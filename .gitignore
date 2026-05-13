@@ -1,2 +1,41 @@
+# === Dependencias externas (cloned, not ours) ===
+test-poseConvBoxing/mmaction2/
+
+# === Modelos y checkpoints (pesados, van fuera de git) ===
+*.pth
+*.pkl
+*.onnx
+work_dirs/
+checkpoints/
+
+# === Videos y media ===
+*.mp4
+*.avi
+*.mov
+*.webm
+
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+*.egg-info/
+.pytest_cache/
+
+# === Conda / virtualenv ===
+.conda/
+venv/
+env/
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Inicial ===
 *.pt
 test-inicial/runs
