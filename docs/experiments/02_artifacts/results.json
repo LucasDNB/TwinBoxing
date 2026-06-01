@@ -1,0 +1,44 @@
+{
+  "experimento": "02 - Smoke test pipeline base sobre video de entrenamiento",
+  "pipeline": {
+    "model": "yolov8l-pose.pt",
+    "tracker": "/home/lucasb/Proyectos/TwinBoxing/test-inicial/botsort.yaml",
+    "conf": 0.5,
+    "device": 0
+  },
+  "resultados": [
+    {
+      "formato": "bolsa",
+      "video": "Bolsa.mp4",
+      "frames_procesados": 716,
+      "tiempo_total_s": 21.89,
+      "fps_promedio": 32.7,
+      "ms_por_frame": 30.6,
+      "ids_unicos_generados": 1,
+      "detecciones_promedio_por_frame": 0.96,
+      "detecciones_max_en_un_frame": 1
+    },
+    {
+      "formato": "sombra",
+      "video": "Sombra.mp4",
+      "frames_procesados": 435,
+      "tiempo_total_s": 12.47,
+      "fps_promedio": 34.9,
+      "ms_por_frame": 28.7,
+      "ids_unicos_generados": 1,
+      "detecciones_promedio_por_frame": 0.97,
+      "detecciones_max_en_un_frame": 1
+    },
+    {
+      "formato": "sparring",
+      "video": "Sparring.mp4",
+      "frames_procesados": 5531,
+      "tiempo_total_s": 150.52,
+      "fps_promedio": 36.7,
+      "ms_por_frame": 27.2,
+      "ids_unicos_generados": 46,
+      "detecciones_promedio_por_frame": 1.88,
+      "detecciones_max_en_un_frame": 4
+    }
+  ]
+}
