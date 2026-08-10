@@ -107,21 +107,28 @@ Dataset público de Kumar et al. (NCVPRIPG 2025). Lo que encontramos ejecutando:
   nativos van de 24 a 29,97 según el video. Verificado con un test discriminante
   usando los videos a 29,97 como control. Los índices de frame son nativos.
   `boxingvi_clip.py` v0.2 corta sin reencodear.
-- Corte completo: 4.757 de 4.757 clips, cero fallos.
-- Distribución: Cross 1371, Jab 1282, Lead Hook 907, Rear Uppercut 473,
+- Corte completo: 4.757 de 4.757 clips, cero fallos. Distribución sobre
+  `manifest.csv`: Cross 1371, Jab 1282, Lead Hook 908, Rear Uppercut 472,
   Lead Uppercut 428, Rear Hook 296.
+- **El pipeline no corre sobre ese total sino sobre `manifest_filtrado.csv`:
+  4.751 clips, seis menos.** Los seis descartados son degenerados: tres de 2
+  frames y tres demasiado largos para contener un solo golpe (63, 37 y 111
+  frames; 111 frames a 25 fps son 4,4 s). Los dos manifests conviven, así que
+  todo número que vaya a la tesis tiene que declarar sobre cuál se calculó.
 
 ### Calidad de anotación (verificación manual)
+
+Columna Clips contada sobre `manifest_filtrado.csv`.
 
 | Video | Clips | Verificados | Correctos | Estado |
 |---|---|---|---|---|
 | V1 | 1863 | 6 | 1 | Roto: clases **y** segmentación temporal |
 | V2 | 232 | 232 | — | Reanotado completo. Irrecuperable: 134 clips usables, sesgo fuerte a Jab/Cross |
-| V3 | 811 | 4 | 1 | Clases mal, ventanas temporales bien. Recuperable reanotando |
+| V3 | 810 | 4 | 1 | Clases mal, ventanas temporales bien. Recuperable reanotando |
 | V4 | 559 | 5 | 5 | Confiable |
-| V5 | 595 | 4 | 3 | Confiable |
+| V5 | 594 | 4 | 3 | Confiable |
 | V7 | 195 | 3 | 3 | Confiable |
-| V8, V9, V10 | 549 | 0 | — | **Sin verificar.** V9 y V10 están en el split de validación |
+| V8, V9, V10 | 498 | 0 | — | **Sin verificar.** V9 y V10 están en el split de validación |
 
 Hallazgo importante: **la calidad no correlaciona con el tamaño del video.** V2
 tiene 232 clips y está tan roto como V1 con 1863. No hay forma de inferir la
@@ -155,7 +162,7 @@ escribe así en el capítulo, sin inflarlo.
    V5 y V7, y probablemente haya que pasar a validación cruzada por video en vez
    de split fijo.
 2. Recalcular pesos de clase sobre el dataset consolidado.
-3. Reanotar V3 completo (~811 clips). Medición real de productividad: 2,2 s por
+3. Reanotar V3 completo (~810 clips). Medición real de productividad: 2,2 s por
    clip mediana, o sea alrededor de una hora.
 4. Decidir V1 con el dato de tasa de descarte que deje V3.
 5. Recién ahí, Fase D: extracción de pose sobre el dataset final.
@@ -171,7 +178,13 @@ escribe así en el capítulo, sin inflarlo.
 - `boxingvi_annot.py` — reanotación web. Servidor HTTP local, playback 0,25x,
   anotación ciega con reveal opcional (tecla E), reanudable, registra tiempo de
   decisión por clip.
-- `boxingvi_muestra.py` — muestreo estratificado para verificación.
+- `boxingvi_muestra.py` — muestreo estratificado para verificación. Determinista
+  por semilla, mezcla las filas para no filtrar la etiqueta por el orden, y se
+  niega a pisar una muestra ya escrita salvo `--force`: resortear después de ver
+  resultados parciales anula el criterio pre-registrado. Sale en el esquema de
+  `manifest_filtrado.csv`, así que `boxingvi_annot.py` la consume sin cambios.
+  Muestra vigente: `clips/muestra_v8v9v10.csv`, 54 clips, seed 42, commit
+  `7f6dcd5` (anterior a toda anotación).
 
 ---
 
