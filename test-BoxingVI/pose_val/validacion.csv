@@ -1,0 +1,31 @@
+clip,cls,n_personas,n_candidatos,margen,disp_norm,lado
+V7_10021_10031_Cross.jpg,Cross,1,1,1.0,1.288,R
+V1_7321_7336_Cross.jpg,Cross,4,4,0.958,0.918,R
+V1_22659_22667_Cross.jpg,Cross,5,3,0.689,0.388,L
+V3_18974_18979_Cross.jpg,Cross,1,1,1.0,0.357,R
+V3_5108_5115_Cross.jpg,Cross,1,1,1.0,1.306,R
+V3_10688_10697_Jab.jpg,Jab,1,1,1.0,0.784,R
+V1_8469_8475_Jab.jpg,Jab,0,0,,,
+V1_28996_29008_Jab.jpg,Jab,0,0,,,
+V3_5148_5155_Jab.jpg,Jab,1,1,1.0,1.076,R
+V1_4349_4358_Jab.jpg,Jab,6,4,0.915,0.562,L
+V1_22649_22658_Lead_Hook.jpg,Lead Hook,5,3,0.889,0.549,L
+V1_26350_26361_Lead_Hook.jpg,Lead Hook,6,5,0.608,0.866,R
+V8_12253_12261_Lead_Hook.jpg,Lead Hook,1,1,1.0,0.566,L
+V4_19316_19323_Lead_Hook.jpg,Lead Hook,1,1,1.0,0.72,R
+V7_10780_10793_Lead_Hook.jpg,Lead Hook,1,1,1.0,1.255,R
+V4_15199_15203_Lead_Uppercut.jpg,Lead Uppercut,1,1,1.0,0.666,L
+V1_12943_12948_Lead_Uppercut.jpg,Lead Uppercut,4,4,0.209,0.272,R
+V7_14644_14661_Lead_Uppercut.jpg,Lead Uppercut,1,1,1.0,0.995,R
+V2_14570_14577_Lead_Uppercut.jpg,Lead Uppercut,1,1,1.0,0.454,L
+V1_13414_13420_Lead_Uppercut.jpg,Lead Uppercut,5,3,0.966,0.523,R
+V1_27688_27694_Rear_Hook.jpg,Rear Hook,6,6,0.071,0.485,R
+V1_25805_25813_Rear_Hook.jpg,Rear Hook,5,5,0.938,1.175,R
+V1_33395_33407_Rear_Hook.jpg,Rear Hook,5,5,0.754,0.236,L
+V1_34783_34793_Rear_Hook.jpg,Rear Hook,5,5,0.941,1.565,R
+V1_33838_33851_Rear_Hook.jpg,Rear Hook,5,5,0.836,0.668,L
+V1_30538_30545_Rear_Uppercut.jpg,Rear Uppercut,5,5,0.923,0.874,L
+V2_13964_13970_Rear_Uppercut.jpg,Rear Uppercut,1,1,1.0,0.691,L
+V1_32504_32512_Rear_Uppercut.jpg,Rear Uppercut,0,0,,,
+V1_27396_27405_Rear_Uppercut.jpg,Rear Uppercut,0,0,,,
+V1_35434_35441_Rear_Uppercut.jpg,Rear Uppercut,8,7,0.623,0.392,L
