@@ -123,7 +123,7 @@ Columna Clips contada sobre `manifest_filtrado.csv`.
 | Video | Clips | Verificados | Correctos | Estado |
 |---|---|---|---|---|
 | V1 | 1863 | 6 | 1 | Roto: clases **y** segmentación temporal |
-| V2 | 232 | 232 | — | Reanotado completo. Irrecuperable: 134 clips usables, sesgo fuerte a Jab/Cross |
+| V2 | 232 | 232 | — | Reanotado completo. Irrecuperable: 134 usables, sesgo fuerte a Jab/Cross. Ver abajo |
 | V3 | 810 | 4 | 1 | Clases mal, ventanas temporales bien. Recuperable reanotando |
 | V4 | 559 | 5 | 5 | Confiable |
 | V5 | 594 | 4 | 3 | Confiable |
@@ -133,6 +133,35 @@ Columna Clips contada sobre `manifest_filtrado.csv`.
 Hallazgo importante: **la calidad no correlaciona con el tamaño del video.** V2
 tiene 232 clips y está tan roto como V1 con 1863. No hay forma de inferir la
 calidad de V8, V9 y V10 sin mirarlos.
+
+Lo que dejó la reanotación completa de V2, medido sobre `reanotado.csv`:
+
+- **98 de 232 clips (42%) no contienen ningún golpe.** La segmentación temporal
+  también está rota, no solo las clases. Esto desmiente la hipótesis con la que
+  se armó `boxingvi_annot.py`, que daba las ventanas de V2 y V3 por correctas.
+  Para V3 la hipótesis sigue sin verificar: salió de mirar 4 clips.
+- Entre los 134 usables, la etiqueta original acierta **17 veces, 12,7%**. Con 6
+  clases el azar es 16,7%, así que V2 no está cerca del azar: está por debajo.
+  Etiquetar al voleo habría dado mejor resultado.
+
+### Placas de título en V1
+
+**V1 trae 209 clips que no contienen una persona: 181 son placas de título
+enteras ("ROUND 2 / 2-2 / 1 minute") y 28 cruzan el corte entre la placa y el
+metraje. Es el 11,2% del video, todos con etiqueta de golpe.** Que el anotador
+original le pusiera Cross a una pantalla de texto dice bastante sobre cómo se
+generaron esas etiquetas.
+
+V1 es el único video afectado. Los otros ocho no tienen un solo clip con
+fracción de negro por encima del corte, así que acá el cero es una afirmación
+fuerte y no un umbral que no aplica.
+
+Advertencia metodológica, porque costó: un primer detector por brillo medio con
+umbral global marcó 528 de 810 clips de V3 como placas, todos falsos positivos.
+V3 es metraje real de estudio con fondo oscuro. El brillo medio confunde video
+oscuro con pantalla negra, y un umbral calibrado en un video no transfiere a
+otro con otra exposición. Si volvés a tocar esto, `boxingvi_placas.py` ya tiene
+la prueba de dos poblaciones que evita repetir el error.
 
 Esto no es un contratiempo, es un hallazgo metodológico sobre un dataset
 publicado y va documentado como tal en el Capítulo 4.
@@ -174,7 +203,12 @@ escribe así en el capítulo, sin inflarlo.
 - `boxingvi_pose.py` — extracción de pose. Usa heurística de desplazamiento de
   muñeca normalizado por longitud de torso para elegir al boxeador atacante.
   Ojo: YOLOv8-pose detecta como personas a los boxeadores pintados en las
-  paredes del gimnasio, y cuatro clips de V1 son placas de título.
+  paredes del gimnasio, y V1 trae 209 clips que son placas de título (ver §4).
+- `boxingvi_placas.py` — detecta placas de título. Mide fracción de píxeles
+  negros y movimiento entre primer y último frame, dos cosas que no dependen de
+  la exposición del video, y antes de contar verifica que la distribución tenga
+  dos poblaciones separadas. Reclasifica desde las métricas guardadas sin releer
+  los videos, así que mover umbrales es instantáneo. Salida: `clips/placas.csv`.
 - `boxingvi_annot.py` — reanotación web. Servidor HTTP local, playback 0,25x,
   anotación ciega con reveal opcional (tecla E), reanudable, registra tiempo de
   decisión por clip.

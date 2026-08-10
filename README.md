@@ -12,6 +12,23 @@
   4. Demo realizada sobre videos de terceros
   5. Se deben realizar mas testeos
 
+10-08 Verificacion de anotaciones BoxingVI: placas de titulo y calidad de V2
+
+  1. V1 tiene 209 clips sin persona (181 placas de titulo enteras, 28 sobre un
+     corte), 11.2% del video, todos con etiqueta de golpe
+  2. Es el unico video afectado: los otros ocho no tienen ningun clip por encima
+     del corte de fraccion de negro
+  3. Resultado negativo: un primer detector por brillo medio con umbral global
+     marco 528 de 810 clips de V3 como placas, todos falsos positivos. V3 es
+     metraje real de estudio con fondo oscuro. El brillo medio no distingue
+     video oscuro de pantalla negra y no transfiere entre videos
+  4. boxingvi_placas.py mide fraccion de negro y movimiento, y exige dos
+     poblaciones separadas antes de contar
+  5. V2 reanotado: 42% de los clips no contienen golpe, o sea la segmentacion
+     temporal tambien esta rota, no solo las clases
+  6. V2 acierta la etiqueta en 12.7% de los usables, por debajo del azar de 6
+     clases (16.7%)
+
 13-05 Experimento 2: Smoke test del pipeline base sobre video de entrenamiento
   1. Pipeline YOLOv8l-pose + BoT-SORT sobre 3 formatos (bolsa, sombra, sparring)
   2. Bolsa y sombra: 1 ID único, 0 falsos positivos, pipeline base suficiente
