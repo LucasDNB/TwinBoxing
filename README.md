@@ -18,8 +18,6 @@
   3. Sparring: 46 IDs únicos confirma que la oclusión mutua entre peleadores es el problema central
   4. Performance >32 FPS en los tres formatos (target del proyecto: 25-30 FPS)
   5. Justifica experimentalmente la lógica de dominio (ROI + top-2 + Hungarian) declarada para Fase 1
-13-05 Experimento 02: smoke test del pipeline base sobre video de entrenamiento
-
 Stack YOLOv8l-pose + BoT-SORT sin logica de dominio, confidence 0.5, entorno twinboxing_env, RTX 2080 Super
 Bolsa: 716 frames, 32.7 fps, 1 ID unico, 0.96 detecciones promedio por frame, max 1
 Sombra: 435 frames, 34.9 fps, 1 ID unico, 0.97 detecciones promedio, max 1
