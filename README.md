@@ -12,23 +12,6 @@
   4. Demo realizada sobre videos de terceros
   5. Se deben realizar mas testeos
 
-10-08 Verificacion de anotaciones BoxingVI: placas de titulo y calidad de V2
-
-  1. V1 tiene 209 clips sin persona (181 placas de titulo enteras, 28 sobre un
-     corte), 11.2% del video, todos con etiqueta de golpe
-  2. Es el unico video afectado: los otros ocho no tienen ningun clip por encima
-     del corte de fraccion de negro
-  3. Resultado negativo: un primer detector por brillo medio con umbral global
-     marco 528 de 810 clips de V3 como placas, todos falsos positivos. V3 es
-     metraje real de estudio con fondo oscuro. El brillo medio no distingue
-     video oscuro de pantalla negra y no transfiere entre videos
-  4. boxingvi_placas.py mide fraccion de negro y movimiento, y exige dos
-     poblaciones separadas antes de contar
-  5. V2 reanotado: 42% de los clips no contienen golpe, o sea la segmentacion
-     temporal tambien esta rota, no solo las clases
-  6. V2 acierta la etiqueta en 12.7% de los usables, por debajo del azar de 6
-     clases (16.7%)
-
 13-05 Experimento 2: Smoke test del pipeline base sobre video de entrenamiento
   1. Pipeline YOLOv8l-pose + BoT-SORT sobre 3 formatos (bolsa, sombra, sparring)
   2. Bolsa y sombra: 1 ID único, 0 falsos positivos, pipeline base suficiente
@@ -132,3 +115,27 @@ V8, V9 y V10 sin verificar (549 clips). V9 y V10 estan en el split de validacion
 Verificados confiables: V4, V5, V7, total 1349 clips
 La validacion automatica no detecta errores de etiqueta: todas las metricas daban perfectas mientras tres videos estaban cerca del azar
 Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cero cerca de un minuto por golpe
+
+10-08 Verificacion de anotaciones BoxingVI: placas de titulo y calidad de V2
+
+  1. V1 tiene 209 clips sin persona (181 placas de titulo enteras, 28 sobre un
+     corte), 11.2% del video, todos con etiqueta de golpe
+  2. Es el unico video afectado: los otros ocho no tienen ningun clip por encima
+     del corte de fraccion de negro
+  3. Resultado negativo: un primer detector por brillo medio con umbral global
+     marco 528 de 810 clips de V3 como placas, todos falsos positivos. V3 es
+     metraje real de estudio con fondo oscuro. El brillo medio no distingue
+     video oscuro de pantalla negra y no transfiere entre videos
+  4. boxingvi_placas.py mide fraccion de negro y movimiento, y exige dos
+     poblaciones separadas antes de contar
+  5. Los "cuatro clips placas de texto" del 30-07 eran cuatro de los 30 clips
+     mirados, no un total. El barrido completo da 209 en V1
+  6. Precision sobre la coincidencia de V2: 7.3% es 17/232 sobre el video
+     entero, 12.7% es 17/134 restringido a los clips que si contienen un golpe.
+     Los dos numeros son correctos, hay que decir cual denominador se usa
+  7. Correccion de la distribucion del 30-07: Lead Hook 908 y Rear Uppercut 472
+     sobre manifest.csv, no 907 y 473. Sumaban igual, por eso no se veia
+  8. El pipeline corre sobre manifest_filtrado.csv (4751), no sobre el total del
+     corte (4757). Todo numero que vaya a la tesis tiene que decir cual usa
+  9. Las 209 placas caen todas en train, ninguna en validacion. Sacarlas mueve
+     los pesos de clase 1.9% como maximo

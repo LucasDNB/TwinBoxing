@@ -142,9 +142,11 @@ Lo que dejó la reanotación completa de V2, medido sobre `reanotado.csv`:
   también está rota, no solo las clases. Esto desmiente la hipótesis con la que
   se armó `boxingvi_annot.py`, que daba las ventanas de V2 y V3 por correctas.
   Para V3 la hipótesis sigue sin verificar: salió de mirar 4 clips.
-- Entre los 134 usables, la etiqueta original acierta **17 veces, 12,7%**. Con 6
-  clases el azar es 16,7%, así que V2 no está cerca del azar: está por debajo.
-  Etiquetar al voleo habría dado mejor resultado.
+- La etiqueta original acierta **17 veces**. Sobre los 232 clips del video eso es
+  **7,3%**; restringido a los 134 que sí contienen un golpe, **12,7%**. Los dos
+  números son correctos y andan dando vueltas los dos, así que siempre hay que
+  decir cuál denominador se usa. Con 6 clases el azar es 16,7%: por cualquiera de
+  las dos cuentas, V2 no está cerca del azar sino por debajo.
 
 ### Placas de título en V1
 
