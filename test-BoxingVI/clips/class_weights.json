@@ -1,0 +1,19 @@
+{
+  "weights": {
+    "Cross": 0.5515,
+    "Jab": 0.6643,
+    "Lead Hook": 0.8108,
+    "Lead Uppercut": 1.8164,
+    "Rear Hook": 2.6792,
+    "Rear Uppercut": 1.908
+  },
+  "classes": [
+    "Cross",
+    "Jab",
+    "Lead Hook",
+    "Lead Uppercut",
+    "Rear Hook",
+    "Rear Uppercut"
+  ],
+  "criterio": "frecuencia inversa balanceada sobre train: n/(k*n_c)"
+}

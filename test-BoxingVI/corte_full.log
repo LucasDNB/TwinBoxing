@@ -1,0 +1,77 @@
+
+### ANOTACIONES CARGADAS ###
+  V1: 1865 validos, 1 descartados  [nombre]
+  V10: 151 validos, 1 descartados  [nombre]
+  V2: 232 validos, 0 descartados  [posicional]
+  V3: 811 validos, 4 descartados  [posicional]
+  V4: 560 validos, 0 descartados  [nombre]
+  V5: 595 validos, 3 descartados  [posicional]
+  V6: 685 validos, 119 descartados  [nombre]
+  V7: 195 validos, 0 descartados  [nombre]
+  V8: 199 validos, 0 descartados  [nombre]
+  V9: 149 validos, 0 descartados  [nombre]
+  TOTAL: 5442 anotaciones validas
+
+### SONDEO DE VIDEOS (fps nativo) ###
+  V1: 3ov6zVAXHJI.mp4 | fps=24.0000 (24) | frames=46561
+  V10: OfZFdwW322E.mp4 | fps=25.0000 (25) | frames=26917
+  V2: JGLLJUgm-0c.mp4 | fps=23.9760 (24000/1001) | frames=32610
+  V3: Cx6JfrRO4eA.mp4 | fps=23.9760 (24000/1001) | frames=33927
+  V4: IVvOmoB88FM.mp4 | fps=23.9760 (24000/1001) | frames=35363
+  V5: V59fcX1YC7E.mp4 | fps=29.9700 (30000/1001) | frames=15519
+  V6: [NO RESUELTO] no encontre archivo de video
+  V7: sqU3DmLppcQ.mp4 | fps=29.9700 (30000/1001) | frames=28062
+  V8: tSNybMUpMKk.mp4 | fps=29.9700 (30000/1001) | frames=24081
+  V9: WuBPbI0x50o.mp4 | fps=23.9760 (24000/1001) | frames=22541
+
+Anotaciones utilizables: 4757 | fuera de rango del video: 0 | sin video: 685
+  ... 100/4757 clips
+  ... 200/4757 clips
+  ... 300/4757 clips
+  ... 400/4757 clips
+  ... 500/4757 clips
+  ... 600/4757 clips
+  ... 700/4757 clips
+  ... 800/4757 clips
+  ... 900/4757 clips
+  ... 1000/4757 clips
+  ... 1100/4757 clips
+  ... 1200/4757 clips
+  ... 1300/4757 clips
+  ... 1400/4757 clips
+  ... 1500/4757 clips
+  ... 1600/4757 clips
+  ... 1700/4757 clips
+  ... 1800/4757 clips
+  ... 1900/4757 clips
+  ... 2000/4757 clips
+  ... 2100/4757 clips
+  ... 2200/4757 clips
+  ... 2300/4757 clips
+  ... 2400/4757 clips
+  ... 2500/4757 clips
+  ... 2600/4757 clips
+  ... 2700/4757 clips
+  ... 2800/4757 clips
+  ... 2900/4757 clips
+  ... 3000/4757 clips
+  ... 3100/4757 clips
+  ... 3200/4757 clips
+  ... 3300/4757 clips
+  ... 3400/4757 clips
+  ... 3500/4757 clips
+  ... 3600/4757 clips
+  ... 3700/4757 clips
+  ... 3800/4757 clips
+  ... 3900/4757 clips
+  ... 4000/4757 clips
+  ... 4100/4757 clips
+  ... 4200/4757 clips
+  ... 4300/4757 clips
+  ... 4400/4757 clips
+  ... 4500/4757 clips
+  ... 4600/4757 clips
+  ... 4700/4757 clips
+
+### RESULTADO ###  clips OK: 4757 | fallidos: 0
+manifest: clips/manifest.csv
