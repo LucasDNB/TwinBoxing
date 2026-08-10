@@ -104,7 +104,9 @@ Dataset público de Kumar et al. (NCVPRIPG 2025). Lo que encontramos ejecutando:
 - Las anotaciones vienen en 10 formatos Excel incompatibles entre sí. Resuelto
   con un loader multi-estrategia (detección por nombre con fallback posicional).
 - **El paper declara anotaciones a 30 fps y es empíricamente falso.** Los fps
-  nativos van de 24 a 29,97 según el video. Verificado con un test discriminante
+  nativos son cuatro valores distintos: 24 (V1), 25 (V10), 24000/1001 = 23,976
+  (V2, V3, V4, V9) y 30000/1001 = 29,97 (V5, V7, V8). Ninguno es VFR.
+  Verificado con un test discriminante
   usando los videos a 29,97 como control. Los índices de frame son nativos.
   `boxingvi_clip.py` v0.2 corta sin reencodear.
 - Corte completo: 4.757 de 4.757 clips, cero fallos. Distribución sobre
@@ -155,6 +157,12 @@ generaron esas etiquetas.
 V1 es el único video afectado. Los otros ocho no tienen un solo clip con
 fracción de negro por encima del corte, así que acá el cero es una afirmación
 fuerte y no un umbral que no aplica.
+
+Las 209 caen **todas en train, ninguna en validación**, así que hoy no ensucian
+ninguna métrica reportada, solo el entrenamiento. Sobre los pesos de clase el
+efecto es chico: recalcularlos sin las placas los mueve como mucho 1,9%, porque
+están repartidas proporcionalmente entre clases. Es un problema de calidad de
+muestra, no de balance.
 
 Advertencia metodológica, porque costó: un primer detector por brillo medio con
 umbral global marcó 528 de 810 clips de V3 como placas, todos falsos positivos.
