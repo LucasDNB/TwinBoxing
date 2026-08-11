@@ -25,7 +25,15 @@ from typing import Callable
 
 import numpy as np
 from PySide6.QtCore import QPointF, QRectF, Qt, Signal
-from PySide6.QtGui import QImage, QPainter, QPixmap, QTransform, QWheelEvent
+from PySide6.QtGui import (
+    QColor,
+    QImage,
+    QPainter,
+    QPen,
+    QPixmap,
+    QTransform,
+    QWheelEvent,
+)
 from PySide6.QtWidgets import QWidget
 
 from boxtwin.core.identity import ResolvedPose
@@ -42,7 +50,8 @@ class VideoView(QWidget):
     """Cuadro mas overlay, en coordenadas del video original."""
 
     zoomChanged = Signal(float)
-    clickedAt = Signal(QPointF)  # en coordenadas del video, para el bloque 5
+    clickedAt = Signal(QPointF)  # en coordenadas del video
+    boxDrawn = Signal(QRectF)  # caja dibujada a mano, en coordenadas del video
 
     def __init__(self, video_size: tuple[int, int], parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -57,6 +66,9 @@ class VideoView(QWidget):
         self._arrastrando = False
         self._ultimo_mouse = QPointF()
         self._extra_painter: Callable[[QPainter, float], None] | None = None
+        self._dibujando = False
+        self._caja_desde: QPointF | None = None
+        self._caja_hasta: QPointF | None = None
 
         self.setMinimumSize(320, 180)
         self.setMouseTracking(True)
@@ -79,6 +91,32 @@ class VideoView(QWidget):
     def set_extra_painter(self, fn: Callable[[QPainter, float], None] | None) -> None:
         """Gancho para que otros bloques dibujen encima sin tocar esta clase."""
         self._extra_painter = fn
+
+    # -- dibujo de caja a mano ---------------------------------------------
+
+    def set_draw_mode(self, activo: bool) -> None:
+        """
+        Modo de dibujo de caja, para re-sembrar un peleador donde el tracker lo perdio.
+
+        La caja se devuelve en coordenadas del VIDEO, no de la pantalla: es lo que se
+        compara por IoU contra las cajas del cache, que estan en esa escala. Convertir en
+        otro lado obligaria a repetir la transformacion y a mantener dos copias sincronizadas.
+        """
+        self._dibujando = activo
+        self._caja_desde = self._caja_hasta = None
+        self.setCursor(
+            Qt.CursorShape.CrossCursor if activo else Qt.CursorShape.ArrowCursor
+        )
+        self.update()
+
+    @property
+    def draw_mode(self) -> bool:
+        return self._dibujando
+
+    def _caja_actual(self) -> QRectF | None:
+        if self._caja_desde is None or self._caja_hasta is None:
+            return None
+        return QRectF(self._caja_desde, self._caja_hasta).normalized()
 
     # -- zoom y paneo ------------------------------------------------------
 
@@ -178,6 +216,12 @@ class VideoView(QWidget):
                            QRectF(self._pixmap.rect()))
 
         paint_poses(painter, self._poses, self.options, zoom=self._effective_zoom())
+        caja = self._caja_actual()
+        if caja is not None:
+            z = self._effective_zoom()
+            painter.setPen(QPen(QColor(245, 194, 66), max(0.5, 2.0 / z), Qt.PenStyle.DashLine))
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.drawRect(caja)
         if self._extra_painter is not None:
             self._extra_painter(painter, self._effective_zoom())
         painter.end()
@@ -189,6 +233,11 @@ class VideoView(QWidget):
         event.accept()
 
     def mousePressEvent(self, event) -> None:  # noqa: N802
+        if self._dibujando and event.button() == Qt.MouseButton.LeftButton:
+            self._caja_desde = self.widget_to_video(event.position())
+            self._caja_hasta = self._caja_desde
+            event.accept()
+            return
         if event.button() == Qt.MouseButton.MiddleButton or (
             event.button() == Qt.MouseButton.LeftButton
             and event.modifiers() & Qt.KeyboardModifier.ShiftModifier
@@ -200,6 +249,11 @@ class VideoView(QWidget):
         event.accept()
 
     def mouseMoveEvent(self, event) -> None:  # noqa: N802
+        if self._dibujando and self._caja_desde is not None:
+            self._caja_hasta = self.widget_to_video(event.position())
+            self.update()
+            event.accept()
+            return
         if self._arrastrando:
             delta = event.position() - self._ultimo_mouse
             self._ultimo_mouse = event.position()
@@ -211,6 +265,16 @@ class VideoView(QWidget):
         event.accept()
 
     def mouseReleaseEvent(self, event) -> None:  # noqa: N802
+        if self._dibujando and self._caja_desde is not None:
+            caja = self._caja_actual()
+            self._caja_desde = self._caja_hasta = None
+            # Un click sin arrastre no es una caja: sin este minimo, cualquier click
+            # accidental crearia un track manual de un pixel.
+            if caja is not None and caja.width() >= 8 and caja.height() >= 8:
+                self.boxDrawn.emit(caja)
+            self.update()
+            event.accept()
+            return
         self._arrastrando = False
         event.accept()
 

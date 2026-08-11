@@ -10,8 +10,8 @@ acierto de etiqueta, y V1 trae 209 clips que son placas de titulo con etiqueta d
 
 ## Estado
 
-Bloques 1 a 4 de 7 terminados: ya se pueden anotar eventos y quedan persistidos.
-Falta la gestion de identidad, los exports y la reanotacion ciega.
+Bloques 1 a 5 de 7 terminados: se anota, se corrige identidad y todo queda persistido.
+Faltan los exports y la reanotacion ciega.
 
 | Bloque | Que | Estado |
 |---|---|---|
@@ -19,7 +19,7 @@ Falta la gestion de identidad, los exports y la reanotacion ciega.
 | 2 | CLI de preproceso, reanudable, con proxy | hecho |
 | 3 | Reproductor de escritorio con overlay y navegacion frame-exacta | hecho |
 | 4 | Anotacion de eventos con atajos de teclado y persistencia | hecho |
-| 5 | Gestion de identidad | pendiente |
+| 5 | Gestion de identidad | hecho |
 | 6 | Exports (clips, mmaction, sequence, stats) | pendiente |
 | 7 | Reanotacion ciega y reporte de acuerdo | pendiente |
 
@@ -233,6 +233,67 @@ atrasada, que es el espacio de clases del export. Resalta la clase mas escasa.
 Se ve mientras se anota y no al final a proposito: en BoxingVI la clase mas frecuente tiene
 1371 ejemplos y la menos frecuente 296, casi cinco a uno, y eso se supo al terminar de
 cortar los clips.
+
+## Gestion de identidad
+
+Es la parte del sistema donde un error no se ve. Si un rol queda mal, el esqueleto sigue
+dibujandose sobre un cuerpo y el overlay se ve perfecto; lo unico que cambia es a que
+peleador se le atribuyen los keypoints en el export.
+
+Un `track_id` no significa nada estable: cambia en cada oclusion, en cada clinch y en cada
+reanudacion del preproceso. Por eso el rol no vive en el cache de pose sino como intervalos
+en el archivo de anotacion, y el color del overlay va por ROL y nunca por id.
+
+La pestana Identidad ofrece cinco operaciones, todas reversibles con `Ctrl+Z`:
+
+**Asignar un rol a un track**, desde el cuadro actual hasta la proxima decision manual. No
+desde el principio del video: el track pudo haber sido otra persona antes, y pisar todo el
+rango borraria correcciones ya hechas.
+
+**Corregir un intercambio** desde el cuadro actual. Los dos assignments nuevos comparten
+`op_id`, asi que en un diff se lee como un solo gesto y no como dos cambios sueltos que hay
+que correlacionar a ojo. El alcance corta en la proxima decision manual posterior: sin ese
+limite, corregir en el minuto dos pisaria lo que ya se habia corregido en el minuto cinco.
+
+**Re-sembrar** dibujando una caja sobre el peleador. Dos modos y la diferencia importa: si
+la caja se superpone con un track existente se le asigna el rol a ese track, que es el caso
+comun porque el tracker no perdio al peleador sino que le cambio el id; si no se superpone
+con nada se crea un track manual sin keypoints, y esos cuadros se marcan solos como no
+confiables porque no hay pose que exportar.
+
+**Marcar tramos no confiables** como `occluded` o `pose_unreliable`. No borra la pose: la
+deteccion se sigue viendo y se sigue pudiendo juzgar. Que entre o no al dataset es politica
+del export, y esa politica puede cambiar sin volver a mirar el video.
+
+**Unir tracks separados por un hueco corto**, propuestos por IoU y ordenados por confianza.
+Se confirman de a uno. Aplicarlos solos seria comodo y peligroso: en un clinch las cajas de
+los dos peleadores se superponen casi por completo, y ahi es donde la heuristica se
+equivoca. El costo de errarle es un tramo entero atribuido a la persona equivocada.
+
+### Interpolacion
+
+Los cuadros de un hueco aceptado se sintetizan **al leer** y nunca se escriben en el npz. El
+cache guarda lo que el modelo observo; una pose inventada no es observacion, y mezclarlas en
+el mismo archivo haria imposible saber despues cual era cual. Salen marcadas con
+`interpolated` y con `det_conf` en cero.
+
+La interpolacion es lineal y no pretende ser trayectoria: en tres cuadros de un golpe rapido
+la muneca recorre bastante y una recta no describe eso. Sirve para que el tramo no tenga
+agujeros. El score de un punto sintetizado es el minimo de sus dos extremos, porque un punto
+inventado no puede tener mas confianza que los datos con que se invento.
+
+Una deteccion real siempre gana sobre una sintetizada en el mismo cuadro.
+
+### Por que estas operaciones deshacen distinto
+
+Los comandos de evento guardan lo minimo para revertirse. Los de identidad guardan una
+instantanea del bloque entero, que es lo contrario, y la razon es el tamano: mil eventos con
+sus metricas son varios megas y copiarlos cincuenta veces costaria cientos, mientras que las
+asignaciones son unas decenas de registros y una copia no se nota.
+
+Las correcciones de identidad son reescrituras estructurales: partir un intervalo, truncar
+otro, insertar dos nuevos. Calcular la inversa exacta de cada una a mano es donde se cuelan
+los errores. Donde la copia es barata, conviene la opcion que no se puede equivocar.
 
 ## Reproductor
 

@@ -32,6 +32,8 @@ MODULOS_CORE = [
     "boxtwin.core.gloves",
     "boxtwin.core.undo",
     "boxtwin.core.metrics",
+    "boxtwin.core.interpolation",
+    "boxtwin.core.identity_ops",
 ]
 
 

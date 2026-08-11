@@ -45,7 +45,15 @@ from PySide6.QtWidgets import (
 
 from boxtwin.core.annotations import new_id
 from boxtwin.core.metrics import ActiveTimeTracker, EventTimer, new_session_metrics
-from boxtwin.core.types import FighterId, IssueLevel
+from boxtwin.core.identity_ops import (
+    AcceptJoin,
+    AssignRole,
+    MarkUnreliable,
+    Reseed,
+    SwapFromFrame,
+)
+from boxtwin.core.interpolation import detectar_huecos, iou
+from boxtwin.core.types import FighterId, IssueLevel, TrackRole
 from boxtwin.core.undo import AddEvent, DeleteEvent, EditEvent
 from boxtwin.core.validation import validate_document
 from boxtwin.gui.keymap import Keymap
@@ -54,6 +62,7 @@ from boxtwin.gui.state import Session
 from boxtwin.gui.widgets.class_counter import ClassCounter
 from boxtwin.gui.widgets.classify_dialog import ClassifyDialog
 from boxtwin.gui.widgets.event_list import EventList
+from boxtwin.gui.widgets.identity_panel import IdentityPanel
 from boxtwin.gui.widgets.timeline import Timeline
 from boxtwin.gui.widgets.video_view import VideoView
 from boxtwin.version import __version__
@@ -93,6 +102,7 @@ class MainWindow(QMainWindow):
         self._seleccionado: str | None = None
         self._fuente_actual = "proxy" if session.using_proxy else "original"
         self._sucio = False
+        self._resembrando: TrackRole | None = None
 
         self.reloj = ActiveTimeTracker()
         self.session_id = session.begin_session(__version__)
@@ -109,6 +119,13 @@ class MainWindow(QMainWindow):
         self.lista.saltarA.connect(self.player.seek)
         self.lista.seleccionado.connect(self._seleccionar_evento)
         self.lista.editar.connect(self._editar_campo)
+        self.identidad.asignar.connect(self._asignar_rol)
+        self.identidad.intercambiar.connect(self._intercambiar)
+        self.identidad.resembrar.connect(self._activar_resiembra)
+        self.identidad.marcarTramo.connect(self._marcar_tramo)
+        self.identidad.buscarUniones.connect(self._buscar_uniones)
+        self.identidad.aceptarUnion.connect(self._aceptar_union)
+        self.view.boxDrawn.connect(self._caja_dibujada)
 
         self._autosave = QTimer(self)
         self._autosave.timeout.connect(self._guardar_si_hace_falta)
@@ -151,6 +168,10 @@ class MainWindow(QMainWindow):
         # -- eventos
         self.lista = EventList()
         pestanas.addTab(self.lista, "Eventos")
+
+        # -- identidad
+        self.identidad = IdentityPanel()
+        pestanas.addTab(self.identidad, "Identidad")
 
         # -- balance de clases
         self.contador = ClassCounter()
@@ -249,6 +270,9 @@ class MainWindow(QMainWindow):
         poses = self.session.resolver.resolve_frame(frame)
         self.view.set_frame(img, poses)
         self.timeline.set_cursor(frame)
+        self.identidad.refrescar(
+            frame, [(p.track_id, p.role, p.interpolated) for p in poses]
+        )
         self._refresh_status()
 
     def _imagen(self, frame: int):
@@ -401,6 +425,111 @@ class MainWindow(QMainWindow):
             metricas.last_edited_at = datetime.now().astimezone()
         self._refrescar_anotacion()
 
+    # -- identidad ---------------------------------------------------------
+
+    def _aplicar_identidad(self, comando) -> bool:
+        """
+        Ejecuta una operacion de identidad y rehace el indice del resolver.
+
+        Sin el refresh, el overlay seguiria mostrando los roles viejos y el anotador
+        confirmaria una correccion que en pantalla parece no haber pasado.
+        """
+        try:
+            self.session.undo.do(comando)
+        except Exception as exc:  # noqa: BLE001
+            QMessageBox.warning(self, "Operación rechazada", str(exc))
+            return False
+        self.session.resolver.refresh()
+        self._refrescar_anotacion()
+        self._on_frame(self.player.cursor)
+        self.statusBar().showMessage(comando.label, 3000)
+        return True
+
+    def _asignar_rol(self, track_id: int, rol: TrackRole) -> None:
+        """
+        Asigna desde el cuadro actual hasta la proxima decision manual.
+
+        Desde el cuadro actual y no desde el principio del video: el track pudo haber sido
+        otra persona antes, y pisar todo el rango borraria correcciones ya hechas.
+        """
+        from boxtwin.core.identity_ops import boundary_after
+
+        frame = self.player.cursor
+        self._aplicar_identidad(
+            AssignRole(
+                track_id=track_id, role=rol, start_frame=frame,
+                end_frame_excl=boundary_after(self.session.doc, frame),
+                annotator=self.session.annotator,
+            )
+        )
+
+    def _intercambiar(self) -> None:
+        self._aplicar_identidad(
+            SwapFromFrame(self.player.cursor, annotator=self.session.annotator)
+        )
+
+    def _activar_resiembra(self, rol: TrackRole) -> None:
+        self.player.pause()
+        self._resembrando = rol
+        self.view.set_draw_mode(True)
+        self.identidad.set_modo_dibujo(True, rol)
+
+    def _caja_dibujada(self, rect) -> None:
+        if self._resembrando is None:
+            return
+        rol = self._resembrando
+        self._resembrando = None
+        self.view.set_draw_mode(False)
+        self.identidad.set_modo_dibujo(False)
+
+        caja = [rect.left(), rect.top(), rect.right(), rect.bottom()]
+        frame = self.player.cursor
+        # Si la caja cae sobre un track existente, se le asigna el rol a ese track: es el
+        # caso comun, porque el tracker no perdio al peleador sino que le cambio el id.
+        import numpy as np
+
+        dets = self.session.cache.detections(frame)
+        mejor_id, mejor_iou = None, 0.0
+        for i in range(len(dets)):
+            solape = iou(np.asarray(caja, np.float32), dets.bbox[i])
+            if solape > mejor_iou:
+                mejor_id, mejor_iou = int(dets.track_id[i]), solape
+
+        umbral = self.session.doc.settings_snapshot.interp_min_iou
+        self._aplicar_identidad(
+            Reseed(
+                frame=frame, role=rol, bbox=caja,
+                track_id=mejor_id if mejor_iou >= umbral else None,
+                iou=round(mejor_iou, 4) if mejor_id is not None else None,
+                annotator=self.session.annotator,
+            )
+        )
+
+    def _marcar_tramo(self, fighter: FighterId, ini: int, fin: int, motivo) -> None:
+        if fin <= ini:
+            self.statusBar().showMessage("el fin del tramo tiene que ser posterior", 3000)
+            return
+        self._aplicar_identidad(
+            MarkUnreliable(
+                fighter=fighter, start_frame=ini, end_frame_excl=fin,
+                reason=motivo, annotator=self.session.annotator,
+            )
+        )
+
+    def _buscar_uniones(self) -> None:
+        st = self.session.doc.settings_snapshot
+        candidatos = detectar_huecos(
+            self.session.cache, max_gap=st.interp_max_gap_frames, min_iou=st.interp_min_iou
+        )
+        self.identidad.set_candidatos(candidatos)
+        self.statusBar().showMessage(f"{len(candidatos)} uniones propuestas", 3000)
+
+    def _aceptar_union(self, candidato, rol: TrackRole) -> None:
+        if self._aplicar_identidad(
+            AcceptJoin(candidato=candidato, role=rol, annotator=self.session.annotator)
+        ):
+            self._buscar_uniones()
+
     # -- deshacer y guardar ------------------------------------------------
 
     def _deshacer(self) -> None:
@@ -408,7 +537,11 @@ class MainWindow(QMainWindow):
         if cmd is None:
             self.statusBar().showMessage("nada que deshacer", 2000)
             return
+        # Deshacer puede haber tocado identidad: el indice del resolver hay que rehacerlo
+        # igual, y rehacerlo de mas no cuesta nada.
+        self.session.resolver.refresh()
         self._refrescar_anotacion()
+        self._on_frame(self.player.cursor)
         self.statusBar().showMessage(f"deshecho: {cmd.label}", 3000)
 
     def _rehacer(self) -> None:
@@ -416,7 +549,9 @@ class MainWindow(QMainWindow):
         if cmd is None:
             self.statusBar().showMessage("nada que rehacer", 2000)
             return
+        self.session.resolver.refresh()
         self._refrescar_anotacion()
+        self._on_frame(self.player.cursor)
         self.statusBar().showMessage(f"rehecho: {cmd.label}", 3000)
 
     def _guardar(self) -> None:

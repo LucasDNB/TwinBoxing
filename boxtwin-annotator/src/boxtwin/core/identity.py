@@ -10,9 +10,14 @@ POR QUE EXISTE
   en el archivo de anotacion: el track 3 es fighter_A entre los cuadros 4120 y 9008, y
   despues quiza sea otra cosa.
 
-  Este modulo es solo de LECTURA. Las operaciones que modifican asignaciones (swap,
-  re-seed, interpolacion) son del bloque 5. Aca vive lo que el overlay y los exports
-  necesitan: dado un cuadro, decir de quien es cada deteccion.
+  Este modulo es solo de LECTURA: las operaciones que modifican asignaciones viven en
+  identity_ops.py. Aca esta lo que el overlay y los exports necesitan, que es decir de
+  quien es cada deteccion de un cuadro.
+
+  Los cuadros de un hueco interpolado se sintetizan al leer y nunca se escriben en el npz.
+  El cache guarda lo que el modelo observo; una pose inventada no es observacion y mezclar
+  las dos cosas en el mismo archivo haria imposible saber despues cual era cual. Salen
+  marcadas con interpolated=True para que el export pueda decidir.
 
 QUE HACE
   Indexa los intervalos por track y resuelve el rol en tiempo logaritmico. Marca ademas si
@@ -40,7 +45,7 @@ from typing import Iterable
 import numpy as np
 
 from boxtwin.core.posecache import PoseCache, PoseDetections
-from boxtwin.core.schema import AnnotationDoc
+from boxtwin.core.schema import AnnotationDoc, Interpolation
 from boxtwin.core.types import FighterId, TrackRole
 
 __all__ = ["ResolvedPose", "IdentityResolver"]
@@ -111,6 +116,33 @@ class IdentityResolver:
 
         self._manual_ids = {mt.track_id for mt in self.doc.identity.manual_tracks}
 
+        # Huecos interpolados, con los extremos ya resueltos para no recalcularlos en cada
+        # cuadro: en reproduccion esto se consulta treinta veces por segundo.
+        self._interps: list[tuple[Interpolation, dict]] = []
+        for interp in self.doc.identity.interpolations:
+            extremos = self._extremos_de(interp)
+            if extremos is not None:
+                self._interps.append((interp, extremos))
+
+    def _extremos_de(self, interp: Interpolation) -> dict | None:
+        """Detecciones de los dos bordes del hueco, o None si el cache no las tiene."""
+        ultimo = interp.gap_start_frame - 1
+        primero = interp.gap_end_frame_excl
+        if not (0 <= ultimo < len(self.cache) and 0 <= primero < len(self.cache)):
+            return None
+        da, db = self.cache.detections(ultimo), self.cache.detections(primero)
+        ia = da.index_of_track(interp.from_track_id)
+        ib = db.index_of_track(interp.to_track_id)
+        if ia is None or ib is None:
+            return None
+        return {
+            "ultimo": ultimo,
+            "primero": primero,
+            "bbox_a": da.bbox[ia], "bbox_b": db.bbox[ib],
+            "kp_a": da.keypoints[ia], "kp_b": db.keypoints[ib],
+            "score": np.minimum(da.kp_score[ia], db.kp_score[ib]),
+        }
+
     # -- consultas puntuales ----------------------------------------------
 
     def role_of(self, frame: int, track_id: int) -> TrackRole | None:
@@ -146,7 +178,41 @@ class IdentityResolver:
         """
         dets = self.cache.detections(frame)
         poses = [self._build(frame, dets, i) for i in range(len(dets))]
+        poses.extend(self._interpoladas(frame, poses))
         return self._resolve_collisions(poses)
+
+    def _interpoladas(self, frame: int, ya: list[ResolvedPose]) -> list[ResolvedPose]:
+        """
+        Poses sinteticas de los huecos declarados.
+
+        Si el rol ya esta cubierto por una deteccion real en ese cuadro no se agrega nada:
+        lo observado siempre gana sobre lo inventado.
+        """
+        cubiertos = {p.role for p in ya if p.role is not None}
+        salida: list[ResolvedPose] = []
+        for interp, ext in self._interps:
+            if not (interp.gap_start_frame <= frame < interp.gap_end_frame_excl):
+                continue
+            if interp.role in cubiertos:
+                continue
+            t = (frame - ext["ultimo"]) / (ext["primero"] - ext["ultimo"])
+            fighter = (
+                FighterId(interp.role.value) if interp.role in (TrackRole.A, TrackRole.B) else None
+            )
+            salida.append(
+                ResolvedPose(
+                    frame=frame,
+                    track_id=interp.to_track_id,
+                    role=interp.role,
+                    bbox=((1 - t) * ext["bbox_a"] + t * ext["bbox_b"]).astype(np.float32),
+                    det_conf=0.0,
+                    keypoints=((1 - t) * ext["kp_a"] + t * ext["kp_b"]).astype(np.float32),
+                    kp_score=ext["score"],
+                    reliable=self.is_reliable(frame, fighter) if fighter else True,
+                    interpolated=True,
+                )
+            )
+        return salida
 
     def by_fighter(self, frame: int) -> dict[FighterId, ResolvedPose | None]:
         """La deteccion de cada peleador en el cuadro, ya desempatada."""
