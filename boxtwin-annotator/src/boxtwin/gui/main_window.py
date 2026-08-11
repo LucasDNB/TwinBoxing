@@ -55,6 +55,8 @@ from boxtwin.core.identity_ops import (
 from boxtwin.core.interpolation import detectar_huecos, iou
 from boxtwin.core.types import FighterId, IssueLevel, TrackRole
 from boxtwin.core.undo import AddEvent, DeleteEvent, EditEvent
+from boxtwin.core.reanno import ReannoTrial, TrialLabels, cargar as cargar_reanno
+from boxtwin.core.reanno import guardar as guardar_reanno
 from boxtwin.core.validation import validate_document
 from boxtwin.gui.keymap import Keymap
 from boxtwin.gui.player.controller import PlayerController
@@ -63,6 +65,7 @@ from boxtwin.gui.widgets.class_counter import ClassCounter
 from boxtwin.gui.widgets.classify_dialog import ClassifyDialog
 from boxtwin.gui.widgets.event_list import EventList
 from boxtwin.gui.widgets.identity_panel import IdentityPanel
+from boxtwin.gui.widgets.reanno_panel import ReannoPanel
 from boxtwin.gui.widgets.timeline import Timeline
 from boxtwin.gui.widgets.video_view import VideoView
 from boxtwin.version import __version__
@@ -103,6 +106,10 @@ class MainWindow(QMainWindow):
         self._fuente_actual = "proxy" if session.using_proxy else "original"
         self._sucio = False
         self._resembrando: TrackRole | None = None
+        self._reanno = self._cargar_reanno()
+        self._reanno_activo = False
+        self._reanno_actual: str | None = None
+        self._reanno_revelado = False
 
         self.reloj = ActiveTimeTracker()
         self.session_id = session.begin_session(__version__)
@@ -126,12 +133,17 @@ class MainWindow(QMainWindow):
         self.identidad.buscarUniones.connect(self._buscar_uniones)
         self.identidad.aceptarUnion.connect(self._aceptar_union)
         self.view.boxDrawn.connect(self._caja_dibujada)
+        self.reanno.empezar.connect(self._reanno_empezar)
+        self.reanno.siguiente.connect(self._reanno_siguiente)
+        self.reanno.revelar.connect(self._reanno_revelar)
+        self.reanno.salir.connect(self._reanno_salir)
 
         self._autosave = QTimer(self)
         self._autosave.timeout.connect(self._guardar_si_hace_falta)
         self._autosave.start(AUTOSAVE_MS)
 
         self._refrescar_anotacion()
+        self._refrescar_reanno()
         self._on_frame(0)
 
     # -- construccion ------------------------------------------------------
@@ -172,6 +184,10 @@ class MainWindow(QMainWindow):
         # -- identidad
         self.identidad = IdentityPanel()
         pestanas.addTab(self.identidad, "Identidad")
+
+        # -- reanotacion ciega
+        self.reanno = ReannoPanel()
+        pestanas.addTab(self.reanno, "Reanotación")
 
         # -- balance de clases
         self.contador = ClassCounter()
@@ -303,7 +319,12 @@ class MainWindow(QMainWindow):
         self.lbl_fps.setText(
             f"| {self.session.fps:.3f} fps | {estado}{direccion} {self.player.speed:g}x"
         )
-        self.lbl_pel.setText(f"| anotando {self.fighter.value}")
+        if self._reanno_activo:
+            self.lbl_pel.setText(f"| CIEGO · {self.fighter.value}")
+            self.lbl_pel.setStyleSheet("color: #e08a3c; font-weight: 600;")
+        else:
+            self.lbl_pel.setText(f"| anotando {self.fighter.value}")
+            self.lbl_pel.setStyleSheet("")
         if self._abierto is None:
             self.lbl_evento.setText("| sin evento abierto")
             self.lbl_evento.setStyleSheet("")
@@ -361,6 +382,8 @@ class MainWindow(QMainWindow):
 
         self.player.pause()
         timer = self._timer_evento or EventTimer(created_at=datetime.now().astimezone())
+        if self._reanno_activo:
+            return self._reanno_clasificar(inicio, fin, timer)
         dlg = ClassifyDialog(
             self.session, self.keymap,
             fighter=self.fighter, start_frame=inicio, end_frame=fin,
@@ -529,6 +552,122 @@ class MainWindow(QMainWindow):
             AcceptJoin(candidato=candidato, role=rol, annotator=self.session.annotator)
         ):
             self._buscar_uniones()
+
+    # -- reanotacion ciega -------------------------------------------------
+
+    def _cargar_reanno(self):
+        ruta = self.session.paths.annot.with_name(
+            self.session.paths.annot.name.replace(".annot.json", ".reanno.json")
+        )
+        self._reanno_path = ruta
+        if not ruta.is_file():
+            return None
+        try:
+            return cargar_reanno(ruta)
+        except Exception:  # noqa: BLE001
+            return None
+
+    def _reanno_empezar(self) -> None:
+        if self._reanno is None:
+            return
+        self._reanno_activo = True
+        # Se ocultan las marcas y la lista: con el golpe senalado en pantalla, el error de
+        # fronteras del reporte mediria cero por construccion.
+        self.timeline.set_blind(True)
+        self.lista.setEnabled(False)
+        self._reanno_siguiente()
+
+    def _reanno_salir(self) -> None:
+        self._reanno_activo = False
+        self._reanno_actual = None
+        self._reanno_revelado = False
+        self.timeline.set_blind(False)
+        self.lista.setEnabled(True)
+        self._cancelar_abierto()
+        self._refrescar_reanno()
+
+    def _reanno_siguiente(self) -> None:
+        if self._reanno is None:
+            return
+        pendientes = self._reanno.pendientes()
+        self._reanno_revelado = False
+        self._cancelar_abierto()
+        if not pendientes:
+            self._reanno_actual = None
+            self.statusBar().showMessage("no quedan intentos pendientes", 4000)
+            self._refrescar_reanno()
+            return
+        self._reanno_actual = pendientes[0]
+        inicio, _ = self._reanno.ventana(self._reanno_actual)
+        self.player.seek(inicio)
+        self._refrescar_reanno()
+
+    def _reanno_revelar(self) -> None:
+        if self._reanno_actual is None:
+            return
+        ev = self.session.doc.event_by_id(self._reanno_actual)
+        if ev is None:
+            return
+        self._reanno_revelado = True
+        QMessageBox.information(
+            self, "Etiqueta original",
+            f"{ev.side.value} {ev.punch_type.value} {ev.target.value} "
+            f"{ev.completeness.value}\ncuadros {ev.start_frame}–{ev.end_frame}\n\n"
+            "Este intento queda marcado como no ciego y no entra en el reporte.",
+        )
+        self._refrescar_reanno()
+
+    def _reanno_clasificar(self, inicio: int, fin: int, timer: EventTimer) -> None:
+        """Clasifica un intento y lo escribe en el archivo de reanotacion, no en el annot."""
+        if self._reanno is None or self._reanno_actual is None:
+            return
+        dlg = ClassifyDialog(
+            self.session, self.keymap,
+            fighter=self.fighter, start_frame=inicio, end_frame=fin,
+            timer=timer, event_id=self._reanno_actual,
+            annotator=self.session.annotator, session_id=self.session_id, parent=self,
+        )
+        acepto = dlg.exec()
+        self._abierto = None
+        self._timer_evento = None
+        if not acepto or dlg.resultado() is None:
+            self._refresh_status()
+            return
+
+        evento, metricas = dlg.resultado()
+        self._reanno.trials = [
+            *self._reanno.trials,
+            ReannoTrial(
+                event_id=self._reanno_actual,
+                annotator=self.session.annotator,
+                annotated_at=datetime.now().astimezone(),
+                active_ms=metricas.active_ms,
+                replays=metricas.replays,
+                revealed=self._reanno_revelado,
+                labels=TrialLabels(
+                    start_frame=evento.start_frame,
+                    end_frame=evento.end_frame,
+                    peak_frame=evento.peak_frame,
+                    side=evento.side,
+                    punch_type=evento.punch_type,
+                    target=evento.target,
+                    completeness=evento.completeness,
+                    landed=evento.landed,
+                    quality=evento.quality,
+                ),
+            ),
+        ]
+        guardar_reanno(self._reanno, self._reanno_path)
+        self.statusBar().showMessage(
+            f"intento registrado ({len(self._reanno.trials)} de {self._reanno.sample.n})", 3000
+        )
+        self._reanno_siguiente()
+
+    def _refrescar_reanno(self) -> None:
+        self.reanno.refrescar(
+            self._reanno, self._reanno_activo, self._reanno_actual, self._reanno_revelado
+        )
+        self._refresh_status()
 
     # -- deshacer y guardar ------------------------------------------------
 

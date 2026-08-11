@@ -10,8 +10,8 @@ acierto de etiqueta, y V1 trae 209 clips que son placas de titulo con etiqueta d
 
 ## Estado
 
-Bloques 1 a 6 de 7 terminados: el pipeline produce dataset de punta a punta.
-Falta la reanotacion ciega y el reporte de acuerdo.
+Los siete bloques terminados. El pipeline va del video crudo al dataset exportado, con
+su medida de acuerdo intra-anotador.
 
 | Bloque | Que | Estado |
 |---|---|---|
@@ -21,7 +21,7 @@ Falta la reanotacion ciega y el reporte de acuerdo.
 | 4 | Anotacion de eventos con atajos de teclado y persistencia | hecho |
 | 5 | Gestion de identidad | hecho |
 | 6 | Exports (clips, mmaction, sequence, stats) | hecho |
-| 7 | Reanotacion ciega y reporte de acuerdo | pendiente |
+| 7 | Reanotacion ciega y reporte de acuerdo | hecho |
 
 ## Instalacion
 
@@ -439,6 +439,76 @@ metadata.
 sin reencodear caen en keyframes), y la salida de libx264 depende de su version. La garantia
 esta sobre el `manifest.csv` y los rangos de cuadros, no sobre los bytes del mp4. Verificado
 sobre material real: los seis clips salieron con exactamente la cantidad de cuadros esperada.
+
+## Reanotacion ciega y acuerdo
+
+Un dataset propio no vale mas que uno publico solo por ser propio. Lo que lo hace defendible
+es poder decir cuanto se contradice a si mismo.
+
+```bash
+boxtwin-annotator reanno proyecto/videos/spar.mp4 --fraction 0.10 --seed 42
+```
+
+Sortea la muestra y la **congela**. Volver a correr el comando muestra el avance; resortear
+exige `--force` explicito, porque resortear despues de ver resultados parciales convierte el
+numero en lo que uno quiera que sea. Es el mismo criterio que ya se aplico en la
+verificacion de BoxingVI, donde la muestra vivia en un commit anterior a toda anotacion.
+
+Si la anotacion cambio desde el sorteo, el comando se niega a seguir: comparar contra un
+estado distinto del que se sorteo invalida el pre-registro.
+
+Se reanota desde la pestana **Reanotacion** del anotador. Mientras el modo esta activo:
+
+- **se ocultan las marcas del timeline y la lista de eventos.** La marca dice exactamente
+  donde empieza y termina el golpe, y con eso a la vista el error de fronteras mide cero por
+  construccion;
+- **la ventana de cada intento lleva relleno aleatorio** a los dos lados, entre 8 y 24
+  cuadros, distinto en cada intento. Con relleno fijo, restarlo recuperaria las fronteras
+  originales;
+- **se puede revelar la etiqueta previa**, y el intento queda marcado. Prohibirlo no
+  serviria, porque el archivo esta ahi para abrirlo; registrarlo hace que no cuente como
+  ciego y que el reporte lo diga.
+
+### El reporte
+
+```bash
+boxtwin-annotator reanno proyecto/videos/spar.mp4 --report
+```
+
+```
+dimension         n  acuerdo   azar   kappa
+side              7    1.000  0.510   1.000
+punch_type        7    0.857  0.429   0.750
+target            7    1.000  0.755   1.000
+completeness      7    1.000  0.755   1.000
+
+fronteras, en cuadros
+  start     mae   1.57  sesgo  -0.71  mediana  2.0  max   2  exactos 0/7
+```
+
+Se reporta **kappa de Cohen** y no porcentaje de acuerdo. Con clases desbalanceadas, un
+anotador que responda siempre la clase mas frecuente saca un porcentaje alto sin saber nada;
+kappa descuenta el acuerdo esperado por azar y ese caso da cero. El porcentaje se reporta al
+lado porque es lo que se entiende de un vistazo, pero no es la medida.
+
+Se reporta **por dimension** y no sobre la clase colapsada. Si el acuerdo baja hace falta
+saber si baja en el tipo, en el brazo o en la altura, porque cada uno se corrige distinto:
+el brazo con mejor overlay, el tipo con mejor definicion operacional.
+
+De las fronteras se reporta el error absoluto medio y tambien el **sesgo con signo**. Son
+dos problemas distintos: ruido simetrico significa que la definicion es dificil de aplicar
+con precision; un sesgo consistente significa que se esta interpretando distinto, y eso se
+arregla cambiando la definicion, no esforzandose mas.
+
+`landed` y `quality` quedan fuera del reporte principal: son estimaciones sobre algo que un
+sistema monocular no observa, y mezclarlas bajaria el kappa por una razon que no es calidad
+de anotacion.
+
+Kappa queda en `n/d` cuando los dos anotadores usaron una sola categoria: ahi la formula
+divide por cero y el valor no existe. No es acuerdo perfecto, y decir 1.0 seria mentir.
+
+Con menos de 20 intentos el reporte avisa: kappa es inestable con n bajo y no conviene
+citarlo sin su n.
 
 ## Arquitectura
 

@@ -13,6 +13,7 @@ QUE HACE
   preprocess  corre pose y tracking sobre un video y escribe el cache, reanudable.
   annotate    abre el anotador de escritorio sobre un video ya preprocesado.
   export      genera el dataset en alguno de los cuatro formatos.
+  reanno      sortea la muestra de reanotacion ciega y calcula el acuerdo.
   probe       muestra los metadatos reales del video sin procesar nada.
 
 USO
@@ -152,6 +153,31 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ex.add_argument("--crf", type=int, default=20)
     ex.add_argument("--preset", default="veryfast")
+
+    # -- reanno ------------------------------------------------------------
+    rn = sub.add_parser(
+        "reanno",
+        help="muestra de reanotacion ciega y reporte de acuerdo",
+        description=(
+            "Sin --report sortea la muestra, o muestra el avance si ya existe. La muestra se "
+            "congela: se niega a resortear salvo --force, porque resortear despues de ver "
+            "resultados parciales convierte el numero en lo que uno quiera que sea."
+        ),
+    )
+    rn.add_argument("video", type=Path)
+    rn.add_argument("--fraction", type=float, default=0.10)
+    rn.add_argument("--seed", type=int, default=42)
+    rn.add_argument("--annotator", default=None)
+    rn.add_argument(
+        "--force", action="store_true",
+        help="resortea descartando la muestra y los intentos anteriores",
+    )
+    rn.add_argument("--report", action="store_true", help="calcula el acuerdo y lo escribe")
+    rn.add_argument(
+        "--include-revealed", action="store_true",
+        help="incluye en el reporte los intentos con la etiqueta revelada, que no fueron ciegos",
+    )
+    rn.add_argument("--out", type=Path, default=None)
 
     # -- proxy -------------------------------------------------------------
     px = sub.add_parser(
@@ -339,6 +365,68 @@ def _cmd_export(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_reanno(args: argparse.Namespace) -> int:
+    import os
+
+    from boxtwin.core.agreement import a_dict, a_texto, comparar
+    from boxtwin.core.annotations import load as load_doc
+    from boxtwin.core.export.base import escribir_json
+    from boxtwin.core.project import project_paths
+    from boxtwin.core.reanno import SampleFrozenError, cargar, cargar_o_sortear, guardar
+
+    paths = project_paths(args.video)
+    if not paths.annot.is_file():
+        print(f"error: no hay anotacion ({paths.annot.name})", file=sys.stderr)
+        return 1
+
+    doc, _ = load_doc(paths.annot)
+    ruta = paths.annot.with_name(paths.annot.name.replace(".annot.json", ".reanno.json"))
+
+    if args.report:
+        if not ruta.is_file():
+            print(f"error: no hay reanotacion ({ruta.name})", file=sys.stderr)
+            return 1
+        re_doc = cargar(ruta)
+        reporte = comparar(doc, re_doc, solo_ciegos=not args.include_revealed)
+        salida = args.out or paths.exports
+        salida.mkdir(parents=True, exist_ok=True)
+        base = paths.video.stem
+        escribir_json(salida / f"{base}.agreement.json", a_dict(reporte))
+        texto = a_texto(reporte)
+        (salida / f"{base}.agreement.txt").write_text(texto, encoding="utf-8")
+        print(texto)
+        print(f"-> {salida / (base + '.agreement.json')}")
+        return 0
+
+    anotador = args.annotator or os.environ.get("USER") or "desconocido"
+    try:
+        re_doc, nueva = cargar_o_sortear(
+            ruta, doc, fraction=args.fraction, seed=args.seed,
+            annotator=anotador, force=args.force,
+        )
+    except SampleFrozenError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    if nueva:
+        guardar(re_doc, ruta)
+        print(f"muestra sorteada: {re_doc.sample.n} de {len(doc.events)} eventos")
+        print(f"  semilla {re_doc.sample.seed} · fraccion {re_doc.sample.fraction}")
+        print(f"  -> {ruta}")
+        print()
+        print("  La muestra queda congelada. Resortearla despues de ver resultados")
+        print("  parciales anula el pre-registro; hace falta --force explicito.")
+    else:
+        print(f"muestra existente: {re_doc.sample.n} eventos, semilla {re_doc.sample.seed}")
+        print(f"  reanotados {len(re_doc.trials)}, pendientes {len(re_doc.pendientes())}")
+        revelados = sum(1 for t in re_doc.trials if t.revealed)
+        if revelados:
+            print(f"  {revelados} con la etiqueta revelada: no cuentan como ciegos")
+    print()
+    print("  Reanotar desde la pestana Reanotacion del anotador.")
+    return 0
+
+
 def _cmd_proxy(args: argparse.Namespace) -> int:
     import time
 
@@ -484,6 +572,8 @@ def main(argv: list[str] | None = None) -> int:
             )
         if args.comando == "export":
             return _cmd_export(args)
+        if args.comando == "reanno":
+            return _cmd_reanno(args)
         if args.comando == "proxy":
             return _cmd_proxy(args)
         if args.comando == "bundle":

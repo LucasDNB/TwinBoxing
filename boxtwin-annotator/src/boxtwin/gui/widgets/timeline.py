@@ -46,6 +46,7 @@ class Timeline(QWidget):
         self._unreliable: list[UnreliableSegment] = []
         self._seams: list[int] = []
         self._seleccionado: str | None = None
+        self._ciego = False
         self.setMinimumHeight(2 * ALTO_CARRIL + ALTO_EJE + 3 * MARGEN)
         self.setMouseTracking(True)
 
@@ -73,6 +74,17 @@ class Timeline(QWidget):
 
     def set_selected(self, event_id: str | None) -> None:
         self._seleccionado = event_id
+        self.update()
+
+    def set_blind(self, ciego: bool) -> None:
+        """
+        Oculta las marcas durante la reanotacion ciega.
+
+        La marca dice exactamente donde empieza y termina el golpe. Con eso a la vista, el
+        error de fronteras del reporte de acuerdo mide cero por construccion y el numero
+        deja de significar nada.
+        """
+        self._ciego = ciego
         self.update()
 
     # -- geometria ---------------------------------------------------------
@@ -107,6 +119,8 @@ class Timeline(QWidget):
         p.end()
 
     def _pintar_no_confiables(self, p: QPainter) -> None:
+        if self._ciego:
+            return
         for seg in self._unreliable:
             carril = self._lane_rect(seg.fighter)
             x1 = self._x(seg.start_frame)
@@ -117,6 +131,8 @@ class Timeline(QWidget):
             )
 
     def _pintar_eventos(self, p: QPainter) -> None:
+        if self._ciego:
+            return
         for ev in self._events:
             carril = self._lane_rect(ev.fighter)
             x1 = self._x(ev.start_frame)

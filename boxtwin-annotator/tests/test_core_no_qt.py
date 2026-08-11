@@ -36,6 +36,8 @@ MODULOS_CORE = [
     "boxtwin.core.identity_ops",
     "boxtwin.core.project",
     "boxtwin.core.export",
+    "boxtwin.core.reanno",
+    "boxtwin.core.agreement",
 ]
 
 

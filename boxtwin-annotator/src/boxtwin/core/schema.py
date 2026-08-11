@@ -140,8 +140,14 @@ BBox = Annotated[
 
 # timespec="seconds" mantiene los timestamps legibles y con ancho fijo. La precision fina
 # la lleva active_ms, que es lo que se mide de verdad.
+#
+# Los microsegundos se truncan AL VALIDAR y no solo al serializar, por el mismo motivo que
+# el redondeo de coordenadas: si el objeto en memoria tuviera mas precision que el archivo,
+# cargar lo que se acaba de guardar daria un documento distinto del que se tenia, y las
+# comparaciones de round-trip fallarian por una diferencia que nunca llego al disco.
 Timestamp = Annotated[
     AwareDatetime,
+    AfterValidator(lambda v: v.replace(microsecond=0)),
     PlainSerializer(lambda v: v.isoformat(timespec="seconds"), return_type=str, when_used="json"),
 ]
 

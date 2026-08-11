@@ -198,6 +198,24 @@ def test_iou_se_redondea_a_cuatro_decimales() -> None:
     assert o.seed_iou == 0.8333
 
 
+def test_los_timestamps_se_truncan_a_segundos() -> None:
+    """
+    Mismo criterio que el redondeo de coordenadas: si el objeto en memoria tuviera mas
+    precision que el archivo, cargar lo que se acaba de guardar daria un documento distinto
+    del que se tenia, por una diferencia que nunca llego al disco.
+    """
+    from datetime import datetime, timedelta, timezone
+
+    ar = timezone(timedelta(hours=-3))
+    con_micros = datetime(2026, 8, 11, 14, 3, 11, 123456, tzinfo=ar)
+    o = Origin(
+        op=AssignmentOp.MANUAL, op_id="op_1", at_frame=0, annotator="lucas",
+        created_at=con_micros,
+    )
+    assert o.created_at.microsecond == 0
+    assert o.created_at == con_micros.replace(microsecond=0)
+
+
 @pytest.mark.parametrize("iou", [-0.1, 1.5])
 def test_iou_rechaza_fuera_de_cero_uno(iou: float) -> None:
     with pytest.raises(ValidationError):
