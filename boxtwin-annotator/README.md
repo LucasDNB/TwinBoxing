@@ -8,6 +8,9 @@ dentro de un video, y porque su calidad de anotacion no resistio la verificacion
 BoxingVI, la reanotacion completa de V2 encontro 42% de clips sin ningun golpe y 7,3% de
 acierto de etiqueta, y V1 trae 209 clips que son placas de titulo con etiqueta de golpe.
 
+**Manual de uso: [`docs/MANUAL.md`](docs/MANUAL.md).** Este README explica por que cada
+cosa esta como esta; el manual explica como se usa.
+
 ## Estado
 
 Los siete bloques terminados y sin pendientes abiertos. El pipeline va del video crudo al

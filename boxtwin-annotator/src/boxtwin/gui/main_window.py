@@ -264,6 +264,7 @@ class MainWindow(QMainWindow):
         add("view.toggle_boxes", lambda: self._flip("boxes"))
         add("view.toggle_ids", lambda: self._flip("ids"))
         add("view.toggle_gloves", lambda: self._flip("gloves"))
+        add("view.only_selected", self._solo_seleccionado)
 
         add("fighter.select_a", lambda: self._elegir_peleador(FighterId.A))
         add("fighter.select_b", lambda: self._elegir_peleador(FighterId.B))
@@ -344,6 +345,10 @@ class MainWindow(QMainWindow):
 
     def _elegir_peleador(self, f: FighterId) -> None:
         self.fighter = f
+        # Si el filtro de un solo peleador esta puesto, sigue al que se acaba de elegir.
+        if self.view.options.only_fighter is not None:
+            self.view.options.only_fighter = f
+            self.view.update()
         self._refresh_status()
 
     def _marcar_inicio(self) -> None:
@@ -744,6 +749,20 @@ class MainWindow(QMainWindow):
 
     def _flip(self, clave: str) -> None:
         self.chk[clave].setChecked(not self.chk[clave].isChecked())
+
+    def _solo_seleccionado(self) -> None:
+        """
+        Alterna entre ver todas las detecciones y solo las del peleador elegido.
+
+        Sirve en el clinch, donde los dos esqueletos se superponen y no se distingue cual
+        keypoint es de quien. Alterna contra el peleador vigente, asi que cambiar con 1 o 2
+        mientras esta activo cambia a quien se mira.
+        """
+        opciones = self.view.options
+        opciones.only_fighter = None if opciones.only_fighter is not None else self.fighter
+        self.view.update()
+        quien = opciones.only_fighter.value if opciones.only_fighter else "todos"
+        self.statusBar().showMessage(f"mostrando {quien}", 2000)
 
     def _pedir_frame(self) -> None:
         self.player.pause()
