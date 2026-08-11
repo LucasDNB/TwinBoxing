@@ -30,6 +30,8 @@ MODULOS_CORE = [
     "boxtwin.core.posecache",
     "boxtwin.core.identity",
     "boxtwin.core.gloves",
+    "boxtwin.core.undo",
+    "boxtwin.core.metrics",
 ]
 
 

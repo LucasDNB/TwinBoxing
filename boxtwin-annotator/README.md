@@ -10,15 +10,15 @@ acierto de etiqueta, y V1 trae 209 clips que son placas de titulo con etiqueta d
 
 ## Estado
 
-Bloques 1 a 3 de 7 terminados: modelo de datos, preproceso y reproductor con overlay.
-Todavia no se pueden anotar eventos.
+Bloques 1 a 4 de 7 terminados: ya se pueden anotar eventos y quedan persistidos.
+Falta la gestion de identidad, los exports y la reanotacion ciega.
 
 | Bloque | Que | Estado |
 |---|---|---|
 | 1 | Modelo de datos en `core/` con validaciones y tests | hecho |
 | 2 | CLI de preproceso, reanudable, con proxy | hecho |
 | 3 | Reproductor de escritorio con overlay y navegacion frame-exacta | hecho |
-| 4 | Anotacion de eventos con atajos de teclado y persistencia | pendiente |
+| 4 | Anotacion de eventos con atajos de teclado y persistencia | hecho |
 | 5 | Gestion de identidad | pendiente |
 | 6 | Exports (clips, mmaction, sequence, stats) | pendiente |
 | 7 | Reanotacion ciega y reporte de acuerdo | pendiente |
@@ -147,6 +147,92 @@ cada 10 minutos de video: el npz son 5 MB, el proxy 97 MB, el original 54 MB en 
 490 MB en 4K. En 1080p el proxy pesa mas que el original porque usa GOP 12; ahi conviene
 mover el original y generar el proxy del otro lado con `boxtwin-annotator proxy`, que solo
 necesita ffmpeg.
+
+## Anotacion
+
+Se marca sobre el reproductor y se clasifica en un dialogo que se completa entero con el
+teclado. La anotacion con mouse no escala: la medicion previa del proyecto dio 2,2 s por
+decision, y ese numero solo se sostiene si la mano no se mueve del teclado.
+
+| Tecla | Que hace |
+|---|---|
+| `[` | marca el inicio y abre un evento |
+| `]` | marca el final y abre el dialogo de clasificacion |
+| `Z` | descarta el evento en curso |
+| `1` `2` | elige fighter_A / fighter_B |
+| `Supr` | borra el evento seleccionado |
+| `Ctrl+Z` / `Ctrl+Shift+Z` | deshacer / rehacer |
+| `Ctrl+S` | guardar |
+
+Dentro del dialogo:
+
+| Tecla | Que hace |
+|---|---|
+| `Q` `W` | lado izquierdo / derecho |
+| `A` `S` `D` | recto / hook / uppercut |
+| `H` `B` | cabeza / cuerpo |
+| `F` | amague (se aprieta de nuevo y vuelve a completo) |
+| `Shift+F` | abortado |
+| `4`–`8` | conecta, bloqueado, esquivado, falla, sin datos |
+| `C` `V` `N` | calidad limpia, con oclusion, ambigua |
+| `P` | marca el pico en el cuadro del preview |
+| `[` `]` | remarca las fronteras sobre el preview |
+| `Espacio` | pausa el preview |
+| `Enter` / `Esc` | confirma / cancela |
+
+Las teclas se validan **por contexto** y no globalmente. `Espacio` es reproducir en el
+reproductor y pausar el preview en el dialogo, y son la misma tecla a proposito: el dialogo
+esta modal encima, asi que nunca compiten.
+
+### Decisiones que no son de comodidad
+
+**El clip se reproduce en loop a 0,25x mientras se clasifica.** Decidir si un golpe fue
+hook o uppercut mirando un cuadro congelado es adivinar: lo que distingue los dos es la
+trayectoria. El loop ademas cuenta las vueltas, que es el proxy directo de dificultad de la
+decision y queda en las metricas.
+
+**Ningun campo que define la clase arranca elegido.** Preseleccionar el tipo mas frecuente
+ahorraria teclas y sesgaria el dataset hacia esa clase cada vez que se confirme sin mirar.
+Los que tienen default en el esquema (`landed` sin datos, `quality` limpia) si vienen
+puestos, porque su default es una afirmacion honesta y no una suposicion.
+
+**La guardia se hereda de la vigente para ese peleador en el inicio del golpe.** El rol
+lead/rear se deriva de ahi en el export, nunca al reves.
+
+**Los ids no se reusan aunque se cancele el dialogo.** El contador no retrocede: una
+referencia externa, por ejemplo la de un `reanno.json`, no puede pasar a apuntar a otro
+evento.
+
+### Persistencia y deshacer
+
+Se guarda en cada evento confirmado y ademas cada 30 segundos. Con guardado solo por
+temporizador, un corte costaria hasta media docena de golpes.
+
+Todo cambio pasa por el historial, incluidas las correcciones en la tabla: una edicion
+tambien se puede errar, y es el momento en que menos se esta prestando atencion. El
+historial guarda 100 pasos y los comandos son reversibles, no copias del documento: mil
+eventos con sus metricas pesan varios megas y cincuenta copias serian cientos.
+
+### Metricas de proceso
+
+Por evento se registra quien anoto, en que sesion, cuando se creo y se confirmo, los
+milisegundos de trabajo activo, cuantas vueltas del preview hubo y cuantas ediciones
+posteriores.
+
+El tiempo que se cuenta es **activo**, no de reloj de pared: el cronometro se detiene
+cuando la ventana pierde el foco y cuando pasan 15 segundos sin actividad. Medido de reloj
+de pared, una sesion de tres horas con dos de almuerzo reporta tres horas y el numero deja
+de servir para estimar, para comparar la dificultad de dos videos o para escribirlo en el
+capitulo.
+
+### Balance de clases
+
+La pestana Balance cuenta los eventos por tipo y lado, y ademas por mano adelantada y
+atrasada, que es el espacio de clases del export. Resalta la clase mas escasa.
+
+Se ve mientras se anota y no al final a proposito: en BoxingVI la clase mas frecuente tiene
+1371 ejemplos y la menos frecuente 296, casi cinco a uno, y eso se supo al terminar de
+cortar los clips.
 
 ## Reproductor
 
@@ -290,6 +376,16 @@ completa esta en `ISSUE_CODES`.
 
 ## Esquema de teclas
 
-Se define en `gui/keymap.py` y es remapeable desde `config.yaml`. Las acciones de
-anotacion e identidad ya estan declaradas aunque sus manejadores lleguen en los bloques 4
-y 5, para que el archivo del usuario no cambie de forma despues.
+Se define en `gui/keymap.py` y es remapeable desde `config.yaml`, que ademas lleva el
+identificador del anotador:
+
+```yaml
+annotator: lucas
+keymap:
+  event.mark_start: "F1"
+  event.mark_end: "F2"
+```
+
+Lo del archivo se superpone al default en vez de reemplazarlo, asi que agregar acciones en
+una version posterior no deja sin teclas a quien ya tenia su config. Un nombre de accion
+mal escrito falla al abrir en vez de ignorarse.

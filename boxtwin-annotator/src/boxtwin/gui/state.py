@@ -30,7 +30,16 @@ from boxtwin.core.annotations import load as load_doc
 from boxtwin.core.annotations import save as save_doc
 from boxtwin.core.identity import IdentityResolver
 from boxtwin.core.posecache import PoseCache
-from boxtwin.core.schema import AnnotationDoc, PoseRef, VideoInfo, new_document
+from boxtwin.core.metrics import new_session_metrics
+from boxtwin.core.schema import (
+    AnnotationDoc,
+    AnnotatorInfo,
+    PoseRef,
+    Totals,
+    VideoInfo,
+    new_document,
+)
+from boxtwin.core.undo import UndoStack
 from boxtwin.core.types import FpsSource, Guard, KeypointFormat
 from boxtwin.core.video import sha256_file
 from boxtwin.gui.player.decoder import FrameSource
@@ -83,6 +92,8 @@ class Session:
     using_proxy: bool
     migrated: list[int]
     has_video: bool = True
+    annotator: str = "desconocido"
+    undo: UndoStack | None = None
     _hires: FrameSource | None = None
 
     @classmethod
@@ -137,6 +148,8 @@ class Session:
             using_proxy=usando_proxy,
             migrated=migrated,
             has_video=paths.video.is_file(),
+            annotator=cls._leer_anotador(paths),
+            undo=UndoStack(doc),
         )
 
     # -- armado ------------------------------------------------------------
@@ -160,6 +173,25 @@ class Session:
     @property
     def hires_available(self) -> bool:
         return self.has_video
+
+    @staticmethod
+    def _leer_anotador(paths: ProjectPaths) -> str:
+        """
+        Quien anota. Sale de config.yaml y si no del usuario del sistema.
+
+        Es obligatorio en las metricas de proceso: sin saber quien anoto que, el analisis
+        de acuerdo entre anotadores no se puede hacer, y ese analisis es parte del aporte
+        metodologico, no un extra.
+        """
+        import os
+
+        if paths.config.is_file():
+            import yaml
+
+            data = yaml.safe_load(paths.config.read_text(encoding="utf-8")) or {}
+            if isinstance(data, dict) and data.get("annotator"):
+                return str(data["annotator"])
+        return os.environ.get("USER") or os.environ.get("USERNAME") or "desconocido"
 
     @staticmethod
     def _load_or_create(paths: ProjectPaths, meta: dict) -> tuple[AnnotationDoc, list[int]]:
@@ -235,6 +267,46 @@ class Session:
             except Exception:  # noqa: BLE001
                 self._hires = False  # type: ignore[assignment]
         return self._hires or None
+
+    def begin_session(self, app_version: str) -> str:
+        """
+        Abre una sesion de trabajo en las metricas de proceso.
+
+        Cada corrida es una sesion propia aunque sea sobre el mismo video: fusionarlas
+        perderia la informacion de cuantas veces se volvio sobre el material, que es
+        justamente lo que distingue una anotacion de una tanda.
+        """
+        from boxtwin.core.annotations import new_id
+
+        ahora = datetime.now().astimezone()
+        sid = new_id(self.doc, "session")
+        self.doc.process.sessions = [
+            *self.doc.process.sessions,
+            new_session_metrics(
+                session_id=sid, annotator=self.annotator, ahora=ahora, app_version=app_version
+            ),
+        ]
+        if not any(a.id == self.annotator for a in self.doc.process.annotators):
+            self.doc.process.annotators = [
+                *self.doc.process.annotators,
+                AnnotatorInfo(id=self.annotator, name=self.annotator),
+            ]
+        return sid
+
+    def end_session(self, active_ms: int) -> None:
+        """Cierra la sesion y recalcula los totales sobre todas las sesiones del archivo."""
+        if not self.doc.process.sessions:
+            return
+        actual = self.doc.process.sessions[-1]
+        actual.ended_at = datetime.now().astimezone()
+        actual.active_ms = active_ms
+
+        total_ms = sum(s.active_ms for s in self.doc.process.sessions)
+        tiempos = sorted(m.active_ms for m in self.doc.process.event_metrics.values())
+        mediana = tiempos[len(tiempos) // 2] if tiempos else None
+        self.doc.process.totals = Totals(
+            active_ms=total_ms, events=len(self.doc.events), median_ms_per_event=mediana
+        )
 
     def save(self) -> None:
         from boxtwin.core.annotations import touch
