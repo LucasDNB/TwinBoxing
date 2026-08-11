@@ -8,9 +8,10 @@ POR QUE EXISTE
   Verlo mientras se anota permite ir a buscar material de las clases flacas en vez de
   acumular mas de las que ya sobran.
 
-  Se muestra en el espacio lead/rear ademas del espacio por lado. El lado es lo que se
-  anota, pero el desbalance que le importa al clasificador es el del espacio de clases del
-  export, y con dos peleadores de guardias distintas los dos espacios no coinciden.
+  Se muestra en los dos espacios. El de lado es el del export por defecto y es el que se
+  resalta; el de mano adelantada y atrasada se muestra igual porque con dos peleadores de
+  guardias distintas los dos espacios no coinciden, y conviene ver si uno esta balanceado y
+  el otro no.
 
 QUE HACE
   Cuenta los eventos por tipo, lado y rol de mano, y marca en color la clase mas escasa.
@@ -54,25 +55,25 @@ class ClassCounter(QWidget):
         por_rol = Counter((e.punch_type, e.arm_role) for e in completos)
         otros = Counter(e.completeness for e in doc.events if e.completeness is not Completeness.FULL)
 
-        minimo = min(por_rol.values(), default=0)
+        minimo = min(por_lado.values(), default=0)
 
-        filas = ["<b>por lado</b><table cellspacing='2'>"]
+        filas = ["<b>por lado</b> <small>(espacio del export)</small><table cellspacing='2'>"]
         for t in PunchType:
-            celdas = "".join(
-                f"<td align='right'>{por_lado.get((t, s), 0)}</td>" for s in Side
-            )
+            celdas = ""
+            for s in Side:
+                n = por_lado.get((t, s), 0)
+                # La clase mas escasa se resalta: es donde conviene buscar material.
+                color = " style='color:#e08a3c'" if n == minimo and len(completos) else ""
+                celdas += f"<td align='right'{color}>{n}</td>"
             filas.append(f"<tr><td>{t.value}</td>{celdas}</tr>")
         filas.append("</table>")
         filas.append("<small>izquierda · derecha</small><br><br>")
 
         filas.append("<b>por mano (lead/rear)</b><table cellspacing='2'>")
         for t in PunchType:
-            celdas = ""
-            for r in ArmRole:
-                n = por_rol.get((t, r), 0)
-                # La clase mas escasa se resalta: es donde conviene buscar material.
-                color = " style='color:#e08a3c'" if n == minimo and len(completos) else ""
-                celdas += f"<td align='right'{color}>{n}</td>"
+            celdas = "".join(
+                f"<td align='right'>{por_rol.get((t, r), 0)}</td>" for r in ArmRole
+            )
             filas.append(f"<tr><td>{t.value}</td>{celdas}</tr>")
         filas.append("</table>")
         filas.append("<small>adelantada · atrasada</small>")

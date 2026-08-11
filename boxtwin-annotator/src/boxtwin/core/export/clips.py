@@ -22,7 +22,7 @@ QUE HACE
   campos del evento y la ruta del clip.
 
 USO
-  export clips --label-space lead-rear --classes 12
+  export clips --classes 12   (label-space side por defecto)
 """
 
 from __future__ import annotations
@@ -75,7 +75,7 @@ def _cortar(video: Path, destino: Path, desde: int, hasta: int, crf: int, preset
 
 @registrar("clips")
 def exportar(ctx: ExportContext) -> ExportResult:
-    space = LabelSpace(ctx.opcion("label_space", LabelSpace.LEAD_REAR.value))
+    space = LabelSpace(ctx.opcion("label_space", LabelSpace.SIDE.value))
     classes = int(ctx.opcion("classes", 12))
     pad = int(ctx.opcion("pad", 0))
     crf = int(ctx.opcion("crf", 20))

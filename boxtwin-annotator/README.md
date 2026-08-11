@@ -363,10 +363,21 @@ entreno sobre los datos que uno cree.
 
 ### Espacios de clases
 
-`--label-space side` es lo que se observa directamente. `--label-space lead-rear` es el
-espacio tactico, derivado de la guardia del peleador. **El de 6 clases en lead-rear coincide
-exactamente con las seis de BoxingVI** (Jab, Cross, Lead/Rear Hook, Lead/Rear Uppercut), asi
-que un dataset propio exportado asi es concatenable con lo que ya esta cortado.
+El default es **`--label-space side`**: el lado observado, sin ningun paso de derivacion.
+El conjunto de 6 queda
+
+```
+straight-left   straight-right
+hook-left       hook-right
+uppercut-left   uppercut-right
+```
+
+`--label-space lead-rear` sigue disponible y es el espacio tactico que usan los datasets del
+area, pero depende de `guard`, que la pone el anotador y puede estar mal o cambiar a mitad
+del combate; un error de guardia intercambia sistematicamente dos clases sin que nada lo
+delate. En ese espacio el conjunto de 6 coincide con las de BoxingVI (Jab, Cross, Lead/Rear
+Hook, Lead/Rear Uppercut), asi que es el que hay que usar para concatenar con lo que ya esta
+cortado de ese dataset.
 
 `--classes 6` es tipo por eje, `12` agrega la altura, `14` agrega amague y fondo.
 

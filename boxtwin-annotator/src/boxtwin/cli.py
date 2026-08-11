@@ -121,9 +121,11 @@ def build_parser() -> argparse.ArgumentParser:
     ex.add_argument("--project", type=Path, default=None)
     ex.add_argument("--out", type=Path, default=None, help="por defecto <proyecto>/exports")
     ex.add_argument(
-        "--label-space", default="lead-rear", choices=["side", "lead-rear"],
-        help="side es lo que se observa; lead-rear es el espacio tactico, derivado de la "
-             "guardia. El de 6 clases en lead-rear coincide con las seis de BoxingVI.",
+        "--label-space", default="side", choices=["side", "lead-rear"],
+        help="side (default) es el lado observado, sin ningun paso de derivacion. "
+             "lead-rear deriva de la guardia del peleador, que la pone el anotador y puede "
+             "estar mal o cambiar a mitad del combate; en ese espacio el conjunto de 6 "
+             "coincide con las clases de BoxingVI.",
     )
     ex.add_argument("--classes", type=int, default=12, choices=[6, 12, 14])
     ex.add_argument(

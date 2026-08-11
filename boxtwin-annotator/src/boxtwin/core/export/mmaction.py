@@ -23,7 +23,7 @@ QUE HACE
   (M, T, V), mas la lista de clases y la metadata de trazabilidad.
 
 USO
-  export mmaction --label-space lead-rear --classes 12
+  export mmaction --classes 12   (label-space side por defecto)
 """
 
 from __future__ import annotations
@@ -108,7 +108,7 @@ def _muestra(
 
 @registrar("mmaction")
 def exportar(ctx: ExportContext) -> ExportResult:
-    space = LabelSpace(ctx.opcion("label_space", LabelSpace.LEAD_REAR.value))
+    space = LabelSpace(ctx.opcion("label_space", LabelSpace.SIDE.value))
     classes = int(ctx.opcion("classes", 12))
     personas = 2 if ctx.opcion("persons", "attacker") == "both" else 1
     n_kp = 19 if ctx.opcion("keypoints", "coco17") == "coco17+gloves" else 17

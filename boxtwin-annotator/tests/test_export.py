@@ -202,7 +202,7 @@ def test_sequence_escribe_bio(ctx: ExportContext) -> None:
     r = correr(ctx, "sequence", classes=12)
     z = np.load(next(a for a in r.archivos if a.suffix == ".npz"))
     clases = list(z["classes"])
-    idx = clases.index("straight-lead-head")
+    idx = clases.index("straight-left-head")
     b, i = 1 + 2 * idx, 2 + 2 * idx
     carril = z["labels"][0, 0]  # fighter_A, brazo izquierdo
     assert carril[20] == b  # primer cuadro del evento
@@ -299,7 +299,7 @@ def test_stats_incluye_duraciones_y_proceso(ctx: ExportContext) -> None:
 def test_stats_escribe_texto_legible(ctx: ExportContext) -> None:
     r = correr(ctx, "stats")
     txt = next(a for a in r.archivos if a.suffix == ".txt").read_text(encoding="utf-8")
-    assert "distribucion en lead-rear" in txt
+    assert "distribucion en side" in txt
     assert "proceso de anotacion" in txt
     # El hash va en el reporte legible tambien: es el que se pega en el capitulo.
     assert annot_hash(ctx.doc)[:16] in txt
@@ -327,3 +327,27 @@ def test_stats_es_determinista(ctx: ExportContext, tmp_path: Path) -> None:
 
 def test_los_cuatro_formatos_estan_registrados() -> None:
     assert set(exportadores()) == {"clips", "mmaction", "sequence", "stats"}
+
+
+def test_el_espacio_por_defecto_es_side(ctx: ExportContext) -> None:
+    """
+    side no tiene paso de derivacion: lo que el anotador vio es lo que se exporta. lead-rear
+    depende de la guardia, que puede estar mal o cambiar a mitad del combate, y un error ahi
+    intercambia sistematicamente dos clases sin que nada lo delate.
+    """
+    r = correr(ctx, "sequence", classes=6)
+    z = np.load(next(a for a in r.archivos if a.suffix == ".npz"))
+    assert list(z["classes"]) == [
+        "straight-left", "straight-right",
+        "hook-left", "hook-right",
+        "uppercut-left", "uppercut-right",
+    ]
+    meta = json.loads(next(a for a in r.archivos if a.suffix == ".json").read_text())
+    assert meta["label_space"] == "side"
+
+
+def test_lead_rear_sigue_disponible(ctx: ExportContext) -> None:
+    """El enunciado pide los dos espacios; cambio el default, no la oferta."""
+    r = correr(ctx, "sequence", classes=6, label_space="lead-rear")
+    z = np.load(next(a for a in r.archivos if a.suffix == ".npz"))
+    assert list(z["classes"])[0] == "straight-lead"

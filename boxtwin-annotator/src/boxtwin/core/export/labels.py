@@ -7,12 +7,17 @@ POR QUE EXISTE
   etiqueta esta mal, con la clase colapsada no se sabe si fallo el tipo, el brazo o la
   altura. Con los campos separados el error se localiza en la dimension que lo produjo.
 
-  Dos espacios porque miden cosas distintas. `side` es lo que el modelo observa
-  directamente y no depende de ninguna derivacion. `lead-rear` es el espacio tactico, el
-  que usan los datasets del area, y sale de combinar el lado con la guardia del peleador.
-  El de 6 clases en lead-rear coincide exactamente con las seis de BoxingVI (Jab, Cross,
-  Lead/Rear Hook, Lead/Rear Uppercut), asi que un dataset propio exportado asi es
-  concatenable con lo que ya esta cortado.
+  Dos espacios porque miden cosas distintas, y `side` es el default. Es el lado observado
+  y no tiene ningun paso de derivacion: lo que el anotador vio es lo que se exporta. El
+  conjunto de 6 queda straight-left, straight-right, hook-left, hook-right, uppercut-left,
+  uppercut-right.
+
+  `lead-rear` sigue disponible y es el espacio tactico que usan los datasets del area, pero
+  depende de la guardia, que la pone el anotador y puede estar mal o cambiar a mitad del
+  combate. Un error de guardia intercambia sistematicamente dos clases sin que nada lo
+  delate. En ese espacio el conjunto de 6 coincide con las de BoxingVI (Jab, Cross,
+  Lead/Rear Hook, Lead/Rear Uppercut), asi que es el que sirve para concatenar con lo que ya
+  esta cortado de ese dataset.
 
   Solo entran los golpes completos a los espacios de 6 y 12. Un amague no es un recto mal
   hecho: es otra cosa, y meterlo en la clase recto ensucia justamente los ejemplos que

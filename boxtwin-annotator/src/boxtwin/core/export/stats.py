@@ -74,10 +74,10 @@ def exportar(ctx: ExportContext) -> ExportResult:
                     cuenta[nombre] += 1
             distribucion[space.value][str(n)] = dict(sorted(cuenta.items()))
 
-    # -- duraciones por clase, en el espacio tactico de 12
+    # -- duraciones por clase, en el espacio observado de 12
     por_clase: dict[str, list] = {}
     for e in completos:
-        nombre = class_name(e, LabelSpace.LEAD_REAR, 12)
+        nombre = class_name(e, LabelSpace.SIDE, 12)
         if nombre:
             por_clase.setdefault(nombre, []).append(e)
     duraciones = {k: _duraciones(v) for k, v in sorted(por_clase.items())}
@@ -144,13 +144,13 @@ def exportar(ctx: ExportContext) -> ExportResult:
     txt_path.write_text(_texto(reporte), encoding="utf-8")
 
     avisos = []
-    balance = distribucion[LabelSpace.LEAD_REAR.value]["12"]
+    balance = distribucion[LabelSpace.SIDE.value]["12"]
     if balance:
         peor = max(balance.values()) / max(1, min(balance.values()))
         if peor >= 3:
             avisos.append(
                 f"desbalance de {peor:.1f}:1 entre la clase mas y menos frecuente "
-                "en lead-rear de 12"
+                "en side de 12"
             )
     if len(balance) < 12:
         avisos.append(f"{12 - len(balance)} de las 12 clases no tienen ningun ejemplo")
@@ -178,9 +178,9 @@ def _texto(r: dict[str, Any]) -> str:
         f"  por peleador    : {r['eventos']['por_peleador']}",
         f"  por resultado   : {r['eventos']['por_resultado']}",
         "",
-        "distribucion en lead-rear, 12 clases (solo golpes completos)",
+        "distribucion en side, 12 clases (solo golpes completos)",
     ]
-    for k, v in r["distribucion"]["lead-rear"]["12"].items():
+    for k, v in r["distribucion"]["side"]["12"].items():
         dur = r["duraciones_por_clase"].get(k, {})
         media = f"  dur media {dur['media']} +- {dur['desvio']}" if dur.get("n") else ""
         lineas.append(f"  {k:28s} {v:5d}{media}")
