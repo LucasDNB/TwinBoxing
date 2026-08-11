@@ -10,8 +10,8 @@ acierto de etiqueta, y V1 trae 209 clips que son placas de titulo con etiqueta d
 
 ## Estado
 
-Los siete bloques terminados. El pipeline va del video crudo al dataset exportado, con
-su medida de acuerdo intra-anotador.
+Los siete bloques terminados y sin pendientes abiertos. El pipeline va del video crudo al
+dataset exportado, con su medida de acuerdo intra-anotador.
 
 | Bloque | Que | Estado |
 |---|---|---|
@@ -509,6 +509,30 @@ divide por cero y el valor no existe. No es acuerdo perfecto, y decir 1.0 seria 
 
 Con menos de 20 intentos el reporte avisa: kappa es inestable con n bajo y no conviene
 citarlo sin su n.
+
+## Herramientas
+
+### Renderizar el overlay a video
+
+```bash
+python tools/render_overlay.py proyecto/videos/spar.mp4 --from 100 --to 400 --fps 8
+```
+
+Quema el overlay usando el mismo camino de dibujo que la aplicacion y estampa, por cuadro,
+de que cuadro es la imagen y de que cuadro son los keypoints. Sirve para revisar anotaciones
+de corrido sin abrir la interfaz, para producir figuras, y para zanjar cualquier duda sobre
+sincronia sin depender de una sesion remota.
+
+Nacio como diagnostico. En agosto de 2026 se reporto un desfasaje aparente entre el
+esqueleto y la persona; con esta herramienta se verifico que **los dos numeros van siempre
+iguales, o sea que el camino de dibujo de escritorio esta sincronizado cuadro a cuadro**. Lo
+que se veia era el cliente de la variante web pidiendo cuadros de mas y dejando la imagen
+atrasada respecto del esqueleto, arreglado en `feat/boxtwin-annotator-web`.
+
+Antes ya se habia verificado, por separado, que el proxy y el original estan alineados
+(mismo conteo de cuadros y `proxy[N]` corresponde a `original[N]`), y que el render directo
+sobre el `.npz` cae sobre el cuerpo. Las tres verificaciones juntas descartan el desfasaje
+como problema de datos, de proxy y de dibujo.
 
 ## Arquitectura
 
