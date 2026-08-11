@@ -30,6 +30,7 @@ from boxtwin.core.annotations import load as load_doc
 from boxtwin.core.annotations import save as save_doc
 from boxtwin.core.identity import IdentityResolver
 from boxtwin.core.posecache import PoseCache
+from boxtwin.core.project import ProjectPaths, project_paths
 from boxtwin.core.metrics import new_session_metrics
 from boxtwin.core.schema import (
     AnnotationDoc,
@@ -45,37 +46,11 @@ from boxtwin.core.video import sha256_file
 from boxtwin.gui.player.decoder import FrameSource
 from boxtwin.version import __version__
 
-__all__ = ["Session", "SessionError", "project_paths"]
+__all__ = ["Session", "SessionError", "ProjectPaths", "project_paths"]
 
 
 class SessionError(RuntimeError):
     pass
-
-
-@dataclass(frozen=True)
-class ProjectPaths:
-    project: Path
-    video: Path
-    npz: Path
-    meta: Path
-    proxy: Path
-    annot: Path
-    config: Path
-
-
-def project_paths(video: Path) -> ProjectPaths:
-    video = Path(video).resolve()
-    project = video.parent.parent if video.parent.name == "videos" else video.parent
-    base = video.stem
-    return ProjectPaths(
-        project=project,
-        video=video,
-        npz=project / "cache" / f"{base}.pose.npz",
-        meta=project / "cache" / f"{base}.meta.json",
-        proxy=project / "cache" / f"{base}.proxy.mp4",
-        annot=project / "annotations" / f"{base}.annot.json",
-        config=project / "config.yaml",
-    )
 
 
 @dataclass

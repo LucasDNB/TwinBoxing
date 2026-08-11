@@ -12,6 +12,7 @@ POR QUE EXISTE
 QUE HACE
   preprocess  corre pose y tracking sobre un video y escribe el cache, reanudable.
   annotate    abre el anotador de escritorio sobre un video ya preprocesado.
+  export      genera el dataset en alguno de los cuatro formatos.
   probe       muestra los metadatos reales del video sin procesar nada.
 
 USO
@@ -102,6 +103,53 @@ def build_parser() -> argparse.ArgumentParser:
              "Qt es 1024x768 y ahi la ventana del anotador queda recortada.",
     )
     an.add_argument("--vnc-port", type=int, default=5900, help="puerto VNC")
+
+    # -- export ------------------------------------------------------------
+    ex = sub.add_parser(
+        "export",
+        help="genera el dataset a partir de la anotacion",
+        description=(
+            "Corre sin GUI. Todos los exports llevan en su metadata el sha256 de la "
+            "anotacion que los genero, que es lo unico que permite saber meses despues "
+            "sobre que datos se entreno un modelo."
+        ),
+    )
+    ex.add_argument("video", type=Path)
+    ex.add_argument(
+        "--format", required=True, choices=["clips", "mmaction", "sequence", "stats"],
+    )
+    ex.add_argument("--project", type=Path, default=None)
+    ex.add_argument("--out", type=Path, default=None, help="por defecto <proyecto>/exports")
+    ex.add_argument(
+        "--label-space", default="lead-rear", choices=["side", "lead-rear"],
+        help="side es lo que se observa; lead-rear es el espacio tactico, derivado de la "
+             "guardia. El de 6 clases en lead-rear coincide con las seis de BoxingVI.",
+    )
+    ex.add_argument("--classes", type=int, default=12, choices=[6, 12, 14])
+    ex.add_argument(
+        "--persons", default="attacker", choices=["attacker", "both"],
+        help="both agrega al rival: da contexto de si el golpe llega, pero cambia el "
+             "problema y deja de ser comparable con lo ya entrenado.",
+    )
+    ex.add_argument(
+        "--keypoints", default="coco17", choices=["coco17", "coco17+gloves"],
+        help="coco17+gloves agrega los indices 17 y 18. Cambia V y los pesos preentrenados "
+             "en NTU dejan de cargar directo.",
+    )
+    ex.add_argument("--pad", type=int, default=0, help="cuadros de relleno a cada lado")
+    ex.add_argument(
+        "--background", type=int, default=0,
+        help="ejemplos de fondo a muestrear. Solo aplica al espacio de 14 clases.",
+    )
+    ex.add_argument("--background-len", type=int, default=20)
+    ex.add_argument("--seed", type=int, default=42, help="semilla del muestreo de fondo")
+    ex.add_argument(
+        "--channels", default="per-arm", choices=["per-arm", "per-fighter"],
+        help="per-arm es el default: en un solo carril BIO, un 1-2 pierde uno de los dos "
+             "golpes porque no entran dos segmentos solapados.",
+    )
+    ex.add_argument("--crf", type=int, default=20)
+    ex.add_argument("--preset", default="veryfast")
 
     # -- proxy -------------------------------------------------------------
     px = sub.add_parser(
@@ -230,6 +278,65 @@ def _cmd_preprocess(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_export(args: argparse.Namespace) -> int:
+    from boxtwin.core.annotations import load as load_doc
+    from boxtwin.core.export import ExportContext, exportadores
+    from boxtwin.core.identity import IdentityResolver
+    from boxtwin.core.posecache import PoseCache
+    from boxtwin.core.project import project_paths
+
+    paths = project_paths(args.video)
+    if not paths.npz.is_file():
+        print(f"error: falta el cache de pose ({paths.npz.name})", file=sys.stderr)
+        return 1
+    if not paths.annot.is_file():
+        print(f"error: no hay anotacion ({paths.annot.name})", file=sys.stderr)
+        return 1
+
+    cache = PoseCache.open(paths.npz)
+    doc, migradas = load_doc(paths.annot)
+    if migradas:
+        print(f"anotacion migrada desde la version {migradas[0]}, backup guardado")
+
+    salida = args.out or (paths.project / "exports")
+    ctx = ExportContext(
+        doc=doc,
+        cache=cache,
+        resolver=IdentityResolver(doc, cache),
+        video_path=paths.video,
+        out_dir=salida,
+        opciones={
+            "label_space": args.label_space,
+            "classes": args.classes,
+            "persons": args.persons,
+            "keypoints": args.keypoints,
+            "pad": args.pad,
+            "background": args.background,
+            "background_len": args.background_len,
+            "seed": args.seed,
+            "channels": args.channels,
+            "crf": args.crf,
+            "preset": args.preset,
+        },
+    )
+
+    print(f"exportando {args.format} de {paths.video.name}")
+    print(f"  eventos   : {len(doc.events)}")
+    print(f"  anotacion : {ctx.doc.video.sha256[:16]}")
+    resultado = exportadores()[args.format](ctx)
+
+    print(f"\nlisto: {resultado.formato}")
+    for k, v in resultado.resumen.items():
+        print(f"  {k}: {v}")
+    for a in resultado.archivos:
+        print(f"  -> {a}")
+    if resultado.avisos:
+        print()
+        for a in resultado.avisos:
+            print(f"  ATENCION: {a}")
+    return 0
+
+
 def _cmd_proxy(args: argparse.Namespace) -> int:
     import time
 
@@ -258,7 +365,7 @@ def _cmd_proxy(args: argparse.Namespace) -> int:
 def _cmd_bundle(args: argparse.Namespace) -> int:
     import shutil
 
-    from boxtwin.gui.state import project_paths
+    from boxtwin.core.project import project_paths
 
     origen = project_paths(args.video)
     destino = Path(args.out).resolve()
@@ -373,6 +480,8 @@ def main(argv: list[str] | None = None) -> int:
                 vnc_size=args.vnc_size,
                 vnc_port=args.vnc_port,
             )
+        if args.comando == "export":
+            return _cmd_export(args)
         if args.comando == "proxy":
             return _cmd_proxy(args)
         if args.comando == "bundle":

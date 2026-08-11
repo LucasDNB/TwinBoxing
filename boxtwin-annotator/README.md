@@ -10,8 +10,8 @@ acierto de etiqueta, y V1 trae 209 clips que son placas de titulo con etiqueta d
 
 ## Estado
 
-Bloques 1 a 5 de 7 terminados: se anota, se corrige identidad y todo queda persistido.
-Faltan los exports y la reanotacion ciega.
+Bloques 1 a 6 de 7 terminados: el pipeline produce dataset de punta a punta.
+Falta la reanotacion ciega y el reporte de acuerdo.
 
 | Bloque | Que | Estado |
 |---|---|---|
@@ -20,7 +20,7 @@ Faltan los exports y la reanotacion ciega.
 | 3 | Reproductor de escritorio con overlay y navegacion frame-exacta | hecho |
 | 4 | Anotacion de eventos con atajos de teclado y persistencia | hecho |
 | 5 | Gestion de identidad | hecho |
-| 6 | Exports (clips, mmaction, sequence, stats) | pendiente |
+| 6 | Exports (clips, mmaction, sequence, stats) | hecho |
 | 7 | Reanotacion ciega y reporte de acuerdo | pendiente |
 
 ## Instalacion
@@ -340,6 +340,94 @@ solo y se perderia la senal que sirve para detectar un intercambio de identidad.
 
 Los keypoints por debajo del umbral de confianza se dibujan atenuados y no se ocultan: una
 pose mala y una pose incompleta son cosas distintas y se corrigen distinto.
+
+## Exports
+
+```bash
+boxtwin-annotator export proyecto/videos/spar.mp4 --format mmaction --classes 12
+```
+
+Corre sin GUI: el pipeline de export tiene que poder ejecutarse en el entorno de
+entrenamiento, que no tiene Qt ni pantalla.
+
+Los cuatro formatos llevan en su metadata el **sha256 de la anotacion** que los genero. Es
+lo unico que permite saber, meses despues y con el annot.json ya modificado, si un modelo se
+entreno sobre los datos que uno cree.
+
+| Formato | Que produce |
+|---|---|
+| `stats` | distribucion, duraciones, cobertura y tiempo de anotacion, en json y en texto |
+| `mmaction` | pickle para PoseConv3D, `keypoint` (M,T,V,C) y `keypoint_score` (M,T,V) |
+| `sequence` | npz con etiquetas BIO por cuadro y brazo, mas mascara de validez |
+| `clips` | un mp4 por evento en carpetas por clase, mas `manifest.csv` |
+
+### Espacios de clases
+
+`--label-space side` es lo que se observa directamente. `--label-space lead-rear` es el
+espacio tactico, derivado de la guardia del peleador. **El de 6 clases en lead-rear coincide
+exactamente con las seis de BoxingVI** (Jab, Cross, Lead/Rear Hook, Lead/Rear Uppercut), asi
+que un dataset propio exportado asi es concatenable con lo que ya esta cortado.
+
+`--classes 6` es tipo por eje, `12` agrega la altura, `14` agrega amague y fondo.
+
+Los amagues quedan fuera de 6 y 12. Un amague no es un recto mal hecho: meterlo en la clase
+recto ensucia justamente los ejemplos que definen la frontera. En el espacio de 14 tiene
+clase propia. Los abortados quedan fuera de los tres: no describen ninguna categoria.
+
+El orden de la lista de clases es **contrato**, porque el indice es la etiqueta numerica. El
+espacio de 14 extiende al de 12 sin renumerarlo.
+
+### mmaction
+
+Por defecto una sola persona, el que pega. `--persons both` agrega al rival, que da contexto
+sobre si el golpe llega, pero cambia el problema: se pasa de clasificar un movimiento a
+clasificar un intercambio, y deja de ser comparable con lo ya entrenado.
+
+Por defecto 17 keypoints. `--keypoints coco17+gloves` sube V a 19 y con eso los pesos
+preentrenados en NTU dejan de cargar directo, porque cambia la primera convolucion. Es una
+rama comparativa, no un cambio de base.
+
+`--background N` muestrea ejemplos de fondo, solo en el espacio de 14. Se exige margen a los
+bordes de todo evento del peleador, se excluyen los tramos no confiables y se pide identidad
+resuelta en toda la ventana: un fondo que contiene la cola de un golpe le ensena al modelo
+que ese movimiento es fondo.
+
+**Partir train/val por evento filtra datos.** En una combinacion las ventanas de dos golpes
+comparten cuadros. Hay que partir por video o por round, y la advertencia va escrita en el
+`meta.json` porque el que arme el split seis meses despues no va a leer la consola.
+
+### sequence
+
+Un carril BIO por **brazo**, no por peleador. En una combinacion el jab izquierdo todavia
+esta retrayendo cuando arranca el cross derecho, y BIO no puede representar dos segmentos
+solapados en un mismo carril: habria que descartar uno. Un 1-2 es el golpe mas frecuente del
+boxeo, asi que el formato perderia datos exactamente donde mas hay.
+
+```
+labels        (n_peleadores, 2, T)   int16, esquema O / B-clase / I-clase
+valid         (n_peleadores, T)      bool
+interpolated  (n_peleadores, T)      bool
+keypoints     (n_peleadores, T, V, 2)
+kp_score      (n_peleadores, T, V)
+```
+
+La mascara de validez distingue "no hay golpe" de "no sabemos": un cuadro sin identidad
+resuelta o dentro de un tramo no confiable no es fondo, es ausencia de dato. Sin esa
+distincion el modelo aprende que las oclusiones son fondo.
+
+El unico solapamiento posible dentro de un carril es el doble jab. Se trunca en el export,
+se reporta, y el `annot.json` no se toca.
+
+### Determinismo
+
+`mmaction`, `sequence` y `stats` son deterministas byte a byte, verificado corriendo el
+mismo comando dos veces. El muestreo de fondo va por semilla y la semilla queda en la
+metadata.
+
+`clips` **no** puede serlo. El corte es frame-exacto, lo que obliga a reencodear (los cortes
+sin reencodear caen en keyframes), y la salida de libx264 depende de su version. La garantia
+esta sobre el `manifest.csv` y los rangos de cuadros, no sobre los bytes del mp4. Verificado
+sobre material real: los seis clips salieron con exactamente la cantidad de cuadros esperada.
 
 ## Arquitectura
 

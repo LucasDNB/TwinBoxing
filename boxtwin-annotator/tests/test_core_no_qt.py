@@ -34,6 +34,8 @@ MODULOS_CORE = [
     "boxtwin.core.metrics",
     "boxtwin.core.interpolation",
     "boxtwin.core.identity_ops",
+    "boxtwin.core.project",
+    "boxtwin.core.export",
 ]
 
 
