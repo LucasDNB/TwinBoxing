@@ -1,0 +1,37 @@
+clip,cls,video_key,start_frame,end_frame,expected_frames,actual_frames,src_video,src_fps,src_vfr,n_frames,split
+clips/Rear_Hook/V5_12495_12505.mp4,Rear Hook,V5,12495,12505,11,,V59fcX1YC7E.mp4,30000/1001,False,11,val
+clips/Lead_Uppercut/V4_18408_18415.mp4,Lead Uppercut,V4,18408,18415,8,,IVvOmoB88FM.mp4,24000/1001,False,8,train
+clips/Cross/V5_2355_2362.mp4,Cross,V5,2355,2362,8,,V59fcX1YC7E.mp4,30000/1001,False,8,val
+clips/Lead_Hook/V5_6830_6839.mp4,Lead Hook,V5,6830,6839,10,,V59fcX1YC7E.mp4,30000/1001,False,10,val
+clips/Cross/V4_9216_9221.mp4,Cross,V4,9216,9221,6,,IVvOmoB88FM.mp4,24000/1001,False,6,train
+clips/Lead_Hook/V5_1921_1934.mp4,Lead Hook,V5,1921,1934,14,,V59fcX1YC7E.mp4,30000/1001,False,14,val
+clips/Jab/V5_295_302.mp4,Jab,V5,295,302,8,,V59fcX1YC7E.mp4,30000/1001,False,8,val
+clips/Lead_Uppercut/V4_9653_9658.mp4,Lead Uppercut,V4,9653,9658,6,,IVvOmoB88FM.mp4,24000/1001,False,6,train
+clips/Jab/V4_10043_10051.mp4,Jab,V4,10043,10051,9,,IVvOmoB88FM.mp4,24000/1001,False,9,train
+clips/Cross/V4_9264_9269.mp4,Cross,V4,9264,9269,6,,IVvOmoB88FM.mp4,24000/1001,False,6,train
+clips/Rear_Uppercut/V4_14770_14773.mp4,Rear Uppercut,V4,14770,14773,4,,IVvOmoB88FM.mp4,24000/1001,False,4,train
+clips/Rear_Hook/V5_12407_12419.mp4,Rear Hook,V5,12407,12419,13,,V59fcX1YC7E.mp4,30000/1001,False,13,val
+clips/Lead_Hook/V4_21408_21413.mp4,Lead Hook,V4,21408,21413,6,,IVvOmoB88FM.mp4,24000/1001,False,6,train
+clips/Lead_Hook/V4_15120_15127.mp4,Lead Hook,V4,15120,15127,8,,IVvOmoB88FM.mp4,24000/1001,False,8,train
+clips/Rear_Uppercut/V5_12051_12058.mp4,Rear Uppercut,V5,12051,12058,8,,V59fcX1YC7E.mp4,30000/1001,False,8,val
+clips/Rear_Hook/V4_20828_20833.mp4,Rear Hook,V4,20828,20833,6,,IVvOmoB88FM.mp4,24000/1001,False,6,train
+clips/Jab/V5_14130_14139.mp4,Jab,V5,14130,14139,10,,V59fcX1YC7E.mp4,30000/1001,False,10,val
+clips/Jab/V4_9207_9213.mp4,Jab,V4,9207,9213,7,,IVvOmoB88FM.mp4,24000/1001,False,7,train
+clips/Rear_Uppercut/V4_18925_18931.mp4,Rear Uppercut,V4,18925,18931,7,,IVvOmoB88FM.mp4,24000/1001,False,7,train
+clips/Lead_Hook/V4_12447_12454.mp4,Lead Hook,V4,12447,12454,8,,IVvOmoB88FM.mp4,24000/1001,False,8,train
+clips/Cross/V5_10615_10623.mp4,Cross,V5,10615,10623,9,,V59fcX1YC7E.mp4,30000/1001,False,9,val
+clips/Lead_Hook/V4_19316_19323.mp4,Lead Hook,V4,19316,19323,8,,IVvOmoB88FM.mp4,24000/1001,False,8,train
+clips/Lead_Uppercut/V5_13737_13751.mp4,Lead Uppercut,V5,13737,13751,15,,V59fcX1YC7E.mp4,30000/1001,False,15,val
+clips/Lead_Hook/V4_20039_20044.mp4,Lead Hook,V4,20039,20044,6,,IVvOmoB88FM.mp4,24000/1001,False,6,train
+clips/Lead_Uppercut/V5_7843_7854.mp4,Lead Uppercut,V5,7843,7854,12,,V59fcX1YC7E.mp4,30000/1001,False,12,val
+clips/Jab/V5_2675_2680.mp4,Jab,V5,2675,2680,6,,V59fcX1YC7E.mp4,30000/1001,False,6,val
+clips/Cross/V5_11405_11411.mp4,Cross,V5,11405,11411,7,,V59fcX1YC7E.mp4,30000/1001,False,7,val
+clips/Rear_Uppercut/V4_18939_18945.mp4,Rear Uppercut,V4,18939,18945,7,,IVvOmoB88FM.mp4,24000/1001,False,7,train
+clips/Jab/V5_5938_5943.mp4,Jab,V5,5938,5943,6,,V59fcX1YC7E.mp4,30000/1001,False,6,val
+clips/Jab/V5_3897_3905.mp4,Jab,V5,3897,3905,9,,V59fcX1YC7E.mp4,30000/1001,False,9,val
+clips/Cross/V5_5400_5410.mp4,Cross,V5,5400,5410,11,,V59fcX1YC7E.mp4,30000/1001,False,11,val
+clips/Jab/V4_9256_9263.mp4,Jab,V4,9256,9263,8,,IVvOmoB88FM.mp4,24000/1001,False,8,train
+clips/Jab/V5_14995_15008.mp4,Jab,V5,14995,15008,14,,V59fcX1YC7E.mp4,30000/1001,False,14,val
+clips/Jab/V4_6881_6889.mp4,Jab,V4,6881,6889,9,,IVvOmoB88FM.mp4,24000/1001,False,9,train
+clips/Rear_Hook/V4_7895_7903.mp4,Rear Hook,V4,7895,7903,9,,IVvOmoB88FM.mp4,24000/1001,False,9,train
+clips/Rear_Uppercut/V5_2083_2091.mp4,Rear Uppercut,V5,2083,2091,9,,V59fcX1YC7E.mp4,30000/1001,False,9,val

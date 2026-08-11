@@ -139,3 +139,31 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      corte (4757). Todo numero que vaya a la tesis tiene que decir cual usa
   9. Las 209 placas caen todas en train, ninguna en validacion. Sacarlas mueve
      los pesos de clase 1.9% como maximo
+
+11-08 Verificacion ciega por muestreo estratificado de V4, V5, V8, V9 y V10
+
+  1. Criterio pre-registrado, 18 clips por video, minimo 2 por clase: 16 o mas
+     aciertos se usa tal cual, 11 a 15 se reanota, 10 o menos se descarta
+  2. V5 18/18, V8 17/18, V9 17/18 se usan tal cual. V10 15/18 y V4 12/18 se
+     reanotan completos
+  3. V4 figuraba como confiable con 5 de 5 clips mirados a ojo. Una muestra de 5
+     no es evidencia: su piso Wilson es 56.6% y el 66.7% real cae adentro. La
+     revision vieja no estaba mal, no informaba nada
+  4. Se reporta piso Wilson 95% y no el porcentaje pelado: 18/18 no es calidad
+     del 100%, es un piso de 82.4% con n=18
+  5. Cero clips sin golpe en los 90 de muestra, contra 42% en V2. En estos cinco
+     videos la segmentacion temporal esta intacta y el dano es solo de clase
+  6. Cada video falla en un eje distinto y sistematico: V10 se equivoca en
+     lateralidad conservando la familia (Rear Hook que es Lead Hook), V4 en
+     familia conservando la lateralidad (Rear Hook que es Rear Uppercut)
+  7. Rear Hook, la clase mas rara, sale 2 de 2 mal en V4 y en V10, y 2 de 2 bien
+     en V5 y V9. V4 aporta 75 de los 136 que sobreviven al descarte de V1 y V2.
+     Con n=2 por video no alcanza para afirmar nada, se sabe al reanotar V4
+  8. La validacion aguanta: 83% de sus 893 clips son V5 y V9, que pasaron. El
+     dano esta en train, donde tras descartar V1 y V2 el unico bloque limpio son
+     los 199 clips de V8
+  9. boxingvi_verifica.py aplica la tabla y se escribio con el CSV de salida
+     vacio, asi que la regla de conteo tampoco se eligio viendo los datos. Se
+     niega a aplicar la tabla si el n no es 18 y no redondea los dudosos
+ 10. V7 sigue pasando como confiable con 3 clips mirados, mismo error que se
+     acaba de pagar con V4. Le falta su muestra de 18

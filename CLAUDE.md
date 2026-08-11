@@ -122,19 +122,44 @@ Dataset público de Kumar et al. (NCVPRIPG 2025). Lo que encontramos ejecutando:
 
 Columna Clips contada sobre `manifest_filtrado.csv`.
 
-| Video | Clips | Verificados | Correctos | Estado |
-|---|---|---|---|---|
-| V1 | 1863 | 6 | 1 | Roto: clases **y** segmentación temporal |
-| V2 | 232 | 232 | — | Reanotado completo. Irrecuperable: 134 usables, sesgo fuerte a Jab/Cross. Ver abajo |
-| V3 | 810 | 4 | 1 | Clases mal, ventanas temporales bien. Recuperable reanotando |
-| V4 | 559 | 5 | 5 | Confiable |
-| V5 | 594 | 4 | 3 | Confiable |
-| V7 | 195 | 3 | 3 | Confiable |
-| V8, V9, V10 | 498 | 0 | — | **Sin verificar.** V9 y V10 están en el split de validación |
+Columna Correctos sobre muestra estratificada de 18 donde dice 18; el resto son
+revisiones a ojo, sin valor probatorio (ver la advertencia debajo de la tabla).
+
+| Video | Clips | Verificados | Correctos | Piso Wilson 95% | Decisión |
+|---|---|---|---|---|---|
+| V1 | 1863 | 6 | 1 | — | Roto: clases **y** segmentación temporal. Descartado |
+| V2 | 232 | 232 | 17 | — | Reanotado completo. Irrecuperable: 134 usables. Descartado |
+| V3 | 810 | 4 | 1 | — | **Sin muestra formal.** Reanotar, con chequeo temprano de vacíos |
+| V4 | 559 | 18 | 12 | 43,7% | **Reanotar completo** |
+| V5 | 594 | 18 | 18 | 82,4% | Usar tal cual |
+| V7 | 195 | 3 | 3 | — | **Sin muestra formal.** Evidencia débil |
+| V8 | 199 | 18 | 17 | 74,2% | Usar tal cual |
+| V9 | 148 | 18 | 17 | 74,2% | Usar tal cual |
+| V10 | 151 | 18 | 15 | 60,8% | **Reanotar completo** |
 
 Hallazgo importante: **la calidad no correlaciona con el tamaño del video.** V2
-tiene 232 clips y está tan roto como V1 con 1863. No hay forma de inferir la
-calidad de V8, V9 y V10 sin mirarlos.
+tiene 232 clips y está tan roto como V1 con 1863.
+
+Segundo hallazgo, más caro: **una revisión de 4 o 5 clips no es evidencia.** V4
+figuraba como "confiable" con 5 de 5 y la muestra de 18 lo dejó en 12. Los dos
+resultados no se contradicen: el piso Wilson de 5/5 es 56,6% y 66,7% cae adentro
+de ese intervalo. La muestra vieja no estaba mal, no informaba nada. V5 pasó a
+18/18 después de figurar con 3 de 4. Cualquier video que vaya a la tesis como
+usable necesita muestra de 18, y hoy V7 no la tiene.
+
+Tercer hallazgo: **cada video falla en un eje distinto y sistemático.** V10 se
+equivoca en lateralidad conservando la familia (Rear Hook que es Lead Hook), V4
+se equivoca en familia conservando la lateralidad (Rear Hook que es Rear
+Uppercut, Lead Hook que es Lead Uppercut). En los 90 clips de muestra de V4, V5,
+V8, V9 y V10 no hay **ni un solo** clip sin golpe, contra el 42% de V2: en estos
+cinco videos la segmentación temporal está intacta y el daño es solo de clase,
+o sea recuperable reclasificando sin resegmentar.
+
+Riesgo abierto sobre Rear Hook, la clase más rara: es 2 de 2 incorrecta tanto en
+V4 como en V10, y 2 de 2 correcta en V5 y V9. V4 aporta 75 de los 136 Rear Hook
+que sobreviven al descarte de V1 y V2. Si esos 75 se comportan como la muestra,
+la clase queda al borde de la viabilidad. Con n=2 por video no da para afirmarlo,
+se sabrá al reanotar V4.
 
 Lo que dejó la reanotación completa de V2, medido sobre `reanotado.csv`:
 
@@ -180,8 +205,9 @@ publicado y va documentado como tal en el Capítulo 4.
 
 ## 5. Tarea en curso
 
-Verificación ciega de V8, V9 y V10 con muestreo estratificado, 18 clips por
-video, mínimo 2 por clase presente.
+Verificación ciega por muestreo estratificado, 18 clips por video, mínimo 2 por
+clase presente. Hecha sobre V8, V9, V10 (`clips/muestra_v8v9v10.csv`, seed 42,
+commit `7f6dcd5`) y sobre V4, V5 (`clips/muestra_v4v5.csv`). Falta V7.
 
 Criterio de decisión **fijado antes de mirar los resultados**:
 
@@ -195,16 +221,34 @@ Con 18 de 18 el límite inferior del intervalo de confianza queda cerca del 82%.
 Alcanza para declarar el video usable, no para afirmar calidad del 95%. Eso se
 escribe así en el capítulo, sin inflarlo.
 
-### Después de la verificación
+El puntaje lo aplica `boxingvi_verifica.py`, no una cuenta a mano. Se escribió
+con el CSV de salida vacío, así que la regla de conteo tampoco se eligió viendo
+los datos, y se niega a aplicar la tabla si el n no es 18.
 
-1. Rehacer el split. Si V9 o V10 caen, la validación se rehace entera sobre V4,
-   V5 y V7, y probablemente haya que pasar a validación cruzada por video en vez
-   de split fijo.
+### Cola de reanotación, en este orden
+
+1. **Chequeo temprano de V3**, 50 clips. Es el único bloque grande cuya
+   segmentación sigue sin verificar y su resultado cambia todo el plan: si la
+   tasa de vacíos se acerca al 42% de V2, V3 está muerto como está y hay que
+   resegmentar. Tres minutos para despejar 810 clips de incertidumbre.
+2. **V4 completo**, 559 clips. Aporta 55% de los Rear Hook que sobreviven.
+3. **V10 completo**, 151 clips.
+4. **V3 completo** si pasó el chequeo, 810 clips.
+
+Total del orden 1520 clips, entre una hora y hora y media a los ritmos medidos
+(2,2 s por clip en V2 no ciego, 3,7 s en la verificación ciega).
+
+### Después de la reanotación
+
+1. Rehacer el split. La validación de hoy es V5 594 + V10 151 + V9 148, y el 83%
+   de ella (V5 y V9) viene de videos que pasaron la muestra, así que aguanta. El
+   daño está en train: descartados V1 y V2, el único bloque limpio que queda son
+   los 199 clips de V8.
 2. Recalcular pesos de clase sobre el dataset consolidado.
-3. Reanotar V3 completo (~810 clips). Medición real de productividad: 2,2 s por
-   clip mediana, o sea alrededor de una hora.
+3. Recontar Rear Hook y decidir si sigue siendo viable como clase.
 4. Decidir V1 con el dato de tasa de descarte que deje V3.
-5. Recién ahí, Fase D: extracción de pose sobre el dataset final.
+5. Muestra de 18 para V7, que hoy pasa como confiable con 3 clips mirados.
+6. Recién ahí, Fase D: extracción de pose sobre el dataset final.
 
 ### Herramientas relevantes
 
@@ -222,6 +266,10 @@ escribe así en el capítulo, sin inflarlo.
 - `boxingvi_annot.py` — reanotación web. Servidor HTTP local, playback 0,25x,
   anotación ciega con reveal opcional (tecla E), reanudable, registra tiempo de
   decisión por clip.
+- `boxingvi_verifica.py` — puntaje de las verificaciones contra la tabla
+  pre-registrada. Reporta los dos denominadores etiquetados, piso Wilson 95%, y
+  si quedan clips en `dudoso` que crucen un umbral se declara indeterminado en
+  vez de redondear para un lado.
 - `boxingvi_muestra.py` — muestreo estratificado para verificación. Determinista
   por semilla, mezcla las filas para no filtrar la etiqueta por el orden, y se
   niega a pisar una muestra ya escrita salvo `--force`: resortear después de ver

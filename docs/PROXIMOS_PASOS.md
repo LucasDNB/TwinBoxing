@@ -1,61 +1,74 @@
 # Próximos pasos — retomar acá
 
-Estado al 10-08. Todo lo automatizable está hecho y commiteado. Lo que sigue
-arranca con anotación manual, que no se puede delegar.
+Estado al 11-08. La verificación por muestreo está hecha sobre V4, V5, V8, V9 y
+V10. Lo que sigue es reanotación manual, que no se puede delegar.
 
-## 1. Anotar la muestra de V8/V9/V10 (bloqueante)
+## Resultado de la verificación
+
+| Video | Aciertos /18 | Piso Wilson 95% | Decisión |
+|---|---|---|---|
+| V5 | 18 | 82,4% | usar tal cual |
+| V8 | 17 | 74,2% | usar tal cual |
+| V9 | 17 | 74,2% | usar tal cual |
+| V10 | 15 | 60,8% | reanotar completo |
+| V4 | 12 | 43,7% | reanotar completo |
+
+V4 venía figurando como confiable con 5 de 5. Eso no era evidencia: el piso
+Wilson de 5/5 es 56,6% y el 66,7% real cae adentro de ese intervalo.
+
+Cero clips sin golpe en los 90 de muestra. La segmentación temporal de estos
+cinco videos está intacta y el daño es solo de clase.
+
+## 1. Chequeo temprano de V3 (primero, son 3 minutos)
 
 ```bash
 cd ~/Proyectos/TwinBoxing/test-BoxingVI
-python ../scripts/boxingvi_annot.py --csv ./clips/muestra_v8v9v10.csv \
-    --videos V8 V9 V10 --out ./clips/verificacion_v8v9v10.csv
-```
-
-54 clips, ~3 min a 2,2 s por clip. Anotar ciego, sin tocar la tecla E. Los tres
-videos vienen mezclados a propósito: no saber cuál estás juzgando evita que el
-recuerdo de V1 roto contamine el juicio.
-
-La muestra está congelada en el commit `7f6dcd5`, anterior a toda anotación. No
-resortearla: el script se niega salvo `--force`, y hacerlo anula el criterio
-pre-registrado.
-
-**Criterio de decisión, fijado de antemano** (aciertos sobre 18):
-
-| 16 o más | usar el video tal cual |
-| 11 a 15  | reanotar completo |
-| 10 o menos | descartar |
-
-Después: contar aciertos por video contra la etiqueta original y aplicar. Si V9
-o V10 caen, la validación se rehace entera y probablemente haya que pasar a
-validación cruzada por video en vez de split fijo. Ojo que V5 también está hoy
-en validación, no solo V9 y V10.
-
-## 2. Reanotar V3 (decidido: directo, sin muestra previa)
-
-```bash
 python ../scripts/boxingvi_annot.py --csv ./clips/manifest_filtrado.csv \
     --videos V3 --shuffle --out ./clips/reanotado.csv
 ```
 
-810 clips, ~30 min. **Chequeo temprano obligatorio:** a los ~50 clips, mirar la
-tasa de "sin golpe" en `reanotado.csv`, que se escribe incrementalmente y se
-puede leer sin frenar el server. Si se acerca al 42% de V2, las ventanas
-temporales de V3 también están rotas, reclasificar no alcanza y hay que
-resegmentar. Mejor descubrirlo a los dos minutos que a la media hora.
+Frenar a los ~50 clips y mirar la tasa de "sin golpe". `reanotado.csv` se
+escribe incrementalmente y se lee sin frenar el server:
+
+```bash
+python -c "import pandas as pd; d=pd.read_csv('clips/reanotado.csv'); d=d[d.video_key=='V3']; print(len(d), (d.nueva_cls=='sin golpe').mean())"
+```
+
+Si se acerca al 42% de V2, las ventanas de V3 también están rotas, reclasificar
+no alcanza y hay que resegmentar. Es el único bloque grande cuya segmentación
+sigue sin verificar, y son 810 clips en juego.
 
 Cuidado: `reanotado.csv` ya tiene los 232 clips de V2. El script reanuda por
-`clip`, así que no los repite, pero al analizar hay que filtrar por `video_key`.
+`clip` así que no los repite, pero al analizar hay que filtrar por `video_key`.
 
-## 3. Consolidación (después de 1 y 2)
+## 2. Reanotar V4 (559 clips, ~28 min)
 
-- Excluir del dataset final los 209 clips de placas de V1 (`clips/placas.csv`,
-  columnas `es_placa` y `placa_parcial`). Caen todos en train.
-- Rehacer el split con lo que sobreviva.
-- Recalcular pesos de clase. Sacar las placas los mueve 1,9% como máximo, así
-  que el driver real va a ser qué videos entren, no las placas.
-- Decidir V1 con la tasa de descarte que deje V3. Sigue pendiente a propósito.
+```bash
+python ../scripts/boxingvi_annot.py --csv ./clips/manifest_filtrado.csv \
+    --videos V4 --shuffle --out ./clips/reanotado.csv
+```
 
-## 4. Recién ahí, Fase D
+Prioridad sobre V10 porque V4 aporta 75 de los 136 Rear Hook que sobreviven al
+descarte de V1 y V2, y sus 2 Rear Hook de muestra salieron los dos mal, los dos
+como Rear Uppercut. Al terminar, recontar la clase.
+
+## 3. Reanotar V10 (151 clips, ~9 min) y después V3 completo
+
+Mismo comando cambiando `--videos`.
+
+## 4. Consolidación
+
+- Excluir los 209 clips de placas de V1 (`clips/placas.csv`). Discutible si V1
+  se descarta entero, que es lo que hoy parece.
+- Rehacer el split. La validación aguanta: 83% de ella es V5 y V9, que pasaron.
+  El problema es train, donde tras descartar V1 y V2 el único bloque limpio son
+  los 199 clips de V8.
+- Recalcular pesos de clase.
+- Decidir si Rear Hook sigue siendo viable como clase.
+- Muestra de 18 para V7, que pasa como confiable con 3 clips mirados.
+- Decidir V1 con la tasa de descarte que deje V3.
+
+## 5. Recién ahí, Fase D
 
 Extracción de pose sobre el dataset final (`boxingvi_pose.py`).
 
