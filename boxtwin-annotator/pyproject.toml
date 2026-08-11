@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "boxtwin-annotator"
+description = "Anotador de eventos de golpe sobre video con overlay de pose, para BoxTwin"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [{ name = "Lucas Benitez" }]
+dynamic = ["version"]
+
+# core/ solo necesita pydantic y numpy. opencv, ultralytics y torch son del preproceso y
+# van como extra para que el pipeline de export pueda instalarse sin el stack de inferencia.
+dependencies = [
+    "pydantic>=2.6",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+# El anotador se sirve por HTTP y se usa desde el navegador de otra maquina. No lleva
+# framework web: la API son seis rutas y alcanza con http.server de la biblioteca estandar.
+# Tampoco lleva torch: anotar no necesita GPU.
+server = ["opencv-python>=4.8", "pyyaml>=6.0"]
+preprocess = ["ultralytics>=8.3", "opencv-python>=4.8", "pyyaml>=6.0"]
+
+[project.scripts]
+boxtwin-annotator = "boxtwin.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "boxtwin.version.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+boxtwin = ["configs/*.yaml", "web/*.html", "web/*.js", "web/*.css"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"

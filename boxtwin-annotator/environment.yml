@@ -1,0 +1,34 @@
+# Entorno reproducible desde cero.
+#
+# En la maquina de desarrollo el anotador corre sobre twinboxing_env, que ya trae
+# ultralytics, opencv y numpy; ahi solo se agregaron pydantic y pytest.
+# Este archivo existe para levantar el entorno en otra maquina sin depender de eso.
+#
+# El anotador (server/) necesita python, pydantic, numpy, opencv y pyyaml. ultralytics y
+# torch son solo del preproceso, que corre en la maquina con GPU.
+#
+#   conda env create -f environment.yml
+#   conda activate boxtwin_annot
+#   pip install -e ".[dev]"
+#
+# Ojo: torch entra como dependencia de ultralytics. Si hace falta la build de CUDA
+# especifica de la 2080 Super, instalarla a mano ANTES que ultralytics.
+# Este entorno no tiene nada que ver con boxtwin_mmaction, que esta pinneado y no se toca.
+
+name: boxtwin_annot
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.12
+  - numpy>=2.0
+  - opencv>=4.10
+  - ffmpeg>=6.0
+  - pyyaml>=6.0
+  - pydantic>=2.6
+  - pytest>=8.0
+  - pip
+  - pip:
+      # El anotador se sirve por HTTP: no hay dependencia de interfaz grafica.
+      - ultralytics>=8.3

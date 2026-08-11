@@ -1,0 +1,37 @@
+# BoT-SORT para boxeo. Este archivo se hashea entero y el hash va al meta.json del cache,
+# asi que cambiarlo invalida la reanudacion y queda registrado en cada video procesado.
+#
+# Por que estos valores y no los de fabrica de ultralytics:
+#
+# track_buffer 120 en vez de 30. A 30 fps son 4 segundos de tolerancia. En boxeo los dos
+#   cuerpos se tapan constantemente y con 30 cuadros el tracker da por muerto un track en
+#   cada clinch, generando un id nuevo por intercambio. Cada id nuevo es trabajo manual de
+#   re-seed en el anotador.
+#
+# with_reid True con model auto. Medido en esta maquina sobre 200 cuadros de 1080p: 29,1
+#   fps con y sin ReID, identico. No es que este apagado, el encoder existe; con
+#   model: auto reusa las features que el detector ya calculo en vez de cargar una red
+#   aparte, por eso sale gratis. Si es gratis y puede evitar un intercambio de identidad,
+#   va activado.
+#
+# gmc_method sparseOptFlow. Compensacion de movimiento global, para camara en mano.
+#
+# Lo que NO esta medido: si el ReID efectivamente reduce los intercambios de identidad.
+# Eso necesita ground truth de identidad, que es justamente lo que el anotador va a
+# producir. Queda como pregunta abierta para medir con el primer video anotado.
+
+tracker_type: botsort
+
+track_high_thresh: 0.5
+track_low_thresh: 0.1
+new_track_thresh: 0.6
+track_buffer: 120
+match_thresh: 0.85
+fuse_score: true
+
+gmc_method: sparseOptFlow
+
+proximity_thresh: 0.5
+appearance_thresh: 0.25
+with_reid: true
+model: auto
