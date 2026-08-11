@@ -4,9 +4,17 @@ BoxingVI - Herramienta de reanotacion manual.
 
 POR QUE EXISTE
   Verificacion manual sobre muestras de V1, V2 y V3 encontro tasas de acierto de
-  etiqueta cercanas al azar. V3 y V2 conservan ventanas temporales correctas (el
-  clip contiene un golpe completo y bien encuadrado) y fallan solo en la clase,
-  por lo que son recuperables reclasificando sin resegmentar.
+  etiqueta cercanas al azar, y la hipotesis inicial fue que V2 y V3 conservaban
+  ventanas temporales correctas (el clip contiene un golpe completo y bien
+  encuadrado) y fallaban solo en la clase, o sea recuperables reclasificando sin
+  resegmentar.
+
+  La reanotacion completa de V2 desmintio eso para V2: 98 de 232 clips (42%) no
+  contienen ningun golpe, asi que la segmentacion temporal tambien esta rota, y
+  entre los 134 usables la etiqueta original acierta 17 veces (12.7%), por debajo
+  del azar de 6 clases (16.7%). Para V3 la hipotesis sigue SIN VERIFICAR: salio
+  de mirar 4 clips. Conviene mirar la tasa de "sin golpe" en los primeros ~50
+  clips de su reanotacion; si se acerca a la de V2, reclasificar no alcanza.
 
 DISENO
   - Anotacion CIEGA por defecto: no muestra la etiqueta original, para no anclar

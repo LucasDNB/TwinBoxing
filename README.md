@@ -113,3 +113,55 @@ V8, V9 y V10 sin verificar (549 clips). V9 y V10 estan en el split de validacion
 Verificados confiables: V4, V5, V7, total 1349 clips
 La validacion automatica no detecta errores de etiqueta: todas las metricas daban perfectas mientras tres videos estaban cerca del azar
 Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cero cerca de un minuto por golpe
+
+10-08 Verificacion de anotaciones BoxingVI: placas de titulo y calidad de V2
+
+  1. V1 tiene 209 clips sin persona (181 placas de titulo enteras, 28 sobre un
+     corte), 11.2% del video, todos con etiqueta de golpe
+  2. Es el unico video afectado: los otros ocho no tienen ningun clip por encima
+     del corte de fraccion de negro
+  3. Resultado negativo: un primer detector por brillo medio con umbral global
+     marco 528 de 810 clips de V3 como placas, todos falsos positivos. V3 es
+     metraje real de estudio con fondo oscuro. El brillo medio no distingue
+     video oscuro de pantalla negra y no transfiere entre videos
+  4. boxingvi_placas.py mide fraccion de negro y movimiento, y exige dos
+     poblaciones separadas antes de contar
+  5. Los "cuatro clips placas de texto" del 30-07 eran cuatro de los 30 clips
+     mirados, no un total. El barrido completo da 209 en V1
+  6. Precision sobre la coincidencia de V2: 7.3% es 17/232 sobre el video
+     entero, 12.7% es 17/134 restringido a los clips que si contienen un golpe.
+     Los dos numeros son correctos, hay que decir cual denominador se usa
+  7. Correccion de la distribucion del 30-07: Lead Hook 908 y Rear Uppercut 472
+     sobre manifest.csv, no 907 y 473. Sumaban igual, por eso no se veia
+  8. El pipeline corre sobre manifest_filtrado.csv (4751), no sobre el total del
+     corte (4757). Todo numero que vaya a la tesis tiene que decir cual usa
+  9. Las 209 placas caen todas en train, ninguna en validacion. Sacarlas mueve
+     los pesos de clase 1.9% como maximo
+
+11-08 Verificacion ciega por muestreo estratificado de V4, V5, V8, V9 y V10
+
+  1. Criterio pre-registrado, 18 clips por video, minimo 2 por clase: 16 o mas
+     aciertos se usa tal cual, 11 a 15 se reanota, 10 o menos se descarta
+  2. V5 18/18, V8 17/18, V9 17/18 se usan tal cual. V10 15/18 y V4 12/18 se
+     reanotan completos
+  3. V4 figuraba como confiable con 5 de 5 clips mirados a ojo. Una muestra de 5
+     no es evidencia: su piso Wilson es 56.6% y el 66.7% real cae adentro. La
+     revision vieja no estaba mal, no informaba nada
+  4. Se reporta piso Wilson 95% y no el porcentaje pelado: 18/18 no es calidad
+     del 100%, es un piso de 82.4% con n=18
+  5. Cero clips sin golpe en los 90 de muestra, contra 42% en V2. En estos cinco
+     videos la segmentacion temporal esta intacta y el dano es solo de clase
+  6. Cada video falla en un eje distinto y sistematico: V10 se equivoca en
+     lateralidad conservando la familia (Rear Hook que es Lead Hook), V4 en
+     familia conservando la lateralidad (Rear Hook que es Rear Uppercut)
+  7. Rear Hook, la clase mas rara, sale 2 de 2 mal en V4 y en V10, y 2 de 2 bien
+     en V5 y V9. V4 aporta 75 de los 136 que sobreviven al descarte de V1 y V2.
+     Con n=2 por video no alcanza para afirmar nada, se sabe al reanotar V4
+  8. La validacion aguanta: 83% de sus 893 clips son V5 y V9, que pasaron. El
+     dano esta en train, donde tras descartar V1 y V2 el unico bloque limpio son
+     los 199 clips de V8
+  9. boxingvi_verifica.py aplica la tabla y se escribio con el CSV de salida
+     vacio, asi que la regla de conteo tampoco se eligio viendo los datos. Se
+     niega a aplicar la tabla si el n no es 18 y no redondea los dudosos
+ 10. V7 sigue pasando como confiable con 3 clips mirados, mismo error que se
+     acaba de pagar con V4. Le falta su muestra de 18
