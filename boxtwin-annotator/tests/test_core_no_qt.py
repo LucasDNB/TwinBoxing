@@ -1,10 +1,10 @@
 """
-La regla de dependencias: core no sabe que existe el servidor ni el preproceso.
+La regla de dependencias: core no sabe que existe la GUI.
 
-Sin este test la separacion se erosiona sola. Basta un import de conveniencia, por ejemplo
-opencv para leer una imagen de prueba, y de golpe el pipeline de export deja de instalarse
-en una maquina sin el stack de video. El test importa todo core con las librerias pesadas
-bloqueadas y falla si alguna se cuela.
+Sin este test la separacion se erosiona sola. Basta un import de conveniencia para mostrar
+un color o un QRect y de golpe el pipeline de export deja de correr en un servidor sin
+display. El test importa todo core con las librerias pesadas bloqueadas y falla si alguna
+se cuela.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import sys
 
 import pytest
 
-PROHIBIDAS = ("torch", "ultralytics", "cv2")
+PROHIBIDAS = ("PySide6", "torch", "ultralytics", "cv2")
 
 MODULOS_CORE = [
     "boxtwin.core",
@@ -50,8 +50,8 @@ def test_core_importa_sin_las_librerias_pesadas(monkeypatch: pytest.MonkeyPatch)
         raiz = name.split(".")[0]
         if raiz in PROHIBIDAS:
             raise AssertionError(
-                f"core intento importar {name!r}; core/ no puede depender del stack de "
-                "inferencia ni del de video"
+                f"core intento importar {name!r}; core/ no puede depender de la GUI ni "
+                "del stack de inferencia"
             )
         return real_import(name, globals, locals, fromlist, level)
 

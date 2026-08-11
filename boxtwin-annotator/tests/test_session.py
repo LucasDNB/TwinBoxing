@@ -10,6 +10,7 @@ mas datos para ganar solo el zoom en resolucion completa.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -17,13 +18,13 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-
-
+pytest.importorskip("PySide6")
 pytest.importorskip("cv2")
 
 from boxtwin.core.posecache import N_KEYPOINTS, FrameStatus, PoseArrays, write_pose_cache  # noqa: E402
-from boxtwin.server.session import Session, SessionError, project_paths  # noqa: E402
+from boxtwin.gui.state import Session, SessionError, project_paths  # noqa: E402
 
 pytestmark = pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="hace falta ffmpeg")
 
@@ -172,3 +173,29 @@ def test_anotacion_de_otro_video(proyecto: Path) -> None:
 
     with pytest.raises(SessionError, match="otro video"):
         Session.open(proyecto / "videos" / "mini.mp4")
+
+
+# -- integracion con la ventana -------------------------------------------
+
+
+def test_la_ventana_abre_y_navega(proyecto: Path) -> None:
+    from PySide6.QtWidgets import QApplication
+
+    from boxtwin.gui.main_window import MainWindow
+
+    app = QApplication.instance() or QApplication([])
+    s = Session.open(proyecto / "videos" / "mini.mp4")
+    try:
+        w = MainWindow(s)
+        w.resize(400, 300)
+        w.show()
+        app.processEvents()
+        w.player.seek(10)
+        app.processEvents()
+        assert w.player.cursor == 10
+        w.player.step(-3)
+        assert w.player.cursor == 7
+        w.player.step(1000)  # se recorta al final, no explota
+        assert w.player.cursor == N - 1
+    finally:
+        s.close()

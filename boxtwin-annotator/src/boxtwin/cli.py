@@ -11,7 +11,7 @@ POR QUE EXISTE
 
 QUE HACE
   preprocess  corre pose y tracking sobre un video y escribe el cache, reanudable.
-  serve       levanta el anotador web, para usarlo desde el navegador de otra maquina.
+  annotate    abre el anotador de escritorio sobre un video ya preprocesado.
   probe       muestra los metadatos reales del video sin procesar nada.
 
 USO
@@ -76,32 +76,32 @@ def build_parser() -> argparse.ArgumentParser:
         help="descarta el trabajo a medias y arranca de cero",
     )
 
-    # -- serve -------------------------------------------------------------
+    # -- annotate ----------------------------------------------------------
     an = sub.add_parser(
-        "serve",
-        help="levanta el anotador web sobre un video ya preprocesado",
+        "annotate",
+        help="abre el anotador sobre un video ya preprocesado",
         description=(
-            "Sirve la interfaz por HTTP para usarla desde el navegador de otra maquina. "
-            "Necesita el cache de pose; si falta, correr antes 'preprocess'."
+            "Necesita el cache de pose. Si falta, correr antes 'preprocess'. "
+            "Reproduce desde el proxy si existe."
         ),
     )
     an.add_argument("video", type=Path)
-    an.add_argument("--port", type=int, default=8000)
-    an.add_argument(
-        "--host", default="0.0.0.0",
-        help="0.0.0.0 escucha en toda la red, que es lo que permite abrirlo desde el "
-             "navegador de otra maquina sin tunel. Con 127.0.0.1 hace falta ssh -L.",
-    )
-    an.add_argument("--quality", type=int, default=85, help="calidad JPEG de los cuadros")
-    an.add_argument(
-        "--stamp", action="store_true",
-        help="modo diagnostico: escribe el numero de cuadro sobre cada imagen. Sirve para "
-             "comprobar en una captura si la imagen y el esqueleto son del mismo cuadro.",
-    )
     an.add_argument(
         "--buffer-mb", type=int, default=512,
-        help="presupuesto de memoria del buffer de cuadros del servidor",
+        help="presupuesto de memoria del buffer de cuadros",
     )
+    an.add_argument(
+        "--platform", default=None,
+        help="plugin de plataforma de Qt: xcb, wayland, vnc, offscreen. Equivale a "
+             "QT_QPA_PLATFORM. Con 'vnc' la ventana se sirve por un puerto y se ve con "
+             "cualquier cliente VNC, sin necesidad de sesion grafica.",
+    )
+    an.add_argument(
+        "--vnc-size", default="1600x1000",
+        help="tamano de la pantalla virtual con --platform vnc. El default del plugin de "
+             "Qt es 1024x768 y ahi la ventana del anotador queda recortada.",
+    )
+    an.add_argument("--vnc-port", type=int, default=5900, help="puerto VNC")
 
     # -- proxy -------------------------------------------------------------
     px = sub.add_parser(
@@ -258,7 +258,7 @@ def _cmd_proxy(args: argparse.Namespace) -> int:
 def _cmd_bundle(args: argparse.Namespace) -> int:
     import shutil
 
-    from boxtwin.server.session import project_paths
+    from boxtwin.gui.state import project_paths
 
     origen = project_paths(args.video)
     destino = Path(args.out).resolve()
@@ -363,12 +363,15 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.comando == "preprocess":
             return _cmd_preprocess(args)
-        if args.comando == "serve":
-            from boxtwin.server.http import serve
+        if args.comando == "annotate":
+            from boxtwin.gui.app import run
 
-            return serve(
-                args.video, host=args.host, port=args.port,
-                buffer_mb=args.buffer_mb, quality=args.quality, stamp=args.stamp,
+            return run(
+                args.video,
+                buffer_mb=args.buffer_mb,
+                platform=args.platform,
+                vnc_size=args.vnc_size,
+                vnc_port=args.vnc_port,
             )
         if args.comando == "proxy":
             return _cmd_proxy(args)

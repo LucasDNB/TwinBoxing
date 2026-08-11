@@ -1,11 +1,11 @@
 # Entorno reproducible desde cero.
 #
 # En la maquina de desarrollo el anotador corre sobre twinboxing_env, que ya trae
-# ultralytics, opencv y numpy; ahi solo se agregaron pydantic y pytest.
+# PySide6, ultralytics, opencv y numpy; ahi solo se agregaron pydantic y pytest.
 # Este archivo existe para levantar el entorno en otra maquina sin depender de eso.
 #
-# El anotador (server/) necesita python, pydantic, numpy, opencv y pyyaml. ultralytics y
-# torch son solo del preproceso, que corre en la maquina con GPU.
+# El anotador (gui/) necesita python, pydantic, numpy, opencv, PySide6 y pyyaml.
+# ultralytics y torch son solo del preproceso, que corre en la maquina con GPU.
 #
 #   conda env create -f environment.yml
 #   conda activate boxtwin_annot
@@ -30,5 +30,5 @@ dependencies:
   - pytest>=8.0
   - pip
   - pip:
-      # El anotador se sirve por HTTP: no hay dependencia de interfaz grafica.
+      - PySide6>=6.7
       - ultralytics>=8.3

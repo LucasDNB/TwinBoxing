@@ -11,7 +11,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from boxtwin.server.ringbuffer import MIN_CAPACITY, FrameRing
+from boxtwin.gui.player.ringbuffer import MIN_CAPACITY, FrameRing
 
 
 def img(valor: int = 0) -> np.ndarray:

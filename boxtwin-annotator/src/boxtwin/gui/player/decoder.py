@@ -30,7 +30,7 @@ from pathlib import Path
 
 import numpy as np
 
-from boxtwin.server.ringbuffer import FrameRing
+from boxtwin.gui.player.ringbuffer import FrameRing
 
 __all__ = ["FrameSource", "DecodeError"]
 

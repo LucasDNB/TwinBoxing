@@ -33,7 +33,7 @@ from boxtwin.core.posecache import PoseCache
 from boxtwin.core.schema import AnnotationDoc, PoseRef, VideoInfo, new_document
 from boxtwin.core.types import FpsSource, Guard, KeypointFormat
 from boxtwin.core.video import sha256_file
-from boxtwin.server.decoder import FrameSource
+from boxtwin.gui.player.decoder import FrameSource
 from boxtwin.version import __version__
 
 __all__ = ["Session", "SessionError", "project_paths"]

@@ -1,10 +1,9 @@
 """
 Nucleo de boxtwin-annotator: modelo de datos, validaciones e IO.
 
-Este paquete no importa torch, ultralytics ni opencv, ni directa ni indirectamente. La
-regla la verifica tests/test_core_dependencies.py y existe para que todo el pipeline de
-export se pueda correr en una maquina sin GPU y sin el stack de video, por ejemplo dentro
-de un notebook o en el entorno de entrenamiento.
+Este paquete no importa PySide6, torch ni ultralytics, ni directa ni indirectamente. La
+regla la verifica tests/test_core_no_qt.py y existe para que todo el pipeline de export se
+pueda correr sin GUI, en un servidor o dentro de un notebook.
 """
 
 from boxtwin.core.annotations import canonicalize, dumps, load, new_id, save, touch

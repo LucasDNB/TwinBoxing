@@ -20,10 +20,9 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
-# El anotador se sirve por HTTP y se usa desde el navegador de otra maquina. No lleva
-# framework web: la API son seis rutas y alcanza con http.server de la biblioteca estandar.
-# Tampoco lleva torch: anotar no necesita GPU.
-server = ["opencv-python>=4.8", "pyyaml>=6.0"]
+# Anotar no necesita GPU ni torch: se preprocesa en la maquina con placa y se anota donde
+# haya pantalla. Verificado, el camino de anotacion no importa ultralytics ni torch.
+gui = ["PySide6>=6.7", "opencv-python>=4.8", "pyyaml>=6.0"]
 preprocess = ["ultralytics>=8.3", "opencv-python>=4.8", "pyyaml>=6.0"]
 
 [project.scripts]
@@ -36,7 +35,7 @@ version = { attr = "boxtwin.version.__version__" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-boxtwin = ["configs/*.yaml", "web/*.html", "web/*.js", "web/*.css"]
+boxtwin = ["configs/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
