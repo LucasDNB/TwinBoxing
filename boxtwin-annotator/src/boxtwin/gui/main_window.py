@@ -38,6 +38,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMainWindow,
     QMessageBox,
+    QScrollArea,
     QTabWidget,
     QVBoxLayout,
     QWidget,
@@ -179,19 +180,19 @@ class MainWindow(QMainWindow):
 
         # -- eventos
         self.lista = EventList()
-        pestanas.addTab(self.lista, "Eventos")
+        pestanas.addTab(self._scroll(self.lista), "Eventos")
 
         # -- identidad
         self.identidad = IdentityPanel()
-        pestanas.addTab(self.identidad, "Identidad")
+        pestanas.addTab(self._scroll(self.identidad), "Identidad")
 
         # -- reanotacion ciega
         self.reanno = ReannoPanel()
-        pestanas.addTab(self.reanno, "Reanotación")
+        pestanas.addTab(self._scroll(self.reanno), "Reanotación")
 
         # -- balance de clases
         self.contador = ClassCounter()
-        pestanas.addTab(self._envolver(self.contador), "Balance")
+        pestanas.addTab(self._scroll(self._envolver(self.contador)), "Balance")
 
         # -- vista y definiciones
         vista = QWidget()
@@ -213,18 +214,39 @@ class MainWindow(QMainWindow):
         defs.setTextFormat(Qt.TextFormat.RichText)
         defs.setAlignment(Qt.AlignmentFlag.AlignTop)
         vlayout.addWidget(defs, 1)
-        pestanas.addTab(vista, "Vista")
+        pestanas.addTab(self._scroll(vista), "Vista")
 
         # -- validacion
         self.lbl_issues = QLabel("sin observaciones")
         self.lbl_issues.setWordWrap(True)
         self.lbl_issues.setTextFormat(Qt.TextFormat.RichText)
         self.lbl_issues.setAlignment(Qt.AlignmentFlag.AlignTop)
-        pestanas.addTab(self._envolver(self.lbl_issues), "Validación")
+        pestanas.addTab(self._scroll(self._envolver(self.lbl_issues)), "Validación")
 
         dock.setWidget(pestanas)
         dock.setMinimumWidth(360)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
+
+    @staticmethod
+    def _scroll(w: QWidget) -> QScrollArea:
+        """
+        Mete un panel en un area desplazable.
+
+        Sin esto, la altura minima del contenido del dock manda sobre el tamano de la
+        ventana entera. Con una anotacion real de 143 observaciones, la pestana de
+        validacion exigia 1635 px y la ventana salia de 1709 de alto sobre una pantalla de
+        1080: el timeline y la barra de estado quedaban abajo del borde, invisibles, y el
+        video aparecia chico y corrido porque se centraba en una vista mucho mas alta que
+        lo que se veia.
+        """
+        area = QScrollArea()
+        area.setWidget(w)
+        area.setWidgetResizable(True)
+        area.setFrameShape(QScrollArea.Shape.NoFrame)
+        # Horizontal no: el contenido se adapta al ancho del dock y una barra horizontal
+        # solo robaria alto.
+        area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        return area
 
     @staticmethod
     def _envolver(w: QWidget) -> QWidget:
