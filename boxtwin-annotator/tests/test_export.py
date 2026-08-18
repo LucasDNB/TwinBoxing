@@ -351,3 +351,45 @@ def test_lead_rear_sigue_disponible(ctx: ExportContext) -> None:
     r = correr(ctx, "sequence", classes=6, label_space="lead-rear")
     z = np.load(next(a for a in r.archivos if a.suffix == ".npz"))
     assert list(z["classes"])[0] == "straight-lead"
+
+
+# -- marca del peleador anotado --------------------------------------------
+
+
+def test_marca_una_caja_por_cuadro() -> None:
+    """
+    Una por cuadro y no una fija: el peleador se mueve, y justo en el golpe es cuando mas se
+    desplaza, asi que una caja promedio marca el lugar equivocado en el momento que importa.
+    """
+    from boxtwin.core.export.clips import _marca
+
+    filtro = _marca([(10.0, 20.0, 50.0, 80.0), (12.0, 22.0, 52.0, 82.0)], "0xEC584C")
+    assert filtro.count("drawbox") == 2
+    assert "enable='eq(n\\,0)'" in filtro
+    assert "enable='eq(n\\,1)'" in filtro
+    assert "x=10:y=20:w=40:h=60" in filtro
+    assert filtro.startswith(",")
+
+
+def test_marca_saltea_los_cuadros_sin_deteccion() -> None:
+    """Sin deteccion no se dibuja nada: no se sabe donde esta y no se inventa."""
+    from boxtwin.core.export.clips import _marca
+
+    filtro = _marca([(10.0, 20.0, 50.0, 80.0), None, (12.0, 22.0, 52.0, 82.0)], "0xEC584C")
+    assert filtro.count("drawbox") == 2
+    assert "enable='eq(n\\,1)'" not in filtro
+    assert "enable='eq(n\\,2)'" in filtro
+
+
+def test_marca_vacia_no_rompe_el_filtro() -> None:
+    from boxtwin.core.export.clips import _marca
+
+    assert _marca([None, None], "0xEC584C") == ""
+
+
+def test_marca_con_caja_degenerada_no_emite_ancho_cero() -> None:
+    """ffmpeg rechaza w=0; una caja de ancho nulo tiene que salir con 1 y no romper el clip."""
+    from boxtwin.core.export.clips import _marca
+
+    filtro = _marca([(10.0, 20.0, 10.0, 20.0)], "0xEC584C")
+    assert "w=1:h=1" in filtro

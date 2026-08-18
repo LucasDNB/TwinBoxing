@@ -17,9 +17,17 @@ POR QUE EXISTE
   depende de su version y sus flags. La garantia de determinismo esta en el manifest y en
   los rangos de cuadros, no en los bytes del mp4.
 
+  El clip marca al peleador anotado con su caja. Sin eso el clip es ambiguo y no se nota:
+  en boxeo los golpes se solapan, asi que la ventana de un evento contiene seguido el golpe
+  del otro peleador. Paso al revisar la primera muestra de Sparring.mp4: el clip de ev_0005,
+  un straight-left de fighter_B, contiene tambien el right hook de fighter_A en los cuadros
+  237-248, y leido sin saber a quien mirar la etiqueta parece equivocada. Un clip que se
+  puede leer mal es un clip que va a ser leido mal, por el que lo anoto dos meses despues y
+  por cualquiera que reciba el dataset.
+
 QUE HACE
-  Recorta un clip por evento en carpetas por clase y escribe un manifest.csv con todos los
-  campos del evento y la ruta del clip.
+  Recorta un clip por evento en carpetas por clase, marcando al peleador anotado, y escribe
+  un manifest.csv con todos los campos del evento y la ruta del clip.
 
 USO
   export clips --classes 12   (label-space side por defecto)
@@ -38,19 +46,53 @@ from boxtwin.core.export.base import (
     escribir_json,
     registrar,
 )
+from boxtwin.core.constants import ROLE_COLOR_A, ROLE_COLOR_B
 from boxtwin.core.export.labels import LabelSpace, class_name
 from boxtwin.core.export.windows import ventana_de_evento
+from boxtwin.core.types import FighterId
 
 __all__ = ["exportar", "CAMPOS"]
 
 CAMPOS = [
     "clip", "clase", "event_id", "video", "fighter", "guard", "arm_role",
     "start_frame", "peak_frame", "end_frame", "n_frames",
-    "side", "punch_type", "target", "completeness", "landed", "quality", "notes",
+    "side", "punch_type", "target", "completeness", "landed", "quality",
+    "frames_sin_caja", "notes",
 ]
 
 
-def _cortar(video: Path, destino: Path, desde: int, hasta: int, crf: int, preset: str) -> str | None:
+def _marca(cajas: list[tuple[float, float, float, float] | None], color: str) -> str:
+    """
+    Filtros drawbox que siguen al peleador anotado, uno por cuadro del clip.
+
+    Se emite un drawbox por cuadro con `enable=eq(n,k)` en vez de una caja fija: el peleador
+    se mueve, y una caja estatica en el promedio marca el lugar equivocado justo en el
+    momento del golpe, que es cuando mas se desplaza. `n` cuenta desde 0 porque estos filtros
+    van despues de select, que reinicia la numeracion del stream de salida.
+
+    Los cuadros sin deteccion no dibujan nada. Eso es honesto: no se sabe donde esta.
+    """
+    partes = []
+    for k, caja in enumerate(cajas):
+        if caja is None:
+            continue
+        x1, y1, x2, y2 = (round(v) for v in caja)
+        partes.append(
+            f"drawbox=x={x1}:y={y1}:w={max(1, x2 - x1)}:h={max(1, y2 - y1)}"
+            f":color={color}:t=3:enable='eq(n\\,{k})'"
+        )
+    return "".join("," + x for x in partes)
+
+
+def _cortar(
+    video: Path,
+    destino: Path,
+    desde: int,
+    hasta: int,
+    crf: int,
+    preset: str,
+    marca: str = "",
+) -> str | None:
     """
     Corta [desde, hasta] por indice de cuadro. Devuelve el error si fallo.
 
@@ -61,7 +103,7 @@ def _cortar(video: Path, destino: Path, desde: int, hasta: int, crf: int, preset
     cmd = [
         "ffmpeg", "-v", "error", "-y",
         "-i", str(video),
-        "-vf", f"select='between(n\\,{desde}\\,{hasta})',setpts=N/FRAME_RATE/TB",
+        "-vf", f"select='between(n\\,{desde}\\,{hasta})',setpts=N/FRAME_RATE/TB{marca}",
         "-fps_mode", "vfr",
         "-c:v", "libx264", "-preset", preset, "-crf", str(crf),
         "-pix_fmt", "yuv420p", "-an",
@@ -80,6 +122,13 @@ def exportar(ctx: ExportContext) -> ExportResult:
     pad = int(ctx.opcion("pad", 0))
     crf = int(ctx.opcion("crf", 20))
     preset = ctx.opcion("preset", "veryfast")
+    marcar = bool(ctx.opcion("mark_fighter", True))
+    # Los mismos colores que el overlay de la aplicacion: quien anoto reconoce el rojo y el
+    # azul sin tener que aprender una convencion nueva para revisar.
+    color = {
+        FighterId.A: "0x%02X%02X%02X" % ROLE_COLOR_A,
+        FighterId.B: "0x%02X%02X%02X" % ROLE_COLOR_B,
+    }
 
     base = ctx.video_path.stem
     raiz = ctx.out_dir / "clips"
@@ -101,7 +150,19 @@ def exportar(ctx: ExportContext) -> ExportResult:
         # El nombre lleva los cuadros: mirando el archivo se sabe de donde salio.
         destino = carpeta / f"{base}_{ev.id}_{v.start_frame}_{v.end_frame}.mp4"
 
-        error = _cortar(ctx.video_path, destino, v.start_frame, v.end_frame, crf, preset)
+        marca = ""
+        sin_caja = 0
+        if marcar:
+            cajas = []
+            for f in range(v.start_frame, v.end_frame + 1):
+                pose = ctx.resolver.by_fighter(f)[ev.fighter]
+                cajas.append(None if pose is None else tuple(float(x) for x in pose.bbox))
+            sin_caja = sum(1 for c in cajas if c is None)
+            marca = _marca(cajas, color[ev.fighter])
+
+        error = _cortar(
+            ctx.video_path, destino, v.start_frame, v.end_frame, crf, preset, marca
+        )
         if error:
             fallidos += 1
             avisos.append(f"{ev.id}: {error}")
@@ -126,6 +187,7 @@ def exportar(ctx: ExportContext) -> ExportResult:
                 "completeness": ev.completeness.value,
                 "landed": ev.landed.value,
                 "quality": ev.quality.value,
+                "frames_sin_caja": sin_caja,
                 "notes": ev.notes,
             }
         )
@@ -141,6 +203,7 @@ def exportar(ctx: ExportContext) -> ExportResult:
 
     meta = base_metadata(ctx, "clips")
     meta["label_space"] = space.value
+    meta["mark_fighter"] = marcar
     meta["counts"] = {"clips": len(filas), "fallidos": fallidos, "descartados": descartados}
     meta["determinism"] = (
         "El corte es frame-exacto pero reencodea, asi que los bytes del mp4 dependen de la "

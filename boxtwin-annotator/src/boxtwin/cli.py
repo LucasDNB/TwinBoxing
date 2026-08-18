@@ -153,6 +153,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ex.add_argument("--crf", type=int, default=20)
     ex.add_argument("--preset", default="veryfast")
+    ex.add_argument(
+        "--no-mark-fighter", action="store_true",
+        help="no dibujar la caja del peleador anotado en los clips. Por defecto se dibuja: "
+             "los golpes se solapan y sin la marca el clip contiene el golpe del otro y la "
+             "etiqueta parece equivocada.",
+    )
 
     # -- reanno ------------------------------------------------------------
     rn = sub.add_parser(
@@ -345,6 +351,7 @@ def _cmd_export(args: argparse.Namespace) -> int:
             "channels": args.channels,
             "crf": args.crf,
             "preset": args.preset,
+            "mark_fighter": not args.no_mark_fighter,
         },
     )
 
