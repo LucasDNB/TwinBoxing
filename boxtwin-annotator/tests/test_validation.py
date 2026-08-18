@@ -207,6 +207,10 @@ def test_ignore_no_produce_colision(doc_rich: AnnotationDoc) -> None:
 
 
 def test_id_interp_too_long(doc_rich: AnnotationDoc) -> None:
+    # El umbral se fija en el test y no se hereda del default: la validacion tiene que probar
+    # la regla, no el valor que hoy trae el esquema. Antes dependia del default y el test se
+    # rompio al subirlo de 5 a 60.
+    doc_rich.settings_snapshot.interp_max_gap_frames = 10
     doc_rich.identity.interpolations.append(
         Interpolation(id="in_9001", role=TrackRole.B, from_track_id=1, to_track_id=2,
                       gap_start_frame=30000, gap_end_frame_excl=30012, gap_len=12,

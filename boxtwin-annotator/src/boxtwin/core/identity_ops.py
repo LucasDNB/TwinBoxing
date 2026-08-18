@@ -29,6 +29,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from boxtwin.core.annotations import new_id
+from boxtwin.core.identity import rol_de_track
 from boxtwin.core.interpolation import GapCandidate
 from boxtwin.core.schema import (
     AnnotationDoc,
@@ -55,6 +56,7 @@ __all__ = [
     "Reseed",
     "MarkUnreliable",
     "AcceptJoin",
+    "FillInternalGaps",
     "boundary_after",
 ]
 
@@ -408,3 +410,67 @@ class AcceptJoin(_SnapshotCommand):
                     created_at=origen.created_at,
                 ),
             ]
+
+
+@dataclass
+class FillInternalGaps(_SnapshotCommand):
+    """
+    Rellena de una vez los huecos internos de los tracks que ya son un peleador.
+
+    Va en lote y las uniones no, y la diferencia no es de comodidad. Unir dos tracks afirma
+    que dos ids son la misma persona, y equivocarse ahi mete keypoints del peleador
+    equivocado en el dataset sin que se vea en el overlay. Un hueco interno no afirma nada:
+    el id es el mismo a los dos lados, ya lo dijo el tracker, y lo unico que se agrega son
+    los cuadros del medio. El riesgo que justifica confirmar de a uno no existe aca, y sobre
+    material real son 253 huecos, o sea 253 confirmaciones que no deciden nada.
+
+    Solo toca tracks con rol de peleador: interpolar un track ignorado seria inventar pose
+    para alguien que se decidio dejar afuera. No duplica interpolaciones ya declaradas, asi
+    que correrlo dos veces es inofensivo.
+    """
+
+    candidatos: list[GapCandidate]
+    annotator: str = "desconocido"
+    label: str = ""
+    aplicados: int = 0
+    _antes: Identity | None = field(default=None, repr=False)
+
+    def __post_init__(self) -> None:
+        if not self.label:
+            self.label = f"rellenar {len(self.candidatos)} huecos internos"
+
+    def _aplicar(self, doc: AnnotationDoc) -> None:
+        ya = {(i.to_track_id, i.gap_start_frame) for i in doc.identity.interpolations}
+        ahora = datetime.now().astimezone()
+        nuevas: list[Interpolation] = []
+
+        for c in self.candidatos:
+            if not c.es_mismo_track:
+                raise ValueError(
+                    f"el candidato {c.from_track_id}->{c.to_track_id} une tracks distintos; "
+                    "eso es una afirmacion de identidad y va por AcceptJoin"
+                )
+            if c.gap_len <= 0 or (c.to_track_id, c.gap_start) in ya:
+                continue
+            rol = rol_de_track(doc, c.from_track_id, c.last_frame)
+            if rol not in (TrackRole.A, TrackRole.B):
+                continue
+            nuevas.append(
+                Interpolation(
+                    id=new_id(doc, "interpolation"),
+                    role=rol,
+                    from_track_id=c.from_track_id,
+                    to_track_id=c.to_track_id,
+                    gap_start_frame=c.gap_start,
+                    gap_end_frame_excl=c.gap_end_excl,
+                    gap_len=c.gap_len,
+                    method=InterpolationMethod.LINEAR,
+                    iou_at_join=c.iou,
+                    accepted_by=self.annotator,
+                    created_at=ahora,
+                )
+            )
+            ya.add((c.to_track_id, c.gap_start))
+
+        self.aplicados = len(nuevas)
+        doc.identity.interpolations = [*doc.identity.interpolations, *nuevas]

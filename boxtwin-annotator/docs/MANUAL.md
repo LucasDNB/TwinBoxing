@@ -135,18 +135,45 @@ los botones **= cuadro actual**, elegí peleador y motivo, y **Marcar tramo**.
 
 No borra la pose: la seguís viendo y juzgando. Solo la excluye del export por defecto.
 
+### Rellenar huecos internos
+
+Hacelo una vez al final, cuando ya asignaste todos los tracks.
+
+Un track no es continuo: el mismo id aparece, desaparece y vuelve. Sobre `Sparring.mp4` los
+42 tracks son en realidad 367 tramos, con 325 huecos de mediana 1 cuadro. En esos cuadros el
+peleador existe pero no tiene pose, y si el hueco cae dentro de un golpe, ese golpe se exporta
+incompleto.
+
+El panel muestra cuántos huecos quedan y cuántos cuadros son. **Rellenar huecos internos** los
+interpola todos de una vez.
+
+Va en lote y las uniones no, y la diferencia no es de comodidad. Unir dos tracks afirma que
+dos ids son la misma persona, y equivocarse mete keypoints del peleador equivocado en el
+dataset. Un hueco interno no afirma nada: el id es el mismo a los dos lados y lo único que se
+agrega son los cuadros del medio. No cambia ninguna asignación de rol.
+
+Solo toca tracks que ya son un peleador, ignora los huecos de más de 20 cuadros —ahí
+interpolar en línea recta sería inventar— y se puede apretar de nuevo sin duplicar nada.
+
+> Medido sobre la anotación real de `Sparring.mp4`: 243 huecos, 559 cuadros. La cobertura de
+> "los dos peleadores presentes" sube de 76,7% a 84,9%, y de los 118 eventos anotados **28
+> tenían cuadros sin pose del peleador anotado; después quedan cero**.
+
 ### Unir tracks
 
 **Buscar tracks para unir** propone pares que podrían ser la misma persona, ordenados por
 parecido de caja. Se confirman de a uno, porque en un clinch las cajas de los dos peleadores
 se superponen casi por completo y ahí es donde la heurística se equivoca.
 
-> **Límite conocido.** El detector solo mira tracks consecutivos separados por hasta 5
-> cuadros. Sobre material real de sparring los tracks suelen **solaparse en el tiempo**
-> (BoT-SORT mantiene vivo el perdido mientras nace el nuevo) y los huecos son de 6 a 60
-> cuadros. Medido sobre `Sparring.mp4`: 68 pares se solapan, 29 tienen huecos de 6 a 60, y
-> solo 2 caen en el rango que el detector mira. En la práctica **va a proponer cero uniones
-> y los tracks hay que asignarlos a mano**.
+No propone unir dos tracks que ya asignaste a peleadores distintos en el cuadro donde se
+unirían. Ojo con el matiz: un mismo track puede ser fighter_B un rato y fighter_A después, que
+es justo lo que deja un swap, así que el filtro mira el cuadro de la unión y no el track
+entero.
+
+> El umbral de hueco por defecto es de 60 cuadros. Con los 5 de la versión anterior el
+> detector proponía **cero** uniones sobre material real. El valor queda congelado en cada
+> `annot.json`, así que un proyecto empezado antes de este cambio conserva el 5: se cambia
+> editando `settings_snapshot.interp_max_gap_frames` en el archivo.
 
 Todo esto se deshace con `Ctrl+Z`.
 
@@ -317,7 +344,14 @@ python tools/render_overlay.py videos/Sparring.mp4 --from 0 --to 500 --fps 8
 
 ## 12. Límites conocidos
 
-- **El detector de uniones de tracks no sirve sobre material real.** Ver la sección 5.
+- **El detector de uniones propone poco.** Sobre `Sparring.mp4` da 3 propuestas correctas en
+  todo el video, así que el grueso de la asignación de tracks sigue siendo manual. Lo que sí
+  rinde es el relleno de huecos internos; ver la sección 5.
+- **El validador cuenta colisiones de rol que no existen.** `ID_ROLE_COLLISION` compara solo
+  los rangos de las asignaciones, sin mirar si los dos tracks tienen detecciones en esos
+  cuadros. Como al asignar un track el anterior no se trunca, los rangos se solapan y salen
+  errores de a decenas. Medido sobre la anotación real: **147 colisiones, 0 cuadros y 0
+  eventos afectados**. Son ruido, no datos rotos.
 - **La guardia arranca en ortodoxa para los dos peleadores.** Si alguno es zurdo, hay que
   cambiarlo antes de anotar, porque de ahí se deriva el rol lead/rear en el export.
 - **`landed` es una estimación.** Un sistema monocular no establece contacto físico; el

@@ -54,6 +54,7 @@ class IdentityPanel(QWidget):
     marcarTramo = Signal(object, int, int, object)  # fighter, ini, fin_excl, motivo
     aceptarUnion = Signal(object, object)  # GapCandidate, TrackRole
     buscarUniones = Signal()
+    rellenarInternos = Signal()
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -129,6 +130,26 @@ class IdentityPanel(QWidget):
         f.addRow(b_marcar)
         raiz.addWidget(g_tramo)
 
+        # -- huecos internos
+        #
+        # Grupo aparte de las uniones, y no es cosmetica. Las uniones piden una decision de
+        # identidad y se confirman de a una; esto rellena cuadros que faltan dentro de un
+        # track que ya es un peleador, no decide nada, y por eso puede ir en un solo boton.
+        # Mezclarlos en la misma lista invitaria a aplicar las uniones con el mismo criterio.
+        g_int = QGroupBox("Huecos internos de los tracks")
+        v = QVBoxLayout(g_int)
+        self.lbl_internos = QLabel("sin analizar")
+        self.lbl_internos.setWordWrap(True)
+        v.addWidget(self.lbl_internos)
+        self.b_internos = QPushButton("Rellenar huecos internos")
+        self.b_internos.setToolTip(
+            "Interpola los cuadros que faltan dentro de un mismo track.\n"
+            "No cambia ninguna asignacion de rol y se puede deshacer."
+        )
+        self.b_internos.clicked.connect(self.rellenarInternos.emit)
+        v.addWidget(self.b_internos)
+        raiz.addWidget(g_int)
+
         # -- uniones propuestas
         g_union = QGroupBox("Uniones propuestas")
         v = QVBoxLayout(g_union)
@@ -177,6 +198,16 @@ class IdentityPanel(QWidget):
             )
         if not candidatos:
             self.lista_uniones.addItem("no hay tracks compatibles para unir")
+
+    def set_internos(self, pendientes: int, cuadros: int) -> None:
+        """Cuantos huecos internos quedan por rellenar y cuantos cuadros recuperan."""
+        if pendientes:
+            self.lbl_internos.setText(
+                f"{pendientes} huecos sin rellenar, {cuadros} cuadros de pose que faltan"
+            )
+        else:
+            self.lbl_internos.setText("sin huecos pendientes")
+        self.b_internos.setEnabled(bool(pendientes))
 
     def set_modo_dibujo(self, activo: bool, rol: TrackRole | None = None) -> None:
         self.lbl_modo.setText(

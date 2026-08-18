@@ -39,6 +39,7 @@ USO
 from __future__ import annotations
 
 from bisect import bisect_right
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -48,7 +49,38 @@ from boxtwin.core.posecache import PoseCache, PoseDetections
 from boxtwin.core.schema import AnnotationDoc, Interpolation
 from boxtwin.core.types import FighterId, TrackRole
 
-__all__ = ["ResolvedPose", "IdentityResolver"]
+__all__ = ["ResolvedPose", "IdentityResolver", "rol_de_track", "rol_en_track"]
+
+
+def rol_de_track(doc: AnnotationDoc, track_id: int, frame: int) -> TrackRole | None:
+    """El rol de un track en un cuadro, o None si ningun assignment lo cubre."""
+    for a in doc.identity.assignments:
+        if a.track_id == track_id and a.covers(frame):
+            return a.role
+    return None
+
+
+def rol_en_track(doc: AnnotationDoc) -> Callable[[int, int], TrackRole | None]:
+    """
+    Consulta indexada de "que rol tiene este track en este cuadro".
+
+    El cuadro no es un detalle. Un mismo track_id puede ser fighter_A un rato y fighter_B
+    despues, y no es un error: es exactamente lo que deja un swap, que existe porque el
+    tracker le puso el mismo id a dos personas distintas. La primera version de esto colapsaba
+    los roles de cada track en un conjunto sin mirar cuando, y sobre Sparring.mp4 eso hacia
+    que los tracks 3 y 12 figuraran los dos como {A, B} y no filtrara nada.
+    """
+    por_track: dict[int, list[tuple[int, int, TrackRole]]] = {}
+    for a in doc.identity.assignments:
+        por_track.setdefault(a.track_id, []).append((a.start_frame, a.end_frame_excl, a.role))
+
+    def consultar(track_id: int, frame: int) -> TrackRole | None:
+        for ini, fin, rol in por_track.get(track_id, ()):
+            if ini <= frame < fin:
+                return rol
+        return None
+
+    return consultar
 
 
 @dataclass(frozen=True)

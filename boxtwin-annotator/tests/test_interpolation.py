@@ -14,10 +14,13 @@ import pytest
 from boxtwin.core.interpolation import (
     GapCandidate,
     detectar_huecos,
+    detectar_huecos_internos,
     interpolar_tramo,
     iou,
+    tramos,
 )
 from boxtwin.core.posecache import N_KEYPOINTS, FrameStatus, PoseArrays, PoseCache
+from boxtwin.core.types import TrackRole
 
 
 def cache_con(por_frame: dict[int, list[tuple[int, tuple[float, float, float, float]]]],
@@ -196,3 +199,124 @@ def test_falla_si_los_tracks_no_estan_donde_dice() -> None:
     malo = GapCandidate(from_track_id=99, to_track_id=2, last_frame=0, first_frame=4, iou=0.9)
     with pytest.raises(ValueError):
         interpolar_tramo(cache, malo)
+
+
+# -- tramos contiguos ------------------------------------------------------
+
+
+def test_tramos_parte_un_track_agujereado() -> None:
+    """
+    Un track no es un intervalo. Con track_buffer alto el mismo id aparece, desaparece y
+    vuelve, y mirar solo el primer y ultimo cuadro finge una continuidad que no existe.
+    """
+    por_frame = {f: [(1, CAJA)] for f in list(range(0, 5)) + list(range(8, 12))}
+    assert tramos(cache_con(por_frame, 12)) == {1: [(0, 4), (8, 11)]}
+
+
+def test_tramos_de_un_track_continuo_es_uno_solo() -> None:
+    por_frame = {f: [(1, CAJA)] for f in range(0, 10)}
+    assert tramos(cache_con(por_frame, 10)) == {1: [(0, 9)]}
+
+
+# -- huecos internos -------------------------------------------------------
+
+
+def test_detecta_hueco_interno_del_mismo_track() -> None:
+    por_frame = {f: [(1, CAJA)] for f in list(range(0, 6)) + list(range(9, 15))}
+    cands = detectar_huecos_internos(cache_con(por_frame, 15))
+    assert len(cands) == 1
+    c = cands[0]
+    assert (c.from_track_id, c.to_track_id) == (1, 1)
+    assert c.es_mismo_track
+    assert (c.last_frame, c.first_frame) == (5, 9)
+    assert c.gap_len == 3
+
+
+def test_hueco_interno_respeta_el_tope() -> None:
+    por_frame = {f: [(1, CAJA)] for f in list(range(0, 6)) + list(range(40, 45))}
+    assert detectar_huecos_internos(cache_con(por_frame, 45), max_gap=20) == []
+    assert len(detectar_huecos_internos(cache_con(por_frame, 45), max_gap=40)) == 1
+
+
+def test_hueco_interno_no_mira_otros_tracks() -> None:
+    """Un track que termina y otro que empieza es una union, no un hueco interno."""
+    por_frame = {f: [(1, CAJA)] for f in range(0, 6)}
+    por_frame.update({f: [(2, CAJA)] for f in range(9, 15)})
+    assert detectar_huecos_internos(cache_con(por_frame, 15)) == []
+
+
+def test_uniones_no_devuelven_huecos_internos() -> None:
+    """La simetrica: el detector de uniones nunca propone unir un track consigo mismo."""
+    por_frame = {f: [(1, CAJA)] for f in list(range(0, 6)) + list(range(9, 15))}
+    cands = detectar_huecos(cache_con(por_frame, 15), max_gap=20)
+    assert all(not c.es_mismo_track for c in cands)
+
+
+def test_hueco_interno_con_salto_absurdo_se_descarta() -> None:
+    lejos = (800.0, 100.0, 900.0, 300.0)
+    por_frame = {f: [(1, CAJA)] for f in range(0, 6)}
+    por_frame.update({f: [(1, lejos)] for f in range(9, 15)})
+    assert detectar_huecos_internos(cache_con(por_frame, 15), min_iou=0.2) == []
+
+
+def test_interpola_un_hueco_interno() -> None:
+    """from == to tiene que funcionar en la interpolacion, no solo en la deteccion."""
+    por_frame = {f: [(1, CAJA)] for f in list(range(0, 6)) + list(range(9, 15))}
+    cache = cache_con(por_frame, 15)
+    (c,) = detectar_huecos_internos(cache)
+    filas = interpolar_tramo(cache, c)
+    assert [f for f, *_ in filas] == [6, 7, 8]
+
+
+# -- filtro por rol --------------------------------------------------------
+
+
+def test_no_propone_unir_dos_peleadores_distintos() -> None:
+    """
+    En un clinch las cajas de los dos boxeadores se superponen y la geometria no distingue
+    una union buena de una que fusionaria a las dos personas. Lo que las distingue es que el
+    anotador ya dijo de quien es cada track.
+    """
+    por_frame = {f: [(1, CAJA)] for f in range(0, 11)}
+    por_frame.update({f: [(2, CAJA)] for f in range(14, 20)})
+    cache = cache_con(por_frame, 20)
+    roles = {1: TrackRole.A, 2: TrackRole.B}
+
+    assert len(detectar_huecos(cache, max_gap=5)) == 1
+    assert detectar_huecos(cache, max_gap=5, rol_en=lambda t, f: roles[t]) == []
+
+
+def test_si_coinciden_en_el_cuadro_de_union_si_se_propone() -> None:
+    """
+    El rol se consulta en el cuadro donde se unirian, no en abstracto. Un track puede ser
+    fighter_B al principio y fighter_A despues, que es lo que deja un swap; colapsarlo a un
+    conjunto de roles hace que el filtro no filtre nada. Caso real de Sparring.mp4: el track
+    3 es B hasta el cuadro 614 y A despues, y se une con el 12 en el 829 siendo los dos A.
+    """
+    por_frame = {f: [(1, CAJA)] for f in range(0, 11)}
+    por_frame.update({f: [(2, CAJA)] for f in range(14, 20)})
+    cache = cache_con(por_frame, 20)
+
+    def rol_en(track: int, frame: int) -> TrackRole:
+        if track == 1:
+            return TrackRole.B if frame < 5 else TrackRole.A
+        return TrackRole.A
+
+    assert len(detectar_huecos(cache, max_gap=5, rol_en=rol_en)) == 1
+
+
+def test_un_track_sin_rol_no_bloquea_la_propuesta() -> None:
+    """Sin assignment no hay afirmacion que contradecir, asi que se propone igual."""
+    por_frame = {f: [(1, CAJA)] for f in range(0, 11)}
+    por_frame.update({f: [(2, CAJA)] for f in range(14, 20)})
+    cache = cache_con(por_frame, 20)
+    roles = {1: TrackRole.A, 2: None}
+    assert len(detectar_huecos(cache, max_gap=5, rol_en=lambda t, f: roles[t])) == 1
+
+
+def test_ignore_no_cuenta_como_peleador_para_el_filtro() -> None:
+    por_frame = {f: [(1, CAJA)] for f in range(0, 11)}
+    por_frame.update({f: [(2, CAJA)] for f in range(14, 20)})
+    cache = cache_con(por_frame, 20)
+    roles = {1: TrackRole.A, 2: TrackRole.IGNORE}
+    assert len(detectar_huecos(cache, max_gap=5, rol_en=lambda t, f: roles[t])) == 1

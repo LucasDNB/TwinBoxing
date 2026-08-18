@@ -558,7 +558,11 @@ class SettingsSnapshot(BoxTwinModel):
     anotaron bajo otro criterio y hay que poder saberlo sin adivinar por fecha.
     """
 
-    interp_max_gap_frames: int = Field(default=5, gt=0)
+    # 60 y no 5. Con 5 el detector de uniones no propone nada: medido sobre Sparring.mp4
+    # (5531 cuadros, 42 tracks) da 0 candidatos con hueco <= 5 y 3 correctos con hueco <= 60,
+    # porque BoT-SORT con track_buffer 120 recupera al peleador bastante despues de perderlo.
+    # Evidencia de un solo video, asi que es un default, no una constante del dominio.
+    interp_max_gap_frames: int = Field(default=60, gt=0)
     interp_min_iou: Unit = 0.5
     kp_score_threshold: Unit = 0.3
     event_max_duration_frames: int = Field(default=40, gt=0)

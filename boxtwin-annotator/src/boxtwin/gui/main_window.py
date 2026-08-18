@@ -49,11 +49,13 @@ from boxtwin.core.metrics import ActiveTimeTracker, EventTimer, new_session_metr
 from boxtwin.core.identity_ops import (
     AcceptJoin,
     AssignRole,
+    FillInternalGaps,
     MarkUnreliable,
     Reseed,
     SwapFromFrame,
 )
-from boxtwin.core.interpolation import detectar_huecos, iou
+from boxtwin.core.identity import rol_en_track
+from boxtwin.core.interpolation import detectar_huecos, detectar_huecos_internos, iou
 from boxtwin.core.types import FighterId, IssueLevel, TrackRole
 from boxtwin.core.undo import AddEvent, DeleteEvent, EditEvent
 from boxtwin.core.reanno import ReannoTrial, TrialLabels, cargar as cargar_reanno
@@ -133,6 +135,7 @@ class MainWindow(QMainWindow):
         self.identidad.marcarTramo.connect(self._marcar_tramo)
         self.identidad.buscarUniones.connect(self._buscar_uniones)
         self.identidad.aceptarUnion.connect(self._aceptar_union)
+        self.identidad.rellenarInternos.connect(self._rellenar_internos)
         self.view.boxDrawn.connect(self._caja_dibujada)
         self.reanno.empezar.connect(self._reanno_empezar)
         self.reanno.siguiente.connect(self._reanno_siguiente)
@@ -569,7 +572,10 @@ class MainWindow(QMainWindow):
     def _buscar_uniones(self) -> None:
         st = self.session.doc.settings_snapshot
         candidatos = detectar_huecos(
-            self.session.cache, max_gap=st.interp_max_gap_frames, min_iou=st.interp_min_iou
+            self.session.cache,
+            max_gap=st.interp_max_gap_frames,
+            min_iou=st.interp_min_iou,
+            rol_en=rol_en_track(self.session.doc),
         )
         self.identidad.set_candidatos(candidatos)
         self.statusBar().showMessage(f"{len(candidatos)} uniones propuestas", 3000)
@@ -579,6 +585,47 @@ class MainWindow(QMainWindow):
             AcceptJoin(candidato=candidato, role=rol, annotator=self.session.annotator)
         ):
             self._buscar_uniones()
+
+    def _huecos_internos_pendientes(self):
+        """Los huecos internos que todavia no tienen interpolacion declarada."""
+        ya = {
+            (i.to_track_id, i.gap_start_frame)
+            for i in self.session.doc.identity.interpolations
+        }
+        rol_en = rol_en_track(self.session.doc)
+        return [
+            c
+            for c in detectar_huecos_internos(self.session.cache)
+            if (c.to_track_id, c.gap_start) not in ya
+            and rol_en(c.from_track_id, c.last_frame) in (TrackRole.A, TrackRole.B)
+        ]
+
+    def _refrescar_internos(self) -> None:
+        pend = self._huecos_internos_pendientes()
+        self.identidad.set_internos(len(pend), sum(c.gap_len for c in pend))
+
+    def _rellenar_internos(self) -> None:
+        pend = self._huecos_internos_pendientes()
+        if not pend:
+            return
+        cuadros = sum(c.gap_len for c in pend)
+        if (
+            QMessageBox.question(
+                self,
+                "Rellenar huecos internos",
+                f"Se van a interpolar {cuadros} cuadros en {len(pend)} huecos.\n\n"
+                "Son huecos dentro de un mismo track, así que no cambia ninguna asignación "
+                "de rol. Los cuadros quedan marcados como interpolados y el export decide "
+                "si los usa. Se puede deshacer con Ctrl+Z.",
+            )
+            != QMessageBox.StandardButton.Yes
+        ):
+            return
+        comando = FillInternalGaps(candidatos=pend, annotator=self.session.annotator)
+        if self._aplicar_identidad(comando):
+            self.statusBar().showMessage(
+                f"{comando.aplicados} huecos rellenados, {cuadros} cuadros interpolados", 5000
+            )
 
     # -- reanotacion ciega -------------------------------------------------
 
@@ -741,6 +788,7 @@ class MainWindow(QMainWindow):
         self.timeline.set_unreliable(doc.unreliable_segments)
         self.timeline.set_selected(self._seleccionado)
         self._pintar_issues()
+        self._refrescar_internos()
         self._sucio = True
         self._refresh_status()
 

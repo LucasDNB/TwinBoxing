@@ -16,12 +16,13 @@ from boxtwin.core.identity import IdentityResolver
 from boxtwin.core.identity_ops import (
     AcceptJoin,
     AssignRole,
+    FillInternalGaps,
     MarkUnreliable,
     Reseed,
     SwapFromFrame,
     boundary_after,
 )
-from boxtwin.core.interpolation import GapCandidate
+from boxtwin.core.interpolation import GapCandidate, detectar_huecos_internos
 from boxtwin.core.posecache import N_KEYPOINTS, FrameStatus, PoseArrays, PoseCache
 from boxtwin.core.schema import AnnotationDoc
 from boxtwin.core.types import FighterId, TrackRole, UnreliableReason
@@ -327,3 +328,89 @@ def test_una_interpolacion_rota_no_rompe_la_lectura(doc: AnnotationDoc, pila: Un
     pila.do(AcceptJoin(candidato=cand, role=TrackRole.A))
     res = IdentityResolver(doc, cache_con({}, 10))
     assert res.resolve_frame(2) == []
+
+
+# -- relleno de huecos internos --------------------------------------------
+
+
+def cache_agujereado() -> PoseCache:
+    """El track 1 se ve en 0-5 y en 9-14; faltan 6, 7 y 8."""
+    por_frame = {f: [(1, CAJA)] for f in list(range(0, 6)) + list(range(9, 15))}
+    return cache_con(por_frame, 15)
+
+
+def test_rellenar_huecos_internos(doc: AnnotationDoc, pila: UndoStack) -> None:
+    cache = cache_agujereado()
+    asignar(pila, 1, TrackRole.A, 0, 15)
+    pila.do(FillInternalGaps(candidatos=detectar_huecos_internos(cache)))
+
+    assert len(doc.identity.interpolations) == 1
+    interp = doc.identity.interpolations[0]
+    assert (interp.from_track_id, interp.to_track_id) == (1, 1)
+    assert (interp.gap_start_frame, interp.gap_end_frame_excl) == (6, 9)
+    assert interp.role is TrackRole.A
+
+
+def test_los_cuadros_rellenados_aparecen_en_el_resolver(
+    doc: AnnotationDoc, pila: UndoStack
+) -> None:
+    """
+    El unico test que prueba lo que importa. Que se escriba el registro no sirve de nada si
+    el cuadro sigue sin pose al leerlo.
+    """
+    cache = cache_agujereado()
+    asignar(pila, 1, TrackRole.A, 0, 15)
+
+    res = IdentityResolver(doc, cache)
+    assert res.by_fighter(7)[FighterId.A] is None
+
+    pila.do(FillInternalGaps(candidatos=detectar_huecos_internos(cache)))
+    res = IdentityResolver(doc, cache)
+    pose = res.by_fighter(7)[FighterId.A]
+    assert pose is not None
+    assert pose.interpolated
+
+
+def test_deshacer_el_relleno(doc: AnnotationDoc, pila: UndoStack) -> None:
+    cache = cache_agujereado()
+    asignar(pila, 1, TrackRole.A, 0, 15)
+    pila.do(FillInternalGaps(candidatos=detectar_huecos_internos(cache)))
+    pila.undo()
+    assert doc.identity.interpolations == []
+
+
+def test_no_rellena_tracks_sin_rol_de_peleador(doc: AnnotationDoc, pila: UndoStack) -> None:
+    """Interpolar un track ignorado seria inventar pose para alguien que se dejo afuera."""
+    cache = cache_agujereado()
+    asignar(pila, 1, TrackRole.IGNORE, 0, 15)
+    pila.do(FillInternalGaps(candidatos=detectar_huecos_internos(cache)))
+    assert doc.identity.interpolations == []
+
+
+def test_no_rellena_tracks_sin_asignar(doc: AnnotationDoc, pila: UndoStack) -> None:
+    cache = cache_agujereado()
+    pila.do(FillInternalGaps(candidatos=detectar_huecos_internos(cache)))
+    assert doc.identity.interpolations == []
+
+
+def test_rellenar_dos_veces_no_duplica(doc: AnnotationDoc, pila: UndoStack) -> None:
+    """Se puede apretar el boton de nuevo sin pensar: es idempotente."""
+    cache = cache_agujereado()
+    asignar(pila, 1, TrackRole.A, 0, 15)
+    cands = detectar_huecos_internos(cache)
+    pila.do(FillInternalGaps(candidatos=cands))
+    segundo = FillInternalGaps(candidatos=cands)
+    pila.do(segundo)
+    assert segundo.aplicados == 0
+    assert len(doc.identity.interpolations) == 1
+
+
+def test_rechaza_candidatos_entre_tracks_distintos(doc: AnnotationDoc, pila: UndoStack) -> None:
+    """
+    Unir dos tracks afirma que son la misma persona y eso se confirma de a uno, por AcceptJoin.
+    Colar una union en el lote saltearia esa confirmacion.
+    """
+    asignar(pila, 1, TrackRole.A, 0, 15)
+    union = GapCandidate(from_track_id=1, to_track_id=2, last_frame=5, first_frame=9, iou=0.9)
+    with pytest.raises(ValueError, match="tracks distintos"):
+        pila.do(FillInternalGaps(candidatos=[union]))
