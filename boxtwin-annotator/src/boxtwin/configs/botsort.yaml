@@ -16,9 +16,17 @@
 #
 # gmc_method sparseOptFlow. Compensacion de movimiento global, para camara en mano.
 #
-# Lo que NO esta medido: si el ReID efectivamente reduce los intercambios de identidad.
-# Eso necesita ground truth de identidad, que es justamente lo que el anotador va a
-# producir. Queda como pregunta abierta para medir con el primer video anotado.
+# MEDIDO el 18-08-2026 sobre Sparring.mp4 anotado, contra las 66 asignaciones manuales como
+#   ground truth: el ReID NO reduce los cambios de identidad. Con ReID 31, sin ReID 29, y la
+#   corrida con ReID reproduce exactamente el cache original, asi que la comparacion es
+#   limpia. La diferencia de 2 sobre 31 es ruido con un solo video; lo que se puede afirmar
+#   es que no hay beneficio, y que cuesta 4,4% mas de tiempo.
+#
+#   Se deja activado igual. La explicacion mas probable del cero es la resolucion: a 640x360
+#   dos boxeadores con ropa parecida no dejan senal de apariencia, el encoder corre pero no
+#   tiene con que discriminar. Falta rehacerlo sobre 1080p, que es donde podria servir.
+#   Detalle en docs/experiments/2026-08-18-reid.md, se reproduce con
+#   tools/comparar_tracker.py.
 
 tracker_type: botsort
 
