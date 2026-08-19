@@ -263,3 +263,45 @@ def test_shards_no_contiguos_fallan(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="no contiguos"):
         w.finalize(tmp_path / "roto.npz", {"counts": {}}, total_frames=8)
+
+
+# -- costuras por corte de plano -------------------------------------------
+
+
+def test_cut_seam_desplaza_los_ids_y_deja_constancia(tmp_path) -> None:
+    """
+    Reiniciar el tracker hace que los ids arranquen de cero otra vez. Sin el desplazamiento,
+    el track 1 del plano nuevo se confundiria con el track 1 del anterior, que es otra
+    persona, y la costura es lo unico que despues permite saber que ahi hubo un corte.
+    """
+    from boxtwin.preprocess.writer import ShardWriter
+
+    w = ShardWriter(tmp_path / "w", video_sha256="a" * 64, config_hash="b" * 64,
+                    n_frames_expected=100)
+    assert w.id_offset == 0
+    w.state.max_track_id = 7
+
+    w.cut_seam(40)
+    assert w.id_offset == 7
+    assert w.state.seams == [{"frame": 40, "id_offset": 7}]
+
+    w.state.max_track_id = 12
+    w.cut_seam(80)
+    assert w.id_offset == 12
+    assert [s["frame"] for s in w.state.seams] == [40, 80]
+
+
+def test_los_cortes_entran_en_el_hash_de_configuracion() -> None:
+    """
+    Cambiarlos mueve donde se reinicia el tracker y por lo tanto los track_id. Si no entraran
+    al hash, dos caches incompatibles pasarian por la misma configuracion y la reanudacion
+    mezclaria los dos.
+    """
+    from boxtwin.preprocess.runner import PreprocessConfig
+
+    a = PreprocessConfig()
+    b = PreprocessConfig(detect_cuts=False)
+    c = PreprocessConfig(cut_threshold=0.5)
+    h = lambda cfg: cfg.config_hash("tracker: x", "sha")  # noqa: E731
+    assert h(a) != h(b)
+    assert h(a) != h(c)

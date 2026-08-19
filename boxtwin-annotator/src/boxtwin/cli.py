@@ -72,6 +72,13 @@ def build_parser() -> argparse.ArgumentParser:
     pre.add_argument("--tracker", type=Path, default=None, help="yaml de BoT-SORT")
     pre.add_argument("--shard-frames", type=int, default=None)
     pre.add_argument("--no-proxy", action="store_true", help="no generar el proxy")
+    pre.add_argument(
+        "--no-detect-cuts", action="store_true",
+        help="no detectar cortes de plano. Por defecto se detectan y el tracker se "
+             "reinicia en cada uno: sin eso, en una transmision con varias camaras la "
+             "identidad se arrastra entre planos y le pone a un peleador el cuerpo del otro.",
+    )
+    pre.add_argument("--cut-threshold", type=float, default=0.3)
     pre.add_argument("--proxy-width", type=int, default=960)
     pre.add_argument(
         "--restart", action="store_true",
@@ -267,6 +274,8 @@ def _cmd_preprocess(args: argparse.Namespace) -> int:
         tracker=args.tracker or default_tracker_path(),
         make_proxy=not args.no_proxy,
         proxy_width=args.proxy_width,
+        detect_cuts=not args.no_detect_cuts,
+        cut_threshold=args.cut_threshold,
     )
     if args.shard_frames:
         cfg.shard_frames = args.shard_frames
@@ -279,7 +288,10 @@ def _cmd_preprocess(args: argparse.Namespace) -> int:
     print(f"modelo   : {cfg.model}  imgsz={cfg.imgsz} device={cfg.device} half={cfg.half}")
     print(f"tracker  : {cfg.tracker}")
 
-    r = preprocess(args.video, proyecto, cfg, restart=args.restart, force=args.force, on_progress=barra)
+    r = preprocess(
+        args.video, proyecto, cfg, restart=args.restart, force=args.force,
+        on_progress=barra,
+    )
     barra(None, None)
 
     fps_efectivo = r.total_frames / r.runtime_s if r.runtime_s else 0.0

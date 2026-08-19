@@ -75,6 +75,11 @@ class PreprocessConfig:
     device: str = "0"
     half: bool = False
     tracker: Path = field(default_factory=default_tracker_path)
+    # Detectar cortes de plano y reiniciar el tracker en cada uno. Sobre camara fija no
+    # encuentra ninguno y no cuesta nada; sobre transmision es lo que evita que la
+    # identidad se arrastre entre camaras.
+    detect_cuts: bool = True
+    cut_threshold: float = 0.3
     shard_frames: int = SHARD_FRAMES
     make_proxy: bool = True
     proxy_width: int = 960
@@ -92,6 +97,10 @@ class PreprocessConfig:
             "iou": self.iou,
             "half": self.half,
             "tracker_config": tracker_text,
+            # Cambiarlas cambia donde se reinicia el tracker y por lo tanto los track_id:
+            # dos corridas con distinto valor no son la misma configuracion.
+            "detect_cuts": self.detect_cuts,
+            "cut_threshold": self.cut_threshold,
         }
 
     def config_hash(self, tracker_text: str, model_sha: str) -> str:
@@ -224,6 +233,13 @@ def preprocess(
     )
     inicio = writer.resume_from()
 
+    cortes: list[int] = []
+    if cfg.detect_cuts:
+        from boxtwin.preprocess.cuts import detectar_cortes
+
+        cortes = detectar_cortes(video, fps=info.fps, umbral=cfg.cut_threshold)
+    pendientes = [c for c in cortes if c > inicio]
+
     proxy_job = None
     if cfg.make_proxy:
         proxy_job = ProxyJob(
@@ -253,6 +269,15 @@ def preprocess(
             ok, frame = cap.read()
             if not ok:
                 break
+
+            if pendientes and frame_idx >= pendientes[0]:
+                # El corte se declara ANTES de inferir el primer cuadro del plano nuevo: si
+                # se infiriera primero, ese cuadro ya se habria asociado con los tracks del
+                # plano anterior, que es exactamente lo que se quiere evitar.
+                _reiniciar_tracker(modelo)
+                writer.cut_seam(frame_idx)
+                while pendientes and pendientes[0] <= frame_idx:
+                    pendientes.pop(0)
 
             dets, sin_track = _inferir(modelo, frame, cfg)
             n_untracked += sin_track
@@ -292,6 +317,12 @@ def preprocess(
         proxy_path=proxy_path if proxy_ok else None, estimado=estimado,
         short_decode=short_decode, total_frames=total_frames,
     )
+    meta["scene_cuts"] = {
+        "detectados": cfg.detect_cuts,
+        "umbral": cfg.cut_threshold,
+        "n": len(cortes),
+        "frames": cortes,
+    }
 
     writer.finalize(npz_path, meta, total_frames=total_frames)
 
@@ -346,6 +377,28 @@ def _cargar_modelo(path: Path, cfg: PreprocessConfig):
 
     modelo = YOLO(str(path))
     return modelo
+
+
+def _reiniciar_tracker(modelo) -> None:
+    """
+    Vacia el estado del tracker sin recrear el modelo.
+
+    Recrear el modelo costaria cargar los pesos de nuevo en cada corte, y en una transmision
+    profesional son decenas por round. `reset()` existe en BYTETracker y en BOTSORT; si una
+    version futura lo saca, se avisa en vez de seguir en silencio con la identidad arrastrada.
+    """
+    trackers = getattr(getattr(modelo, "predictor", None), "trackers", None) or []
+    if not trackers:
+        return
+    for t in trackers:
+        reset = getattr(t, "reset", None)
+        if reset is None:
+            raise RuntimeError(
+                "el tracker de esta version de ultralytics no tiene reset(); sin eso la "
+                "identidad se arrastra a traves de los cortes de plano. Correr con "
+                "--no-detect-cuts si se acepta ese riesgo."
+            )
+        reset()
 
 
 def _inferir(modelo, frame, cfg: PreprocessConfig) -> tuple[FrameDetections, int]:

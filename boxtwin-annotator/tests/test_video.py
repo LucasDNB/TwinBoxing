@@ -142,3 +142,69 @@ def test_sha256_es_estable_y_sensible(tmp_path: Path) -> None:
     assert sha256_file(a) == sha256_file(a)
     assert sha256_file(a) != sha256_file(b)
     assert len(sha256_file(a)) == 64
+
+
+# -- deteccion de cortes de plano ------------------------------------------
+
+
+def test_detectar_cortes_encuentra_los_pegados(tmp_path) -> None:
+    """
+    Control con la respuesta conocida: tres clips distintos pegados tienen dos cortes. Un
+    umbral sin control no informa nada, que es la leccion que dejo el detector de placas de
+    BoxingVI marcando 528 falsos positivos.
+    """
+    import shutil
+    import subprocess
+
+    import pytest
+
+    if shutil.which("ffmpeg") is None:
+        pytest.skip("sin ffmpeg")
+
+    from boxtwin.preprocess.cuts import detectar_cortes
+
+    # Fuentes con textura y no colores planos: un color solido es un caso patologico para
+    # la deteccion de escena y no se parece en nada a video real. Con colores planos este
+    # mismo control encontraba 1 de 2 cortes.
+    partes = []
+    for i, fuente in enumerate(("testsrc", "smptebars", "rgbtestsrc")):
+        f = tmp_path / f"p{i}.mp4"
+        subprocess.run(
+            ["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi",
+             "-i", f"{fuente}=s=160x120:d=1:r=10", "-pix_fmt", "yuv420p", str(f)],
+            check=True,
+        )
+        partes.append(f)
+    lista = tmp_path / "l.txt"
+    lista.write_text("".join(f"file '{p}'\n" for p in partes))
+    pegado = tmp_path / "pegado.mp4"
+    subprocess.run(
+        ["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0",
+         "-i", str(lista), "-c", "copy", str(pegado)],
+        check=True,
+    )
+
+    cortes = detectar_cortes(pegado, fps=10.0)
+    assert len(cortes) == 2, cortes
+    # Caen donde empieza cada clip nuevo, con tolerancia de un cuadro por el redondeo.
+    assert all(abs(c - esperado) <= 1 for c, esperado in zip(cortes, (10, 20)))
+
+
+def test_una_sola_toma_no_tiene_cortes(tmp_path) -> None:
+    import shutil
+    import subprocess
+
+    import pytest
+
+    if shutil.which("ffmpeg") is None:
+        pytest.skip("sin ffmpeg")
+
+    from boxtwin.preprocess.cuts import detectar_cortes
+
+    f = tmp_path / "uno.mp4"
+    subprocess.run(
+        ["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi",
+         "-i", "testsrc=s=160x120:d=3:r=10", "-pix_fmt", "yuv420p", str(f)],
+        check=True,
+    )
+    assert detectar_cortes(f, fps=10.0) == []

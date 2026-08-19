@@ -113,6 +113,21 @@ Conviene recorrer el video de principio a fin asignando cada track ámbar que ap
 timeline no marca dónde aparecen los tracks nuevos, así que el método es avanzar de a
 segundo con `Ctrl+→` mirando el color.
 
+### Cortes de cámara
+
+En el timeline aparecen marcas verticales: son **costuras**, cuadros donde la identidad se
+corta y hay que reasignar. Salen de dos causas, un preproceso reanudado o un corte de plano.
+
+En metraje de transmisión son muchas. Medido sobre 38 minutos de una pelea profesional:
+**187 cortes, uno cada 12 segundos**. En cada uno el tracker arranca de cero, así que los
+tracks de después no tienen nada que ver con los de antes.
+
+Eso es deliberado y es lo correcto. Arrastrar la identidad a través de un corte de cámara le
+pone a un peleador el cuerpo del otro, y no se nota: el esqueleto sigue estando sobre un
+cuerpo. Es preferible reasignar de más que exportar keypoints del boxeador equivocado.
+
+Sobre cámara fija el detector encuentra cero cortes y no cambia nada.
+
 ### Cuando A y B se intercambian
 
 Ubicá el primer cuadro donde están cambiados y apretá **Intercambiar A ↔ B desde acá**. La

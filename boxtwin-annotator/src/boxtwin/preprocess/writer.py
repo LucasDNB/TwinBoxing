@@ -169,6 +169,19 @@ class ShardWriter:
             self._guardar_estado()
         return self.state.next_frame
 
+    def cut_seam(self, frame: int) -> None:
+        """
+        Declara que la identidad se corta en `frame`. Se llama al reiniciar el tracker.
+
+        Misma mecanica que `resume_from`, otra causa: alla el tracker se reinicia porque el
+        proceso se corto, aca porque cambio el plano y arrastrar la identidad a traves de un
+        corte de camara le pone a un peleador el cuerpo del otro. En los dos casos los ids
+        nuevos arrancan de cero y hay que desplazarlos para que no pisen a los anteriores.
+        """
+        self.state.id_offset = self.state.max_track_id
+        self.state.seams.append({"frame": frame, "id_offset": self.state.id_offset})
+        self._guardar_estado()
+
     @property
     def id_offset(self) -> int:
         return self.state.id_offset
