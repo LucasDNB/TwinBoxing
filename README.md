@@ -167,3 +167,52 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      niega a aplicar la tabla si el n no es 18 y no redondea los dudosos
  10. V7 sigue pasando como confiable con 3 clips mirados, mismo error que se
      acaba de pagar con V4. Le falta su muestra de 18
+
+19-08 Dataset propio: instrumento medido y el baseline que no medía generalización
+
+  1. boxtwin-annotator terminado y usado sobre material real. Sparring.mp4 anotado
+     completo: 125 eventos, 66 asignaciones de identidad, 243 interpolaciones
+  2. Reanotacion ciega sobre muestra de 35 ventanas, semilla 7: side kappa 1.000,
+     punch_type 0.755, target 0.635, completeness 0.651 sobre 51 golpes emparejados.
+     Deteccion recall 0.911, precision 0.903
+  3. Error de fronteras 1.12 cuadros al inicio y 1.55 al final, sobre golpes que
+     duran 9.9. Es el techo contra el que hay que reportar el error del modelo, no
+     cero
+  4. El primer protocolo de reanotacion media su propia ambiguedad: pedia reanotar
+     un evento sin decir cual, y 26 de 35 ventanas contienen mas de un golpe del
+     mismo peleador. 15 de 34 intentos reanotaron el golpe de al lado y el reporte
+     los conto como desacuerdo. Rehecho pidiendo todos los golpes de la ventana y
+     emparejando por solapamiento, como en deteccion temporal de acciones
+  5. La reanotacion encontro 7 golpes que faltaban en la anotacion, un subconteo del
+     5.6%. Se agregaron, pero el numero de acuerdo NO se recalcula sobre la version
+     corregida: seria circular. Queda congelado declarando que se midio sobre 118
+     eventos
+  6. El 84.51% de PoseConv3D sobre Bhargav no mide generalizacion. Su validacion
+     comparte 47 de 49 sujetos con el entrenamiento, el 96%: el split es por clip y
+     no por sujeto. Evaluado sobre Sparring.mp4 da 10.53% top-1, por debajo del
+     16.7% de azar con 6 clases. El control reproduce el 84.51% al decimal, asi que
+     el arnes es correcto
+  7. Los 9 videos de BoxingVI son contenido de fitness: shadowboxing y bolsa, una
+     sola persona, con cronometros en pantalla. Ninguno es sparring. Sin oponente no
+     existen landed, blocked ni slipped, y el subsistema de identidad es irrelevante
+  8. Medido que el ReID de BoT-SORT no reduce los cambios de identidad a 640x360:
+     31 con ReID contra 29 sin el, y 4.4% mas de tiempo. Falta rehacerlo sobre 1080p
+  9. Hook contra straight no es separable con descriptores 2D. Cinco probados, mejor
+     AUC 0.638, y el mejor umbral acierta 62% contra 59% de predecir la clase
+     mayoritaria. Dos de ellos codifican la definicion del anotador. Explicacion
+     probable: proyeccion monocular. El eje dificil de este problema es la familia
+     del golpe, no el brazo
+ 10. Definicion operacional del tipo de golpe escrita y agregada al panel siempre
+     visible. Hasta ahora solo estaban definidas las fronteras temporales, y se nota:
+     lo definido da 1.12 cuadros de error, lo no definido kappa 0.755 con sesgo
+     direccional. boundary_definitions_version pasa a 2
+ 11. Pelea profesional Pacquiao vs Margarito preprocesada, 12 rounds netos: 136364
+     cuadros a 1080p60, 87 minutos con FP16, 1.11 millones de detecciones, 11100
+     tracks. FP16 mide 1.8x mas rapido con 0.02% de diferencia en detecciones
+ 12. 181 cortes de camara, uno cada 12.6 s. El tracker se reinicia en cada uno: sin
+     eso la identidad se arrastra entre planos y le pone a un peleador el cuerpo del
+     otro, sin que se vea en el overlay
+ 13. Dos agujeros cerrados por los que casi se pierde trabajo: project_paths seguia
+     los symlinks y un proyecto de prueba escribia sobre el original, y el preproceso
+     no miraba si existia una anotacion antes de rehacer el cache y renumerar los
+     track_id
