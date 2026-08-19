@@ -208,3 +208,33 @@ def test_una_sola_toma_no_tiene_cortes(tmp_path) -> None:
         check=True,
     )
     assert detectar_cortes(f, fps=10.0) == []
+
+
+def test_una_transicion_no_produce_cuatro_cortes(tmp_path, monkeypatch) -> None:
+    """
+    Una disolvencia mantiene el puntaje de escena alto varios cuadros y el filtro dispara en
+    cada uno. Sobre 20 s de la pelea salieron cortes en 195, 197, 199 y 201: es una sola
+    transicion, y reiniciar el tracker cuatro veces seguidas no aporta nada.
+    """
+    from boxtwin.preprocess import cuts
+
+    salida = "pts_time:3.25\npts_time:3.283\npts_time:3.316\npts_time:3.35\npts_time:20.0\n"
+
+    class Fake:
+        stderr = salida
+
+    monkeypatch.setattr(cuts.subprocess, "run", lambda *a, **k: Fake())
+    assert cuts.detectar_cortes(tmp_path / "x.mp4", fps=60.0) == [195, 1200]
+
+
+def test_una_disolvencia_larga_colapsa_a_un_solo_corte(tmp_path, monkeypatch) -> None:
+    """Se compara contra el ultimo guardado: si no, los cortes se encadenarian de a pares."""
+    from boxtwin.preprocess import cuts
+
+    tiempos = [3.0 + i * 0.05 for i in range(10)]   # medio segundo disparando cada 3 cuadros
+
+    class Fake:
+        stderr = "".join(f"pts_time:{t:.3f}\n" for t in tiempos)
+
+    monkeypatch.setattr(cuts.subprocess, "run", lambda *a, **k: Fake())
+    assert cuts.detectar_cortes(tmp_path / "x.mp4", fps=60.0) == [180]

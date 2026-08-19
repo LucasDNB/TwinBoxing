@@ -237,7 +237,7 @@ def preprocess(
     if cfg.detect_cuts:
         from boxtwin.preprocess.cuts import detectar_cortes
 
-        cortes = detectar_cortes(video, fps=info.fps, umbral=cfg.cut_threshold)
+        cortes = detectar_cortes(video, fps=info.fps_container, umbral=cfg.cut_threshold)
     pendientes = [c for c in cortes if c > inicio]
 
     proxy_job = None

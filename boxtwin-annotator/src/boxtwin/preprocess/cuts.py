@@ -37,12 +37,28 @@ import re
 import subprocess
 from pathlib import Path
 
-__all__ = ["detectar_cortes", "UMBRAL_ESCENA"]
+__all__ = ["detectar_cortes", "UMBRAL_ESCENA", "MIN_SEPARACION"]
 
 # 0,3 es el valor de fabrica del filtro y el control lo respalda: con 0,2, 0,3 y 0,4 encuentra
 # los mismos 2 cortes del video de prueba. Mas bajo empieza a disparar con los flashes de las
 # camaras de prensa, que en boxeo profesional son constantes.
 UMBRAL_ESCENA = 0.3
+
+# Separacion minima entre dos cortes, en segundos.
+#
+# Una disolvencia o un flash de prensa mantienen el puntaje de escena alto durante varios
+# cuadros y el filtro dispara en cada uno. Sobre 20 s de la pelea salieron cuatro cortes en
+# los cuadros 195, 197, 199 y 201: es una sola transicion, no cuatro. Ninguna transmision
+# tiene dos planos distintos separados por menos de dos decimas de segundo, y los cortes
+# rapidos de verdad andan por el medio segundo, asi que agrupar por debajo de 0,2 no pierde
+# ninguno real y evita reiniciar el tracker cuatro veces seguidas.
+#
+# Se encadena: se compara contra la deteccion ANTERIOR, no contra el ultimo corte guardado. Con
+# la segunda forma una disolvencia que dispara cada tres cuadros durante medio segundo deja
+# escapar uno cada doce, en vez de colapsar a uno. Encadenar agrupa la RACHA entera, que es lo
+# que una transicion es, y no corre riesgo de juntar cortes reales porque dos planos distintos
+# nunca estan a menos de 0,2 s.
+MIN_SEPARACION = 0.2
 
 _PTS = re.compile(r"pts_time:([0-9.]+)")
 
@@ -74,5 +90,14 @@ def detectar_cortes(
         return []
 
     frames = sorted({round(float(m) * fps) for m in _PTS.findall(salida)})
-    # El cuadro 0 no es un corte, es el principio.
-    return [f for f in frames if f > 0]
+    minimo = max(1, round(MIN_SEPARACION * fps))
+    salida_f: list[int] = []
+    previo: int | None = None
+    for f in frames:
+        # El cuadro 0 no es un corte, es el principio.
+        if f <= 0:
+            continue
+        if previo is None or f - previo >= minimo:
+            salida_f.append(f)
+        previo = f
+    return salida_f
