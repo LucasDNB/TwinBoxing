@@ -87,3 +87,61 @@ def test_error_sale_por_stderr_con_codigo_1(capsys: pytest.CaptureFixture) -> No
     assert codigo == 1
     assert salida.err.startswith("error: ")
     assert "Traceback" not in salida.err
+
+
+# -- el preproceso no puede destruir una anotacion --------------------------
+
+
+def test_project_paths_no_sigue_symlinks(tmp_path) -> None:
+    """
+    Un proyecto de prueba con el video enlazado al original tiene que quedarse en el de
+    prueba. Con resolve() apuntaba al original y las escrituras caian sobre la anotacion de
+    verdad; paso dos veces armando pruebas aisladas.
+    """
+    import os
+
+    from boxtwin.core.project import project_paths
+
+    (tmp_path / "real" / "videos").mkdir(parents=True)
+    (tmp_path / "real" / "videos" / "v.mp4").write_bytes(b"x")
+    (tmp_path / "copia" / "videos").mkdir(parents=True)
+    os.symlink(tmp_path / "real" / "videos" / "v.mp4", tmp_path / "copia" / "videos" / "v.mp4")
+
+    assert project_paths(tmp_path / "copia" / "videos" / "v.mp4").project == tmp_path / "copia"
+
+
+def test_preprocess_se_niega_a_pisar_una_anotacion(tmp_path) -> None:
+    """
+    Rehacer el cache renumera los track_id y las asignaciones pasan a apuntar a otra persona.
+    No se ve en el overlay, solo en el export, asi que tiene que fallar antes y no avisar
+    despues.
+    """
+    import json
+
+    import pytest
+
+    from boxtwin.preprocess.runner import AnotacionEnRiesgoError, _anotacion_en_riesgo
+
+    (tmp_path / "annotations").mkdir()
+    (tmp_path / "cache").mkdir()
+    annot = tmp_path / "annotations" / "v.annot.json"
+
+    # Sin anotacion no hay riesgo.
+    assert _anotacion_en_riesgo(tmp_path, "v") is None
+
+    # Una anotacion vacia tampoco: no hay trabajo que perder.
+    annot.write_text(json.dumps({"events": [], "identity": {"assignments": []}}))
+    assert _anotacion_en_riesgo(tmp_path, "v") is None
+
+    # Con asignaciones, si.
+    annot.write_text(json.dumps({"events": [], "identity": {"assignments": [{"id": "a"}]}}))
+    assert _anotacion_en_riesgo(tmp_path, "v") == (0, 1)
+
+    # Con eventos, tambien.
+    annot.write_text(json.dumps({"events": [{"id": "e"}], "identity": {"assignments": []}}))
+    assert _anotacion_en_riesgo(tmp_path, "v") == (1, 0)
+
+    # Un archivo ilegible es trabajo igual: no se pisa por no poder contarlo.
+    annot.write_text("{ roto")
+    assert _anotacion_en_riesgo(tmp_path, "v") == (-1, -1)
+    assert AnotacionEnRiesgoError is not None

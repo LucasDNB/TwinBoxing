@@ -17,6 +17,7 @@ USO
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -41,8 +42,14 @@ def project_paths(video: Path) -> ProjectPaths:
 
     Si el video esta en <proyecto>/videos/, el proyecto es el padre; si no, el directorio
     del video. Es la convencion del layout y evita tener que pasar dos rutas a cada comando.
+
+    NO se resuelven los symlinks. Se usa abspath, que normaliza los ".." de forma lexica y
+    deja el enlace intacto. La diferencia no es cosmetica: con resolve(), un proyecto de
+    prueba armado con el video enlazado al original hace que todo apunte al proyecto
+    original, y las escrituras caen sobre la anotacion de verdad. Paso dos veces el
+    19-08-2026 armando pruebas aisladas; la segunda pisó un reanno.json de 35 intentos.
     """
-    video = Path(video).resolve()
+    video = Path(os.path.abspath(video))
     project = video.parent.parent if video.parent.name == "videos" else video.parent
     base = video.stem
     return ProjectPaths(

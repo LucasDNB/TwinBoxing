@@ -77,6 +77,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--restart", action="store_true",
         help="descarta el trabajo a medias y arranca de cero",
     )
+    pre.add_argument(
+        "--force", action="store_true",
+        help="rehace el cache aunque cuelgue una anotacion. Renumera los track_id, asi que "
+             "despues hay que reasignar identidad desde cero.",
+    )
 
     # -- annotate ----------------------------------------------------------
     an = sub.add_parser(
@@ -274,7 +279,7 @@ def _cmd_preprocess(args: argparse.Namespace) -> int:
     print(f"modelo   : {cfg.model}  imgsz={cfg.imgsz} device={cfg.device} half={cfg.half}")
     print(f"tracker  : {cfg.tracker}")
 
-    r = preprocess(args.video, proyecto, cfg, restart=args.restart, on_progress=barra)
+    r = preprocess(args.video, proyecto, cfg, restart=args.restart, force=args.force, on_progress=barra)
     barra(None, None)
 
     fps_efectivo = r.total_frames / r.runtime_s if r.runtime_s else 0.0

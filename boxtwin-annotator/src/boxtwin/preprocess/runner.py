@@ -46,7 +46,10 @@ from boxtwin.preprocess.proxy import ProxyJob
 from boxtwin.preprocess.writer import SHARD_FRAMES, FrameDetections, ShardWriter
 from boxtwin.version import __version__
 
-__all__ = ["PreprocessConfig", "PreprocessResult", "preprocess", "default_tracker_path"]
+__all__ = [
+    "PreprocessConfig", "PreprocessResult", "preprocess", "default_tracker_path",
+    "AnotacionEnRiesgoError",
+]
 
 META_FORMAT_VERSION = 1
 
@@ -110,12 +113,40 @@ class PreprocessResult:
     frames_expected: int
 
 
+class AnotacionEnRiesgoError(RuntimeError):
+    """Rehacer el cache dejaria la anotacion apuntando a personas equivocadas."""
+
+
+def _anotacion_en_riesgo(project_dir: Path, base: str) -> tuple[int, int] | None:
+    """
+    Cuantos eventos y asignaciones cuelgan del cache que se va a rehacer.
+
+    Los track_id son del tracker, no del video: rehacer el cache los renumera, y las
+    asignaciones de identidad pasan a apuntar a otra persona. No se ve en el overlay, porque
+    el esqueleto sigue estando sobre un cuerpo; se ve en el export, cuando ya es tarde.
+    """
+    annot = project_dir / "annotations" / f"{base}.annot.json"
+    if not annot.is_file():
+        return None
+    try:
+        import json
+
+        d = json.loads(annot.read_text(encoding="utf-8"))
+        n_ev = len(d.get("events", []))
+        n_as = len(d.get("identity", {}).get("assignments", []))
+    except Exception:  # noqa: BLE001
+        # Un archivo ilegible tambien es trabajo: no se pisa por no poder contarlo.
+        return (-1, -1)
+    return (n_ev, n_as) if (n_ev or n_as) else None
+
+
 def preprocess(
     video: Path,
     project_dir: Path,
     cfg: PreprocessConfig | None = None,
     *,
     restart: bool = False,
+    force: bool = False,
     on_progress: Callable[[int, int], None] | None = None,
 ) -> PreprocessResult:
     """
@@ -123,6 +154,9 @@ def preprocess(
 
     `on_progress(frame_actual, total_estimado)` se llama cada tanto; el total es estimado
     porque el real solo se sabe al terminar de decodificar.
+
+    Se niega a rehacer un cache del que cuelga una anotacion, salvo `force`. Reanudar no
+    cuenta: ahi los track_id ya emitidos no cambian.
     """
     import cv2  # se importa aca para que el modulo se pueda inspeccionar sin opencv
 
@@ -147,6 +181,28 @@ def preprocess(
     meta_path = cache_dir / f"{base}.meta.json"
     proxy_path = cache_dir / f"{base}.proxy.mp4"
     work_dir = cache_dir / f"{base}.pose.partial"
+
+    # El guard va antes de borrar nada. Reanudar es inofensivo: los track_id ya escritos no
+    # se tocan. Lo que destruye la anotacion es empezar de cero, sea por --restart o porque
+    # cambio la configuracion y el cache anterior dejo de valer.
+    rehace = restart or (npz_path.is_file() and not work_dir.is_dir())
+    if rehace and not force:
+        riesgo = _anotacion_en_riesgo(project_dir, base)
+        if riesgo is not None:
+            n_ev, n_as = riesgo
+            detalle = (
+                "no se pudo leer, pero existe"
+                if n_ev < 0
+                else f"{n_ev} eventos y {n_as} asignaciones de identidad"
+            )
+            raise AnotacionEnRiesgoError(
+                f"{base}.annot.json tiene {detalle}.\n"
+                "  Rehacer el cache renumera los track_id y esas asignaciones pasan a\n"
+                "  apuntar a otra persona. No se ve en el overlay: el esqueleto sigue\n"
+                "  estando sobre un cuerpo, y el error aparece recien en el export.\n"
+                "  Si de verdad querés rehacerlo, --force, y despues hay que reasignar\n"
+                "  identidad desde cero."
+            )
 
     if restart:
         import shutil
