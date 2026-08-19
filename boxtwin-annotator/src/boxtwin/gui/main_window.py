@@ -620,6 +620,19 @@ class MainWindow(QMainWindow):
         ):
             self._buscar_uniones()
 
+    def _huecos_todos(self):
+        """
+        Todos los huecos internos del cache, calculados una sola vez.
+
+        Depende solo del cache, que es inmutable, asi que recalcularlo en cada refresco es
+        puro desperdicio. Y no es poco: sobre la pelea, con 11.100 tracks y 1,1 millones de
+        detecciones, recorrerlo tarda 3,5 s. Como el refresco corre despues de cada evento
+        confirmado, sin este cache anotar 1400 golpes costaria 82 minutos de espera.
+        """
+        if getattr(self, "_huecos_cache", None) is None:
+            self._huecos_cache = detectar_huecos_internos(self.session.cache)
+        return self._huecos_cache
+
     def _huecos_internos_pendientes(self):
         """Los huecos internos que todavia no tienen interpolacion declarada."""
         ya = {
@@ -629,7 +642,7 @@ class MainWindow(QMainWindow):
         rol_en = rol_en_track(self.session.doc)
         return [
             c
-            for c in detectar_huecos_internos(self.session.cache)
+            for c in self._huecos_todos()
             if (c.to_track_id, c.gap_start) not in ya
             and rol_en(c.from_track_id, c.last_frame) in (TrackRole.A, TrackRole.B)
         ]
