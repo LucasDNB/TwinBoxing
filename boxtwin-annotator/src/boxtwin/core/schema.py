@@ -566,7 +566,12 @@ class SettingsSnapshot(BoxTwinModel):
     interp_min_iou: Unit = 0.5
     kp_score_threshold: Unit = 0.3
     event_max_duration_frames: int = Field(default=40, gt=0)
-    boundary_definitions_version: int = Field(default=1, ge=1)
+    # 2: se agrego la definicion de TIPO DE GOLPE al panel. Hasta la 1 solo estaban
+    # definidas las fronteras temporales, y el tipo quedaba a criterio no escrito: sobre
+    # Sparring.mp4 eso dio kappa 0,755 en punch_type con desacuerdo direccional, 6 casos
+    # de hook anotado y straight reanotado contra 1 al reves. Los eventos de antes y de
+    # despues no se anotaron bajo el mismo criterio y tienen que poder distinguirse.
+    boundary_definitions_version: int = Field(default=2, ge=1)
 
     # Combinaciones: un golpe puede empezar antes de que termine el anterior.
     same_side_overlap_max_frames: int = Field(default=3, ge=0)

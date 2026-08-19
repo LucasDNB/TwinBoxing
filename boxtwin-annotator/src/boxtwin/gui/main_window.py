@@ -90,7 +90,25 @@ Cuadro en que el puño retrocedió aproximadamente la mitad del camino de vuelta
 guardia.<br><br>
 <b>feint</b><br>
 El movimiento inicia pero se aborta antes del 60% de la extensión esperada y no hay
-retracción de recuperación completa.
+retracción de recuperación completa.<br><br>
+<hr>
+<b>Tipo de golpe</b><br><br>
+<b>straight</b> (jab, cross)<br>
+El puño viaja hacia el blanco trazando una recta o casi recta. Si se traza una recta entre
+el puño y el hombro durante el recorrido, <b>el codo siempre está por debajo de esa línea</b>,
+salvo en la extensión máxima. El codo queda detrás del puño todo el recorrido y se extiende
+siguiéndolo. La potencia viene del empuje de la pierna trasera.<br>
+<i>Vista frontal o trasera:</i> codo, hombro y puño casi en el mismo punto.<br><br>
+<b>hook</b><br>
+El puño viaja sobre un arco alrededor del eje vertical del cuerpo. El codo se mantiene
+flexionado en un ángulo aproximadamente constante y va <b>al costado, no detrás</b>. La
+potencia viene de la rotación de tronco y cadera.<br>
+<i>Vista frontal o trasera:</i> codo y hombro en puntos cercanos, el puño un poco más
+alejado.<br><br>
+<b>Cuando no se distingue</b><br>
+Si el golpe se tira hacia la cámara y no se ve el plano del recorrido, mirar el
+<b>hombro contrario</b>: en el hook rota visiblemente, en el straight acompaña menos.
+También se observa mayor amplitud del brazo y mayor rotación de torso en el hook.
 """
 
 
