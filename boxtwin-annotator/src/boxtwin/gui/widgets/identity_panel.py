@@ -29,6 +29,7 @@ from __future__ import annotations
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QComboBox,
+    QDoubleSpinBox,
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
@@ -55,6 +56,8 @@ class IdentityPanel(QWidget):
     aceptarUnion = Signal(object, object)  # GapCandidate, TrackRole
     buscarUniones = Signal()
     rellenarInternos = Signal()
+    previsualizarChicos = Signal(float)   # cambio el umbral, recalcular el conteo
+    ignorarChicos = Signal(float)         # aplicar
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -130,6 +133,36 @@ class IdentityPanel(QWidget):
         f.addRow(b_marcar)
         raiz.addWidget(g_tramo)
 
+        # -- publico
+        #
+        # En metraje de transmision el detector encuentra a todo el mundo. Sobre 20 s de una
+        # pelea a 1080p: 9,4 personas por cuadro y 108 tracks, de los cuales dos son los
+        # boxeadores. Asignarlos de a uno no es trabajo, es imposible.
+        g_pub = QGroupBox("Descartar público")
+        v = QVBoxLayout(g_pub)
+        self.lbl_chicos = QLabel("sin analizar")
+        self.lbl_chicos.setWordWrap(True)
+        v.addWidget(self.lbl_chicos)
+        fila = QHBoxLayout()
+        fila.addWidget(QLabel("alto mínimo:"))
+        self.sp_alto = QDoubleSpinBox()
+        self.sp_alto.setRange(0.05, 0.90)
+        self.sp_alto.setSingleStep(0.05)
+        self.sp_alto.setDecimals(2)
+        self.sp_alto.setValue(0.30)
+        self.sp_alto.setSuffix("  del alto de imagen")
+        self.sp_alto.valueChanged.connect(self.previsualizarChicos.emit)
+        fila.addWidget(self.sp_alto, 1)
+        v.addLayout(fila)
+        self.b_chicos = QPushButton("Ignorar los tracks más chicos")
+        self.b_chicos.setToolTip(
+            "Marca como ignore los tracks que nunca llegan a ese alto.\n"
+            "Nunca toca un track que ya es un peleador. Se deshace con Ctrl+Z."
+        )
+        self.b_chicos.clicked.connect(lambda: self.ignorarChicos.emit(self.sp_alto.value()))
+        v.addWidget(self.b_chicos)
+        raiz.addWidget(g_pub)
+
         # -- huecos internos
         #
         # Grupo aparte de las uniones, y no es cosmetica. Las uniones piden una decision de
@@ -198,6 +231,16 @@ class IdentityPanel(QWidget):
             )
         if not candidatos:
             self.lista_uniones.addItem("no hay tracks compatibles para unir")
+
+    def set_chicos(self, a_ignorar: int, total: int) -> None:
+        """Cuantos tracks caerian con el umbral actual."""
+        if total:
+            self.lbl_chicos.setText(
+                f"{a_ignorar} de {total} tracks nunca llegan a ese alto"
+            )
+        else:
+            self.lbl_chicos.setText("sin tracks")
+        self.b_chicos.setEnabled(bool(a_ignorar))
 
     def set_internos(self, pendientes: int, cuadros: int) -> None:
         """Cuantos huecos internos quedan por rellenar y cuantos cuadros recuperan."""

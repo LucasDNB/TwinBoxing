@@ -57,6 +57,7 @@ __all__ = [
     "MarkUnreliable",
     "AcceptJoin",
     "FillInternalGaps",
+    "IgnoreSmallTracks",
     "boundary_after",
 ]
 
@@ -474,3 +475,67 @@ class FillInternalGaps(_SnapshotCommand):
 
         self.aplicados = len(nuevas)
         doc.identity.interpolations = [*doc.identity.interpolations, *nuevas]
+
+
+@dataclass
+class IgnoreSmallTracks(_SnapshotCommand):
+    """
+    Marca como `ignore` a los tracks que nunca superan cierto alto. El publico, basicamente.
+
+    En metraje de transmision el detector encuentra a todo el mundo. Medido sobre 20 s de una
+    pelea profesional a 1080p: 9,4 personas por cuadro y 108 tracks distintos, de los cuales
+    dos son los boxeadores. Asignarlos de a uno no es trabajo, es imposible.
+
+    Va en lote por la misma razon que el relleno de huecos: no decide nada sobre quien es
+    quien, solo declara que un track no es ninguno de los dos peleadores. Y el umbral es una
+    decision del anotador que queda registrada como asignaciones, no un filtro horneado en el
+    cache: el cache guarda lo que el modelo observo, y si el umbral resulta mal elegido se
+    deshace con Ctrl+Z en vez de reprocesar horas de video.
+
+    NUNCA pisa un track que ya tiene rol de peleador en algun lado. Un boxeador puede quedar
+    chico durante un plano abierto, y una operacion en lote que le borre el rol por eso es
+    justo el tipo de error que este sistema no puede permitirse, porque no se ve.
+    """
+
+    track_ids: list[int]
+    total_frames: int
+    umbral: float = 0.0
+    annotator: str = "desconocido"
+    label: str = ""
+    aplicados: int = 0
+    _antes: Identity | None = field(default=None, repr=False)
+
+    def __post_init__(self) -> None:
+        if not self.label:
+            self.label = f"ignorar {len(self.track_ids)} tracks chicos"
+
+    def _aplicar(self, doc: AnnotationDoc) -> None:
+        peleadores = {TrackRole.A, TrackRole.B}
+        con_rol = {
+            a.track_id for a in doc.identity.assignments if a.role in peleadores
+        }
+        ya_ignorados = {
+            a.track_id
+            for a in doc.identity.assignments
+            if a.role is TrackRole.IGNORE
+            and a.start_frame == 0
+            and a.end_frame_excl >= self.total_frames
+        }
+        origen = _origen(doc, AssignmentOp.MANUAL, 0, self.annotator)
+
+        nuevos: list[Assignment] = []
+        for tid in sorted(set(self.track_ids)):
+            if tid in con_rol or tid in ya_ignorados:
+                continue
+            nuevos.append(
+                Assignment(
+                    id=new_id(doc, "assignment"),
+                    track_id=tid,
+                    role=TrackRole.IGNORE,
+                    start_frame=0,
+                    end_frame_excl=self.total_frames,
+                    origin=origen,
+                )
+            )
+        self.aplicados = len(nuevos)
+        doc.identity.assignments = [*doc.identity.assignments, *nuevos]

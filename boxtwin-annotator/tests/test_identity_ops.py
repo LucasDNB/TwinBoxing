@@ -414,3 +414,60 @@ def test_rechaza_candidatos_entre_tracks_distintos(doc: AnnotationDoc, pila: Und
     union = GapCandidate(from_track_id=1, to_track_id=2, last_frame=5, first_frame=9, iou=0.9)
     with pytest.raises(ValueError, match="tracks distintos"):
         pila.do(FillInternalGaps(candidatos=[union]))
+
+
+# -- descartar publico ------------------------------------------------------
+
+
+def test_ignora_los_tracks_chicos(doc: AnnotationDoc, pila: UndoStack) -> None:
+    from boxtwin.core.identity_ops import IgnoreSmallTracks
+
+    cmd = IgnoreSmallTracks(track_ids=[5, 6, 7], total_frames=1000, umbral=0.3)
+    pila.do(cmd)
+    assert cmd.aplicados == 3
+    for a in doc.identity.assignments:
+        assert a.role is TrackRole.IGNORE
+        assert (a.start_frame, a.end_frame_excl) == (0, 1000)
+    pila.undo()
+    assert doc.identity.assignments == []
+
+
+def test_nunca_pisa_un_track_que_ya_es_peleador(doc: AnnotationDoc, pila: UndoStack) -> None:
+    """
+    Un boxeador puede quedar chico en un plano abierto. Una operacion en lote que le borre el
+    rol por eso es justo el error que este sistema no puede permitirse, porque no se ve: el
+    esqueleto sigue estando sobre un cuerpo.
+    """
+    from boxtwin.core.identity_ops import IgnoreSmallTracks
+
+    asignar(pila, 5, TrackRole.A, 0, 1000)
+    cmd = IgnoreSmallTracks(track_ids=[5, 6], total_frames=1000)
+    pila.do(cmd)
+    assert cmd.aplicados == 1
+    roles = {a.track_id: a.role for a in doc.identity.assignments}
+    assert roles[5] is TrackRole.A
+    assert roles[6] is TrackRole.IGNORE
+
+
+def test_ignorar_dos_veces_no_duplica(doc: AnnotationDoc, pila: UndoStack) -> None:
+    from boxtwin.core.identity_ops import IgnoreSmallTracks
+
+    pila.do(IgnoreSmallTracks(track_ids=[5, 6], total_frames=1000))
+    segundo = IgnoreSmallTracks(track_ids=[5, 6], total_frames=1000)
+    pila.do(segundo)
+    assert segundo.aplicados == 0
+    assert len(doc.identity.assignments) == 2
+
+
+def test_altura_maxima_usa_el_maximo_y_no_la_mediana() -> None:
+    """
+    Un peleador puede quedar chico durante un plano abierto. Con la mediana, un track que
+    arranca de lejos y se acerca quedaria del lado equivocado.
+    """
+    from boxtwin.core.identity import altura_maxima_por_track
+
+    # El track 1 esta chico casi siempre y grande una vez.
+    por_frame = {f: [(1, (0.0, 0.0, 10.0, 10.0))] for f in range(9)}
+    por_frame[9] = [(1, (0.0, 0.0, 10.0, 90.0))]
+    alturas = altura_maxima_por_track(cache_con(por_frame, 10), 100)
+    assert alturas[1] == pytest.approx(0.9)

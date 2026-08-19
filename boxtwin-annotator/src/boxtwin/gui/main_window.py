@@ -50,11 +50,12 @@ from boxtwin.core.identity_ops import (
     AcceptJoin,
     AssignRole,
     FillInternalGaps,
+    IgnoreSmallTracks,
     MarkUnreliable,
     Reseed,
     SwapFromFrame,
 )
-from boxtwin.core.identity import rol_en_track
+from boxtwin.core.identity import altura_maxima_por_track, rol_en_track
 from boxtwin.core.interpolation import detectar_huecos, detectar_huecos_internos, iou
 from boxtwin.core.types import FighterId, IssueLevel, TrackRole
 from boxtwin.core.undo import AddEvent, DeleteEvent, EditEvent
@@ -139,6 +140,8 @@ class MainWindow(QMainWindow):
         self.identidad.buscarUniones.connect(self._buscar_uniones)
         self.identidad.aceptarUnion.connect(self._aceptar_union)
         self.identidad.rellenarInternos.connect(self._rellenar_internos)
+        self.identidad.previsualizarChicos.connect(self._previsualizar_chicos)
+        self.identidad.ignorarChicos.connect(self._ignorar_chicos)
         self.view.boxDrawn.connect(self._caja_dibujada)
         self.reanno.empezar.connect(self._reanno_empezar)
         self.reanno.siguiente.connect(self._reanno_siguiente)
@@ -613,9 +616,68 @@ class MainWindow(QMainWindow):
             and rol_en(c.from_track_id, c.last_frame) in (TrackRole.A, TrackRole.B)
         ]
 
+    def _alturas(self) -> dict[int, float]:
+        """Cacheado: recorrer el cache entero cuesta segundos sobre un video largo."""
+        if getattr(self, "_alturas_cache", None) is None:
+            self._alturas_cache = altura_maxima_por_track(
+                self.session.cache, self.session.video_size[1]
+            )
+        return self._alturas_cache
+
+    def _tracks_chicos(self, umbral: float) -> list[int]:
+        """
+        Tracks que nunca llegan al umbral y todavia no estan resueltos.
+
+        Se descuentan los que ya tienen rol de peleador, que no se tocan nunca, y tambien los
+        que ya estan ignorados de punta a punta: si no, el conteo seguiria mostrando los
+        mismos 75 despues de aplicarlos y el boton quedaria invitando a repetir una operacion
+        que ya no hace nada.
+        """
+        peleadores = {TrackRole.A, TrackRole.B}
+        resueltos = {
+            a.track_id
+            for a in self.session.doc.identity.assignments
+            if a.role in peleadores
+            or (
+                a.role is TrackRole.IGNORE
+                and a.start_frame == 0
+                and a.end_frame_excl >= self.session.total_frames
+            )
+        }
+        return [
+            t for t, alto in self._alturas().items()
+            if alto < umbral and t not in resueltos
+        ]
+
+    def _previsualizar_chicos(self, umbral: float) -> None:
+        self.identidad.set_chicos(len(self._tracks_chicos(umbral)), len(self._alturas()))
+
+    def _ignorar_chicos(self, umbral: float) -> None:
+        chicos = self._tracks_chicos(umbral)
+        if not chicos:
+            return
+        if (
+            QMessageBox.question(
+                self,
+                "Descartar público",
+                f"Se van a marcar como ignore {len(chicos)} tracks que nunca llegan al "
+                f"{umbral:.0%} del alto de imagen.\n\n"
+                "No se toca ningún track que ya sea un peleador. Se deshace con Ctrl+Z.",
+            )
+            != QMessageBox.StandardButton.Yes
+        ):
+            return
+        comando = IgnoreSmallTracks(
+            track_ids=chicos, total_frames=self.session.total_frames,
+            umbral=umbral, annotator=self.session.annotator,
+        )
+        if self._aplicar_identidad(comando):
+            self.statusBar().showMessage(f"{comando.aplicados} tracks ignorados", 5000)
+
     def _refrescar_internos(self) -> None:
         pend = self._huecos_internos_pendientes()
         self.identidad.set_internos(len(pend), sum(c.gap_len for c in pend))
+        self._previsualizar_chicos(self.identidad.sp_alto.value())
 
     def _rellenar_internos(self) -> None:
         pend = self._huecos_internos_pendientes()

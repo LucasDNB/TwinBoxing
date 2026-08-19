@@ -49,7 +49,36 @@ from boxtwin.core.posecache import PoseCache, PoseDetections
 from boxtwin.core.schema import AnnotationDoc, Interpolation
 from boxtwin.core.types import FighterId, TrackRole
 
-__all__ = ["ResolvedPose", "IdentityResolver", "rol_de_track", "rol_en_track"]
+__all__ = [
+    "ResolvedPose", "IdentityResolver", "rol_de_track", "rol_en_track",
+    "altura_maxima_por_track",
+]
+
+
+def altura_maxima_por_track(cache: PoseCache, alto_imagen: int) -> dict[int, float]:
+    """
+    Alto maximo de la caja de cada track, como fraccion del alto de la imagen.
+
+    Se usa el MAXIMO y no la mediana: un peleador puede quedar chico durante un plano
+    abierto y grande en el resto, y lo que decide si es un peleador o alguien del publico
+    es si alguna vez estuvo cerca de la camara. Con la mediana, un track que arranca de
+    lejos y se acerca quedaria del lado equivocado.
+
+    Existe porque en metraje de transmision el detector encuentra al publico. Medido sobre
+    20 s de una pelea profesional a 1080p: 9,4 personas por cuadro y 108 tracks distintos,
+    de los cuales dos son los boxeadores.
+    """
+    if alto_imagen <= 0:
+        raise ValueError("el alto de la imagen tiene que ser positivo")
+    salida: dict[int, float] = {}
+    for f in range(len(cache)):
+        d = cache.detections(f)
+        for i in range(len(d)):
+            t = int(d.track_id[i])
+            alto = float(d.bbox[i][3] - d.bbox[i][1]) / alto_imagen
+            if alto > salida.get(t, 0.0):
+                salida[t] = alto
+    return salida
 
 
 def rol_de_track(doc: AnnotationDoc, track_id: int, frame: int) -> TrackRole | None:
