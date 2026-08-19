@@ -92,3 +92,101 @@ Los 35 intentos de la v1 se conservan como evidencia y se migran a v2 marcados c
 `protocolo_v1`. El reporte declara que sus números de detección no significan nada. La
 muestra hay que rehacerla con semilla nueva: los resultados de la primera corrida ya se
 vieron, incluida la lista de los 15 casos mal emparejados.
+
+---
+
+## Resultado con el protocolo v2
+
+Muestra nueva, semilla 7, 35 ventanas, 35 intentos ciegos. Medido contra la anotación de
+**118 eventos**, es decir el estado previo a las correcciones que la propia reanotación
+motivó.
+
+### Detección
+
+| | |
+|---|---|
+| Golpes exigibles (anotados y enteros en alguna ventana) | 56 |
+| Encontrados | 51 |
+| Omitidos | 5 |
+| Marcas del reanotador | 72 |
+| Sin correspondencia | 7 |
+| **Recall** | **0,911** |
+| **Precisión** | **0,903** |
+
+### Clasificación, sobre 51 golpes emparejados
+
+| Dimensión | Acuerdo | Kappa |
+|---|---|---|
+| side | 1,000 | **1,000** |
+| punch_type | 0,882 | 0,755 |
+| completeness | 0,961 | 0,651 |
+| target | 0,941 | 0,635 |
+
+`target` y `completeness` tienen kappa bajo con acuerdo altísimo: es la paradoja de kappa
+con marginales extremos, casi todo es `head` y `full`. Se reportan con el acuerdo y el n al
+lado, no con el kappa solo.
+
+### Fronteras
+
+| | MAE | Sesgo | Mediana | Máx | Exactos |
+|---|---|---|---|---|---|
+| start | 1,12 | −0,92 | 1,0 | 6 | 16/51 |
+| end | 1,55 | −0,80 | 1,0 | 8 | 13/51 |
+| duración | 1,65 | +0,12 | 2,0 | 8 | 12/51 |
+
+Sobre golpes de 9,9 cuadros de media, un error de 1,1 cuadros es el 11% de la duración.
+**Es el techo contra el que hay que reportar el error del modelo**, no cero.
+
+## Dos correcciones al análisis, encontradas leyendo este resultado
+
+Ninguna estaba en la anotación.
+
+**Golpes en el borde.** Un evento que asomaba por el borde de la ventana quedaba fuera de
+los exigibles, pero si el reanotador lo marcaba, la marca se contaba como inventada. 8 de
+las 12 marcas "sin correspondencia" eran eso. Ahora se emparejan sin entrar al acuerdo.
+
+**Observaciones repetidas.** Las ventanas se solapan, así que un mismo evento caía en dos y
+aportaba dos observaciones al kappa: 60 parejas eran 52 eventos distintos. Ahora entra una
+vez, con su mejor pareja.
+
+Con las dos corregidas, recall pasó de 0,857 a 0,911 y precisión de 0,833 a 0,903.
+
+## Los 7 golpes que faltaban
+
+Las 7 marcas sin correspondencia se revisaron a ojo y **las 7 son golpes reales**. Se
+agregaron como `ev_0121` a `ev_0127`, con dos correcciones de tipo respecto de lo marcado en
+la reanotación. La anotación pasó de 118 a 125 eventos: un subconteo del 5,6%.
+
+**El número de acuerdo no se recalcula sobre la anotación corregida.** Sería circular: esos
+7 golpes salieron de la reanotación, así que coincidirían por construcción. Corriendo el
+reporte contra la versión corregida da recall 0,900 y precisión 0,958, y ese 0,958 no
+significa nada. La medición válida queda congelada en `exports/Sparring.agreement.previo.*`
+y es la que va al capítulo, declarando que se midió sobre 118 eventos.
+
+## Hook contra straight: no hay descriptor geométrico
+
+De los 8 desacuerdos de `punch_type`, 6 son `hook` anotado y `straight` reanotado. La
+confusión es direccional, no simétrica.
+
+Se probaron tres descriptores sobre los 103 golpes completos, buscando una definición
+operacional medible:
+
+| Descriptor | AUC |
+|---|---|
+| Ángulo del codo en máxima extensión | 0,608 |
+| Rectitud de la trayectoria de ida | 0,638 |
+| Barrido angular alrededor del hombro | 0,510 |
+
+El mejor umbral sobre el ángulo del codo acierta 62% contra 59% de predecir siempre la clase
+mayoritaria. **No hay separación.** La proyección monocular es la explicación más probable:
+un hook tirado hacia la cámara se proyecta como un straight.
+
+Consecuencia para la anotación: la definición operacional no puede ser un umbral, tiene que
+ser fenomenológica y la pone el anotador.
+
+Consecuencia para el modelo, que es la que importa: **el eje difícil de este problema es la
+familia del golpe, no el brazo.** Coincide con `side` en kappa 1,000 contra `punch_type` en
+0,755, y con lo que ya se había medido en BoxingVI, donde V4 fallaba en familia conservando
+lateralidad. No prueba que PoseConv3D no pueda —un modelo espaciotemporal ve mucho más que
+tres descriptores a mano— pero es una señal que conviene declarar antes de entrenar y no
+después.
