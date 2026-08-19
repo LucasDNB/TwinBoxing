@@ -1,0 +1,45 @@
+# BoT-SORT para boxeo. Este archivo se hashea entero y el hash va al meta.json del cache,
+# asi que cambiarlo invalida la reanudacion y queda registrado en cada video procesado.
+#
+# Por que estos valores y no los de fabrica de ultralytics:
+#
+# track_buffer 120 en vez de 30. A 30 fps son 4 segundos de tolerancia. En boxeo los dos
+#   cuerpos se tapan constantemente y con 30 cuadros el tracker da por muerto un track en
+#   cada clinch, generando un id nuevo por intercambio. Cada id nuevo es trabajo manual de
+#   re-seed en el anotador.
+#
+# with_reid True con model auto. Medido en esta maquina sobre 200 cuadros de 1080p: 29,1
+#   fps con y sin ReID, identico. No es que este apagado, el encoder existe; con
+#   model: auto reusa las features que el detector ya calculo en vez de cargar una red
+#   aparte, por eso sale gratis. Si es gratis y puede evitar un intercambio de identidad,
+#   va activado.
+#
+# gmc_method sparseOptFlow. Compensacion de movimiento global, para camara en mano.
+#
+# MEDIDO el 18-08-2026 sobre Sparring.mp4 anotado, contra las 66 asignaciones manuales como
+#   ground truth: el ReID NO reduce los cambios de identidad. Con ReID 31, sin ReID 29, y la
+#   corrida con ReID reproduce exactamente el cache original, asi que la comparacion es
+#   limpia. La diferencia de 2 sobre 31 es ruido con un solo video; lo que se puede afirmar
+#   es que no hay beneficio, y que cuesta 4,4% mas de tiempo.
+#
+#   Se deja activado igual. La explicacion mas probable del cero es la resolucion: a 640x360
+#   dos boxeadores con ropa parecida no dejan senal de apariencia, el encoder corre pero no
+#   tiene con que discriminar. Falta rehacerlo sobre 1080p, que es donde podria servir.
+#   Detalle en docs/experiments/2026-08-18-reid.md, se reproduce con
+#   tools/comparar_tracker.py.
+
+tracker_type: botsort
+
+track_high_thresh: 0.5
+track_low_thresh: 0.1
+new_track_thresh: 0.6
+track_buffer: 120
+match_thresh: 0.85
+fuse_score: true
+
+gmc_method: sparseOptFlow
+
+proximity_thresh: 0.5
+appearance_thresh: 0.25
+with_reid: true
+model: auto

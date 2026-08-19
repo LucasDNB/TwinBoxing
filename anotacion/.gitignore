@@ -1,0 +1,8 @@
+# El video y el cache no van al repo: son cientos de MB y se regeneran.
+# Lo que si va es annotations/, que es horas de trabajo humano y no se regenera.
+videos/
+cache/
+exports/
+proxy/
+*.log
+*.bak
