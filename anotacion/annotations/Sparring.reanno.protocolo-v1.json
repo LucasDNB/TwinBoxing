@@ -1,0 +1,859 @@
+{
+  "schema_version": 1,
+  "kind": "boxtwin.reanno",
+  "source_annot_sha256": "e08f01c08fd2dca44b59e7fc5d11f3987f89540afc07ecfc73ab3f1988ec9ee0",
+  "video_sha256": "bb3611d2bb0e038d55b066d19561447d4d4979e4dfdeae447faca50db308d381",
+  "sample": {
+    "seed": 42,
+    "fraction": 0.3,
+    "n": 35,
+    "drawn_at": "2026-08-18T22:42:03+00:00",
+    "drawn_by": "lucasb",
+    "event_ids": [
+      "ev_0004",
+      "ev_0005",
+      "ev_0012",
+      "ev_0015",
+      "ev_0016",
+      "ev_0019",
+      "ev_0027",
+      "ev_0029",
+      "ev_0030",
+      "ev_0031",
+      "ev_0033",
+      "ev_0037",
+      "ev_0055",
+      "ev_0056",
+      "ev_0060",
+      "ev_0067",
+      "ev_0072",
+      "ev_0074",
+      "ev_0078",
+      "ev_0080",
+      "ev_0084",
+      "ev_0086",
+      "ev_0089",
+      "ev_0092",
+      "ev_0094",
+      "ev_0097",
+      "ev_0103",
+      "ev_0106",
+      "ev_0107",
+      "ev_0108",
+      "ev_0112",
+      "ev_0114",
+      "ev_0116",
+      "ev_0117",
+      "ev_0118"
+    ],
+    "windows": {
+      "ev_0004": [
+        229,
+        261
+      ],
+      "ev_0005": [
+        213,
+        263
+      ],
+      "ev_0012": [
+        463,
+        498
+      ],
+      "ev_0015": [
+        499,
+        546
+      ],
+      "ev_0016": [
+        550,
+        580
+      ],
+      "ev_0019": [
+        582,
+        623
+      ],
+      "ev_0027": [
+        803,
+        853
+      ],
+      "ev_0029": [
+        920,
+        950
+      ],
+      "ev_0030": [
+        918,
+        957
+      ],
+      "ev_0031": [
+        918,
+        958
+      ],
+      "ev_0033": [
+        940,
+        989
+      ],
+      "ev_0037": [
+        1242,
+        1275
+      ],
+      "ev_0055": [
+        2263,
+        2297
+      ],
+      "ev_0056": [
+        2269,
+        2306
+      ],
+      "ev_0060": [
+        2414,
+        2455
+      ],
+      "ev_0067": [
+        2833,
+        2880
+      ],
+      "ev_0072": [
+        2954,
+        3001
+      ],
+      "ev_0074": [
+        3157,
+        3193
+      ],
+      "ev_0078": [
+        3300,
+        3344
+      ],
+      "ev_0080": [
+        3498,
+        3536
+      ],
+      "ev_0084": [
+        3588,
+        3626
+      ],
+      "ev_0086": [
+        3684,
+        3727
+      ],
+      "ev_0089": [
+        4207,
+        4249
+      ],
+      "ev_0092": [
+        4674,
+        4712
+      ],
+      "ev_0094": [
+        4715,
+        4747
+      ],
+      "ev_0097": [
+        4817,
+        4851
+      ],
+      "ev_0103": [
+        5145,
+        5187
+      ],
+      "ev_0106": [
+        5198,
+        5231
+      ],
+      "ev_0107": [
+        5272,
+        5312
+      ],
+      "ev_0108": [
+        5268,
+        5317
+      ],
+      "ev_0112": [
+        5321,
+        5361
+      ],
+      "ev_0114": [
+        5342,
+        5377
+      ],
+      "ev_0116": [
+        5358,
+        5401
+      ],
+      "ev_0117": [
+        5362,
+        5407
+      ],
+      "ev_0118": [
+        5372,
+        5413
+      ]
+    }
+  },
+  "trials": [
+    {
+      "event_id": "ev_0004",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:23:30+00:00",
+      "active_ms": 32913,
+      "replays": 23,
+      "revealed": false,
+      "labels": {
+        "start_frame": 229,
+        "end_frame": 236,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "feint",
+        "landed": "landed",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0005",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:27:09+00:00",
+      "active_ms": 12891,
+      "replays": 6,
+      "revealed": false,
+      "labels": {
+        "start_frame": 238,
+        "end_frame": 248,
+        "peak_frame": null,
+        "side": "right",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "landed",
+        "quality": "partial_occlusion"
+      }
+    },
+    {
+      "event_id": "ev_0012",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:27:58+00:00",
+      "active_ms": 6495,
+      "replays": 3,
+      "revealed": false,
+      "labels": {
+        "start_frame": 471,
+        "end_frame": 483,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "missed",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0015",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:28:43+00:00",
+      "active_ms": 7377,
+      "replays": 3,
+      "revealed": false,
+      "labels": {
+        "start_frame": 512,
+        "end_frame": 524,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "missed",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0016",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:29:07+00:00",
+      "active_ms": 4698,
+      "replays": 3,
+      "revealed": false,
+      "labels": {
+        "start_frame": 562,
+        "end_frame": 569,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "missed",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0019",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:29:46+00:00",
+      "active_ms": 9125,
+      "replays": 4,
+      "revealed": false,
+      "labels": {
+        "start_frame": 596,
+        "end_frame": 608,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "hook",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0027",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:30:09+00:00",
+      "active_ms": 7177,
+      "replays": 4,
+      "revealed": false,
+      "labels": {
+        "start_frame": 804,
+        "end_frame": 811,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "slipped",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0029",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:30:42+00:00",
+      "active_ms": 12306,
+      "replays": 6,
+      "revealed": false,
+      "labels": {
+        "start_frame": 937,
+        "end_frame": 945,
+        "peak_frame": null,
+        "side": "right",
+        "punch_type": "uppercut",
+        "target": "head",
+        "completeness": "full",
+        "landed": "missed",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0030",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:31:12+00:00",
+      "active_ms": 6769,
+      "replays": 4,
+      "revealed": false,
+      "labels": {
+        "start_frame": 947,
+        "end_frame": 955,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "hook",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0031",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:31:41+00:00",
+      "active_ms": 4714,
+      "replays": 3,
+      "revealed": false,
+      "labels": {
+        "start_frame": 957,
+        "end_frame": 967,
+        "peak_frame": null,
+        "side": "right",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0033",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:32:24+00:00",
+      "active_ms": 8232,
+      "replays": 5,
+      "revealed": false,
+      "labels": {
+        "start_frame": 986,
+        "end_frame": 992,
+        "peak_frame": null,
+        "side": "right",
+        "punch_type": "hook",
+        "target": "body",
+        "completeness": "full",
+        "landed": "landed",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0037",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:32:44+00:00",
+      "active_ms": 4536,
+      "replays": 4,
+      "revealed": false,
+      "labels": {
+        "start_frame": 1257,
+        "end_frame": 1264,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "slipped",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0055",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:33:02+00:00",
+      "active_ms": 5610,
+      "replays": 3,
+      "revealed": false,
+      "labels": {
+        "start_frame": 2270,
+        "end_frame": 2279,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0056",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:33:56+00:00",
+      "active_ms": 3162,
+      "replays": 2,
+      "revealed": false,
+      "labels": {
+        "start_frame": 2269,
+        "end_frame": 2279,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0060",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:35:59+00:00",
+      "active_ms": 6360,
+      "replays": 2,
+      "revealed": false,
+      "labels": {
+        "start_frame": 2430,
+        "end_frame": 2445,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "hook",
+        "target": "head",
+        "completeness": "full",
+        "landed": "missed",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0067",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:36:29+00:00",
+      "active_ms": 7436,
+      "replays": 3,
+      "revealed": false,
+      "labels": {
+        "start_frame": 2852,
+        "end_frame": 2862,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "missed",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0072",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:36:48+00:00",
+      "active_ms": 5163,
+      "replays": 3,
+      "revealed": false,
+      "labels": {
+        "start_frame": 2966,
+        "end_frame": 2974,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "slipped",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0074",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:37:06+00:00",
+      "active_ms": 3659,
+      "replays": 2,
+      "revealed": false,
+      "labels": {
+        "start_frame": 3174,
+        "end_frame": 3182,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "hook",
+        "target": "head",
+        "completeness": "full",
+        "landed": "landed",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0078",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:39:33+00:00",
+      "active_ms": 7681,
+      "replays": 5,
+      "revealed": false,
+      "labels": {
+        "start_frame": 3331,
+        "end_frame": 3339,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "landed",
+        "quality": "partial_occlusion"
+      }
+    },
+    {
+      "event_id": "ev_0080",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:39:54+00:00",
+      "active_ms": 8340,
+      "replays": 5,
+      "revealed": false,
+      "labels": {
+        "start_frame": 3514,
+        "end_frame": 3522,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0084",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:42:42+00:00",
+      "active_ms": 3700,
+      "replays": 2,
+      "revealed": true,
+      "labels": {
+        "start_frame": 3601,
+        "end_frame": 3611,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0086",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:43:02+00:00",
+      "active_ms": 6168,
+      "replays": 4,
+      "revealed": false,
+      "labels": {
+        "start_frame": 3685,
+        "end_frame": 3692,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "hook",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0089",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:43:39+00:00",
+      "active_ms": 8395,
+      "replays": 7,
+      "revealed": false,
+      "labels": {
+        "start_frame": 4228,
+        "end_frame": 4234,
+        "peak_frame": null,
+        "side": "right",
+        "punch_type": "hook",
+        "target": "body",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "partial_occlusion"
+      }
+    },
+    {
+      "event_id": "ev_0092",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:43:57+00:00",
+      "active_ms": 4485,
+      "replays": 3,
+      "revealed": false,
+      "labels": {
+        "start_frame": 4688,
+        "end_frame": 4695,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0094",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:44:24+00:00",
+      "active_ms": 8707,
+      "replays": 4,
+      "revealed": false,
+      "labels": {
+        "start_frame": 4724,
+        "end_frame": 4736,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "hook",
+        "target": "body",
+        "completeness": "full",
+        "landed": "landed",
+        "quality": "partial_occlusion"
+      }
+    },
+    {
+      "event_id": "ev_0097",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:44:47+00:00",
+      "active_ms": 8990,
+      "replays": 5,
+      "revealed": false,
+      "labels": {
+        "start_frame": 4817,
+        "end_frame": 4826,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "hook",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "partial_occlusion"
+      }
+    },
+    {
+      "event_id": "ev_0103",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:45:05+00:00",
+      "active_ms": 4528,
+      "replays": 3,
+      "revealed": false,
+      "labels": {
+        "start_frame": 5156,
+        "end_frame": 5163,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "slipped",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0106",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:45:18+00:00",
+      "active_ms": 2283,
+      "replays": 2,
+      "revealed": false,
+      "labels": {
+        "start_frame": 5198,
+        "end_frame": 5206,
+        "peak_frame": null,
+        "side": "right",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "slipped",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0107",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:45:39+00:00",
+      "active_ms": 3309,
+      "replays": 2,
+      "revealed": false,
+      "labels": {
+        "start_frame": 5290,
+        "end_frame": 5297,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "landed",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0108",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:46:10+00:00",
+      "active_ms": 10397,
+      "replays": 6,
+      "revealed": false,
+      "labels": {
+        "start_frame": 5292,
+        "end_frame": 5298,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "landed",
+        "quality": "partial_occlusion"
+      }
+    },
+    {
+      "event_id": "ev_0112",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:46:35+00:00",
+      "active_ms": 6017,
+      "replays": 3,
+      "revealed": false,
+      "labels": {
+        "start_frame": 5331,
+        "end_frame": 5338,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0114",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:46:57+00:00",
+      "active_ms": 8422,
+      "replays": 4,
+      "revealed": false,
+      "labels": {
+        "start_frame": 5339,
+        "end_frame": 5348,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "hook",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0116",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:47:16+00:00",
+      "active_ms": 5763,
+      "replays": 4,
+      "revealed": false,
+      "labels": {
+        "start_frame": 5358,
+        "end_frame": 5364,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "hook",
+        "target": "head",
+        "completeness": "full",
+        "landed": "blocked",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0117",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:47:37+00:00",
+      "active_ms": 4057,
+      "replays": 4,
+      "revealed": false,
+      "labels": {
+        "start_frame": 5366,
+        "end_frame": 5372,
+        "peak_frame": null,
+        "side": "right",
+        "punch_type": "hook",
+        "target": "body",
+        "completeness": "full",
+        "landed": "landed",
+        "quality": "clean"
+      }
+    },
+    {
+      "event_id": "ev_0118",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-18T23:47:49+00:00",
+      "active_ms": 2861,
+      "replays": 2,
+      "revealed": false,
+      "labels": {
+        "start_frame": 5372,
+        "end_frame": 5380,
+        "peak_frame": null,
+        "side": "left",
+        "punch_type": "straight",
+        "target": "head",
+        "completeness": "full",
+        "landed": "landed",
+        "quality": "clean"
+      }
+    }
+  ]
+}

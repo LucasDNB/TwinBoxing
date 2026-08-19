@@ -1,0 +1,1405 @@
+{
+  "schema_version": 2,
+  "kind": "boxtwin.reanno",
+  "source_annot_sha256": "1df48a0e5ad28ecc6685190380f32505d81a03a1f758edc092f6f74ea46fe705",
+  "video_sha256": "bb3611d2bb0e038d55b066d19561447d4d4979e4dfdeae447faca50db308d381",
+  "sample": {
+    "seed": 7,
+    "fraction": 0.3,
+    "n": 35,
+    "drawn_at": "2026-08-19T00:10:11+00:00",
+    "drawn_by": "lucasb",
+    "event_ids": [
+      "ev_0005",
+      "ev_0007",
+      "ev_0008",
+      "ev_0009",
+      "ev_0010",
+      "ev_0012",
+      "ev_0014",
+      "ev_0017",
+      "ev_0021",
+      "ev_0029",
+      "ev_0030",
+      "ev_0032",
+      "ev_0043",
+      "ev_0048",
+      "ev_0052",
+      "ev_0055",
+      "ev_0056",
+      "ev_0058",
+      "ev_0067",
+      "ev_0071",
+      "ev_0073",
+      "ev_0075",
+      "ev_0076",
+      "ev_0077",
+      "ev_0083",
+      "ev_0086",
+      "ev_0091",
+      "ev_0093",
+      "ev_0097",
+      "ev_0105",
+      "ev_0108",
+      "ev_0109",
+      "ev_0110",
+      "ev_0116",
+      "ev_0118"
+    ],
+    "windows": {
+      "ev_0005": [
+        219,
+        254
+      ],
+      "ev_0007": [
+        258,
+        294
+      ],
+      "ev_0008": [
+        365,
+        409
+      ],
+      "ev_0009": [
+        399,
+        435
+      ],
+      "ev_0010": [
+        405,
+        439
+      ],
+      "ev_0012": [
+        465,
+        505
+      ],
+      "ev_0014": [
+        501,
+        535
+      ],
+      "ev_0017": [
+        574,
+        602
+      ],
+      "ev_0021": [
+        685,
+        739
+      ],
+      "ev_0029": [
+        918,
+        963
+      ],
+      "ev_0030": [
+        918,
+        965
+      ],
+      "ev_0032": [
+        929,
+        972
+      ],
+      "ev_0043": [
+        1758,
+        1797
+      ],
+      "ev_0048": [
+        2053,
+        2086
+      ],
+      "ev_0052": [
+        2062,
+        2121
+      ],
+      "ev_0055": [
+        2254,
+        2304
+      ],
+      "ev_0056": [
+        2269,
+        2306
+      ],
+      "ev_0058": [
+        2384,
+        2425
+      ],
+      "ev_0067": [
+        2832,
+        2877
+      ],
+      "ev_0071": [
+        2948,
+        2986
+      ],
+      "ev_0073": [
+        2958,
+        3013
+      ],
+      "ev_0075": [
+        3166,
+        3189
+      ],
+      "ev_0076": [
+        3158,
+        3203
+      ],
+      "ev_0077": [
+        3197,
+        3246
+      ],
+      "ev_0083": [
+        3514,
+        3555
+      ],
+      "ev_0086": [
+        3687,
+        3721
+      ],
+      "ev_0091": [
+        4538,
+        4586
+      ],
+      "ev_0093": [
+        4686,
+        4717
+      ],
+      "ev_0097": [
+        4804,
+        4850
+      ],
+      "ev_0105": [
+        5178,
+        5225
+      ],
+      "ev_0108": [
+        5283,
+        5319
+      ],
+      "ev_0109": [
+        5278,
+        5320
+      ],
+      "ev_0110": [
+        5303,
+        5345
+      ],
+      "ev_0116": [
+        5364,
+        5399
+      ],
+      "ev_0118": [
+        5374,
+        5410
+      ]
+    }
+  },
+  "trials": [
+    {
+      "event_id": "ev_0005",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:11:14+00:00",
+      "active_ms": 6880,
+      "replays": 3,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 244,
+          "end_frame": 254,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0007",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:11:49+00:00",
+      "active_ms": 5617,
+      "replays": 4,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 270,
+          "end_frame": 278,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0008",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:12:43+00:00",
+      "active_ms": 10190,
+      "replays": 4,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 386,
+          "end_frame": 396,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 396,
+          "end_frame": 406,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0009",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:13:16+00:00",
+      "active_ms": 3040,
+      "replays": 2,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 409,
+          "end_frame": 419,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0010",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:13:46+00:00",
+      "active_ms": 3417,
+      "replays": 2,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 419,
+          "end_frame": 430,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0012",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:14:42+00:00",
+      "active_ms": 13809,
+      "replays": 8,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 470,
+          "end_frame": 477,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "unknown",
+          "quality": "partial_occlusion"
+        },
+        {
+          "start_frame": 479,
+          "end_frame": 486,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0014",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:15:20+00:00",
+      "active_ms": 6390,
+      "replays": 3,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 510,
+          "end_frame": 523,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0017",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:15:56+00:00",
+      "active_ms": 7090,
+      "replays": 4,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 584,
+          "end_frame": 594,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0021",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:17:10+00:00",
+      "active_ms": 16018,
+      "replays": 10,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 704,
+          "end_frame": 710,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "feint",
+          "landed": "unknown",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 707,
+          "end_frame": 717,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "body",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 725,
+          "end_frame": 733,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "uppercut",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0029",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:18:30+00:00",
+      "active_ms": 10079,
+      "replays": 6,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 928,
+          "end_frame": 935,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 941,
+          "end_frame": 948,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0030",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:19:48+00:00",
+      "active_ms": 20985,
+      "replays": 12,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 938,
+          "end_frame": 945,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "uppercut",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 947,
+          "end_frame": 954,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 956,
+          "end_frame": 965,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0032",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:21:36+00:00",
+      "active_ms": 10986,
+      "replays": 11,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 936,
+          "end_frame": 945,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "uppercut",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 946,
+          "end_frame": 955,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 957,
+          "end_frame": 968,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0043",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:22:28+00:00",
+      "active_ms": 12864,
+      "replays": 5,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 1770,
+          "end_frame": 1779,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 1780,
+          "end_frame": 1793,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0048",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:24:10+00:00",
+      "active_ms": 18319,
+      "replays": 12,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 2063,
+          "end_frame": 2069,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 2067,
+          "end_frame": 2075,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 2075,
+          "end_frame": 2084,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0052",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:28:12+00:00",
+      "active_ms": 15444,
+      "replays": 10,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 2063,
+          "end_frame": 2070,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "feint",
+          "landed": "unknown",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 2076,
+          "end_frame": 2084,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 2086,
+          "end_frame": 2095,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0055",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:29:30+00:00",
+      "active_ms": 11984,
+      "replays": 6,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 2272,
+          "end_frame": 2281,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 2284,
+          "end_frame": 2293,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0056",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:30:14+00:00",
+      "active_ms": 10312,
+      "replays": 5,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 2272,
+          "end_frame": 2280,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 2284,
+          "end_frame": 2296,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0058",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:31:04+00:00",
+      "active_ms": 13505,
+      "replays": 8,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 2394,
+          "end_frame": 2401,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 2402,
+          "end_frame": 2411,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "partial_occlusion"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0067",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:31:47+00:00",
+      "active_ms": 2374,
+      "replays": 1,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 2852,
+          "end_frame": 2866,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0071",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:32:50+00:00",
+      "active_ms": 16070,
+      "replays": 10,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 2948,
+          "end_frame": 2956,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 2966,
+          "end_frame": 2974,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 2979,
+          "end_frame": 2986,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "uppercut",
+          "target": "head",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0073",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:33:51+00:00",
+      "active_ms": 7977,
+      "replays": 4,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 2964,
+          "end_frame": 2974,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 2979,
+          "end_frame": 2990,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "uppercut",
+          "target": "head",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0075",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:34:52+00:00",
+      "active_ms": 18011,
+      "replays": 11,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 3169,
+          "end_frame": 3175,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 3175,
+          "end_frame": 3182,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "partial_occlusion"
+        },
+        {
+          "start_frame": 3183,
+          "end_frame": 3189,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0076",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:35:28+00:00",
+      "active_ms": 3985,
+      "replays": 3,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 3173,
+          "end_frame": 3181,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0077",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:36:42+00:00",
+      "active_ms": 4556,
+      "replays": 2,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 3215,
+          "end_frame": 3224,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0083",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:37:10+00:00",
+      "active_ms": 4173,
+      "replays": 3,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 3535,
+          "end_frame": 3544,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0086",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:37:56+00:00",
+      "active_ms": 9240,
+      "replays": 6,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 3687,
+          "end_frame": 3692,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 3696,
+          "end_frame": 3704,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0091",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:38:28+00:00",
+      "active_ms": 8568,
+      "replays": 3,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 4560,
+          "end_frame": 4573,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "body",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0093",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:39:03+00:00",
+      "active_ms": 11458,
+      "replays": 7,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 4687,
+          "end_frame": 4695,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "feint",
+          "landed": "unknown",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 4694,
+          "end_frame": 4702,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0097",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:41:24+00:00",
+      "active_ms": 12207,
+      "replays": 6,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 4804,
+          "end_frame": 4815,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 4815,
+          "end_frame": 4824,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 4824,
+          "end_frame": 4833,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "body",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0105",
+      "fighter": "fighter_A",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:42:23+00:00",
+      "active_ms": 15901,
+      "replays": 9,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 5192,
+          "end_frame": 5203,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 5208,
+          "end_frame": 5216,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 5219,
+          "end_frame": 5228,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "hook",
+          "target": "body",
+          "completeness": "full",
+          "landed": "slipped",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0108",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:51:16+00:00",
+      "active_ms": 22205,
+      "replays": 14,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 5290,
+          "end_frame": 5295,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 5297,
+          "end_frame": 5307,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 5313,
+          "end_frame": 5319,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 5324,
+          "end_frame": 5332,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 5339,
+          "end_frame": 5350,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0109",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:51:17+00:00",
+      "active_ms": 0,
+      "replays": 0,
+      "revealed": false,
+      "punches": [],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0110",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:54:34+00:00",
+      "active_ms": 61386,
+      "replays": 25,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 5312,
+          "end_frame": 5322,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 5326,
+          "end_frame": 5336,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 5339,
+          "end_frame": 5350,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "hook",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 5351,
+          "end_frame": 5358,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0116",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:55:39+00:00",
+      "active_ms": 14088,
+      "replays": 7,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 5364,
+          "end_frame": 5372,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "hook",
+          "target": "body",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 5371,
+          "end_frame": 5379,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "landed",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 5390,
+          "end_frame": 5401,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    },
+    {
+      "event_id": "ev_0118",
+      "fighter": "fighter_B",
+      "annotator": "lucas",
+      "annotated_at": "2026-08-19T00:56:20+00:00",
+      "active_ms": 9889,
+      "replays": 4,
+      "revealed": false,
+      "punches": [
+        {
+          "start_frame": 5390,
+          "end_frame": 5400,
+          "peak_frame": null,
+          "side": "right",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "missed",
+          "quality": "clean"
+        },
+        {
+          "start_frame": 5403,
+          "end_frame": 5411,
+          "peak_frame": null,
+          "side": "left",
+          "punch_type": "straight",
+          "target": "head",
+          "completeness": "full",
+          "landed": "blocked",
+          "quality": "clean"
+        }
+      ],
+      "protocolo_v1": false
+    }
+  ]
+}

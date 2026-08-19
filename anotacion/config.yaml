@@ -1,0 +1,11 @@
+# Proyecto de anotacion de BoxTwin.
+#
+# annotator va a las metricas de proceso de cada evento. Es obligatorio para el analisis
+# de acuerdo: sin saber quien anoto que, ese analisis no se puede hacer.
+annotator: lucas
+
+# Las teclas se pueden remapear. Lo que se ponga acá se superpone al default, asi que no
+# hace falta listarlas todas. Ejemplo:
+# keymap:
+#   event.mark_start: "F1"
+#   event.mark_end: "F2"
