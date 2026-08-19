@@ -12,6 +12,18 @@ POR QUE EXISTE
   La ventana de cada intento viene con relleno aleatorio desde el archivo de muestra, asi
   que los bordes tampoco delatan las fronteras.
 
+  Se piden TODOS los golpes de ese peleador en la ventana, no uno. Pedir "reanota el evento
+  X" es irresoluble a ciegas, y no por poco: sobre la muestra real de Sparring.mp4, 26 de 35
+  ventanas contienen mas de un golpe del mismo peleador. Cerrar la ventana con cero golpes es
+  una respuesta valida.
+
+  De QUIEN son los golpes se dice, y en grande. No es una pista: el peleador es un dato del
+  intento, no algo que haya que adivinar, y sin decirlo la ventana es ambigua porque en el
+  cuadro hay dos personas golpeando. La primera corrida real se hizo sin este dato y el
+  reanotador marco los golpes del peleador que tenia seleccionado en la interfaz, que no era
+  el del intento: 15 de 34 intentos quedaron comparados contra el golpe equivocado, y el
+  kappa de punch_type dio 0,43 cuando el emparejamiento correcto daba 0,80.
+
   Revelar la etiqueta previa es posible y queda registrado. Prohibirlo no serviria, porque
   el archivo esta ahi para abrirlo; registrarlo hace que el intento no cuente como ciego y
   el reporte lo diga.
@@ -44,6 +56,7 @@ class ReannoPanel(QWidget):
     siguiente = Signal()
     revelar = Signal()
     salir = Signal()
+    confirmarVentana = Signal()
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -74,6 +87,15 @@ class ReannoPanel(QWidget):
         self.lbl_intento = QLabel("—")
         self.lbl_intento.setWordWrap(True)
         v.addWidget(self.lbl_intento)
+        self.b_confirmar = QPushButton("Confirmar ventana")
+        self.b_confirmar.setToolTip(
+            "Cierra el intento con los golpes marcados y pasa al siguiente.\n"
+            "Cerrarla sin ningun golpe es una respuesta valida."
+        )
+        self.b_confirmar.clicked.connect(self.confirmarVentana.emit)
+        self.b_confirmar.setEnabled(False)
+        v.addWidget(self.b_confirmar)
+
         self.b_revelar = QPushButton("Revelar la etiqueta original")
         self.b_revelar.setToolTip(
             "El intento queda marcado y no cuenta como ciego en el reporte"
@@ -96,9 +118,14 @@ class ReannoPanel(QWidget):
             "Mientras el modo está activo se ocultan las marcas del timeline y la lista de "
             "eventos: con la marca a la vista, el error de fronteras mediría cero por "
             "construcción.<br><br>"
-            "En cada intento hay que marcar el inicio y el final con <b>[</b> y <b>]</b> "
-            "dentro de la ventana, igual que al anotar. La ventana lleva relleno aleatorio, "
-            "así que sus bordes no dicen dónde está el golpe."
+            "En cada ventana hay que marcar <b>todos los golpes del peleador indicado</b>, "
+            "con <b>[</b> y <b>]</b> igual que al anotar, y después <b>Confirmar ventana</b>. "
+            "Si no ves ninguno, confirmala vacía: es una respuesta válida.<br><br>"
+            "El peleador se indica arriba y se fija solo. No se pide un golpe en particular "
+            "porque no se puede pedir sin decir dónde está, y en una combinación eso hace "
+            "que se reanote el de al lado. Cuál corresponde con cuál lo decide el reporte, "
+            "por solapamiento.<br><br>"
+            "La ventana lleva relleno aleatorio, así que sus bordes no dicen dónde está nada."
         )
         self.ayuda.setWordWrap(True)
         self.ayuda.setTextFormat(Qt.TextFormat.RichText)
@@ -108,7 +135,10 @@ class ReannoPanel(QWidget):
 
     # -- estado ------------------------------------------------------------
 
-    def refrescar(self, doc_re, activo: bool, actual: str | None, revelado: bool) -> None:
+    def refrescar(
+        self, doc_re, activo: bool, actual: str | None, revelado: bool,
+        fighter: str | None = None, marcados: int = 0,
+    ) -> None:
         if doc_re is None:
             self.lbl_estado.setText(
                 "sin muestra sorteada.<br>Sortearla con "
@@ -135,13 +165,25 @@ class ReannoPanel(QWidget):
         self.b_siguiente.setEnabled(activo)
         self.b_salir.setEnabled(activo)
         self.b_revelar.setEnabled(activo and actual is not None and not revelado)
+        self.b_confirmar.setEnabled(activo and actual is not None)
+        self.b_confirmar.setText(
+            f"Confirmar ventana ({marcados} golpes)" if marcados
+            else "Confirmar ventana (sin golpes)"
+        )
 
         if actual is None:
             self.lbl_intento.setText("—" if not activo else "sin intentos pendientes")
         else:
             ini, fin = doc_re.ventana(actual)
+            color = "#ec584c" if fighter == "fighter_A" else "#4a9eeb"
+            quien = (
+                f"<span style='color:{color}; font-size:15pt'><b>{fighter}</b></span><br>"
+                if fighter else ""
+            )
             self.lbl_intento.setText(
-                f"ventana <b>{ini}–{fin}</b><br>marcar inicio y final adentro"
+                f"{quien}ventana <b>{ini}–{fin}</b><br>"
+                f"marcá <b>todos</b> sus golpes en este tramo<br>"
+                f"llevás <b>{marcados}</b>"
             )
             self.lbl_intento.setTextFormat(Qt.TextFormat.RichText)
         self.lbl_revelado.setText(

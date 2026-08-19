@@ -114,8 +114,8 @@ def intento(eid: str, ini: int, fin: int, *, revealed: bool = False, **kw) -> Re
     )
     labels.update(kw)
     return ReannoTrial(
-        event_id=eid, annotator="lucas", annotated_at=T0, revealed=revealed,
-        labels=TrialLabels(**labels),
+        event_id=eid, fighter=FighterId.A, annotator="lucas", annotated_at=T0,
+        revealed=revealed, punches=[TrialLabels(**labels)],
     )
 
 
@@ -204,7 +204,8 @@ def test_ruido_simetrico_no_deja_sesgo(par) -> None:
 
 def test_avisa_con_n_bajo(par) -> None:
     doc, re_doc = par
-    re_doc.trials = [intento(doc.events[0].id, 100, 120)]
+    e = doc.events[0]
+    re_doc.trials = [intento(e.id, e.start_frame, e.end_frame)]
     r = comparar(doc, re_doc)
     assert any("inestable con n bajo" in a for a in r.avisos)
 
@@ -233,7 +234,7 @@ def test_sin_intentos(par) -> None:
     doc, re_doc = par
     r = comparar(doc, re_doc)
     assert r.dimensiones == {}
-    assert any("no hay intentos comparables" in a for a in r.avisos)
+    assert any("no hay golpes emparejados" in a for a in r.avisos)
 
 
 # -- salida ----------------------------------------------------------------
@@ -252,3 +253,81 @@ def test_el_texto_declara_el_n(par) -> None:
 
 def test_las_cuatro_dimensiones_del_enunciado() -> None:
     assert set(DIMENSIONES) == {"side", "punch_type", "target", "completeness"}
+
+
+# -- emparejamiento --------------------------------------------------------
+
+
+class Marca:
+    """Un golpe cualquiera con fronteras, que es lo unico que mira el emparejador."""
+
+    def __init__(self, ini: int, fin: int) -> None:
+        self.start_frame, self.end_frame = ini, fin
+
+
+def test_empareja_por_solapamiento() -> None:
+    from boxtwin.core.agreement import emparejar
+
+    parejas, faltan, sobran = emparejar([Marca(100, 110)], [Marca(101, 111)])
+    assert parejas and parejas[0][:2] == (0, 0)
+    assert not faltan and not sobran
+
+
+def test_no_empareja_lo_que_no_se_toca() -> None:
+    from boxtwin.core.agreement import emparejar
+
+    parejas, faltan, sobran = emparejar([Marca(100, 110)], [Marca(200, 210)])
+    assert parejas == []
+    assert faltan == [0] and sobran == [0]
+
+
+def test_una_combinacion_no_se_colapsa_en_una_pareja() -> None:
+    """
+    Uno a uno: sin esa restriccion un golpe reanotado largo se llevaria los dos de un 1-2 y
+    el recall saldria inflado.
+    """
+    from boxtwin.core.agreement import emparejar
+
+    jab, cross = Marca(100, 110), Marca(108, 120)
+    largo = Marca(100, 120)
+    parejas, faltan, sobran = emparejar([jab, cross], [largo])
+    assert len(parejas) == 1
+    assert len(faltan) == 1
+
+
+def test_el_mejor_solapamiento_gana() -> None:
+    from boxtwin.core.agreement import emparejar
+
+    parejas, _, _ = emparejar([Marca(100, 110)], [Marca(130, 140), Marca(101, 111)])
+    assert parejas[0][1] == 1
+
+
+def test_deteccion_cuenta_omitidos_y_agregados(par) -> None:
+    """Los dos numeros que la v1 no podia dar: si el golpe se encontro."""
+    doc, re_doc = par
+    e = doc.events[0]
+    # Se marca el golpe correcto y ademas uno que no existe en la anotacion.
+    t = intento(e.id, e.start_frame, e.end_frame)
+    t.punches = [*t.punches, TrialLabels(
+        start_frame=e.start_frame, end_frame=e.start_frame + 5,
+        side=Side.LEFT, punch_type=PunchType.HOOK, target=Target.HEAD,
+        completeness=Completeness.FULL,
+    )]
+    re_doc.trials = [t]
+    r = comparar(doc, re_doc)
+    assert r.deteccion["emparejados"] == 1
+    assert r.deteccion["agregados"] == 1
+    assert r.deteccion["precision"] == 0.5
+
+
+def test_una_ventana_vacia_es_una_respuesta(par) -> None:
+    """Cero golpes es "no vi ninguno", no un intento invalido."""
+    doc, re_doc = par
+    e = doc.events[0]
+    t = intento(e.id, e.start_frame, e.end_frame)
+    t.punches = []
+    re_doc.trials = [t]
+    r = comparar(doc, re_doc)
+    assert r.deteccion["ventanas_sin_ningun_golpe"] == 1
+    assert r.deteccion["omitidos"] >= 1
+    assert r.deteccion["recall"] == 0.0

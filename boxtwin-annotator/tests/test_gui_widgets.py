@@ -203,3 +203,36 @@ def test_timeline_conoce_todos_los_tipos_de_golpe() -> None:
     from boxtwin.core.constants import PUNCH_COLORS
 
     assert set(PUNCH_COLORS) == {t.value for t in PunchType}
+
+
+# -- reanotacion ciega: el peleador lo fija el intento ----------------------
+
+
+def test_el_panel_de_reanno_dice_de_que_peleador_es(app) -> None:
+    """
+    Sin este dato la ventana es ambigua: en el cuadro hay dos personas golpeando.
+
+    La primera corrida real se hizo sin mostrarlo y el reanotador marco los golpes del
+    peleador que tenia seleccionado en la interfaz, no el del intento.
+    """
+    from boxtwin.gui.widgets.reanno_panel import ReannoPanel
+
+    class DocRe:
+        class sample:
+            n = 3
+            seed = 42
+            drawn_by = "lucas"
+
+        trials: list = []
+
+        def pendientes(self):
+            return ["ev_0001"]
+
+        def ventana(self, _):
+            return (100, 140)
+
+    panel = ReannoPanel()
+    panel.refrescar(DocRe(), True, "ev_0001", False, "fighter_B")
+    assert "fighter_B" in panel.lbl_intento.text()
+    panel.refrescar(DocRe(), True, "ev_0001", False, "fighter_A")
+    assert "fighter_A" in panel.lbl_intento.text()

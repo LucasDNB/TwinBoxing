@@ -110,6 +110,9 @@ class MainWindow(QMainWindow):
         self._sucio = False
         self._resembrando: TrackRole | None = None
         self._reanno = self._cargar_reanno()
+        self._reanno_golpes: list[TrialLabels] = []
+        self._reanno_ms = 0
+        self._reanno_replays = 0
         self._reanno_activo = False
         self._reanno_actual: str | None = None
         self._reanno_revelado = False
@@ -141,6 +144,7 @@ class MainWindow(QMainWindow):
         self.reanno.siguiente.connect(self._reanno_siguiente)
         self.reanno.revelar.connect(self._reanno_revelar)
         self.reanno.salir.connect(self._reanno_salir)
+        self.reanno.confirmarVentana.connect(self._reanno_confirmar_ventana)
 
         self._autosave = QTimer(self)
         self._autosave.timeout.connect(self._guardar_si_hace_falta)
@@ -369,6 +373,15 @@ class MainWindow(QMainWindow):
     # -- anotacion ---------------------------------------------------------
 
     def _elegir_peleador(self, f: FighterId) -> None:
+        if self._reanno_activo and self._reanno_actual is not None:
+            # En modo ciego el peleador lo fija el intento. Dejarlo cambiar por un atajo
+            # apretado de costumbre reintroduce el error que este bloqueo existe para evitar,
+            # y es un error mudo: el golpe queda registrado bajo el peleador equivocado y el
+            # reporte lo cuenta como desacuerdo de etiqueta.
+            self.statusBar().showMessage(
+                "en modo ciego el peleador lo fija el intento; no se puede cambiar", 3000
+            )
+            return
         self.fighter = f
         # Si el filtro de un solo peleador esta puesto, sigue al que se acaba de elegir.
         if self.view.options.only_fighter is not None:
@@ -637,7 +650,7 @@ class MainWindow(QMainWindow):
         if not ruta.is_file():
             return None
         try:
-            return cargar_reanno(ruta)
+            return cargar_reanno(ruta, self.session.doc)
         except Exception:  # noqa: BLE001
             return None
 
@@ -655,6 +668,9 @@ class MainWindow(QMainWindow):
         self._reanno_activo = False
         self._reanno_actual = None
         self._reanno_revelado = False
+        self._reanno_golpes = []
+        self._reanno_ms = 0
+        self._reanno_replays = 0
         self.timeline.set_blind(False)
         self.lista.setEnabled(True)
         self._cancelar_abierto()
@@ -672,6 +688,15 @@ class MainWindow(QMainWindow):
             self._refrescar_reanno()
             return
         self._reanno_actual = pendientes[0]
+        self._reanno_golpes = []
+        self._reanno_ms = 0
+        self._reanno_replays = 0
+        # El peleador lo fija el intento, no la seleccion de la interfaz. Sin esto el
+        # reanotador marca el golpe del que tenia seleccionado, que en general no es el del
+        # intento, y el reporte compara contra el evento equivocado.
+        ev = self.session.doc.event_by_id(self._reanno_actual)
+        if ev is not None:
+            self.fighter = ev.fighter
         inicio, _ = self._reanno.ventana(self._reanno_actual)
         self.player.seek(inicio)
         self._refrescar_reanno()
@@ -709,37 +734,73 @@ class MainWindow(QMainWindow):
             return
 
         evento, metricas = dlg.resultado()
+        # Se acumula, no se cierra el intento. La ventana puede contener varios golpes del
+        # mismo peleador: sobre la muestra real de Sparring.mp4 son 26 de 35. Cerrarla al
+        # primero es lo que hacia la v1, y ahi el reporte terminaba comparando contra el
+        # golpe de al lado.
+        self._reanno_golpes.append(
+            TrialLabels(
+                start_frame=evento.start_frame,
+                end_frame=evento.end_frame,
+                peak_frame=evento.peak_frame,
+                side=evento.side,
+                punch_type=evento.punch_type,
+                target=evento.target,
+                completeness=evento.completeness,
+                landed=evento.landed,
+                quality=evento.quality,
+            )
+        )
+        self._reanno_ms += metricas.active_ms
+        self._reanno_replays += metricas.replays
+        self.player.seek(evento.end_frame)
+        self.statusBar().showMessage(
+            f"{len(self._reanno_golpes)} marcados en esta ventana; confirmá cuando no "
+            "quede ninguno", 4000
+        )
+        self._refrescar_reanno()
+
+    def _reanno_confirmar_ventana(self) -> None:
+        """
+        Cierra el intento con los golpes marcados, que pueden ser cero.
+
+        Cero es una respuesta valida y significativa: "no vi ningun golpe aca". Sin esa
+        opcion el reanotador queda obligado a inventar uno y el numero deja de medir.
+        """
+        if self._reanno is None or self._reanno_actual is None:
+            return
+        self._cancelar_abierto()
+        ev = self.session.doc.event_by_id(self._reanno_actual)
+        if ev is None:
+            return
         self._reanno.trials = [
             *self._reanno.trials,
             ReannoTrial(
                 event_id=self._reanno_actual,
+                fighter=ev.fighter,
                 annotator=self.session.annotator,
                 annotated_at=datetime.now().astimezone(),
-                active_ms=metricas.active_ms,
-                replays=metricas.replays,
+                active_ms=self._reanno_ms,
+                replays=self._reanno_replays,
                 revealed=self._reanno_revelado,
-                labels=TrialLabels(
-                    start_frame=evento.start_frame,
-                    end_frame=evento.end_frame,
-                    peak_frame=evento.peak_frame,
-                    side=evento.side,
-                    punch_type=evento.punch_type,
-                    target=evento.target,
-                    completeness=evento.completeness,
-                    landed=evento.landed,
-                    quality=evento.quality,
-                ),
+                punches=list(self._reanno_golpes),
             ),
         ]
         guardar_reanno(self._reanno, self._reanno_path)
         self.statusBar().showMessage(
-            f"intento registrado ({len(self._reanno.trials)} de {self._reanno.sample.n})", 3000
+            f"ventana cerrada con {len(self._reanno_golpes)} golpes "
+            f"({len(self._reanno.trials)} de {self._reanno.sample.n})", 3000
         )
         self._reanno_siguiente()
 
     def _refrescar_reanno(self) -> None:
+        objetivo = None
+        if self._reanno_actual is not None:
+            ev = self.session.doc.event_by_id(self._reanno_actual)
+            objetivo = ev.fighter.value if ev is not None else None
         self.reanno.refrescar(
-            self._reanno, self._reanno_activo, self._reanno_actual, self._reanno_revelado
+            self._reanno, self._reanno_activo, self._reanno_actual, self._reanno_revelado,
+            objetivo, len(self._reanno_golpes),
         )
         self._refresh_status()
 

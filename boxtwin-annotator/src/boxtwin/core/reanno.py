@@ -19,9 +19,22 @@ POR QUE EXISTE
   El reanotador puede revelar la etiqueta original, pero ese intento queda marcado y no
   cuenta como ciego. Prohibirlo no serviria: el que quiera mirar mira igual. Registrarlo si.
 
+  Cada intento pide TODOS los golpes de un peleador en la ventana, no uno solo. La v1 pedia
+  reanotar "el evento X" y eso es irresoluble a ciegas: en boxeo los golpes se encadenan, y
+  sin revelar donde esta el objetivo no hay forma de saber a cual se refiere. Medido sobre la
+  muestra real de Sparring.mp4, 26 de 35 ventanas contienen mas de un golpe del mismo
+  peleador, y en la primera corrida 15 de 34 intentos ciegos reanotaron el golpe de al lado.
+  El reporte los conto como desacuerdo de etiqueta: kappa de punch_type dio 0,43 cuando el
+  emparejamiento por solapamiento daba 0,80, y el error de frontera dio 8,1 cuadros cuando el
+  real era 1,4. El protocolo medi­a su propia ambiguedad.
+
+  Pedir la ventana entera vuelve el emparejamiento un paso explicito de la evaluacion, con su
+  umbral declarado, que es como se evalua deteccion temporal de acciones. Y mide algo que la
+  v1 no podia: si el golpe se encontro, no solo si se etiqueto igual.
+
 QUE HACE
   Sortea la muestra de forma determinista, define la ventana de cada intento y persiste el
-  archivo de reanotacion.
+  archivo de reanotacion. Migra los archivos de la v1.
 
 USO
   doc_re = sortear(doc, fraction=0.10, seed=42, annotator="lucas")
@@ -49,6 +62,7 @@ from boxtwin.core.schema import (
 )
 from boxtwin.core.types import (
     Completeness,
+    FighterId,
     Landed,
     PunchType,
     Quality,
@@ -67,10 +81,11 @@ __all__ = [
     "ventana_de_intento",
     "cargar",
     "guardar",
+    "migrar_v1",
     "SampleFrozenError",
 ]
 
-REANNO_SCHEMA_VERSION = 1
+REANNO_SCHEMA_VERSION = 2
 REANNO_KIND = "boxtwin.reanno"
 
 # Relleno aleatorio a cada lado de la ventana del intento. El rango es amplio a proposito:
@@ -98,14 +113,30 @@ class TrialLabels(BoxTwinModel):
 
 
 class ReannoTrial(BoxTwinModel):
+    """
+    Lo que el reanotador marco en una ventana.
+
+    `event_id` es el ANCLA: el evento alrededor del cual se sorteo la ventana. No es el
+    evento que hay que reanotar, y no se le muestra al reanotador. La tarea es marcar todos
+    los golpes del peleador que caen en la ventana, y cual corresponde con cual lo decide el
+    emparejamiento del reporte.
+
+    `punches` vacio es una respuesta valida y significativa: "no vi ningun golpe aca". Sin esa
+    opcion el reanotador queda obligado a inventar uno y el numero deja de medir.
+    """
+
     event_id: str
+    fighter: FighterId
     annotator: str
     annotated_at: Timestamp
     active_ms: Annotated[int, Field(ge=0)] = 0
     replays: Annotated[int, Field(ge=0)] = 0
     # Un intento revelado no cuenta como ciego. No se prohibe, se registra.
     revealed: bool = False
-    labels: TrialLabels
+    punches: list[TrialLabels] = Field(default_factory=list)
+    # Producido bajo el protocolo v1, que preguntaba por un evento sin decir cual. Se
+    # conserva porque es evidencia, pero el reporte tiene que declararlo.
+    protocolo_v1: bool = False
 
 
 class ReannoSample(BoxTwinModel):
@@ -233,10 +264,57 @@ def guardar(doc: ReannoDoc, path: Path) -> None:
         raise
 
 
-def cargar(path: Path) -> ReannoDoc:
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
+def migrar_v1(data: dict, doc: AnnotationDoc | None = None) -> dict:
+    """
+    v1 -> v2: cada intento tenia un solo golpe, ahora tiene una lista.
+
+    Los intentos de la v1 se conservan porque son evidencia de como se produjo el dato, pero
+    quedan marcados: una lista de un elemento no significa "vi un solo golpe" sino "el
+    protocolo solo me dejaba marcar uno", y sus numeros de deteccion no significan nada.
+
+    El peleador sale del evento ancla, que es lo unico que la v1 guardaba al respecto.
+    """
+    data = dict(data)
+    data["schema_version"] = 2
+    nuevos = []
+    for t in data.get("trials", []):
+        t = dict(t)
+        labels = t.pop("labels", None)
+        t["punches"] = [labels] if labels is not None else []
+        if "fighter" not in t:
+            ev = doc.event_by_id(t["event_id"]) if doc is not None else None
+            t["fighter"] = ev.fighter.value if ev is not None else FighterId.A.value
+        t["protocolo_v1"] = True
+        nuevos.append(t)
+    data["trials"] = nuevos
+    return data
+
+
+def cargar(path: Path, doc: AnnotationDoc | None = None) -> ReannoDoc:
+    """
+    Lee el archivo, migrando de la v1 si hace falta.
+
+    `doc` solo se usa para recuperar el peleador de los intentos viejos. Sin el la migracion
+    funciona igual pero esos intentos quedan con el peleador por defecto.
+    """
+    path = Path(path)
+    data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("kind") != REANNO_KIND:
         raise ValueError(f"{path} no es un archivo de reanotacion")
+    version = int(data.get("schema_version", 1))
+    if version > REANNO_SCHEMA_VERSION:
+        raise ValueError(
+            f"{path.name} es de esquema v{version} y esta version entiende hasta la "
+            f"v{REANNO_SCHEMA_VERSION}. No se puede bajar de version adivinando."
+        )
+    if version < 2:
+        # Respaldo antes de tocar nada: el original es la evidencia de como se produjo.
+        respaldo = path.with_name(path.name + f".v{version}.bak")
+        if not respaldo.exists():
+            respaldo.write_text(
+                json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
+            )
+        data = migrar_v1(data, doc)
     return ReannoDoc.model_validate(data)
 
 
@@ -257,7 +335,7 @@ def cargar_o_sortear(
     """
     path = Path(path)
     if path.is_file() and not force:
-        existente = cargar(path)
+        existente = cargar(path, doc)
         if existente.source_annot_sha256 != annot_sha(doc):
             raise SampleFrozenError(
                 f"{path.name} se sorteo sobre otra version de la anotacion.\n"

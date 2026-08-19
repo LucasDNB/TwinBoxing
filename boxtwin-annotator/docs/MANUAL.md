@@ -302,24 +302,63 @@ Las clases por defecto son por lado: `straight-left`, `straight-right`, `hook-le
 
 ## 10. Reanotación ciega
 
-Para medir cuánto se contradice tu propia anotación.
+Para medir cuánto se contradice tu propia anotación. Es el número que hace defendible un
+dataset propio.
 
 ```bash
-boxtwin-annotator reanno videos/Sparring.mp4 --fraction 0.10 --seed 42
+boxtwin-annotator reanno videos/Sparring.mp4 --fraction 0.30 --seed 42
 ```
 
 Sortea una muestra y **la congela**. Después, desde la pestaña **Reanotación**, botón
-*Empezar*. Mientras el modo está activo se ocultan las marcas del timeline y la lista de
-eventos, y cada intento se presenta en una ventana con relleno aleatorio, para que nada
-delate dónde está el golpe.
+*Empezar*.
 
-Marcás inicio y final con `[` y `]` como siempre, y clasificás. Al terminar:
+### Cómo es la tarea
+
+En cada ventana marcás **todos los golpes del peleador indicado**, con `[` y `]` igual que
+al anotar, y después **Confirmar ventana**. Si no ves ninguno, confirmala vacía: es una
+respuesta válida y significativa.
+
+El peleador se indica arriba en su color y **se fija solo**: mientras el modo esté activo no
+se puede cambiar con el atajo.
+
+No se te pide un golpe en particular, y eso es deliberado. Pedirlo sería irresoluble sin
+decirte dónde está, que es justo lo que se está midiendo. Cuál de tus marcas corresponde con
+cuál de la anotación original lo decide el reporte, emparejando por solapamiento temporal.
+
+> **Por qué cambió esto.** La primera versión pedía reanotar un evento sin decir cuál. Sobre
+> `Sparring.mp4`, 26 de 35 ventanas contienen más de un golpe del mismo peleador, y en la
+> corrida real 15 de 34 intentos reanotaron el golpe de al lado. El reporte los contó como
+> desacuerdo de etiqueta: kappa de `punch_type` dio 0,43 cuando el emparejamiento correcto
+> daba 0,80, y el error de frontera dio 8,1 cuadros cuando el real era 1,4. El protocolo
+> medía su propia ambigüedad.
+
+Mientras el modo está activo se ocultan las marcas del timeline y la lista de eventos, y la
+ventana lleva relleno aleatorio, así que ni la interfaz ni los bordes dicen dónde está nada.
+
+### El reporte
 
 ```bash
 boxtwin-annotator reanno videos/Sparring.mp4 --report
 ```
 
-Da kappa de Cohen por dimensión y el error de fronteras en cuadros.
+Da dos familias de números que **no hay que confundir**.
+
+**Detección**: si el golpe se encontró. Un golpe de la anotación sin pareja es una omisión;
+uno de la reanotación sin pareja puede ser un golpe que la primera pasada se perdió, y en
+ese caso el dataset está incompleto.
+
+**Clasificación**: kappa de Cohen por dimensión, sobre los golpes que las dos pasadas
+encontraron, más el error de fronteras en cuadros.
+
+Se lee en ese orden. Un kappa alto con recall bajo describe a alguien consistente en lo que
+ve y que ve poco, y eso no se arregla igual que lo contrario.
+
+### Archivos de versiones anteriores
+
+Un `reanno.json` de la v1 se migra solo al abrirlo, dejando `<archivo>.v1.bak` con el
+original. Los intentos migrados quedan marcados como `protocolo_v1` y el reporte lo declara:
+cada uno podía marcar un solo golpe por construcción, así que sus números de detección no
+significan nada.
 
 ---
 

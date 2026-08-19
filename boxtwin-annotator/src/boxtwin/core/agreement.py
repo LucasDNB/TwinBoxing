@@ -20,8 +20,20 @@ POR QUE EXISTE
   precision; un sesgo consistente significa que la definicion se esta interpretando distinto,
   y eso se arregla cambiando la definicion, no esforzandose mas.
 
+  El emparejamiento entre lo anotado y lo reanotado es un paso EXPLICITO con su umbral
+  declarado, y no una correspondencia dada por el protocolo. Tiene que serlo: cada intento
+  pide todos los golpes de un peleador en una ventana, asi que cuantos hay y cual va con cual
+  es parte de lo que se mide, no un dato de entrada.
+
+  De ahi salen dos familias de numeros que no hay que confundir. La DETECCION dice si el
+  golpe se encontro: uno de la anotacion sin pareja es una omision, uno de la reanotacion sin
+  pareja es un golpe que la primera pasada no marco. La CLASIFICACION dice si, sobre los que
+  las dos pasadas encontraron, la etiqueta coincide. Un kappa alto con recall bajo describe a
+  alguien consistente en lo que ve y que ve poco, y eso no se arregla igual que lo contrario.
+
 QUE HACE
-  Arma matriz de confusion y kappa por dimension, y estadisticas de error de frontera.
+  Empareja por solapamiento temporal, arma matriz de confusion y kappa por dimension,
+  estadisticas de error de frontera, y precision y recall de deteccion.
 
 USO
   reporte = comparar(doc, doc_re)
@@ -37,7 +49,18 @@ from boxtwin.core.reanno import ReannoDoc
 from boxtwin.core.schema import AnnotationDoc
 from boxtwin.core.types import Completeness, PunchType, Side, Target
 
-__all__ = ["DIMENSIONES", "Acuerdo", "cohen_kappa", "matriz_confusion", "comparar"]
+__all__ = [
+    "DIMENSIONES", "Acuerdo", "cohen_kappa", "matriz_confusion", "comparar",
+    "emparejar", "iou_temporal", "IOU_MINIMO",
+]
+
+# Solapamiento temporal minimo para considerar que dos marcas son el mismo golpe.
+#
+# 0,3 y no 0,5. Los golpes duran unos 10 cuadros, asi que exigir 0,5 descartaria parejas que
+# difieren en 3 o 4 cuadros de frontera, y ese error de frontera es justo lo que se quiere
+# MEDIR, no excluir. Un umbral que descarta los casos dificiles reporta el error de los
+# faciles. Con 0,3 entra todo lo que un humano llamaria "el mismo golpe".
+IOU_MINIMO = 0.3
 
 # Las cuatro que pide el enunciado. landed y quality quedan afuera del reporte principal
 # porque son estimaciones del anotador sobre algo que un sistema monocular no observa, y
@@ -72,6 +95,7 @@ class Reporte:
     n_revelados: int
     dimensiones: dict[str, Acuerdo] = field(default_factory=dict)
     fronteras: dict[str, Any] = field(default_factory=dict)
+    deteccion: dict[str, Any] = field(default_factory=dict)
     avisos: list[str] = field(default_factory=list)
 
 
@@ -113,6 +137,54 @@ def _valor(obj, campo: str) -> str:
     return v.value if hasattr(v, "value") else str(v)
 
 
+def iou_temporal(a1: int, a2: int, b1: int, b2: int) -> float:
+    """Solapamiento sobre union de dos rangos inclusivos de cuadros."""
+    inter = max(0, min(a2, b2) - max(a1, b1) + 1)
+    if inter == 0:
+        return 0.0
+    union = (a2 - a1 + 1) + (b2 - b1 + 1) - inter
+    return inter / union if union > 0 else 0.0
+
+
+def emparejar(
+    originales: Sequence, reanotados: Sequence, *, min_iou: float = IOU_MINIMO
+) -> tuple[list[tuple[int, int, float]], list[int], list[int]]:
+    """
+    Empareja golpes por solapamiento temporal. Devuelve (parejas, omitidos, agregados).
+
+    Codicioso por solapamiento descendente y uno a uno. Codicioso y no optimo global a
+    proposito: con dos o tres golpes por ventana las dos soluciones coinciden, y el codicioso
+    se explica en una linea en el capitulo, que para un numero que hay que defender vale mas
+    que un decimal.
+
+    Uno a uno importa: sin esa restriccion un golpe reanotado largo se emparejaria con los
+    dos golpes de un 1-2 y el recall saldria inflado.
+    """
+    candidatos = []
+    for i, o in enumerate(originales):
+        for j, r in enumerate(reanotados):
+            v = iou_temporal(o.start_frame, o.end_frame, r.start_frame, r.end_frame)
+            if v >= min_iou:
+                candidatos.append((v, i, j))
+    candidatos.sort(key=lambda x: (-x[0], x[1], x[2]))
+
+    parejas: list[tuple[int, int, float]] = []
+    usados_o: set[int] = set()
+    usados_r: set[int] = set()
+    for v, i, j in candidatos:
+        if i in usados_o or j in usados_r:
+            continue
+        parejas.append((i, j, v))
+        usados_o.add(i)
+        usados_r.add(j)
+
+    return (
+        parejas,
+        [i for i in range(len(originales)) if i not in usados_o],
+        [j for j in range(len(reanotados)) if j not in usados_r],
+    )
+
+
 def comparar(doc: AnnotationDoc, re_doc: ReannoDoc, *, solo_ciegos: bool = True) -> Reporte:
     """
     Compara la anotacion original contra su reanotacion.
@@ -120,6 +192,10 @@ def comparar(doc: AnnotationDoc, re_doc: ReannoDoc, *, solo_ciegos: bool = True)
     Por defecto solo entran los intentos ciegos. Un intento donde el reanotador miro la
     etiqueta previa mide otra cosa: mide si acepta lo que ya habia, no si llega a lo mismo
     por su cuenta.
+
+    De cada intento se toman los golpes del peleador que caen ENTEROS en la ventana. Un golpe
+    que asoma por el borde no se puede reanotar bien, y contarlo como omision seria castigar
+    al reanotador por lo que no se le mostro.
     """
     intentos = re_doc.trials
     ciegos = [t for t in intentos if not t.revealed]
@@ -131,24 +207,63 @@ def comparar(doc: AnnotationDoc, re_doc: ReannoDoc, *, solo_ciegos: bool = True)
         n_revelados=len(intentos) - len(ciegos),
     )
 
-    pares = []
+    pares: list[tuple[Any, Any]] = []
+    n_omitidos = n_agregados = n_originales = n_reanotados = 0
+    ventanas_vacias = 0
+    de_v1 = 0
+
     for t in usados:
-        original = doc.event_by_id(t.event_id)
-        if original is None:
+        if getattr(t, "protocolo_v1", False):
+            de_v1 += 1
+        if doc.event_by_id(t.event_id) is None:
             reporte.avisos.append(
-                f"el evento {t.event_id} ya no existe en la anotacion; se omite del reporte"
+                f"el evento ancla {t.event_id} ya no existe en la anotacion; se omite"
             )
             continue
-        pares.append((original, t))
+        try:
+            v_ini, v_fin = re_doc.ventana(t.event_id)
+        except KeyError:
+            reporte.avisos.append(f"el intento {t.event_id} no tiene ventana; se omite")
+            continue
+
+        originales = sorted(
+            (
+                e for e in doc.events
+                if e.fighter == t.fighter and v_ini <= e.start_frame and e.end_frame <= v_fin
+            ),
+            key=lambda e: e.start_frame,
+        )
+        parejas, omitidos, agregados = emparejar(originales, t.punches)
+
+        n_originales += len(originales)
+        n_reanotados += len(t.punches)
+        n_omitidos += len(omitidos)
+        n_agregados += len(agregados)
+        if not t.punches:
+            ventanas_vacias += 1
+        for i, j, _ in parejas:
+            pares.append((originales[i], t.punches[j]))
+
+    reporte.deteccion = {
+        "golpes_en_la_anotacion": n_originales,
+        "golpes_en_la_reanotacion": n_reanotados,
+        "emparejados": len(pares),
+        "omitidos": n_omitidos,
+        "agregados": n_agregados,
+        "recall": round(len(pares) / n_originales, 4) if n_originales else None,
+        "precision": round(len(pares) / n_reanotados, 4) if n_reanotados else None,
+        "iou_minimo": IOU_MINIMO,
+        "ventanas_sin_ningun_golpe": ventanas_vacias,
+    }
 
     if not pares:
-        reporte.avisos.append("no hay intentos comparables")
+        reporte.avisos.append("no hay golpes emparejados; no se puede calcular acuerdo")
         return reporte
 
     for dim, valores in DIMENSIONES.items():
         etiquetas = [v.value for v in valores]
         a = [_valor(o, dim) for o, _ in pares]
-        b = [_valor(t.labels, dim) for _, t in pares]
+        b = [_valor(r, dim) for _, r in pares]
         m = matriz_confusion(a, b, etiquetas)
         po, pe, kappa, nota = cohen_kappa(m)
         reporte.dimensiones[dim] = Acuerdo(
@@ -158,12 +273,9 @@ def comparar(doc: AnnotationDoc, re_doc: ReannoDoc, *, solo_ciegos: bool = True)
         )
 
     # -- fronteras
-    d_ini = [t.labels.start_frame - o.start_frame for o, t in pares]
-    d_fin = [t.labels.end_frame - o.end_frame for o, t in pares]
-    d_dur = [
-        (t.labels.end_frame - t.labels.start_frame) - (o.end_frame - o.start_frame)
-        for o, t in pares
-    ]
+    d_ini = [r.start_frame - o.start_frame for o, r in pares]
+    d_fin = [r.end_frame - o.end_frame for o, r in pares]
+    d_dur = [(r.end_frame - r.start_frame) - (o.end_frame - o.start_frame) for o, r in pares]
     reporte.fronteras = {
         "n": len(pares),
         "start": _resumen_error(d_ini),
@@ -173,8 +285,29 @@ def comparar(doc: AnnotationDoc, re_doc: ReannoDoc, *, solo_ciegos: bool = True)
 
     if len(pares) < N_MINIMO:
         reporte.avisos.append(
-            f"solo {len(pares)} intentos comparados: kappa es inestable con n bajo y el "
+            f"solo {len(pares)} golpes emparejados: kappa es inestable con n bajo y el "
             "intervalo de confianza es amplio. No conviene reportar el valor sin el n."
+        )
+    if de_v1:
+        reporte.avisos.append(
+            f"{de_v1} intentos vienen del protocolo v1, que pedia reanotar un evento sin "
+            "decir cual. Sobre material con combinaciones eso hace que se reanote el golpe "
+            "de al lado, y ademas cada intento podia marcar un solo golpe por construccion: "
+            "sus numeros de deteccion no significan nada. Rehacer la muestra antes de "
+            "reportar."
+        )
+    d = reporte.deteccion
+    if d.get("recall") is not None and d["recall"] < 0.9:
+        reporte.avisos.append(
+            f"recall de deteccion {d['recall']:.2f}: {d['omitidos']} golpes de la anotacion "
+            "no aparecieron en la reanotacion. Eso se mira antes que kappa: una etiqueta "
+            "consistente sobre los golpes que se ven no dice nada de los que no se ven."
+        )
+    if d.get("precision") is not None and d["precision"] < 0.9:
+        reporte.avisos.append(
+            f"precision de deteccion {d['precision']:.2f}: {d['agregados']} golpes marcados "
+            "en la reanotacion no estaban en la anotacion. Pueden ser golpes que la primera "
+            "pasada se perdio, y en ese caso el dataset esta incompleto."
         )
     if reporte.n_revelados:
         reporte.avisos.append(
@@ -239,9 +372,29 @@ def a_texto(r: Reporte) -> str:
         f"intentos: {r.n_intentos} ({r.n_ciegos} ciegos, {r.n_revelados} revelados)",
         "",
     ]
-    if not r.dimensiones:
-        return "\n".join(lineas + ["sin intentos comparables", ""])
+    d = r.deteccion
+    if d:
+        # La deteccion va PRIMERO. Un kappa alto sobre los golpes que las dos pasadas
+        # encontraron no dice nada de los que una de las dos no vio, y leerlo sin el recall
+        # al lado invita a esa confusion.
+        rec = "n/d" if d.get("recall") is None else f"{d['recall']:.3f}"
+        pre = "n/d" if d.get("precision") is None else f"{d['precision']:.3f}"
+        lineas += [
+            "deteccion (emparejado por solapamiento temporal >= "
+            f"{d['iou_minimo']:.2f})",
+            f"  golpes en la anotacion   {d['golpes_en_la_anotacion']:4d}",
+            f"  golpes en la reanotacion {d['golpes_en_la_reanotacion']:4d}",
+            f"  emparejados              {d['emparejados']:4d}",
+            f"  omitidos                 {d['omitidos']:4d}   (estaban y no se marcaron)",
+            f"  agregados                {d['agregados']:4d}   (se marcaron y no estaban)",
+            f"  recall {rec}   precision {pre}",
+            "",
+        ]
 
+    if not r.dimensiones:
+        return "\n".join(lineas + ["sin golpes emparejados", ""])
+
+    lineas.append("clasificacion, sobre los golpes emparejados")
     lineas.append(f"{'dimension':14s} {'n':>4s} {'acuerdo':>8s} {'azar':>6s} {'kappa':>7s}")
     for dim, ac in r.dimensiones.items():
         k = "n/d" if ac.kappa is None else f"{ac.kappa:.3f}"
