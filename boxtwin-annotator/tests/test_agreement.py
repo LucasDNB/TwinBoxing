@@ -315,8 +315,8 @@ def test_deteccion_cuenta_omitidos_y_agregados(par) -> None:
     )]
     re_doc.trials = [t]
     r = comparar(doc, re_doc)
-    assert r.deteccion["emparejados"] == 1
-    assert r.deteccion["agregados"] == 1
+    assert r.deteccion["golpes_encontrados"] == 1
+    assert r.deteccion["marcas_sin_correspondencia"] == 1
     assert r.deteccion["precision"] == 0.5
 
 
@@ -331,3 +331,38 @@ def test_una_ventana_vacia_es_una_respuesta(par) -> None:
     assert r.deteccion["ventanas_sin_ningun_golpe"] == 1
     assert r.deteccion["omitidos"] >= 1
     assert r.deteccion["recall"] == 0.0
+
+
+def test_un_evento_en_dos_ventanas_es_una_sola_observacion(par) -> None:
+    """
+    Las ventanas se solapan. Sin deduplicar, el mismo golpe aporta dos observaciones: sobre
+    la corrida real de Sparring.mp4, 60 parejas eran 52 eventos distintos. Contarlo dos veces
+    no agrega informacion y estrecha el intervalo de kappa mas de lo que corresponde.
+    """
+    doc, re_doc = par
+    e = doc.events[0]
+    # Dos intentos distintos cuyas ventanas contienen el mismo evento.
+    re_doc.sample.windows[doc.events[1].id] = [e.start_frame - 5, e.end_frame + 5]
+    re_doc.trials = [
+        intento(e.id, e.start_frame, e.end_frame),
+        intento(doc.events[1].id, e.start_frame, e.end_frame),
+    ]
+    r = comparar(doc, re_doc)
+    assert r.dimensiones["side"].n == 1
+
+
+def test_un_golpe_que_asoma_por_el_borde_no_es_un_agregado(par) -> None:
+    """
+    Si el golpe no entra entero en la ventana no se puede exigir, pero marcarlo tampoco es un
+    error. La primera version solo hacia lo primero y sobre la corrida real 8 de 12
+    "agregados" eran esto.
+    """
+    doc, re_doc = par
+    e = doc.events[0]
+    # La ventana corta el evento por la mitad.
+    re_doc.sample.windows[e.id] = [e.start_frame + 5, e.end_frame + 40]
+    re_doc.trials = [intento(e.id, e.start_frame, e.end_frame)]
+    r = comparar(doc, re_doc)
+    assert r.deteccion["marcas_sin_correspondencia"] == 0
+    assert r.deteccion["marcas_en_el_borde"] == 1
+    assert r.deteccion["precision"] == 1.0

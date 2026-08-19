@@ -193,9 +193,19 @@ def comparar(doc: AnnotationDoc, re_doc: ReannoDoc, *, solo_ciegos: bool = True)
     etiqueta previa mide otra cosa: mide si acepta lo que ya habia, no si llega a lo mismo
     por su cuenta.
 
-    De cada intento se toman los golpes del peleador que caen ENTEROS en la ventana. Un golpe
-    que asoma por el borde no se puede reanotar bien, y contarlo como omision seria castigar
-    al reanotador por lo que no se le mostro.
+    Dos reglas que parecen detalles y no lo son.
+
+    Un golpe que asoma por el borde de la ventana no se puede reanotar bien, asi que no se
+    cuenta como omision. Pero TAMPOCO se lo trata como inexistente: si el reanotador lo marco,
+    su marca se empareja con el y no se cuenta como agregada. La primera version solo hacia lo
+    primero, y sobre la corrida real 8 de 12 "agregados" eran eso: golpes anotados que asomaban
+    por el borde, marcados correctamente y contados como inventados. La precision salia 0,83
+    cuando era 0,94.
+
+    Y cada evento anotado entra UNA sola vez, aunque caiga en varias ventanas. Las ventanas se
+    solapan, asi que sin deduplicar el mismo golpe aporta dos observaciones: sobre la corrida
+    real, 60 parejas eran 52 eventos distintos. Contar dos veces no agrega informacion y
+    estrecha el intervalo de kappa mas de lo que corresponde.
     """
     intentos = re_doc.trials
     ciegos = [t for t in intentos if not t.revealed]
@@ -207,8 +217,13 @@ def comparar(doc: AnnotationDoc, re_doc: ReannoDoc, *, solo_ciegos: bool = True)
         n_revelados=len(intentos) - len(ciegos),
     )
 
-    pares: list[tuple[Any, Any]] = []
-    n_omitidos = n_agregados = n_originales = n_reanotados = 0
+    # La deteccion se cuenta por evento unico y la clasificacion tambien, pero la precision
+    # se cuenta por marca del reanotador: son denominadores distintos y mezclarlos hace que
+    # las cuentas no cierren.
+    mejor_por_evento: dict[str, tuple[float, Any, Any]] = {}
+    exigibles: set[str] = set()      # eventos que caen enteros en alguna ventana
+    encontrados: set[str] = set()    # de esos, los que el reanotador marco
+    n_reanotados = n_marcas_emparejadas = n_de_borde = 0
     ventanas_vacias = 0
     de_v1 = 0
 
@@ -226,32 +241,56 @@ def comparar(doc: AnnotationDoc, re_doc: ReannoDoc, *, solo_ciegos: bool = True)
             reporte.avisos.append(f"el intento {t.event_id} no tiene ventana; se omite")
             continue
 
-        originales = sorted(
+        candidatos = sorted(
             (
                 e for e in doc.events
-                if e.fighter == t.fighter and v_ini <= e.start_frame and e.end_frame <= v_fin
+                if e.fighter == t.fighter and e.start_frame <= v_fin and e.end_frame >= v_ini
             ),
             key=lambda e: e.start_frame,
         )
-        parejas, omitidos, agregados = emparejar(originales, t.punches)
+        # Enteros dentro de la ventana: son los unicos exigibles.
+        enteros = {
+            e.id for e in candidatos if v_ini <= e.start_frame and e.end_frame <= v_fin
+        }
+        parejas, omitidos, agregados = emparejar(candidatos, t.punches)
 
-        n_originales += len(originales)
+        exigibles |= enteros
         n_reanotados += len(t.punches)
-        n_omitidos += len(omitidos)
-        n_agregados += len(agregados)
+        n_marcas_emparejadas += len(parejas)
         if not t.punches:
             ventanas_vacias += 1
-        for i, j, _ in parejas:
-            pares.append((originales[i], t.punches[j]))
+        for i, j, v in parejas:
+            o = candidatos[i]
+            if o.id not in enteros:
+                # Asomaba por el borde: se empareja para no contarlo como agregado, pero no
+                # entra al acuerdo, porque el reanotador no lo vio completo.
+                n_de_borde += 1
+                continue
+            encontrados.add(o.id)
+            # Un evento en dos ventanas es una sola observacion: se queda la mejor.
+            previo = mejor_por_evento.get(o.id)
+            if previo is None or v > previo[0]:
+                mejor_por_evento[o.id] = (v, o, t.punches[j])
+
+    pares: list[tuple[Any, Any]] = [(o, r) for _, o, r in mejor_por_evento.values()]
+    omitidos = sorted(exigibles - encontrados)
+    agregadas = n_reanotados - n_marcas_emparejadas
 
     reporte.deteccion = {
-        "golpes_en_la_anotacion": n_originales,
-        "golpes_en_la_reanotacion": n_reanotados,
-        "emparejados": len(pares),
-        "omitidos": n_omitidos,
-        "agregados": n_agregados,
-        "recall": round(len(pares) / n_originales, 4) if n_originales else None,
-        "precision": round(len(pares) / n_reanotados, 4) if n_reanotados else None,
+        "golpes_exigibles": len(exigibles),
+        "golpes_encontrados": len(encontrados),
+        "omitidos": len(omitidos),
+        "ids_omitidos": omitidos,
+        "marcas_del_reanotador": n_reanotados,
+        "marcas_sin_correspondencia": agregadas,
+        "marcas_en_el_borde": n_de_borde,
+        # Un evento que cae en dos ventanas se marca dos veces. Las dos marcas son correctas
+        # y cuentan para la precision, pero al acuerdo entra una sola.
+        "marcas_repetidas": n_marcas_emparejadas - len(encontrados) - n_de_borde,
+        "recall": round(len(encontrados) / len(exigibles), 4) if exigibles else None,
+        "precision": (
+            round(n_marcas_emparejadas / n_reanotados, 4) if n_reanotados else None
+        ),
         "iou_minimo": IOU_MINIMO,
         "ventanas_sin_ningun_golpe": ventanas_vacias,
     }
@@ -305,7 +344,8 @@ def comparar(doc: AnnotationDoc, re_doc: ReannoDoc, *, solo_ciegos: bool = True)
         )
     if d.get("precision") is not None and d["precision"] < 0.9:
         reporte.avisos.append(
-            f"precision de deteccion {d['precision']:.2f}: {d['agregados']} golpes marcados "
+            f"precision de deteccion {d['precision']:.2f}: "
+            f"{d['marcas_sin_correspondencia']} golpes marcados "
             "en la reanotacion no estaban en la anotacion. Pueden ser golpes que la primera "
             "pasada se perdio, y en ese caso el dataset esta incompleto."
         )
@@ -382,11 +422,19 @@ def a_texto(r: Reporte) -> str:
         lineas += [
             "deteccion (emparejado por solapamiento temporal >= "
             f"{d['iou_minimo']:.2f})",
-            f"  golpes en la anotacion   {d['golpes_en_la_anotacion']:4d}",
-            f"  golpes en la reanotacion {d['golpes_en_la_reanotacion']:4d}",
-            f"  emparejados              {d['emparejados']:4d}",
+            f"  golpes exigibles         {d['golpes_exigibles']:4d}   "
+            "(anotados y enteros dentro de alguna ventana)",
+            f"  encontrados              {d['golpes_encontrados']:4d}",
             f"  omitidos                 {d['omitidos']:4d}   (estaban y no se marcaron)",
-            f"  agregados                {d['agregados']:4d}   (se marcaron y no estaban)",
+            "",
+            f"  marcas del reanotador    {d['marcas_del_reanotador']:4d}",
+            f"  sin correspondencia      {d['marcas_sin_correspondencia']:4d}   "
+            "(se marcaron y no estaban)",
+            f"  en el borde              {d['marcas_en_el_borde']:4d}   "
+            "(anotadas, pero asomaban: no entran al acuerdo)",
+            f"  repetidas                {d['marcas_repetidas']:4d}   "
+            "(el mismo golpe visto en dos ventanas)",
+            "",
             f"  recall {rec}   precision {pre}",
             "",
         ]
