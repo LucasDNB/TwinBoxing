@@ -553,5 +553,15 @@ class IgnoreSmallTracks(_SnapshotCommand):
                     origin=origen,
                 )
             )
+        # Recortar antes de insertar, igual que AssignRole. Sin esto, un track que ya tenia
+        # un ignore suelto queda con dos intervalos solapados y el resolver elige segun el
+        # orden de la lista. Sobre el round anotado aparecieron 30 asi, todos ignore contra
+        # ignore: inofensivos en el resultado, pero no deterministas y ensuciando la
+        # validacion con errores que no se pueden arreglar mirando el video.
+        asignaciones = list(doc.identity.assignments)
+        for a in nuevos:
+            asignaciones = _recortar(
+                asignaciones, a.track_id, a.start_frame, a.end_frame_excl
+            )
         self.aplicados = len(nuevos)
-        doc.identity.assignments = [*doc.identity.assignments, *nuevos]
+        doc.identity.assignments = [*asignaciones, *nuevos]

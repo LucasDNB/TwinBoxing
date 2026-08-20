@@ -498,3 +498,26 @@ def test_ignorar_un_rango_no_toca_lo_de_afuera(doc: AnnotationDoc, pila: UndoSta
     pila.do(IgnoreSmallTracks(track_ids=[9], total_frames=600, start_frame=300))
     a = doc.identity.assignments[0]
     assert (a.start_frame, a.end_frame_excl) == (300, 600)
+
+
+def test_ignorar_recorta_lo_que_ya_habia_del_mismo_track(
+    doc: AnnotationDoc, pila: UndoStack
+) -> None:
+    """
+    Sin recortar, un track con un ignore suelto previo queda con dos intervalos solapados y
+    el resolver elige segun el orden de la lista. Sobre el round anotado de Pacquiao vs
+    Margarito salieron 30 asi, todos ignore contra ignore.
+    """
+    from boxtwin.core.identity_ops import IgnoreSmallTracks
+    from boxtwin.core.validation import validate_document
+
+    asignar(pila, 9, TrackRole.IGNORE, 723, 1000)
+    pila.do(IgnoreSmallTracks(track_ids=[9], total_frames=800, start_frame=718))
+
+    tramos = sorted(
+        (a.start_frame, a.end_frame_excl)
+        for a in doc.identity.assignments
+        if a.track_id == 9
+    )
+    assert tramos == [(718, 800), (800, 1000)]
+    assert "ID_ASSIGNMENT_OVERLAP" not in {i.code for i in validate_document(doc)}
