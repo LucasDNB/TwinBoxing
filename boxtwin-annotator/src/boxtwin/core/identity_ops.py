@@ -144,7 +144,21 @@ def _origen(doc: AnnotationDoc, op: AssignmentOp, frame: int, annotator: str, **
 
 @dataclass
 class AssignRole(_SnapshotCommand):
-    """Asigna un rol a un track sobre un rango, reemplazando lo que hubiera."""
+    """
+    Asigna un rol a un track sobre un rango, reemplazando lo que hubiera de ESE track.
+
+    NO le quita el rol a los demas tracks, y se probo lo contrario. Parecia obvio que un
+    peleador es uno solo y que asignar un track nuevo deberia truncar al anterior; sobre el
+    round anotado de Pacquiao vs Margarito eso elimina las 1165 colisiones de rol, pero los
+    cuadros sin pose dentro de eventos suben de 51 a 218 y los eventos afectados de 6 a 34.
+
+    La razon es que los solapamientos hacen de respaldo. El tracker fragmenta a un peleador
+    en varios tracks dentro del mismo plano, y cuando uno vuelve a aparecer la asignacion
+    vieja lo sigue cubriendo. Truncarla deja esos cuadros sin nadie.
+
+    El ruido de validacion que esto genera se resuelve del otro lado, en validate_document,
+    reportando solo las colisiones donde los dos tracks tienen detecciones a la vez.
+    """
 
     track_id: int
     role: TrackRole
@@ -163,6 +177,7 @@ class AssignRole(_SnapshotCommand):
         asignaciones = _recortar(
             doc.identity.assignments, self.track_id, self.start_frame, self.end_frame_excl
         )
+
         asignaciones.append(
             Assignment(
                 id=new_id(doc, "assignment"),
@@ -498,7 +513,8 @@ class IgnoreSmallTracks(_SnapshotCommand):
     """
 
     track_ids: list[int]
-    total_frames: int
+    total_frames: int          # fin del rango, exclusivo
+    start_frame: int = 0       # inicio del rango: 0 para todo el video, o el corte de plano
     umbral: float = 0.0
     annotator: str = "desconocido"
     label: str = ""
@@ -518,10 +534,10 @@ class IgnoreSmallTracks(_SnapshotCommand):
             a.track_id
             for a in doc.identity.assignments
             if a.role is TrackRole.IGNORE
-            and a.start_frame == 0
+            and a.start_frame <= self.start_frame
             and a.end_frame_excl >= self.total_frames
         }
-        origen = _origen(doc, AssignmentOp.MANUAL, 0, self.annotator)
+        origen = _origen(doc, AssignmentOp.MANUAL, self.start_frame, self.annotator)
 
         nuevos: list[Assignment] = []
         for tid in sorted(set(self.track_ids)):
@@ -532,7 +548,7 @@ class IgnoreSmallTracks(_SnapshotCommand):
                     id=new_id(doc, "assignment"),
                     track_id=tid,
                     role=TrackRole.IGNORE,
-                    start_frame=0,
+                    start_frame=self.start_frame,
                     end_frame_excl=self.total_frames,
                     origin=origen,
                 )

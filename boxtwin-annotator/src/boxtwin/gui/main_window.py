@@ -160,7 +160,9 @@ class MainWindow(QMainWindow):
         self.identidad.rellenarInternos.connect(self._rellenar_internos)
         self.identidad.previsualizarChicos.connect(self._previsualizar_chicos)
         self.identidad.ignorarChicos.connect(self._ignorar_chicos)
+        self.identidad.ignorarResto.connect(self._ignorar_resto_del_plano)
         self.view.boxDrawn.connect(self._caja_dibujada)
+        self.view.clickedAt.connect(self._click_en_video)
         self.reanno.empezar.connect(self._reanno_empezar)
         self.reanno.siguiente.connect(self._reanno_siguiente)
         self.reanno.revelar.connect(self._reanno_revelar)
@@ -316,6 +318,10 @@ class MainWindow(QMainWindow):
         add("view.toggle_gloves", lambda: self._flip("gloves"))
         add("view.only_selected", self._solo_seleccionado)
 
+        add("identity.assign_a", lambda: self._asignar_clickeado(TrackRole.A))
+        add("identity.assign_b", lambda: self._asignar_clickeado(TrackRole.B))
+        add("identity.ignore", lambda: self._asignar_clickeado(TrackRole.IGNORE))
+        add("identity.ignore_rest", self._ignorar_resto_del_plano)
         add("fighter.select_a", lambda: self._elegir_peleador(FighterId.A))
         add("fighter.select_b", lambda: self._elegir_peleador(FighterId.B))
 
@@ -531,6 +537,91 @@ class MainWindow(QMainWindow):
         self._on_frame(self.player.cursor)
         self.statusBar().showMessage(comando.label, 3000)
         return True
+
+    def _click_en_video(self, punto) -> None:
+        """
+        Selecciona el track que esta debajo del click. No asigna nada todavia.
+
+        Si hay varias cajas encima del punto gana la mas chica, que es la que el ojo
+        entiende como "ese": una caja grande que contiene a otra casi siempre es un plano
+        general o una deteccion mal cerrada.
+        """
+        x, y = punto.x(), punto.y()
+        mejor, mejor_area = None, float("inf")
+        for pose in self.session.resolver.resolve_frame(self.player.cursor):
+            x1, y1, x2, y2 = (float(v) for v in pose.bbox)
+            if x1 <= x <= x2 and y1 <= y <= y2:
+                area = (x2 - x1) * (y2 - y1)
+                if area < mejor_area:
+                    mejor, mejor_area = pose.track_id, area
+        if mejor is None:
+            self.statusBar().showMessage("no hay ninguna detección bajo el cursor", 2000)
+            return
+        self._track_clickeado = mejor
+        self.identidad.seleccionar(mejor)
+        rol = rol_en_track(self.session.doc)(mejor, self.player.cursor)
+        self.statusBar().showMessage(
+            f"track #{mejor} · {rol.value if rol else 'sin asignar'} · "
+            f"{self.keymap.sequence('identity.assign_a')}/"
+            f"{self.keymap.sequence('identity.assign_b')} para asignar", 4000
+        )
+
+    def _asignar_clickeado(self, rol: TrackRole) -> None:
+        """Asigna el track del ultimo click, o el seleccionado en la lista si no hubo click."""
+        tid = self.identidad.track_seleccionado()
+        if tid is None:
+            tid = getattr(self, "_track_clickeado", None)
+        if tid is None:
+            self.statusBar().showMessage(
+                "elegí un track: click sobre el peleador en el video", 3000
+            )
+            return
+        self._asignar_rol(tid, rol)
+
+    def _plano_actual(self) -> tuple[int, int]:
+        """
+        El tramo entre dos cortes de camara que contiene al cuadro actual.
+
+        Es la unidad natural de trabajo en metraje de transmision: dentro de un plano la
+        identidad se mantiene, y en el corte siguiente hay que rehacerla toda.
+        """
+        f = self.player.cursor
+        seams = sorted(self.session.seams)
+        ini = max([s for s in seams if s <= f], default=0)
+        fin = min([s for s in seams if s > f], default=self.session.total_frames)
+        return ini, fin
+
+    def _ignorar_resto_del_plano(self) -> None:
+        """
+        Marca como ignore todo lo que en este plano no sea un peleador.
+
+        Es lo que se sabe con certeza despues de asignar a los dos boxeadores: el resto de lo
+        que hay en pantalla es publico, arbitro o esquina. Acotado al plano y no a todo el
+        video, porque en el plano siguiente los track_id son otros y todavia no se miraron.
+        """
+        ini, fin = self._plano_actual()
+        rol_en = rol_en_track(self.session.doc)
+        peleadores = {TrackRole.A, TrackRole.B}
+        presentes: set[int] = set()
+        for f in range(ini, fin):
+            for pose in self.session.resolver.resolve_frame(f):
+                presentes.add(pose.track_id)
+        sobran = sorted(
+            t for t in presentes
+            if not any(rol_en(t, f) in peleadores for f in (ini, (ini + fin) // 2, fin - 1))
+        )
+        if not sobran:
+            self.statusBar().showMessage("en este plano no queda nada por ignorar", 3000)
+            return
+        comando = IgnoreSmallTracks(
+            track_ids=sobran, total_frames=fin, start_frame=ini,
+            annotator=self.session.annotator,
+            label=f"ignorar {len(sobran)} tracks del plano {ini}-{fin}",
+        )
+        if self._aplicar_identidad(comando):
+            self.statusBar().showMessage(
+                f"{comando.aplicados} tracks ignorados en el plano {ini}–{fin}", 4000
+            )
 
     def _asignar_rol(self, track_id: int, rol: TrackRole) -> None:
         """
@@ -947,7 +1038,7 @@ class MainWindow(QMainWindow):
         self._refresh_status()
 
     def _pintar_issues(self) -> None:
-        issues = validate_document(self.session.doc)
+        issues = validate_document(self.session.doc, self.session.cache)
         if not issues:
             self.lbl_issues.setText("sin observaciones")
             return

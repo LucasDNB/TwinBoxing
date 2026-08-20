@@ -364,13 +364,44 @@ def _check_combos_and_metrics(doc: AnnotationDoc, out: list[Issue]) -> None:
 # ---------------------------------------------------------------------------
 
 
-def validate_document(doc: AnnotationDoc) -> list[Issue]:
+def _colision_real(issue: Issue, doc: AnnotationDoc, cache) -> bool:
+    """
+    Para ID_ROLE_COLLISION: los dos tracks tienen detecciones en algun cuadro del solape.
+
+    El resto de los codigos pasa sin tocar. Solo este se calcula sobre rangos sin mirar si
+    los tracks existen ahi, y por eso es el unico que necesita el cache para no mentir.
+    """
+    if issue.code != "ID_ROLE_COLLISION" or not issue.ref or not issue.frames:
+        return True
+    ids = issue.ref.split(",")
+    if len(ids) != 2:
+        return True
+    por_id = {a.id: a for a in doc.identity.assignments}
+    a, b = (por_id.get(x) for x in ids)
+    if a is None or b is None:
+        return True
+    fa = set(cache.frames_of_track(a.track_id).tolist())
+    fb = set(cache.frames_of_track(b.track_id).tolist())
+    return bool(fa & fb & set(range(*issue.frames)))
+
+
+def validate_document(doc: AnnotationDoc, cache=None) -> list[Issue]:
     """
     Devuelve todos los Issues del documento, ordenados y de forma determinista.
 
     El orden es por nivel, despues por frame de inicio y despues por codigo y referencia,
     para que dos corridas sobre el mismo archivo den exactamente la misma lista y se pueda
     diffear un reporte de validacion.
+
+    Con `cache`, ID_ROLE_COLLISION se filtra a las colisiones REALES: las que ademas de
+    solaparse en rango tienen a los dos tracks detectados en el mismo cuadro. Sin el cache no
+    se puede saber, y se reportan todas.
+
+    La diferencia no es menor. Sobre un round anotado de Pacquiao vs Margarito se reportaban
+    1165 colisiones y solo 6 eventos tenian keypoints ambiguos; sobre Sparring.mp4, 147
+    colisiones y cero. Los solapamientos de rango son normales y hasta utiles, porque hacen
+    de respaldo cuando el tracker fragmenta a un peleador y un track viejo vuelve a aparecer.
+    Reportarlos todos como error es enterrar los seis que importan bajo mil que no.
     """
     out: list[Issue] = []
     _check_events_bounds_and_duration(doc, out)
@@ -381,6 +412,9 @@ def validate_document(doc: AnnotationDoc) -> list[Issue]:
     _check_guard_overrides(doc, out)
     _check_identity(doc, out)
     _check_combos_and_metrics(doc, out)
+
+    if cache is not None:
+        out = [i for i in out if _colision_real(i, doc, cache)]
 
     out.sort(
         key=lambda i: (

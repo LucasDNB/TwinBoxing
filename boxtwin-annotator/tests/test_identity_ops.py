@@ -471,3 +471,30 @@ def test_altura_maxima_usa_el_maximo_y_no_la_mediana() -> None:
     por_frame[9] = [(1, (0.0, 0.0, 10.0, 90.0))]
     alturas = altura_maxima_por_track(cache_con(por_frame, 10), 100)
     assert alturas[1] == pytest.approx(0.9)
+
+
+# -- solapamientos de rol: no se truncan ------------------------------------
+
+
+def test_asignar_no_le_quita_el_rol_al_anterior(doc: AnnotationDoc, pila: UndoStack) -> None:
+    """
+    Se probo truncar al ocupante anterior y es peor. Sobre el round anotado de Pacquiao vs
+    Margarito elimina las 1165 colisiones, pero los cuadros sin pose dentro de eventos suben
+    de 51 a 218: los solapamientos hacen de respaldo cuando el tracker fragmenta a un
+    peleador y un track viejo vuelve a aparecer.
+    """
+    asignar(pila, 1, TrackRole.A, 0, 1000)
+    asignar(pila, 2, TrackRole.A, 400, 1000)
+
+    roles = [(a.track_id, a.start_frame, a.end_frame_excl) for a in doc.identity.assignments]
+    assert (1, 0, 1000) in roles
+    assert (2, 400, 1000) in roles
+
+
+def test_ignorar_un_rango_no_toca_lo_de_afuera(doc: AnnotationDoc, pila: UndoStack) -> None:
+    """El boton de plano acota a [ini, fin): fuera de ahi los track_id son otros."""
+    from boxtwin.core.identity_ops import IgnoreSmallTracks
+
+    pila.do(IgnoreSmallTracks(track_ids=[9], total_frames=600, start_frame=300))
+    a = doc.identity.assignments[0]
+    assert (a.start_frame, a.end_frame_excl) == (300, 600)

@@ -58,6 +58,7 @@ class IdentityPanel(QWidget):
     rellenarInternos = Signal()
     previsualizarChicos = Signal(float)   # cambio el umbral, recalcular el conteo
     ignorarChicos = Signal(float)         # aplicar
+    ignorarResto = Signal()               # todo lo que no sea peleador en este plano
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -161,6 +162,17 @@ class IdentityPanel(QWidget):
         )
         self.b_chicos.clicked.connect(lambda: self.ignorarChicos.emit(self.sp_alto.value()))
         v.addWidget(self.b_chicos)
+
+        # Lo anterior filtra por tamano en todo el video. Esto es lo que se sabe con certeza
+        # despues de asignar a los dos boxeadores de un plano: el resto es publico, arbitro o
+        # esquina. Acotado al plano porque en el siguiente los track_id son otros.
+        self.b_resto = QPushButton("Ignorar todo lo demás de este plano")
+        self.b_resto.setToolTip(
+            "Marca como ignore todos los tracks del plano actual que no sean A ni B.\n"
+            "Hacelo despues de asignar a los dos boxeadores. Se deshace con Ctrl+Z."
+        )
+        self.b_resto.clicked.connect(self.ignorarResto.emit)
+        v.addWidget(self.b_resto)
         raiz.addWidget(g_pub)
 
         # -- huecos internos
@@ -258,6 +270,14 @@ class IdentityPanel(QWidget):
         )
 
     # -- interaccion -------------------------------------------------------
+
+    def seleccionar(self, track_id: int) -> None:
+        """Marca un track en la lista, si esta presente en el cuadro actual."""
+        for i in range(self.lista_tracks.count()):
+            item = self.lista_tracks.item(i)
+            if item.data(Qt.ItemDataRole.UserRole) == track_id:
+                self.lista_tracks.setCurrentItem(item)
+                return
 
     def track_seleccionado(self) -> int | None:
         item = self.lista_tracks.currentItem()
