@@ -21,7 +21,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from boxtwin_detector.dataset import FPS_DESTINO, construir, escribir
+from boxtwin_detector.dataset import FPS_DESTINO, construir, escribir, leer
 from boxtwin_detector.version import __version__
 
 
@@ -70,6 +70,79 @@ def _build(args: argparse.Namespace) -> int:
     return 0
 
 
+def _train(args: argparse.Namespace) -> int:
+    # torch es un extra: importarlo aca deja que `build` corra sin el
+    import json
+    from dataclasses import asdict
+
+    import torch
+
+    from boxtwin_detector.entrenamiento import Config, Estandarizador, entrenar
+    from boxtwin_detector.modelo import TCN
+    from boxtwin_detector.splits import leave_one_source_out, partir_en_distribucion
+
+    fuentes = [leer(p) for p in args.datos]
+    por_nombre = {f.nombre: f for f in fuentes}
+    cfg = Config(epocas=args.epocas, lr=args.lr, ventana=args.ventana, batch=args.batch,
+                 ventanas_por_epoca=args.ventanas, alpha_pesos=args.alpha,
+                 canales=args.canales, semilla=args.semilla)
+
+    if args.fold == "en-distribucion":
+        if args.fuente is None:
+            print("error: --fuente es obligatorio con --fold en-distribucion", file=sys.stderr)
+            return 1
+        if args.fuente not in por_nombre:
+            print(f"error: no cargue la fuente {args.fuente}; tengo "
+                  f"{sorted(por_nombre)}", file=sys.stderr)
+            return 1
+        tr, va = partir_en_distribucion(por_nombre[args.fuente], args.fraccion)
+        train, val, nombre = [tr], [va], f"en-distribucion-{args.fuente}"
+    else:
+        folds = {f.nombre: f for f in leave_one_source_out(sorted(por_nombre))}
+        if args.fold not in folds:
+            print(f"error: fold desconocido; tengo {sorted(folds)}", file=sys.stderr)
+            return 1
+        fold = folds[args.fold]
+        train = [por_nombre[n] for n in fold.train]
+        val = [por_nombre[n] for n in fold.val]
+        nombre = fold.nombre
+
+    est = Estandarizador.ajustar(train)
+    modelo = TCN(n_features=train[0].features.shape[2], canales=cfg.canales,
+                 dropout=args.dropout)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    print(f"fold {nombre}")
+    print(f"  train: {', '.join(f.nombre for f in train)} "
+          f"({sum(int(f.usable.sum()) for f in train)} cuadros usables)")
+    print(f"  val:   {', '.join(f.nombre for f in val)} "
+          f"({sum(int(f.usable.sum()) for f in val)} cuadros usables)")
+    print(f"  campo receptivo {modelo.campo_receptivo} cuadros, device {device}")
+
+    hist = entrenar(modelo, train, val, est, cfg, device)
+
+    args.out.mkdir(parents=True, exist_ok=True)
+    ck = args.out / f"detector-{nombre}.pt"
+    torch.save({"state_dict": modelo.state_dict(), "config": asdict(cfg),
+                "estandarizador": est.a_dict(), "n_features": modelo.n_features,
+                "canales": cfg.canales, "fold": nombre}, ck)
+    (args.out / f"detector-{nombre}.json").write_text(json.dumps({
+        "fold": nombre,
+        "train": [f.nombre for f in train], "val": [f.nombre for f in val],
+        "procedencia": {f.nombre: f.procedencia for f in fuentes},
+        "historial": hist,
+    }, indent=2, ensure_ascii=False) + "\n")
+
+    m = hist["mejor"]["val"]
+    print(f"\nmejor epoca {hist['mejor']['epoca']}: F1 macro {m['f1_macro']:.4f}")
+    print(f"  recall  O {m['O_recall']:.3f}  B {m['B_recall']:.3f}  I {m['I_recall']:.3f}")
+    print(f"  decir siempre O daria exactitud {m['siempre_O']:.2%} y F1 macro ~0,33")
+    print(f"  -> {ck.name}")
+    print("\nEsto es F1 por cuadro, que es una escalera y no el piso. La medida que "
+          "importa\nes precision y recall POR EVENTO, y llega en el bloque 3.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="boxtwin-detector", description=__doc__.split("USO")[0])
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
@@ -83,6 +156,24 @@ def main(argv: list[str] | None = None) -> int:
                         "a 30; sin esto el mismo golpe dura el doble de cuadros en una "
                         "fuente que en otra.")
     b.set_defaults(func=_build)
+
+    tr = sub.add_parser("train", help="entrena el detector sobre un fold")
+    tr.add_argument("datos", type=Path, nargs="+", help="los .det.npz que escribio build")
+    tr.add_argument("--fold", required=True,
+                    help="sin-<fuente> para dejar una afuera, o en-distribucion")
+    tr.add_argument("--fuente", default=None, help="cual, con --fold en-distribucion")
+    tr.add_argument("--fraccion", type=float, default=0.25)
+    tr.add_argument("--out", type=Path, default=Path("modelos"))
+    tr.add_argument("--epocas", type=int, default=40)
+    tr.add_argument("--lr", type=float, default=1e-3)
+    tr.add_argument("--ventana", type=int, default=256)
+    tr.add_argument("--batch", type=int, default=32)
+    tr.add_argument("--ventanas", type=int, default=512)
+    tr.add_argument("--alpha", type=float, default=0.5)
+    tr.add_argument("--canales", type=int, default=64)
+    tr.add_argument("--dropout", type=float, default=0.1)
+    tr.add_argument("--semilla", type=int, default=42)
+    tr.set_defaults(func=_train)
 
     args = p.parse_args(argv)
     return int(args.func(args))

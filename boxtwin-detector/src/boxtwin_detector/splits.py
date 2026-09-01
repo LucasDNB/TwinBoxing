@@ -37,7 +37,10 @@ from typing import Sequence
 
 import numpy as np
 
-__all__ = ["Fold", "leave_one_source_out", "en_distribucion", "BANDA_POR_DEFECTO"]
+from boxtwin_detector.dataset import Fuente
+
+__all__ = ["Fold", "leave_one_source_out", "en_distribucion", "partir_en_distribucion",
+           "BANDA_POR_DEFECTO"]
 
 # 2 segundos a 30 fps. Tiene que cubrir la ventana del modelo, o la validacion filtra.
 BANDA_POR_DEFECTO = 60
@@ -86,3 +89,32 @@ def en_distribucion(
     train[: max(corte - banda, 0)] = True
     val[corte:] = True
     return train, val
+
+
+def partir_en_distribucion(
+    f: Fuente, fraccion: float = 0.25, banda: int = BANDA_POR_DEFECTO
+) -> tuple[Fuente, Fuente]:
+    """
+    Parte una fuente en dos, enmascarando en vez de recortar.
+
+    Enmascarar y no recortar mantiene el eje de tiempo intacto, asi los cuadros siguen
+    correspondiendo a los del video y cualquier cosa que se mire despues -un segmento, una
+    prediccion- se puede llevar al reproductor sin traducir indices.
+    """
+    lo, hi = f.conteos.get("cobertura", [0, f.T - 1])
+    largo = hi - lo + 1
+    tr_m, va_m = en_distribucion(largo, fraccion, banda)
+
+    def copia(mascara: np.ndarray, nombre: str) -> Fuente:
+        u = np.zeros_like(f.usable)
+        u[:, lo : hi + 1] = f.usable[:, lo : hi + 1] & mascara[None, :]
+        activos = np.where(mascara)[0]
+        cob = [lo + int(activos[0]), lo + int(activos[-1])]
+        conteos = dict(f.conteos)
+        conteos["cobertura"] = cob
+        conteos["cuadros_usables"] = int(u.sum())
+        return Fuente(nombre=f"{f.nombre}:{nombre}", features=f.features, labels=f.labels,
+                      usable=u, carriles=list(f.carriles), fps=f.fps,
+                      conteos=conteos, procedencia=dict(f.procedencia))
+
+    return copia(tr_m, "train"), copia(va_m, "val")

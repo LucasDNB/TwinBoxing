@@ -14,12 +14,12 @@ La señal hay que aprenderla en el tiempo.
 
 ## Estado
 
-Se entrega en cuatro bloques. **Bloque 1 terminado**, 51 tests.
+Se entrega en cuatro bloques. **Bloques 1 y 2 terminados**, 93 tests.
 
 | Bloque | Qué | Estado |
 |---|---|---|
 | 1 | Dataset: remuestreo, features, máscaras, particiones | hecho |
-| 2 | Modelo temporal y entrenamiento | pendiente |
+| 2 | Modelo temporal y entrenamiento | hecho |
 | 3 | Decodificación a segmentos y evaluación | pendiente |
 | 4 | Los tres folds y el reporte | pendiente |
 
@@ -131,6 +131,64 @@ funciona cuando no aprendió nada. Todo se mide por evento.
 
 `B` se conserva aunque cueste un cuadro por golpe, porque sin ella dos golpes pegados del
 mismo brazo se leen como uno solo largo. Medido: pasa 1 vez en 400 eventos.
+
+## El modelo
+
+Una TCN de convoluciones dilatadas (1, 2, 4, 8, 16), campo receptivo **63 cuadros = 2,1 s**,
+que es ~9 veces la duración mediana de un golpe. Entrada `(4, T, 20)`, salida `(4, T, 3)`.
+
+**No causal**, a propósito. Se ve en los datos por qué hace falta: en el golpe del cuadro 161
+de `sparring-3`, los primeros cuatro cuadros ya etiquetados son indistinguibles de la guardia
+de los tres anteriores. La `B` está donde el anotador dijo que arranca el movimiento, no donde
+el movimiento se hace evidente, y eso recién pasa en el cuadro 166. Ningún clasificador cuadro
+a cuadro puede acertar ahí; hay que mirar hacia adelante. El detector corre sobre video
+grabado, así que puede.
+
+Una sola etapa, también a propósito: el refinamiento multi-etapa es lo que se prueba **después**
+de saber que una etapa no alcanza. Empezar por el grande deja sin saber cuál de las dos cosas
+aportó.
+
+Nada de heatmaps ni PoseConv3D. Ese modelo clasifica un clip recortado y trabaja en píxeles,
+que es por donde se cuela la cámara.
+
+## Entrenamiento
+
+```bash
+boxtwin-detector train data/*.det.npz --fold en-distribucion --fuente sparring-3-rounds
+boxtwin-detector train data/*.det.npz --fold sin-Sparring
+```
+
+Cuatro cosas que un loop genérico no hace:
+
+- **La pérdida se enmascara.** Los cuadros sin pose confiable, los amagues y todo lo que cae
+  fuera del tramo anotado no entran.
+- **Pesos por clase** `(1/frecuencia)^0,5`. El inverso puro le da a `B` un peso de 149 contra
+  1 de `O` y el gradiente queda dominado por un puñado de cuadros.
+- **Las ventanas se sortean dentro del tramo anotado.** El tensor de Pacquiao tiene 68.250
+  cuadros y sólo 5,8% usables; sorteando sobre el largo total, 19 de cada 20 ventanas caerían
+  donde no hay nada que aprender.
+- **La inferencia va por trozos con solape**, y el borde se descarta. Sin eso aparece un
+  artefacto cada N cuadros que ninguna métrica agregada muestra.
+
+La estandarización se ajusta **sólo sobre el entrenamiento**. Ajustarla sobre todo el corpus
+filtra la validación a través de la escala: sutil, y da una mejora chica y falsa.
+
+### Lo que da hasta ahora
+
+| | F1 macro por cuadro | recall O / B / I |
+|---|---|---|
+| Decir siempre `O` | ~0,33 | 1,00 / 0,00 / 0,00 |
+| En distribución (`sparring-3`) | **0,635** | 0,98 / 0,39 / 0,67 |
+| Dejando `Sparring` afuera | **0,512** | 0,96 / 0,15 / 0,45 |
+
+**Estos números son una escalera, no el piso.** F1 macro por cuadro sirve para elegir un
+checkpoint y para saber que el modelo aprende algo; no dice cuántos golpes encuentra. La
+medida real —precisión y recall **por evento**— necesita la decodificación a segmentos, que es
+el bloque 3.
+
+El sobreajuste llega temprano: en distribución, la pérdida sigue bajando de 0,124 a 0,012
+mientras el recall de `B` cae de 0,57 a 0,16. Por eso hay parada temprana y se guarda el mejor
+checkpoint, no el último.
 
 ## Particiones
 

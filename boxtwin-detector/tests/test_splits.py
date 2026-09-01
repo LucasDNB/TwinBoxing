@@ -52,3 +52,24 @@ def test_fraccion_invalida():
 def test_si_no_queda_entrenamiento_es_error():
     with pytest.raises(ValueError):
         en_distribucion(50, fraccion=0.9, banda=60)
+
+
+def test_partir_en_distribucion_no_comparte_cuadros():
+    import numpy as np
+    from boxtwin_detector.dataset import Fuente
+    from boxtwin_detector.splits import partir_en_distribucion
+
+    T = 2000
+    f = Fuente(nombre="x", features=np.zeros((4, T, 20), np.float32),
+               labels=np.zeros((4, T), np.int8), usable=np.ones((4, T), bool),
+               carriles=["a", "b", "c", "d"], fps=30.0,
+               conteos={"cobertura": [100, 1899]})
+    tr, va = partir_en_distribucion(f, fraccion=0.25, banda=60)
+    assert not (tr.usable & va.usable).any()
+    assert tr.usable.sum() > 0 and va.usable.sum() > 0
+    # nada fuera de la cobertura original
+    assert not tr.usable[:, :100].any() and not va.usable[:, 1900:].any()
+    # la banda muerta existe
+    ultimo_tr = np.where(tr.usable[0])[0][-1]
+    primer_va = np.where(va.usable[0])[0][0]
+    assert primer_va - ultimo_tr > 60
