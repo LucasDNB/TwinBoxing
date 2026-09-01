@@ -60,3 +60,20 @@ def test_segmento_completamente_fuera_se_descarta():
 def test_segmento_invertido_es_error():
     with pytest.raises(ValueError):
         Segmento(5, 2, 0)
+
+
+def test_segmentos_de_tambien_lee_el_espacio_O_B_I():
+    # Load-bearing: el detector emite O/B/I y se recuperan segmentos con la misma funcion.
+    # Funciona porque B=1 es impar e I=2 es par distinto de cero, igual que en el export.
+    carril = np.array([0, 1, 2, 2, 0, 1, 2, 0], np.int8)
+    assert segmentos_de(carril) == [Segmento(1, 3, 0), Segmento(5, 6, 0)]
+
+
+def test_el_segmento_habla_el_idioma_del_emparejador():
+    from boxtwin.core.agreement import emparejar, iou_temporal
+
+    s = Segmento(10, 20, 0)
+    assert (s.start_frame, s.end_frame) == (10, 20)
+    assert iou_temporal(s.start_frame, s.end_frame, 10, 20) == 1.0
+    parejas, om, ag = emparejar([Segmento(10, 20, 0)], [Segmento(12, 22, 0)])
+    assert len(parejas) == 1 and not om and not ag

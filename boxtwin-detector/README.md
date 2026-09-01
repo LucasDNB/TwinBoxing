@@ -14,13 +14,13 @@ La señal hay que aprenderla en el tiempo.
 
 ## Estado
 
-Se entrega en cuatro bloques. **Bloques 1 y 2 terminados**, 93 tests.
+Se entrega en cuatro bloques. **Bloques 1, 2 y 3 terminados**, 113 tests.
 
 | Bloque | Qué | Estado |
 |---|---|---|
 | 1 | Dataset: remuestreo, features, máscaras, particiones | hecho |
 | 2 | Modelo temporal y entrenamiento | hecho |
-| 3 | Decodificación a segmentos y evaluación | pendiente |
+| 3 | Decodificación a segmentos y evaluación | hecho |
 | 4 | Los tres folds y el reporte | pendiente |
 
 ## Instalación
@@ -189,6 +189,58 @@ el bloque 3.
 El sobreajuste llega temprano: en distribución, la pérdida sigue bajando de 0,124 a 0,012
 mientras el recall de `B` cae de 0,57 a 0,16. Por eso hay parada temprana y se guarda el mejor
 checkpoint, no el último.
+
+## Decodificación y evaluación
+
+```bash
+boxtwin-detector eval modelos/detector-en-distribucion-sparring-3-rounds.pt data/*.det.npz
+```
+
+Tres números por cuadro todavía no son una lista de golpes. La decodificación es donde se
+**elige el punto de operación**, y por eso `eval` devuelve la curva entera y no un punto: el
+disparador heurístico quedó clavado en 21% de precisión justamente porque no tenía esta
+perilla.
+
+Los tres parámetros salen de lo medido: largo mínimo 5 cuadros (los golpes duran 7 de mediana,
+p10 en 5), hueco máximo 2 (un bajón de un cuadro es un error de pose, no el final del golpe) y
+corte por `B` apagado por defecto (los carriles ya son por brazo, así que dos golpes seguidos
+del mismo brazo pasan 1 vez en 400).
+
+Se evalúa con `boxtwin.core.agreement.emparejar` a IoU 0,3 — **el mismo emparejador con que se
+midió el acuerdo intra-anotador**. Con otro, los números no se podrían poner al lado del techo
+humano, que es el punto. El emparejamiento es **por carril**: dos golpes simultáneos de
+peleadores distintos no son el mismo golpe.
+
+### Resultado en distribución
+
+`sparring-3`, último 25% del video, **81 golpes**. Todo por el mismo decodificador, el mismo
+emparejador y la misma región:
+
+| | recall | precisión | F1 | error inicio / fin |
+|---|---|---|---|---|
+| **Techo humano** | 0,911 | 0,903 | 0,907 | 1,12 / 1,55 |
+| **Modelo** (umbral 0,60) | **0,679** | **0,252** | **0,368** | 2,02 / 1,87 |
+| Extensión de muñeca | 0,222 | 0,281 | 0,248 | — |
+
+**El modelo le gana a la heurística**, sobre todo en recall: 0,68 contra 0,22. Y cuando
+encuentra un golpe lo localiza bien — IoU medio 0,665, y el error de fronteras de 2,0 cuadros
+está a menos de un cuadro del humano.
+
+Lo que falla es la precisión: 218 marcas para 81 golpes, 2,7 veces de más. Sigue lejísimos de
+0,903.
+
+Y son 81 golpes, así que las barras de error son anchas. En distribución, además, que es el
+caso fácil.
+
+### El umbral tiene poco recorrido
+
+Medido sobre la validación: el 63% de los cuadros tiene P(golpe) < 0,05 y el 14,7% > 0,95.
+**Sólo el 9% cae en la zona indecisa.** El modelo está saturado, así que mover el umbral de 0,1
+a 0,9 reclasifica menos de un cuadro de cada diez.
+
+La consecuencia práctica: el punto de operación lo fija más el `alpha` de los pesos por clase,
+en el entrenamiento, que el umbral de decodificación. Barrer `alpha` —o calibrar la salida— es
+trabajo del bloque 4.
 
 ## Particiones
 

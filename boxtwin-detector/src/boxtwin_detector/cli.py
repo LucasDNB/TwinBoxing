@@ -127,7 +127,7 @@ def _train(args: argparse.Namespace) -> int:
                 "estandarizador": est.a_dict(), "n_features": modelo.n_features,
                 "canales": cfg.canales, "fold": nombre}, ck)
     (args.out / f"detector-{nombre}.json").write_text(json.dumps({
-        "fold": nombre,
+        "fold": nombre, "fraccion": args.fraccion,
         "train": [f.nombre for f in train], "val": [f.nombre for f in val],
         "procedencia": {f.nombre: f.procedencia for f in fuentes},
         "historial": hist,
@@ -140,6 +140,100 @@ def _train(args: argparse.Namespace) -> int:
     print(f"  -> {ck.name}")
     print("\nEsto es F1 por cuadro, que es una escalera y no el piso. La medida que "
           "importa\nes precision y recall POR EVENTO, y llega en el bloque 3.")
+    return 0
+
+
+def _eval(args: argparse.Namespace) -> int:
+    import json
+
+    import numpy as np
+    import torch
+
+    from boxtwin_detector.entrenamiento import Config, Estandarizador, predecir_secuencia
+    from boxtwin_detector.evaluacion import barrer
+    from boxtwin_detector.modelo import TCN
+    from boxtwin_detector.splits import partir_en_distribucion
+
+    ck = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
+    meta = json.loads(Path(str(args.checkpoint).replace(".pt", ".json")).read_text())
+    cfg = Config(**ck["config"])
+    est = Estandarizador.de_dict(ck["estandarizador"])
+    modelo = TCN(n_features=ck["n_features"], canales=ck["canales"])
+    modelo.load_state_dict(ck["state_dict"])
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    modelo = modelo.to(device).eval()
+
+    por_nombre = {f.nombre: f for f in (leer(p) for p in args.datos)}
+    fold = ck["fold"]
+    if fold.startswith("en-distribucion-"):
+        base = fold[len("en-distribucion-"):]
+        if base not in por_nombre:
+            print(f"error: falta la fuente {base}", file=sys.stderr)
+            return 1
+        _, va = partir_en_distribucion(por_nombre[base], meta.get("fraccion", 0.25))
+        val = [va]
+    else:
+        val = [por_nombre[n] for n in meta["val"] if n in por_nombre]
+        if not val:
+            print(f"error: no cargue ninguna fuente de validacion ({meta['val']})",
+                  file=sys.stderr)
+            return 1
+
+    print(f"fold {fold}, validando sobre {', '.join(f.nombre for f in val)}\n")
+    umbrales = args.umbrales or [round(x, 2) for x in np.arange(0.10, 0.95, 0.05)]
+
+    for f in val:
+        logits = [predecir_secuencia(modelo, est.aplicar(f.features[c]), cfg, device)
+                  for c in range(f.features.shape[0])]
+        cob = tuple(f.conteos.get("cobertura", [0, f.T - 1]))
+        filas = barrer(logits, f.labels, f.usable, umbrales, cobertura=cob,
+                       largo_minimo=args.largo_minimo, hueco_maximo=args.hueco_maximo)
+        n_gt = filas[0]["golpes"]
+        n_alc = filas[0].get("golpes_alcanzables", n_gt)
+        print(f"{f.nombre}: {n_gt} golpes anotados, {n_alc} con pose usable "
+              f"({n_gt - n_alc} que el sistema no puede encontrar)")
+        print(f"  {'umbral':>7} {'predichos':>10} {'recall':>8} {'precision':>10} "
+              f"{'F1':>7} {'IoU':>6} {'err ini':>8} {'err fin':>8}")
+        mejor = None
+        for x in filas:
+            r, pr = x["recall"], x["precision"]
+            f1 = 2 * r * pr / (r + pr) if r + pr else 0.0
+            if mejor is None or f1 > mejor[0]:
+                mejor = (f1, x)
+            print(f"  {x['umbral']:7.2f} {x['predichos']:10d} {r:8.3f} {pr:10.3f} "
+                  f"{f1:7.3f} {x['iou_medio']:6.3f} "
+                  f"{(x['error_inicio'] if x['error_inicio'] is not None else float('nan')):8.2f} "
+                  f"{(x['error_fin'] if x['error_fin'] is not None else float('nan')):8.2f}")
+        f1, x = mejor
+        print(f"\n  mejor F1 {f1:.3f} en umbral {x['umbral']:.2f}: "
+              f"recall {x['recall']:.3f}, precision {x['precision']:.3f}")
+        print(f"  recall sobre los alcanzables: {x.get('recall_alcanzables', float('nan')):.3f}")
+        # -- la heuristica, por el MISMO decodificador y el MISMO emparejador
+        from boxtwin_detector.features import NOMBRES
+        i_ext = NOMBRES.index("extension")
+        ext = [f.features[c, :, i_ext] for c in range(f.features.shape[0])]
+        base = barrer(ext, f.labels, f.usable,
+                      [round(x, 2) for x in np.arange(0.3, 1.7, 0.1)],
+                      cobertura=cob, como_score=True,
+                      largo_minimo=args.largo_minimo, hueco_maximo=args.hueco_maximo)
+        mejor_b = max(base, key=lambda x: (2 * x["recall"] * x["precision"] /
+                                           (x["recall"] + x["precision"]))
+                      if x["recall"] + x["precision"] else 0.0)
+        f1b = (2 * mejor_b["recall"] * mejor_b["precision"] /
+               (mejor_b["recall"] + mejor_b["precision"])
+               if mejor_b["recall"] + mejor_b["precision"] else 0.0)
+
+        print("\n  contra que se compara, todo sobre los mismos golpes:")
+        print(f"    modelo                             recall {x['recall']:.3f}  "
+              f"precision {x['precision']:.3f}  F1 {f1:.3f}")
+        print(f"    extension de muneca, mismo decoder recall {mejor_b['recall']:.3f}  "
+              f"precision {mejor_b['precision']:.3f}  F1 {f1b:.3f}  "
+              f"(umbral {mejor_b['umbral']:.1f})")
+        print("    techo humano (reanotacion ciega)   recall 0,911  precision 0,903")
+        print("    error de fronteras del humano      1,12 cuadros al inicio, 1,55 al final")
+        if f1 <= f1b:
+            print("\n    ATENCION: el modelo NO le gana a la heuristica en este fold.")
+        print()
     return 0
 
 
@@ -174,6 +268,15 @@ def main(argv: list[str] | None = None) -> int:
     tr.add_argument("--dropout", type=float, default=0.1)
     tr.add_argument("--semilla", type=int, default=42)
     tr.set_defaults(func=_train)
+
+    ev = sub.add_parser("eval", help="decodifica a segmentos y mide por evento")
+    ev.add_argument("checkpoint", type=Path)
+    ev.add_argument("datos", type=Path, nargs="+")
+    ev.add_argument("--umbrales", type=float, nargs="+", default=None)
+    ev.add_argument("--largo-minimo", type=int, default=5,
+                    help="los golpes duran 7 cuadros de mediana, p10 en 5")
+    ev.add_argument("--hueco-maximo", type=int, default=2)
+    ev.set_defaults(func=_eval)
 
     args = p.parse_args(argv)
     return int(args.func(args))

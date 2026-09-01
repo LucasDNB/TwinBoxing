@@ -52,6 +52,17 @@ class Segmento:
     def largo(self) -> int:
         return self.fin - self.inicio + 1
 
+    # boxtwin.core.agreement.emparejar espera .start_frame y .end_frame inclusivos. Se
+    # exponen para poder evaluar el detector con EL MISMO emparejador con que se midio el
+    # acuerdo humano: con otro, los numeros no se podrian comparar contra 0,911 y 0,903.
+    @property
+    def start_frame(self) -> int:
+        return self.inicio
+
+    @property
+    def end_frame(self) -> int:
+        return self.fin
+
 
 def es_b(etiqueta: int) -> bool:
     """En el espacio del export, B son los impares: _bio(idx) = (1 + 2*idx, 2 + 2*idx)."""
