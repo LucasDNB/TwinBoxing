@@ -77,7 +77,7 @@ def _train(args: argparse.Namespace) -> int:
 
     import torch
 
-    from boxtwin_detector.entrenamiento import Config, Estandarizador, entrenar
+    from boxtwin_detector.entrenamiento import Config, Estandarizador, entrenar, sembrar
     from boxtwin_detector.modelo import TCN
     from boxtwin_detector.splits import leave_one_source_out, partir_en_distribucion
 
@@ -108,6 +108,7 @@ def _train(args: argparse.Namespace) -> int:
         nombre = fold.nombre
 
     est = Estandarizador.ajustar(train)
+    sembrar(cfg.semilla)          # antes de construir: fija la inicializacion de los pesos
     modelo = TCN(n_features=train[0].features.shape[2], canales=cfg.canales,
                  dropout=args.dropout)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -237,6 +238,125 @@ def _eval(args: argparse.Namespace) -> int:
     return 0
 
 
+def _folds(args: argparse.Namespace) -> int:
+    """
+    El protocolo del bloque 4: varias semillas por fold, y la heuristica al lado.
+
+    Varias semillas y no una porque esta medido que el desvio entre semillas es del orden de
+    0,1 de F1 por evento, o sea mas grande que casi cualquier efecto que se quiera reportar.
+    Una corrida sola elige el numero que a uno le guste.
+    """
+    import json
+
+    import numpy as np
+    import torch
+
+    from boxtwin_detector.entrenamiento import (
+        Config, Estandarizador, entrenar, predecir_secuencia, sembrar,
+    )
+    from boxtwin_detector.evaluacion import barrer
+    from boxtwin_detector.features import NOMBRES
+    from boxtwin_detector.modelo import TCN
+    from boxtwin_detector.splits import leave_one_source_out, partir_en_distribucion
+
+    fuentes = {f.nombre: f for f in (leer(p) for p in args.datos)}
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    umbrales = [round(x, 2) for x in np.arange(0.10, 0.95, 0.05)]
+
+    def f1(r, p):
+        return 2 * r * p / (r + p) if r + p else 0.0
+
+    def mejor(curvas):
+        """Mejor F1 sobre la curva agregada de todas las fuentes de validacion."""
+        best = None
+        for i, u in enumerate(umbrales):
+            g = sum(c[i]["golpes"] for c in curvas)
+            pr = sum(c[i]["predichos"] for c in curvas)
+            em = sum(c[i]["emparejados"] for c in curvas)
+            r, p = (em / g if g else 0.0), (em / pr if pr else 0.0)
+            v = f1(r, p)
+            if best is None or v > best["f1"]:
+                best = {"umbral": u, "golpes": g, "predichos": pr, "recall": round(r, 4),
+                        "precision": round(p, 4), "f1": round(v, 4)}
+        return best
+
+    def curva_modelo(m, est, cfg, vals):
+        out = []
+        for f in vals:
+            lg = [predecir_secuencia(m, est.aplicar(f.features[c]), cfg, device)
+                  for c in range(f.features.shape[0])]
+            cob = tuple(f.conteos.get("cobertura", [0, f.T - 1]))
+            out.append(barrer(lg, f.labels, f.usable, umbrales, cobertura=cob))
+        return out
+
+    def curva_heuristica(vals):
+        i = NOMBRES.index("extension")
+        us = [round(x, 2) for x in np.arange(0.3, 1.7, 0.05)]
+        out = []
+        for f in vals:
+            ext = [f.features[c, :, i] for c in range(f.features.shape[0])]
+            cob = tuple(f.conteos.get("cobertura", [0, f.T - 1]))
+            out.append(barrer(ext, f.labels, f.usable, us, cobertura=cob, como_score=True))
+        best = None
+        for k, u in enumerate(us):
+            g = sum(c[k]["golpes"] for c in out)
+            pr = sum(c[k]["predichos"] for c in out)
+            em = sum(c[k]["emparejados"] for c in out)
+            r, p = (em / g if g else 0.0), (em / pr if pr else 0.0)
+            v = f1(r, p)
+            if best is None or v > best["f1"]:
+                best = {"umbral": u, "golpes": g, "recall": round(r, 4),
+                        "precision": round(p, 4), "f1": round(v, 4)}
+        return best
+
+    tareas = []
+    if args.en_distribucion:
+        base = args.en_distribucion
+        if base not in fuentes:
+            print(f"error: no cargue {base}", file=sys.stderr)
+            return 1
+        tr, va = partir_en_distribucion(fuentes[base], args.fraccion)
+        tareas.append((f"en-distribucion-{base}", [tr], [va]))
+    for fold in leave_one_source_out(sorted(fuentes)):
+        tareas.append((fold.nombre, [fuentes[n] for n in fold.train],
+                       [fuentes[n] for n in fold.val]))
+
+    resultados = []
+    print(f"{len(args.semillas)} semillas por fold, alpha {args.alpha}\n")
+    print(f"{'fold':>26} {'golpes':>7} {'F1 medio':>9} {'desvio':>7} {'min':>6} {'max':>6} "
+          f"{'recall':>7} {'prec':>6} | {'F1 heur':>8}")
+    for nombre, train, val in tareas:
+        est = Estandarizador.ajustar(train)
+        fs, rs, ps, corridas = [], [], [], []
+        for s in args.semillas:
+            cfg = Config(epocas=args.epocas, alpha_pesos=args.alpha, semilla=s)
+            sembrar(s)
+            m = TCN(n_features=train[0].features.shape[2], canales=cfg.canales)
+            entrenar(m, train, val, est, cfg, device, verbose=False)
+            b = mejor(curva_modelo(m, est, cfg, val))
+            corridas.append({"semilla": s, **b})
+            fs.append(b["f1"]); rs.append(b["recall"]); ps.append(b["precision"])
+        h = curva_heuristica(val)
+        print(f"{nombre:>26} {h['golpes']:7d} {np.mean(fs):9.3f} {np.std(fs):7.3f} "
+              f"{min(fs):6.3f} {max(fs):6.3f} {np.mean(rs):7.3f} {np.mean(ps):6.3f} | "
+              f"{h['f1']:8.3f}")
+        resultados.append({"fold": nombre, "corridas": corridas, "heuristica": h,
+                           "f1_medio": round(float(np.mean(fs)), 4),
+                           "f1_desvio": round(float(np.std(fs)), 4),
+                           "recall_medio": round(float(np.mean(rs)), 4),
+                           "precision_media": round(float(np.mean(ps)), 4)})
+
+    print("\n  techo humano: recall 0,911  precision 0,903  F1 0,907")
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(
+            {"alpha": args.alpha, "semillas": args.semillas, "epocas": args.epocas,
+             "procedencia": {n: f.procedencia for n, f in fuentes.items()},
+             "resultados": resultados}, indent=2, ensure_ascii=False) + "\n")
+        print(f"  -> {args.out}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="boxtwin-detector", description=__doc__.split("USO")[0])
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
@@ -277,6 +397,17 @@ def main(argv: list[str] | None = None) -> int:
                     help="los golpes duran 7 cuadros de mediana, p10 en 5")
     ev.add_argument("--hueco-maximo", type=int, default=2)
     ev.set_defaults(func=_eval)
+
+    fo = sub.add_parser("folds", help="el protocolo completo: varias semillas por fold")
+    fo.add_argument("datos", type=Path, nargs="+")
+    fo.add_argument("--semillas", type=int, nargs="+", default=[42, 1, 2, 3, 4])
+    fo.add_argument("--alpha", type=float, default=0.5)
+    fo.add_argument("--epocas", type=int, default=40)
+    fo.add_argument("--en-distribucion", default=None,
+                    help="ademas de los folds cruzados, la particion en distribucion de esta fuente")
+    fo.add_argument("--fraccion", type=float, default=0.25)
+    fo.add_argument("--out", type=Path, default=None)
+    fo.set_defaults(func=_folds)
 
     args = p.parse_args(argv)
     return int(args.func(args))

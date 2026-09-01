@@ -206,3 +206,32 @@ def test_sin_paciencia_corre_todas_las_epocas():
     hist = entrenar(TCN(n_features=20, canales=16), tr, va, est, cfg,
                     torch.device("cpu"), verbose=False)
     assert len(hist["epocas"]) == 3 and "parada_temprana" not in hist
+
+
+def test_dos_corridas_con_la_misma_semilla_dan_lo_mismo():
+    # Sin sembrar antes de construir el modelo, los pesos se inicializan con el estado
+    # global que hubiera y dos corridas "iguales" difieren hasta 0,1 de F1 por evento.
+    from boxtwin_detector.entrenamiento import sembrar
+
+    tr = [fuente("tr", T=1200, semilla=11)]
+    va = [fuente("va", T=500, semilla=12)]
+    est = Estandarizador.ajustar(tr)
+
+    def corrida(semilla):
+        cfg = Config(epocas=3, ventanas_por_epoca=16, batch=8, ventana=256, semilla=semilla)
+        sembrar(semilla)
+        m = TCN(n_features=20, canales=32)
+        h = entrenar(m, tr, va, est, cfg, torch.device("cpu"), verbose=False)
+        return [e["perdida"] for e in h["epocas"]]
+
+    assert corrida(42) == corrida(42)
+    assert corrida(42) != corrida(7)
+
+
+def test_sembrar_fija_la_inicializacion_de_los_pesos():
+    from boxtwin_detector.entrenamiento import sembrar
+
+    sembrar(3); a = TCN(n_features=20, canales=32).entrada.weight.detach().clone()
+    sembrar(3); b = TCN(n_features=20, canales=32).entrada.weight.detach().clone()
+    sembrar(4); c = TCN(n_features=20, canales=32).entrada.weight.detach().clone()
+    assert torch.equal(a, b) and not torch.equal(a, c)

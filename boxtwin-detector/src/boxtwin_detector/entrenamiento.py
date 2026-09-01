@@ -49,10 +49,29 @@ from boxtwin_detector.dataset import Fuente
 
 __all__ = [
     "Config", "Estandarizador", "pesos_de_clase", "sortear_ventanas",
-    "predecir_secuencia", "metricas", "entrenar",
+    "predecir_secuencia", "metricas", "entrenar", "sembrar",
 ]
 
 N_CLASES = 3
+
+
+def sembrar(semilla: int) -> None:
+    """
+    Fija todo lo que decide un resultado, y HAY QUE LLAMARLA ANTES DE CONSTRUIR EL MODELO.
+
+    Sembrar dentro de `entrenar` no alcanza: para cuando corre, los pesos ya se inicializaron
+    con el estado global que hubiera. Medido, dos corridas con la misma semilla daban curvas
+    de perdida distintas por eso, y la diferencia en F1 por evento llegaba a 0,1, o sea mas
+    que cualquier efecto que se quiera reportar.
+
+    cudnn.deterministic cierra la otra via: por defecto cuDNN elige kernels no deterministas.
+    Cuesta algo de velocidad y compra poder repetir un numero, que en un proyecto donde cada
+    export lleva su sha256 no es negociable.
+    """
+    torch.manual_seed(semilla)
+    torch.cuda.manual_seed_all(semilla)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 @dataclass
@@ -236,7 +255,9 @@ def entrenar(
 ) -> dict:
     """Entrena y devuelve el historial, con el mejor estado por F1 macro de validacion."""
     device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    torch.manual_seed(cfg.semilla)
+    # Se vuelve a sembrar por si el modelo se construyo aparte; no reemplaza a llamar
+    # sembrar() ANTES de crearlo, que es lo que fija la inicializacion de los pesos.
+    sembrar(cfg.semilla)
     rng = np.random.default_rng(cfg.semilla)
     modelo = modelo.to(device)
 

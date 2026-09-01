@@ -319,3 +319,44 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      contra straight. Se descarto construir el salto a candidatos, que iba a usarlo
      para navegar. Corrige ademas la lectura del demo: sus 66 disparos no son un
      detector rudimentario sino ruido, y el 21% no habla del clasificador
+ 13. Construido el detector temporal, en boxtwin-detector: una TCN de convoluciones
+     dilatadas con campo receptivo de 63 cuadros que decide por cuadro y por brazo si
+     hay golpe. Cuatro decisiones de dataset que no se ven en los tensores y arruinan
+     el resultado en silencio: remuestrear las tres fuentes a 30 fps porque Pacquiao
+     va a 60 y el mismo golpe dura el doble de cuadros, enmascarar los amagues en vez
+     de darlos por fondo, acotar al tramo anotado, y normalizar por
+     max(ancho de hombros, largo del torso)
+ 14. Normalizar por el ancho de hombros solo estaba roto y se descubrio mirando un
+     golpe real: la guardia de boxeo es de perfil y ahi los hombros se superponen, de
+     16 px en el percentil 1 contra 142 en la mediana. Entre el 19% y el 37% de los
+     cuadros entraban al modelo con extensiones fisicamente imposibles, hasta 680
+     anchos de hombro. Con el torso en la escala, ademas, la feature separa mejor:
+     AUC 0,657 a 0,727 en sparring-3 y 0,639 a 0,744 en Pacquiao
+ 15. Medido por evento con el mismo emparejador del acuerdo intra-anotador, cinco
+     semillas por particion:
+
+                                 golpes    F1     recall  precision   F1 heuristica
+       en distribucion               81   0,445    0,674     0,359          0,248
+       sin Sparring                 114   0,348    0,582     0,280          0,243
+       sin Pacquiao                 145   0,506    0,583     0,493          0,303
+       sin sparring-3               380   0,416    0,589     0,349          0,274
+       techo humano                        0,907   0,911     0,903
+
+ 16. EL DETECTOR NO SE DERRUMBA AL CAMBIAR DE FUENTE, y el clasificador si lo hacia.
+     En distribucion 0,445 contra 0,348, 0,506 y 0,416 en los cruzados, con uno de
+     ellos por encima del de distribucion; el clasificador tenia 25 puntos de ventaja
+     en distribucion y caia a o por debajo de su linea de base en los tres cruzados.
+     No son numeros comparables entre si, pero la forma si: la lectura mas probable es
+     que la representacion era el problema, y que geometria normalizada transfiere
+     donde los heatmaps en pixeles no
+ 17. El ruido entre semillas es mas grande que casi todo lo demas: 0,24 de F1 entre la
+     mejor y la peor de una misma configuracion. El primer barrido de alpha, con una
+     semilla, eligio 0,25 por un 0,634 cuya media real es 0,445; con cinco semillas el
+     barrido no tiene ganador y quedo el default. Y dos corridas con la misma semilla
+     daban distinto porque el modelo se construia antes de sembrar, con los pesos
+     inicializados al azar
+ 18. Lo que falla es la precision, 0,28 a 0,49 contra 0,903 del humano; el recall se
+     sostiene entre 0,58 y 0,67. El umbral no lo arregla porque el modelo esta
+     saturado: solo el 9% de los cuadros cae en la zona indecisa. Con precision 0,35
+     hay dos marcas falsas por cada tres golpes reales, asi que todavia no es un
+     sistema que cuenta golpes

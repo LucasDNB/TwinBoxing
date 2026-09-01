@@ -14,14 +14,14 @@ La señal hay que aprenderla en el tiempo.
 
 ## Estado
 
-Se entrega en cuatro bloques. **Bloques 1, 2 y 3 terminados**, 113 tests.
+Se entrega en cuatro bloques. **Terminado**, 115 tests.
 
 | Bloque | Qué | Estado |
 |---|---|---|
 | 1 | Dataset: remuestreo, features, máscaras, particiones | hecho |
 | 2 | Modelo temporal y entrenamiento | hecho |
 | 3 | Decodificación a segmentos y evaluación | hecho |
-| 4 | Los tres folds y el reporte | pendiente |
+| 4 | Los tres folds y el reporte | hecho |
 
 ## Instalación
 
@@ -211,26 +211,15 @@ midió el acuerdo intra-anotador**. Con otro, los números no se podrían poner 
 humano, que es el punto. El emparejamiento es **por carril**: dos golpes simultáneos de
 peleadores distintos no son el mismo golpe.
 
-### Resultado en distribución
+### Cómo localiza cuando acierta
 
-`sparring-3`, último 25% del video, **81 golpes**. Todo por el mismo decodificador, el mismo
-emparejador y la misma región:
+Sobre la partición en distribución de `sparring-3`, el error de fronteras del modelo es de
+**2,0 cuadros al inicio y 1,9 al final**, con IoU medio 0,665. El humano, medido por
+reanotación ciega, da 1,12 y 1,55. Cuando el detector encuentra un golpe, lo ubica a menos de
+un cuadro de donde lo ubicaría una persona.
 
-| | recall | precisión | F1 | error inicio / fin |
-|---|---|---|---|---|
-| **Techo humano** | 0,911 | 0,903 | 0,907 | 1,12 / 1,55 |
-| **Modelo** (umbral 0,60) | **0,679** | **0,252** | **0,368** | 2,02 / 1,87 |
-| Extensión de muñeca | 0,222 | 0,281 | 0,248 | — |
-
-**El modelo le gana a la heurística**, sobre todo en recall: 0,68 contra 0,22. Y cuando
-encuentra un golpe lo localiza bien — IoU medio 0,665, y el error de fronteras de 2,0 cuadros
-está a menos de un cuadro del humano.
-
-Lo que falla es la precisión: 218 marcas para 81 golpes, 2,7 veces de más. Sigue lejísimos de
-0,903.
-
-Y son 81 golpes, así que las barras de error son anchas. En distribución, además, que es el
-caso fácil.
+Los resultados por evento están abajo, en **Los cuatro folds**. Un solo entrenamiento no
+alcanza para reportarlos: el desvío entre semillas es de ~0,09 de F1.
 
 ### El umbral tiene poco recorrido
 
@@ -241,6 +230,61 @@ a 0,9 reclasifica menos de un cuadro de cada diez.
 La consecuencia práctica: el punto de operación lo fija más el `alpha` de los pesos por clase,
 en el entrenamiento, que el umbral de decodificación. Barrer `alpha` —o calibrar la salida— es
 trabajo del bloque 4.
+
+## Los cuatro folds
+
+```bash
+boxtwin-detector folds data/*.det.npz --en-distribucion sparring-3-rounds --out reporte.json
+```
+
+Cinco semillas por partición, y se reporta la media. Ver
+[`docs/experiments/2026-09-01-detector-folds.md`](docs/experiments/2026-09-01-detector-folds.md).
+
+| Partición | Golpes | F1 medio | Desvío | recall | precisión | F1 heurística |
+|---|---|---|---|---|---|---|
+| **En distribución** (`sparring-3`) | 81 | **0,445** | 0,090 | 0,674 | 0,359 | 0,248 |
+| sin `Sparring` | 114 | **0,348** | 0,083 | 0,582 | 0,280 | 0,243 |
+| sin `Pacquiao` | 145 | **0,506** | 0,101 | 0,583 | 0,493 | 0,303 |
+| sin `sparring-3` | 380 | **0,416** | 0,093 | 0,589 | 0,349 | 0,274 |
+| *Techo humano* | | *0,907* | | *0,911* | *0,903* | |
+
+**Le gana a la heurística en las cuatro**, por 0,10 a 0,20 de F1, que son 2,5 a 5 errores
+estándar de la media.
+
+**Y no hay brecha entre distribución y fuente nueva**: 0,445 contra 0,348 / 0,506 / 0,416. Uno
+de los cruzados queda por encima del de distribución. Eso es lo contrario de lo que le pasó al
+clasificador, que cayó a o por debajo de su línea de base en los tres folds cruzados teniendo
+25 puntos de ventaja en distribución. No son números comparables entre sí —aquello es top-1 de
+seis clases— pero la **forma** sí lo es: uno se derrumba al cambiar de fuente y el otro no.
+
+La lectura más probable es que la representación era el problema: geometría normalizada
+transfiere, heatmaps en píxeles no.
+
+### El ruido entre semillas es más grande que casi todo
+
+Entre la mejor y la peor semilla de una misma configuración hay **0,24 de F1**. Con 81 a 380
+golpes en validación, una corrida sola no dice nada.
+
+Pasó en este mismo trabajo: el primer barrido de `alpha`, con una semilla, eligió 0,25 por un
+F1 de 0,634 cuya media real sobre cinco semillas es 0,445. El barrido **no tiene ganador** —los
+cinco valores caen dentro de un desvío— así que quedó el default 0,5 y se reporta inconcluso.
+
+Por eso `sembrar()` hay que llamarla **antes** de construir el modelo, y por eso está
+`cudnn.deterministic`. Sin las dos cosas, dos corridas con la misma semilla difieren hasta 0,1
+de F1: más que cualquier efecto reportable.
+
+## Dónde está el error hoy
+
+El recall es estable entre 0,58 y 0,67 en las cuatro particiones. **Lo que falla es la
+precisión**, entre 0,28 y 0,49 contra 0,903 del humano: el detector encuentra la mayoría de los
+golpes y marca de más.
+
+El umbral no lo va a arreglar, porque el modelo está saturado (sólo el 9% de los cuadros cae en
+la zona indecisa). Calibración por temperatura o pérdida focal atacan eso directamente; el
+umbral no.
+
+Y con precisión 0,35 hay dos marcas falsas por cada tres golpes reales, así que **esto todavía
+no es un sistema que cuenta golpes**. Para el bucle de preanotación hace falta 0,5 o 0,6.
 
 ## Particiones
 
