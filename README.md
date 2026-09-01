@@ -309,3 +309,13 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      puntos y los hiperparametros mueven cinco. Sigue sumar fuentes, y construir el
      detector de secuencia con carriles BIO, que no esta hecho. El 21% de precision
      del disparador heuristico es la linea de base contra la que se mide
+ 11. Medido que el disparador por extension de muneca NO supera al azar. Con 42
+     golpes por minuto, el 46% de la linea de tiempo esta a menos de medio segundo
+     de un golpe por construccion, y esa es la precision de poner paradas al azar;
+     el disparador saca 0,52 en sparring-3, 0,49 en Sparring y 0,70 en Pacquiao
+     contra 0,46, 0,47 y 0,65. En Sparring es indistinguible del azar
+ 12. La causa es que la guardia vive en 1,0-1,5 anchos de hombro, o sea donde viven
+     los golpes: AUC 0,61 a 0,67 por cuadro, el mismo orden que el 0,64 de hook
+     contra straight. Se descarto construir el salto a candidatos, que iba a usarlo
+     para navegar. Corrige ademas la lectura del demo: sus 66 disparos no son un
+     detector rudimentario sino ruido, y el 21% no habla del clasificador
