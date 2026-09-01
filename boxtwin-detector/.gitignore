@@ -1,0 +1,2 @@
+# Los tensores del detector se regeneran corriendo build sobre los exports.
+data/
