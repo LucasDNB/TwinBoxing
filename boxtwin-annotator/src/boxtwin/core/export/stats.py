@@ -113,7 +113,7 @@ def exportar(ctx: ExportContext) -> ExportResult:
         },
     }
 
-    issues = validate_document(doc)
+    issues = validate_document(doc, ctx.cache)
     reporte: dict[str, Any] = base_metadata(ctx, "stats")
     reporte["eventos"] = {
         "total": len(eventos),

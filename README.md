@@ -214,3 +214,98 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      los symlinks y un proyecto de prueba escribia sobre el original, y el preproceso
      no miraba si existia una anotacion antes de rehacer el cache y renumerar los
      track_id
+
+20-08 Identidad por click, y el validador de colisiones que no validaba
+
+  1. Medido sobre el primer round de Pacquiao: 151 eventos en 2,9 minutos de video
+     costaron 70,7 minutos de trabajo, y solo el 22% se fue en clasificar golpes. El
+     78% es identidad y navegacion, a 23 s por asignacion. La pelea entera son 15
+     horas, no las 5 estimadas
+  2. Asignar ahora es click sobre el peleador y Ctrl+1 o Ctrl+2: el track se busca
+     solo, tomando la caja mas chica que contiene el punto. Antes habia que buscar el
+     track_id en una lista lateral, que es un numero sin significado para quien anota,
+     y no habia ningun atajo de teclado de identidad
+  3. Ctrl+4 ignora todo lo que en ese plano no sea peleador, acotado al plano entre
+     dos cortes de camara: en el siguiente los track_id ya son otros
+  4. Las 1165 colisiones de rol eran del validador y no de los datos. Comparaba
+     rangos sin mirar si los dos tracks existen ahi; con el cache quedan 10 en
+     Pacquiao y 0 en Sparring
+  5. Truncar al ocupante anterior al asignar elimina todas las colisiones y empeora
+     el dato: los cuadros sin pose dentro de eventos suben de 51 a 218. Los
+     solapamientos hacen de respaldo cuando el tracker fragmenta a un peleador y un
+     track viejo reaparece. Revertido, con un test que lo fija
+  6. IgnoreSmallTracks agregaba su asignacion sin recortar lo que el track ya tuviera,
+     dejando dos intervalos del mismo track superpuestos y un resolver que elige por
+     orden de lista. 30 casos, todos ignore contra ignore
+
+23-08 Pacquiao round 1 cerrado
+
+  1. 151 eventos. Reparados los 280 solapamientos que dejo la version vieja de
+     IgnoreSmallTracks: asignaciones 9910 -> 9658 y la validacion baja a 9
+     colisiones, que son las reales
+  2. Rellenados los huecos internos, 415 interpolaciones sobre 1089 cuadros. Los
+     cuadros sin pose dentro de eventos bajan de 51 a 1, y los eventos afectados de
+     21 a 1
+  3. 11 de 12 clases con ejemplos y desbalance 63:1, con straight-left-head y
+     straight-right-head como el grueso, que sobre Pacquiao es lo esperable. Ritmo
+     5,2 s por golpe contra 9,0 en el sparring
+
+25-08 sparring-3, tercera fuente y la primera donde el ritmo mejora
+
+  1. Sparring de gimnasio a 1080p30 con camara casi fija: 11 cortes en 9,7 minutos
+     contra los 181 de la transmision profesional, y 257 tracks contra 11.100
+  2. Dos rounds, 146 eventos. Aislando el segundo, ya con el click-para-asignar
+     rodado: 11,8 minutos de trabajo por minuto de video contra 24,4 en Pacquiao
+  3. El tiempo de identidad sigue siendo el 73% pese a hacer 3,7 veces menos
+     asignaciones por minuto. Ese tiempo no es de asignar sino de mirar, o sea
+     recorrer el video y confirmar que la asignacion se sostiene, y no hay mejora de
+     interfaz que lo devuelva
+  4. Calidad muy superior: 2 avisos y ningun error de validacion contra 9 colisiones
+     reales en Pacquiao, y 4 cuadros sin pose dentro de eventos contra 51
+  5. El reparto de clases es genuinamente distinto y se sostiene entre los dos rounds:
+     hook 33% contra 15% en Pacquiao. Sumar material de este tipo ayuda a las clases
+     raras por composicion y no solo por volumen
+
+01-09 Dataset propio cerrado en 676 eventos, y el primer entrenamiento
+
+  1. sparring-3 anotado entero, 9,6 de 9,7 minutos: 400 eventos, 101 asignaciones y
+     314 interpolaciones que bajan los cuadros sin pose dentro de eventos de 27 a 9.
+     Ritmo 9,5 minutos de trabajo por minuto de video, tres veces mas eficiente que
+     la transmision profesional
+  2. Corrige una extrapolacion equivocada. Con 222 eventos la composicion daba
+     uppercut 5% y de ahi se dijo que con 360 eventos llegaria a unos 18; con el
+     video entero salieron 39, porque los rounds 4 y 5 tuvieron el doble en
+     proporcion. Es el mismo error ya documentado dos veces en este proyecto: la
+     muestra chica no estaba mal, no informaba nada
+  3. El dataset queda en 676 eventos sobre tres fuentes, 418 straight, 209 hook y 49
+     uppercut, con las 12 clases pobladas
+  4. Primer entrenamiento propio: PoseConv3D sobre las 640 muestras que caen en el
+     espacio de 6 clases lead-rear, inicializado del checkpoint de Bhargav y con los
+     hiperparametros de aquella corrida sin tocar, a proposito. Cambiar datos e
+     hiperparametros a la vez deja sin saber cual movio el numero
+  5. En distribucion 62,5% top-1 contra 37,5% de linea de base. Dejando una fuente
+     afuera: 33,3 contra 41,2, 58,6 contra 60,7 y 34,1 contra 37,8. Aprende en
+     distribucion y no generaliza a una fuente nueva
+  6. Descartada la longitud de clip. Los clips tienen 7 cuadros de mediana y el
+     pipeline los estira a 48, casi siete repeticiones por cuadro, asi que parecia un
+     candidato fuerte. Con clip_len 12, 24 y 48 sale 55,2%, 58,3% y 59,4%: los tres
+     dentro del intervalo de +-10 puntos que corresponde a 96 muestras de validacion,
+     y si algo hay, favorece al clip largo
+  7. Hook contra straight tiene ahora tres mediciones independientes que coinciden.
+     De los 13 hooks que el modelo falla, 11 los llama straight; el anotador los
+     distingue con kappa 0,881; y ningun descriptor 2D paso de AUC 0,64, dos de ellos
+     codificando la definicion escrita por el anotador. La distincion existe y un
+     humano la hace, pero no esta accesible en la pose monocular
+  8. Bhargav saca 84,51% con 275 muestras de entrenamiento y este trabajo 62,5% con
+     285. Mismo volumen, veintidos puntos menos: su material es una persona sola
+     haciendo shadowboxing en plano fijo y el de aca son dos boxeadores ocluyendose
+     en sparring real. El numero publicado no es comparable
+  9. tools/demo_vivo.py corre pose, identidad y clasificacion juntas sobre video, que
+     es la primera vez que las tres piezas van juntas, y hace visible el agujero que
+     los numeros escondian: encuentra 14 de 21 golpes reales pero dispara 66 veces,
+     21% de precision. El clasificador no tiene clase "no hay golpe" porque se
+     entreno sobre ventanas que siempre contienen uno
+ 10. No sigue tunear: la brecha entre en distribucion y cruzado es de mas de 20
+     puntos y los hiperparametros mueven cinco. Sigue sumar fuentes, y construir el
+     detector de secuencia con carriles BIO, que no esta hecho. El 21% de precision
+     del disparador heuristico es la linea de base contra la que se mide

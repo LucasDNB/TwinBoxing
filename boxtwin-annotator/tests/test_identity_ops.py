@@ -471,3 +471,53 @@ def test_altura_maxima_usa_el_maximo_y_no_la_mediana() -> None:
     por_frame[9] = [(1, (0.0, 0.0, 10.0, 90.0))]
     alturas = altura_maxima_por_track(cache_con(por_frame, 10), 100)
     assert alturas[1] == pytest.approx(0.9)
+
+
+# -- solapamientos de rol: no se truncan ------------------------------------
+
+
+def test_asignar_no_le_quita_el_rol_al_anterior(doc: AnnotationDoc, pila: UndoStack) -> None:
+    """
+    Se probo truncar al ocupante anterior y es peor. Sobre el round anotado de Pacquiao vs
+    Margarito elimina las 1165 colisiones, pero los cuadros sin pose dentro de eventos suben
+    de 51 a 218: los solapamientos hacen de respaldo cuando el tracker fragmenta a un
+    peleador y un track viejo vuelve a aparecer.
+    """
+    asignar(pila, 1, TrackRole.A, 0, 1000)
+    asignar(pila, 2, TrackRole.A, 400, 1000)
+
+    roles = [(a.track_id, a.start_frame, a.end_frame_excl) for a in doc.identity.assignments]
+    assert (1, 0, 1000) in roles
+    assert (2, 400, 1000) in roles
+
+
+def test_ignorar_un_rango_no_toca_lo_de_afuera(doc: AnnotationDoc, pila: UndoStack) -> None:
+    """El boton de plano acota a [ini, fin): fuera de ahi los track_id son otros."""
+    from boxtwin.core.identity_ops import IgnoreSmallTracks
+
+    pila.do(IgnoreSmallTracks(track_ids=[9], total_frames=600, start_frame=300))
+    a = doc.identity.assignments[0]
+    assert (a.start_frame, a.end_frame_excl) == (300, 600)
+
+
+def test_ignorar_recorta_lo_que_ya_habia_del_mismo_track(
+    doc: AnnotationDoc, pila: UndoStack
+) -> None:
+    """
+    Sin recortar, un track con un ignore suelto previo queda con dos intervalos solapados y
+    el resolver elige segun el orden de la lista. Sobre el round anotado de Pacquiao vs
+    Margarito salieron 30 asi, todos ignore contra ignore.
+    """
+    from boxtwin.core.identity_ops import IgnoreSmallTracks
+    from boxtwin.core.validation import validate_document
+
+    asignar(pila, 9, TrackRole.IGNORE, 723, 1000)
+    pila.do(IgnoreSmallTracks(track_ids=[9], total_frames=800, start_frame=718))
+
+    tramos = sorted(
+        (a.start_frame, a.end_frame_excl)
+        for a in doc.identity.assignments
+        if a.track_id == 9
+    )
+    assert tramos == [(718, 800), (800, 1000)]
+    assert "ID_ASSIGNMENT_OVERLAP" not in {i.code for i in validate_document(doc)}

@@ -284,3 +284,60 @@ def test_nivel_emitido_coincide_con_la_tabla(code: str, doc_rich: AnnotationDoc)
     )
     for issue in validate_document(doc_rich):
         assert issue.level is ISSUE_CODES[issue.code]
+
+
+# -- colisiones de rol: solo las reales -------------------------------------
+
+
+class CacheFalso:
+    """Lo minimo que mira el filtro: en que cuadros existe cada track."""
+
+    def __init__(self, por_track: dict[int, list[int]]) -> None:
+        self._t = por_track
+
+    def frames_of_track(self, track_id: int):
+        import numpy as np
+
+        return np.asarray(self._t.get(track_id, []), dtype=np.int64)
+
+
+def _dos_tracks_al_mismo_rol(doc_rich: AnnotationDoc) -> AnnotationDoc:
+    from boxtwin.core.schema import Assignment, Origin
+
+    o = doc_rich.identity.assignments[0].origin
+    doc_rich.identity.assignments = [
+        Assignment(id="as_9001", track_id=101, role=TrackRole.A,
+                   start_frame=0, end_frame_excl=1000, origin=o),
+        Assignment(id="as_9002", track_id=102, role=TrackRole.A,
+                   start_frame=500, end_frame_excl=1000, origin=o),
+    ]
+    return doc_rich
+
+
+def test_sin_cache_se_reportan_todas(doc_rich: AnnotationDoc) -> None:
+    d = _dos_tracks_al_mismo_rol(doc_rich)
+    assert "ID_ROLE_COLLISION" in codes(d)
+
+
+def test_con_cache_no_se_reporta_si_los_tracks_no_coexisten(doc_rich: AnnotationDoc) -> None:
+    """
+    Solaparse en rango es normal y hasta util: hace de respaldo cuando el tracker fragmenta a
+    un peleador. Lo que importa es si los dos tracks estan detectados en el mismo cuadro.
+    """
+    d = _dos_tracks_al_mismo_rol(doc_rich)
+    cache = CacheFalso({101: list(range(0, 400)), 102: list(range(500, 900))})
+    assert "ID_ROLE_COLLISION" not in {i.code for i in validate_document(d, cache)}
+
+
+def test_con_cache_si_se_reporta_cuando_coexisten(doc_rich: AnnotationDoc) -> None:
+    d = _dos_tracks_al_mismo_rol(doc_rich)
+    cache = CacheFalso({101: list(range(0, 900)), 102: list(range(500, 900))})
+    assert "ID_ROLE_COLLISION" in {i.code for i in validate_document(d, cache)}
+
+
+def test_el_cache_no_toca_los_otros_codigos(doc_rich: AnnotationDoc) -> None:
+    d = _dos_tracks_al_mismo_rol(doc_rich)
+    cache = CacheFalso({101: list(range(0, 400)), 102: list(range(500, 900))})
+    sin = {i.code for i in validate_document(d)} - {"ID_ROLE_COLLISION"}
+    con = {i.code for i in validate_document(d, cache)} - {"ID_ROLE_COLLISION"}
+    assert sin == con

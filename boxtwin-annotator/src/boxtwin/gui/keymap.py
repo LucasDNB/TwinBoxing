@@ -62,6 +62,14 @@ DEFAULT_KEYMAP: dict[str, str] = {
     "view.toggle_gloves": "L",
     "view.only_selected": "O",
     # -- seleccion de peleador --------------------------------------------
+    # Identidad: se asigna el track que esta debajo del ultimo click sobre el video.
+    # Sin esto hay que buscar el track_id en una lista lateral, y son 23 s por asignacion
+    # medidos sobre un round real, contra 2 o 3 clickeando al boxeador.
+    "identity.assign_a": "Ctrl+1",
+    "identity.assign_b": "Ctrl+2",
+    "identity.ignore": "Ctrl+3",
+    "identity.ignore_rest": "Ctrl+4",
+
     "fighter.select_a": "1",
     "fighter.select_b": "2",
     # -- marcado, sobre el reproductor ------------------------------------
