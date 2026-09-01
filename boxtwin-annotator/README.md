@@ -26,6 +26,24 @@ dataset exportado, con su medida de acuerdo intra-anotador.
 | 6 | Exports (clips, mmaction, sequence, stats) | hecho |
 | 7 | Reanotacion ciega y reporte de acuerdo | hecho |
 
+### Lo que salio de usarlo
+
+El anotador es el instrumento, y los experimentos que se corrieron con el estan en
+`docs/experiments/`. En orden:
+
+| Fecha | Que | Resultado |
+|---|---|---|
+| [18-08](docs/experiments/2026-08-18-reid.md) | ¿El ReID de BoT-SORT reduce los cambios de identidad? | No, a esta resolucion |
+| [19-08](docs/experiments/2026-08-19-baseline-bhargav.md) | El baseline publico de 84,51% | No mide generalizacion: comparte el 96% de los sujetos |
+| [19-08](docs/experiments/2026-08-19-hook-vs-straight.md) | Hook contra straight con descriptores 2D | Negativo, mejor AUC 0,64 sobre cinco probados |
+| [19-08](docs/experiments/2026-08-19-protocolo-reanotacion.md) | El protocolo de reanotacion ciega | Media su propia ambiguedad; rehecho |
+| [01-09](docs/experiments/2026-09-01-primer-entrenamiento.md) | Primer entrenamiento con dataset propio | 62,5% en distribucion, no generaliza a una fuente nueva |
+
+El dataset propio quedo en 676 eventos sobre tres fuentes. Lo que falta no es del anotador
+sino de lo que viene despues: un **detector** que decida cuando hay golpe. El export
+`sequence` ya escribe el formato que ese modelo necesita, pero el modelo no esta construido.
+
+
 ## Instalacion
 
 En la maquina de desarrollo corre sobre `twinboxing_env`, que ya trae PySide6,
@@ -536,6 +554,33 @@ Antes ya se habia verificado, por separado, que el proxy y el original estan ali
 (mismo conteo de cuadros y `proxy[N]` corresponde a `original[N]`), y que el render directo
 sobre el `.npz` cae sobre el cuerpo. Las tres verificaciones juntas descartan el desfasaje
 como problema de datos, de proxy y de dibujo.
+
+### Demo del pipeline completo sobre video
+
+```bash
+~/miniforge3/envs/boxtwin_mmaction/bin/python tools/demo_vivo.py <proyecto>
+```
+
+Reproduce el video con el overlay coloreado por peleador, dispara la clasificacion cuando
+detecta la extension de un brazo, y muestra los golpes reconocidos en un panel lateral.
+Corre en `boxtwin_mmaction`, que es donde vive el modelo, y lee la pose del cache: no
+infiere en vivo.
+
+Existe porque una matriz de confusion no muestra COMO falla un sistema. Y lo que mostro es
+un agujero de arquitectura que los numeros escondian: medido contra la anotacion sobre 30
+segundos de `sparring-3`, encuentra 14 de 21 golpes reales pero dispara 66 veces, o sea que
+cuatro de cada cinco marcas no son un golpe.
+
+**El clasificador no tiene clase "no hay golpe"**: fue entrenado sobre ventanas que siempre
+contienen uno, asi que a cualquier ventana le devuelve uno de los seis. Hace falta un
+detector que decida cuando preguntar, y el modelo de secuencia con carriles BIO no esta
+construido; el disparador por extension de muneca que usa el demo es una heuristica de
+reemplazo y los falsos positivos son suyos, no del clasificador. Ver
+[`docs/experiments/2026-09-01-primer-entrenamiento.md`](docs/experiments/2026-09-01-primer-entrenamiento.md).
+
+Segunda advertencia que no es letra chica: el clasificador solo tiene senal en distribucion.
+Sobre un video que no sea `sparring-3`, lo que se ve en pantalla es ruido con formato de
+prediccion.
 
 ## Arquitectura
 
