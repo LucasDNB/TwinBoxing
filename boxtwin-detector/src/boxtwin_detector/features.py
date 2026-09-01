@@ -9,7 +9,22 @@ POR QUE EXISTE
   Aca las features se construyen para que esa via este cerrada por diseno:
 
   - CENTRADAS en el punto medio de los hombros, asi la posicion en el cuadro no entra.
-  - ESCALADAS por el ancho de hombros, asi la distancia a camara no entra.
+  - ESCALADAS por max(ancho de hombros, largo del torso), asi la distancia a camara no entra.
+
+    NO por el ancho de hombros solo, que fue el primer intento y estaba roto. La guardia de
+    boxeo es de perfil casi siempre, y de perfil los hombros se superponen en la proyeccion:
+    su ancho medido va de 16 px en el percentil 1 a 142 en la mediana, un factor de nueve.
+    Dividir por eso hace explotar todas las features. Medido sobre las tres fuentes, entre
+    el 19% y el 37% de los cuadros daban una extension de muneca mayor a 2 anchos de hombro,
+    que es fisicamente imposible, con maximos de 354, 59 y 680.
+
+    El largo del torso no colapsa al girar sobre el eje vertical, que es el giro que hace un
+    boxeador: su razon percentil 99 sobre percentil 1 es 3,0 contra 20,2 la del ancho de
+    hombros. Tomando el maximo de los dos, una sola medicion degenerada no puede arruinar la
+    normalizacion.
+
+    Y no es solo estabilidad: la extension normalizada asi SEPARA MEJOR. AUC por cuadro de
+    0,657 a 0,727 en sparring-3, 0,577 a 0,584 en Sparring y 0,639 a 0,744 en Pacquiao.
   - ESPEJADAS por brazo, asi un jab y un cross se ven iguales. Detectar no necesita saber
     que brazo es, y espejar duplica los datos efectivos.
 
@@ -45,6 +60,12 @@ L_CAD, R_CAD = 11, 12
 
 MIN_SCORE = 0.3
 _EPS = 1e-6
+
+# Un brazo humano estirado no llega a 2 desde el centro de hombros, ni con la escala mas
+# favorable. Es una red de contencion: con la escala actual no descarta practicamente nada
+# (el maximo medido es 2,4), pero deja que una pose rota entre en la mascara y no en la
+# perdida, en vez de meter un valor de 300 en la entrada del modelo.
+EXTENSION_MAX = 3.0
 
 # Un espejo real no es solo negar la x: lo que era el hombro izquierdo de la persona aparece
 # del otro lado y sigue siendo su hombro izquierdo, asi que los pares tambien se permutan.
@@ -109,11 +130,15 @@ def features_de(
         kp, sc = espejar(kp, sc)
     T = len(kp)
 
-    escala = np.linalg.norm(kp[:, L_HOM] - kp[:, R_HOM], axis=-1)
     centro = (kp[:, L_HOM] + kp[:, R_HOM]) / 2
+    ancho = np.linalg.norm(kp[:, L_HOM] - kp[:, R_HOM], axis=-1)
+    torso = np.linalg.norm(centro - (kp[:, L_CAD] + kp[:, R_CAD]) / 2, axis=-1)
+    caderas_ok = np.minimum(sc[:, L_CAD], sc[:, R_CAD]) >= MIN_SCORE
+    escala = np.where(caderas_ok, np.maximum(ancho, torso), ancho)
 
     ok = (
         (np.minimum(sc[:, L_HOM], sc[:, R_HOM]) >= MIN_SCORE)
+        & caderas_ok
         & (sc[:, L_COD] >= MIN_SCORE)
         & (sc[:, L_MUN] >= MIN_SCORE)
         & (escala > _EPS)
@@ -165,6 +190,7 @@ def features_de(
         ],
         axis=-1,
     )
+    ok &= extension <= EXTENSION_MAX
     f[~ok] = 0.0
     f = np.nan_to_num(f, nan=0.0, posinf=0.0, neginf=0.0)
 
