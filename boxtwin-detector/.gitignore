@@ -1,2 +1,3 @@
-# Los tensores del detector se regeneran corriendo build sobre los exports.
 data/
+# Los reportes de folds se regeneran corriendo el comando; llevan su procedencia adentro.
+reporte*.json
