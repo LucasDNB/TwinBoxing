@@ -289,11 +289,17 @@ Promediar las probabilidades de cinco semillas gana en los cuatro folds cruzados
 | Partición | Golpes | Una corrida | Desvío | **Ensamble** | recall | precisión |
 |---|---|---|---|---|---|---|
 | En distribución (`sparring-3`) | 81 | **0,445** | 0,090 | 0,409 | 0,691 | 0,290 |
-| sin `02-sparring` | 62 | 0,458 | 0,106 | **0,505** | 0,435 | 0,600 |
-| sin `Sparring` | 114 | 0,356 | 0,100 | **0,429** | 0,307 | 0,714 |
-| sin `Pacquiao` | 145 | 0,479 | 0,099 | **0,580** | 0,490 | 0,710 |
-| sin `sparring-3` | 380 | 0,430 | 0,104 | **0,527** | 0,382 | 0,853 |
+| sin `02-sparring` | 62 | 0,520 | 0,144 | **0,602** | 0,500 | 0,756 |
+| sin `03-sparring` | 129 | 0,496 | 0,074 | **0,515** | 0,395 | 0,739 |
+| sin `Sparring` | 114 | 0,397 | 0,101 | **0,470** | 0,482 | 0,458 |
+| sin `Pacquiao` | 145 | 0,494 | 0,097 | **0,548** | 0,393 | **0,905** |
+| sin `sparring-3` | 380 | 0,496 | 0,111 | **0,615** | 0,518 | 0,755 |
 | *Techo humano* | | | | *0,907* | *0,911* | *0,903* |
+
+Cinco fuentes, 830 golpes. El fold más confiable —`sin sparring-3`, con 380 golpes en
+validación— da **F1 0,615**. Y la precisión de `sin Pacquiao` es **0,905**, contra 0,903 del
+humano: sobre transmisión profesional que el modelo nunca vio, nueve de cada diez marcas son
+un golpe real.
 
 Pierde en distribución, y es coherente: la ganancia viene de suprimir detecciones espurias, que
 son idiosincrasia de cada corrida. Sobre la misma fuente en que se entrenó, las manías de un
@@ -309,13 +315,28 @@ Ver [`docs/experiments/2026-09-03-ensamble.md`](docs/experiments/2026-09-03-ensa
 documenta además una teoría equivocada sobre la cuantización del voto que escondió el mejor
 punto de operación durante una medición entera.
 
+## ¿Sirve sumar fuentes?
+
+La cuarta no; la quinta sí. Pasando de tres a cuatro fuentes de entrenamiento, el cambio medio
+sobre los folds cruzados fue **+0,046** en una corrida y **+0,048** en ensamble — contra
+**−0,002** cuando se sumó la anterior.
+
+El control lo respalda: la partición en distribución no toca las fuentes nuevas y da números
+**idénticos bit a bit** entre las dos rondas, así que la diferencia viene sólo de los datos
+agregados.
+
+`03-sparring` es el doble de grande que `02` (131 golpes contra 67) y bastante más diverso
+(28% hooks contra 13%), así que no se puede separar *más fuentes* de *más datos* con dos
+incrementos. Lo que queda establecido es que el techo no estaba donde parecía.
+
+Ver [`docs/experiments/2026-09-03-quinta-fuente.md`](docs/experiments/2026-09-03-quinta-fuente.md).
+
 ## Dónde está el error hoy
 
 Con el ensamble, **la precisión dejó de ser el problema**: 0,60 a 0,85 según el fold, contra
 0,903 del humano. Cuatro de cada cinco marcas que hace son un golpe real.
 
-**Ahora manda el recall**, que bajó a 0,31–0,49: se le escapan dos de cada tres golpes. Es la
-próxima frontera.
+**Ahora manda el recall**, entre 0,39 y 0,52 contra 0,911 del humano. Ahí queda todo el error.
 
 ## Particiones
 

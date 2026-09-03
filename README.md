@@ -402,3 +402,18 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      angosto: entre umbral 0,75 y 0,80 se caen 360 marcas y la precision salta de
      0,307 a 0,853. La grilla gruesa se lo saltaba entero. Se elimino la abstraccion y
      quedo un test que fija que el promedio no cae sobre los escalones
+  8. Anotada la quinta fuente, 03-sparring: 131 golpes en 2,9 minutos, 45,9 por minuto,
+     la mas intensa del dataset, con 28% de hooks contra 13% de 02-sparring. Una
+     colision en la validacion
+  9. Y ESTA VEZ SUMAR LA FUENTE SI MOVIO LA AGUJA. Pasando de tres a cuatro fuentes de
+     entrenamiento, el cambio medio sobre los folds cruzados es +0,046 en una corrida y
+     +0,048 en ensamble, contra el -0,002 de cuando se sumo la cuarta. El control lo
+     respalda: la particion en distribucion no toca las fuentes nuevas y da numeros
+     identicos bit a bit entre las dos rondas
+ 10. No se puede separar "mas fuentes" de "mas datos" con dos incrementos: 03 es el
+     doble de grande que 02 y bastante mas diverso. Lo que queda establecido es que el
+     techo no estaba donde parecia despues de la primera medicion
+ 11. El fold mas confiable es el mejor: sin sparring-3, con 380 golpes en validacion,
+     da F1 0,615 con recall 0,518 y precision 0,755. Y la precision de sin Pacquiao es
+     0,905 contra 0,903 del humano, sobre transmision profesional que el modelo nunca
+     vio. El recall sigue siendo la frontera, entre 0,39 y 0,52 contra 0,911
