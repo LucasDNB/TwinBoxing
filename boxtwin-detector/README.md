@@ -14,7 +14,7 @@ La señal hay que aprenderla en el tiempo.
 
 ## Estado
 
-Se entrega en cuatro bloques. **Terminado**, 115 tests.
+Se entrega en bloques. **Bloques 1 a 5 terminados**, 128 tests.
 
 | Bloque | Qué | Estado |
 |---|---|---|
@@ -22,6 +22,7 @@ Se entrega en cuatro bloques. **Terminado**, 115 tests.
 | 2 | Modelo temporal y entrenamiento | hecho |
 | 3 | Decodificación a segmentos y evaluación | hecho |
 | 4 | Los tres folds y el reporte | hecho |
+| 5 | Ensamble de semillas | hecho |
 
 ## Instalación
 
@@ -273,18 +274,48 @@ Por eso `sembrar()` hay que llamarla **antes** de construir el modelo, y por eso
 `cudnn.deterministic`. Sin las dos cosas, dos corridas con la misma semilla difieren hasta 0,1
 de F1: más que cualquier efecto reportable.
 
+## Ensamble de semillas
+
+```bash
+boxtwin-detector train data/*.det.npz --fold sin-Sparring --semillas 42 1 2 3 4
+```
+
+El desvío entre semillas de una misma configuración es ~0,10 de F1, y es **igual con 62 golpes
+de validación que con 380**. Si viniera del muestreo de la evaluación tendría que caer como la
+raíz del tamaño. No cae: la varianza está en el entrenamiento.
+
+Promediar las probabilidades de cinco semillas gana en los cuatro folds cruzados:
+
+| Partición | Golpes | Una corrida | Desvío | **Ensamble** | recall | precisión |
+|---|---|---|---|---|---|---|
+| En distribución (`sparring-3`) | 81 | **0,445** | 0,090 | 0,409 | 0,691 | 0,290 |
+| sin `02-sparring` | 62 | 0,458 | 0,106 | **0,505** | 0,435 | 0,600 |
+| sin `Sparring` | 114 | 0,356 | 0,100 | **0,429** | 0,307 | 0,714 |
+| sin `Pacquiao` | 145 | 0,479 | 0,099 | **0,580** | 0,490 | 0,710 |
+| sin `sparring-3` | 380 | 0,430 | 0,104 | **0,527** | 0,382 | 0,853 |
+| *Techo humano* | | | | *0,907* | *0,911* | *0,903* |
+
+Pierde en distribución, y es coherente: la ganancia viene de suprimir detecciones espurias, que
+son idiosincrasia de cada corrida. Sobre la misma fuente en que se entrenó, las manías de un
+modelo encajan; cruzando de fuente, no.
+
+**La precisión pasa de 0,28–0,43 a 0,60–0,85**, a un paso del 0,903 humano. El costo es recall,
+que baja de ~0,59 a 0,31–0,49.
+
+No se compara contra la mejor de las cinco semillas (0,638 en el fold grande): elegirla mirando
+la validación es seleccionar sobre el test.
+
+Ver [`docs/experiments/2026-09-03-ensamble.md`](docs/experiments/2026-09-03-ensamble.md), que
+documenta además una teoría equivocada sobre la cuantización del voto que escondió el mejor
+punto de operación durante una medición entera.
+
 ## Dónde está el error hoy
 
-El recall es estable entre 0,58 y 0,67 en las cuatro particiones. **Lo que falla es la
-precisión**, entre 0,28 y 0,49 contra 0,903 del humano: el detector encuentra la mayoría de los
-golpes y marca de más.
+Con el ensamble, **la precisión dejó de ser el problema**: 0,60 a 0,85 según el fold, contra
+0,903 del humano. Cuatro de cada cinco marcas que hace son un golpe real.
 
-El umbral no lo va a arreglar, porque el modelo está saturado (sólo el 9% de los cuadros cae en
-la zona indecisa). Calibración por temperatura o pérdida focal atacan eso directamente; el
-umbral no.
-
-Y con precisión 0,35 hay dos marcas falsas por cada tres golpes reales, así que **esto todavía
-no es un sistema que cuenta golpes**. Para el bucle de preanotación hace falta 0,5 o 0,6.
+**Ahora manda el recall**, que bajó a 0,31–0,49: se le escapan dos de cada tres golpes. Es la
+próxima frontera.
 
 ## Particiones
 

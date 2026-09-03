@@ -83,9 +83,10 @@ def _train(args: argparse.Namespace) -> int:
 
     fuentes = [leer(p) for p in args.datos]
     por_nombre = {f.nombre: f for f in fuentes}
+    semillas = args.semillas
     cfg = Config(epocas=args.epocas, lr=args.lr, ventana=args.ventana, batch=args.batch,
                  ventanas_por_epoca=args.ventanas, alpha_pesos=args.alpha,
-                 canales=args.canales, semilla=args.semilla)
+                 canales=args.canales, semilla=semillas[0], dropout=args.dropout)
 
     if args.fold == "en-distribucion":
         if args.fuente is None:
@@ -108,26 +109,37 @@ def _train(args: argparse.Namespace) -> int:
         nombre = fold.nombre
 
     est = Estandarizador.ajustar(train)
-    sembrar(cfg.semilla)          # antes de construir: fija la inicializacion de los pesos
-    modelo = TCN(n_features=train[0].features.shape[2], canales=cfg.canales,
-                 dropout=args.dropout)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    rf = TCN(n_features=train[0].features.shape[2], canales=cfg.canales).campo_receptivo
 
     print(f"fold {nombre}")
     print(f"  train: {', '.join(f.nombre for f in train)} "
           f"({sum(int(f.usable.sum()) for f in train)} cuadros usables)")
     print(f"  val:   {', '.join(f.nombre for f in val)} "
           f"({sum(int(f.usable.sum()) for f in val)} cuadros usables)")
-    print(f"  campo receptivo {modelo.campo_receptivo} cuadros, device {device}")
-
-    hist = entrenar(modelo, train, val, est, cfg, device)
+    print(f"  campo receptivo {rf} cuadros, device {device}, "
+          f"{len(semillas)} semilla(s): {semillas}")
 
     args.out.mkdir(parents=True, exist_ok=True)
-    ck = args.out / f"detector-{nombre}.pt"
-    torch.save({"state_dict": modelo.state_dict(), "config": asdict(cfg),
-                "estandarizador": est.a_dict(), "n_features": modelo.n_features,
-                "canales": cfg.canales, "fold": nombre}, ck)
+    if len(semillas) > 1:
+        from boxtwin_detector.ensamble import entrenar_ensamble, guardar
+        ens = entrenar_ensamble(train, val, cfg, semillas, device)
+        ck = args.out / f"detector-{nombre}.ens.pt"
+        guardar(ens, ck)
+        hist = {"mejor": ens.historiales[0]["mejor"],
+                "semillas": semillas,
+                "por_semilla": [h["mejor"] for h in ens.historiales]}
+    else:
+        sembrar(cfg.semilla)      # antes de construir: fija la inicializacion de los pesos
+        modelo = TCN(n_features=train[0].features.shape[2], canales=cfg.canales,
+                     dropout=args.dropout)
+        hist = entrenar(modelo, train, val, est, cfg, device)
+        ck = args.out / f"detector-{nombre}.pt"
+        torch.save({"state_dict": modelo.state_dict(), "config": asdict(cfg),
+                    "estandarizador": est.a_dict(), "n_features": modelo.n_features,
+                    "canales": cfg.canales, "fold": nombre}, ck)
     (args.out / f"detector-{nombre}.json").write_text(json.dumps({
+        "semillas": semillas,
         "fold": nombre, "fraccion": args.fraccion,
         "train": [f.nombre for f in train], "val": [f.nombre for f in val],
         "procedencia": {f.nombre: f.procedencia for f in fuentes},
@@ -135,12 +147,16 @@ def _train(args: argparse.Namespace) -> int:
     }, indent=2, ensure_ascii=False) + "\n")
 
     m = hist["mejor"]["val"]
-    print(f"\nmejor epoca {hist['mejor']['epoca']}: F1 macro {m['f1_macro']:.4f}")
+    print(f"\nF1 macro por cuadro {m['f1_macro']:.4f} (epoca {hist['mejor']['epoca']})")
     print(f"  recall  O {m['O_recall']:.3f}  B {m['B_recall']:.3f}  I {m['I_recall']:.3f}")
     print(f"  decir siempre O daria exactitud {m['siempre_O']:.2%} y F1 macro ~0,33")
     print(f"  -> {ck.name}")
     print("\nEsto es F1 por cuadro, que es una escalera y no el piso. La medida que "
-          "importa\nes precision y recall POR EVENTO, y llega en el bloque 3.")
+          "importa\nes precision y recall POR EVENTO: correr `eval` sobre este checkpoint.")
+    if len(semillas) == 1:
+        print("\nUna sola semilla: el desvio entre semillas es ~0,10 de F1 por evento, asi "
+              "que\neste numero es una muestra de esa distribucion. Con --semillas 42 1 2 3 4 "
+              "se\nentrena un ensamble, que gana ~0,10 y ademas es determinista.")
     return 0
 
 
@@ -155,17 +171,28 @@ def _eval(args: argparse.Namespace) -> int:
     from boxtwin_detector.modelo import TCN
     from boxtwin_detector.splits import partir_en_distribucion
 
+    from boxtwin_detector.ensamble import cargar as cargar_ensamble
+    from boxtwin_detector.ensamble import probabilidad
+
     ck = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
-    meta = json.loads(Path(str(args.checkpoint).replace(".pt", ".json")).read_text())
-    cfg = Config(**ck["config"])
-    est = Estandarizador.de_dict(ck["estandarizador"])
-    modelo = TCN(n_features=ck["n_features"], canales=ck["canales"])
-    modelo.load_state_dict(ck["state_dict"])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    modelo = modelo.to(device).eval()
+    es_ensamble = ck.get("kind") == "boxtwin.detector.ensamble"
+    nombre_meta = str(args.checkpoint).replace(".ens.pt", ".json").replace(".pt", ".json")
+    meta = json.loads(Path(nombre_meta).read_text())
+    cfg = Config(**ck["config"])
+    if es_ensamble:
+        ens = cargar_ensamble(args.checkpoint, device)
+        est = ens.estandarizador
+        modelo = None
+    else:
+        est = Estandarizador.de_dict(ck["estandarizador"])
+        modelo = TCN(n_features=ck["n_features"], canales=ck["canales"])
+        modelo.load_state_dict(ck["state_dict"])
+        modelo = modelo.to(device).eval()
+        ens = None
 
     por_nombre = {f.nombre: f for f in (leer(p) for p in args.datos)}
-    fold = ck["fold"]
+    fold = ck.get("fold") or meta["fold"]
     if fold.startswith("en-distribucion-"):
         base = fold[len("en-distribucion-"):]
         if base not in por_nombre:
@@ -180,15 +207,30 @@ def _eval(args: argparse.Namespace) -> int:
                   file=sys.stderr)
             return 1
 
-    print(f"fold {fold}, validando sobre {', '.join(f.nombre for f in val)}\n")
-    umbrales = args.umbrales or [round(x, 2) for x in np.arange(0.10, 0.95, 0.05)]
+    if es_ensamble:
+        print(f"fold {fold}, ENSAMBLE de {ens.n} semillas {ens.semillas}")
+        print("  el umbral se barre con grilla fina: la salida NO queda cuantizada en\n"
+              "  pasos de 1/n, y el optimo suele caer en un acantilado angosto\n")
+    else:
+        print(f"fold {fold}, un solo modelo\n")
+    print(f"validando sobre {', '.join(f.nombre for f in val)}\n")
+    # grilla fina en los dos casos. El ensamble tiene un acantilado angosto -entre 0,75 y
+    # 0,80 se caen 360 marcas y la precision salta de 0,31 a 0,85- que una grilla gruesa se
+    # saltea.
+    umbrales = args.umbrales or [round(x, 2) for x in np.arange(0.05, 1.0, 0.05)]
 
     for f in val:
-        logits = [predecir_secuencia(modelo, est.aplicar(f.features[c]), cfg, device)
-                  for c in range(f.features.shape[0])]
         cob = tuple(f.conteos.get("cobertura", [0, f.T - 1]))
-        filas = barrer(logits, f.labels, f.usable, umbrales, cobertura=cob,
-                       largo_minimo=args.largo_minimo, hueco_maximo=args.hueco_maximo)
+        if es_ensamble:
+            senal = probabilidad(ens, f, device)
+            filas = barrer(senal, f.labels, f.usable, umbrales, cobertura=cob,
+                           como_score=True, largo_minimo=args.largo_minimo,
+                           hueco_maximo=args.hueco_maximo)
+        else:
+            logits = [predecir_secuencia(modelo, est.aplicar(f.features[c]), cfg, device)
+                      for c in range(f.features.shape[0])]
+            filas = barrer(logits, f.labels, f.usable, umbrales, cobertura=cob,
+                           largo_minimo=args.largo_minimo, hueco_maximo=args.hueco_maximo)
         n_gt = filas[0]["golpes"]
         n_alc = filas[0].get("golpes_alcanzables", n_gt)
         print(f"{f.nombre}: {n_gt} golpes anotados, {n_alc} con pose usable "
@@ -196,12 +238,13 @@ def _eval(args: argparse.Namespace) -> int:
         print(f"  {'umbral':>7} {'predichos':>10} {'recall':>8} {'precision':>10} "
               f"{'F1':>7} {'IoU':>6} {'err ini':>8} {'err fin':>8}")
         mejor = None
-        for x in filas:
+        for k, x in enumerate(filas, start=1):
             r, pr = x["recall"], x["precision"]
             f1 = 2 * r * pr / (r + pr) if r + pr else 0.0
             if mejor is None or f1 > mejor[0]:
                 mejor = (f1, x)
-            print(f"  {x['umbral']:7.2f} {x['predichos']:10d} {r:8.3f} {pr:10.3f} "
+            etiqueta = f"{x['umbral']:.2f}"
+            print(f"  {etiqueta:>7} {x['predichos']:10d} {r:8.3f} {pr:10.3f} "
                   f"{f1:7.3f} {x['iou_medio']:6.3f} "
                   f"{(x['error_inicio'] if x['error_inicio'] is not None else float('nan')):8.2f} "
                   f"{(x['error_fin'] if x['error_fin'] is not None else float('nan')):8.2f}")
@@ -251,6 +294,7 @@ def _folds(args: argparse.Namespace) -> int:
     import numpy as np
     import torch
 
+    from boxtwin_detector.decodificacion import probabilidad_de_golpe
     from boxtwin_detector.entrenamiento import (
         Config, Estandarizador, entrenar, predecir_secuencia, sembrar,
     )
@@ -280,14 +324,31 @@ def _folds(args: argparse.Namespace) -> int:
                         "precision": round(p, 4), "f1": round(v, 4)}
         return best
 
-    def curva_modelo(m, est, cfg, vals):
+    def probs_modelo(m, est, cfg, vals):
+        """P(golpe) por fuente y carril. Se guarda para poder promediar el ensamble."""
+        return [[probabilidad_de_golpe(
+                    predecir_secuencia(m, est.aplicar(f.features[c]), cfg, device))
+                 for c in range(f.features.shape[0])] for f in vals]
+
+    def curva_de_probs(probs, vals, us):
         out = []
-        for f in vals:
-            lg = [predecir_secuencia(m, est.aplicar(f.features[c]), cfg, device)
-                  for c in range(f.features.shape[0])]
+        for f, ps in zip(vals, probs):
             cob = tuple(f.conteos.get("cobertura", [0, f.T - 1]))
-            out.append(barrer(lg, f.labels, f.usable, umbrales, cobertura=cob))
+            out.append(barrer(ps, f.labels, f.usable, us, cobertura=cob, como_score=True))
         return out
+
+    def mejor_en(us, curvas):
+        best = None
+        for i, u in enumerate(us):
+            g = sum(c[i]["golpes"] for c in curvas)
+            pr = sum(c[i]["predichos"] for c in curvas)
+            em = sum(c[i]["emparejados"] for c in curvas)
+            r, p = (em / g if g else 0.0), (em / pr if pr else 0.0)
+            v = f1(r, p)
+            if best is None or v > best["f1"]:
+                best = {"umbral": u, "golpes": g, "predichos": pr, "recall": round(r, 4),
+                        "precision": round(p, 4), "f1": round(v, 4)}
+        return best
 
     def curva_heuristica(vals):
         i = NOMBRES.index("extension")
@@ -322,31 +383,42 @@ def _folds(args: argparse.Namespace) -> int:
                        [fuentes[n] for n in fold.val]))
 
     resultados = []
-    print(f"{len(args.semillas)} semillas por fold, alpha {args.alpha}\n")
-    print(f"{'fold':>26} {'golpes':>7} {'F1 medio':>9} {'desvio':>7} {'min':>6} {'max':>6} "
-          f"{'recall':>7} {'prec':>6} | {'F1 heur':>8}")
+    n = len(args.semillas)
+    us_voto = umbrales
+    print(f"{n} semillas por fold, alpha {args.alpha}\n")
+    print(f"{'fold':>26} {'golpes':>7} | {'una corrida':>12} {'desvio':>7} | "
+          f"{'ensamble':>9} {'recall':>7} {'prec':>6} | {'heuristica':>10}")
     for nombre, train, val in tareas:
         est = Estandarizador.ajustar(train)
-        fs, rs, ps, corridas = [], [], [], []
+        fs, corridas = [], []
+        acum = [[np.zeros(f.T) for _ in range(f.features.shape[0])] for f in val]
         for s in args.semillas:
             cfg = Config(epocas=args.epocas, alpha_pesos=args.alpha, semilla=s)
             sembrar(s)
             m = TCN(n_features=train[0].features.shape[2], canales=cfg.canales)
             entrenar(m, train, val, est, cfg, device, verbose=False)
-            b = mejor(curva_modelo(m, est, cfg, val))
+            probs = probs_modelo(m, est, cfg, val)
+            for i, ps in enumerate(probs):
+                for c, x in enumerate(ps):
+                    acum[i][c] += x
+            b = mejor_en(umbrales, curva_de_probs(probs, val, umbrales))
             corridas.append({"semilla": s, **b})
-            fs.append(b["f1"]); rs.append(b["recall"]); ps.append(b["precision"])
+            fs.append(b["f1"])
+        ens_probs = [[a / n for a in fuente_] for fuente_ in acum]
+        e = mejor_en(us_voto, curva_de_probs(ens_probs, val, us_voto))
         h = curva_heuristica(val)
-        print(f"{nombre:>26} {h['golpes']:7d} {np.mean(fs):9.3f} {np.std(fs):7.3f} "
-              f"{min(fs):6.3f} {max(fs):6.3f} {np.mean(rs):7.3f} {np.mean(ps):6.3f} | "
-              f"{h['f1']:8.3f}")
+        print(f"{nombre:>26} {h['golpes']:7d} | {np.mean(fs):12.3f} {np.std(fs):7.3f} | "
+              f"{e['f1']:9.3f} {e['recall']:7.3f} {e['precision']:6.3f} | {h['f1']:10.3f}")
         resultados.append({"fold": nombre, "corridas": corridas, "heuristica": h,
+                           "ensamble": e,
                            "f1_medio": round(float(np.mean(fs)), 4),
-                           "f1_desvio": round(float(np.std(fs)), 4),
-                           "recall_medio": round(float(np.mean(rs)), 4),
-                           "precision_media": round(float(np.mean(ps)), 4)})
+                           "f1_desvio": round(float(np.std(fs)), 4)})
 
     print("\n  techo humano: recall 0,911  precision 0,903  F1 0,907")
+    print("  \"una corrida\" es el promedio de las semillas por separado: lo que sale de "
+          "entrenar una vez.")
+    print("  NO se reporta la mejor de las semillas: elegirla mirando la validacion es "
+          "seleccionar sobre el test.")
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(
@@ -386,7 +458,9 @@ def main(argv: list[str] | None = None) -> int:
     tr.add_argument("--alpha", type=float, default=0.5)
     tr.add_argument("--canales", type=int, default=64)
     tr.add_argument("--dropout", type=float, default=0.1)
-    tr.add_argument("--semilla", type=int, default=42)
+    tr.add_argument("--semillas", type=int, nargs="+", default=[42],
+                    help="una sola entrena un modelo; varias entrenan un ENSAMBLE, que gana "
+                         "~0,10 de F1 por evento y no tiene varianza de semilla")
     tr.set_defaults(func=_train)
 
     ev = sub.add_parser("eval", help="decodifica a segmentos y mide por evento")

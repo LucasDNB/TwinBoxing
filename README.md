@@ -360,3 +360,45 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      saturado: solo el 9% de los cuadros cae en la zona indecisa. Con precision 0,35
      hay dos marcas falsas por cada tres golpes reales, asi que todavia no es un
      sistema que cuenta golpes
+
+03-09 Cuarta fuente, y la varianza que estaba en el entrenamiento
+
+  1. 02-sparring anotado a ciegas: 67 golpes en 2,8 minutos, 438 asignaciones de
+     identidad y UNA sola colision en la validacion, contra 18 avisos y 15 colisiones
+     de sparring-3. La anotacion mas limpia del dataset
+  2. Tiene la mitad de golpes por minuto que el resto, 23,9 contra 41,7 y 42,5.
+     Verificado que no es anotacion incompleta: la tasa se sostiene entre la primera y
+     la segunda mitad del video. Es un sparring mas medido, y eso lo hace mas dificil
+     en precision porque hay mas fondo verdadero por golpe
+  3. Los tres folds que ya existian pasan de entrenar con dos fuentes a entrenar con
+     tres, y el cambio medio es -0,002. Sumar una fuente no movio nada medible. Con
+     desvio 0,10 sobre cinco semillas el piso de deteccion es 0,06 de F1, asi que lo
+     que se puede afirmar es "no se detecto mejora", no "sumar fuentes no sirve"
+  4. El desvio entre semillas es el MISMO con 62 golpes de validacion que con 380. Si
+     viniera del muestreo de la evaluacion tendria que caer como la raiz del tamano.
+     No cae: la varianza esta en el entrenamiento, no en la medicion
+  5. Promediar las probabilidades de cinco semillas gana en los cuatro folds cruzados,
+     entre +0,05 y +0,10, y pierde -0,04 en distribucion. Es coherente: la ganancia
+     viene de suprimir detecciones espurias, que son idiosincrasia de cada corrida, y
+     sobre la misma fuente en que se entreno esas manias encajan
+
+       particion            golpes   una corrida   ensamble   recall  precision
+       en distribucion          81         0,445      0,409    0,691      0,290
+       sin 02-sparring          62         0,458      0,505    0,435      0,600
+       sin Sparring            114         0,356      0,429    0,307      0,714
+       sin Pacquiao            145         0,479      0,580    0,490      0,710
+       sin sparring-3          380         0,430      0,527    0,382      0,853
+       techo humano                        0,907               0,911      0,903
+
+  6. LA PRECISION DEJO DE SER EL PROBLEMA: de 0,28-0,43 pasa a 0,60-0,85, a un paso
+     del 0,903 humano. Cuatro de cada cinco marcas son un golpe real, que es el umbral
+     que se habia estimado necesario para que la preanotacion fuera rentable. Ahora
+     manda el recall, que bajo a 0,31-0,49
+  7. Una teoria equivocada costo una medicion entera. Parecia que promediar n modelos
+     saturados daba una salida cuantizada en pasos de 1/n, o sea que solo habria n
+     puntos de operacion; sobre eso se barrieron cinco umbrales y el ensamble salio
+     PEOR que una corrida sola en las cinco particiones. El reparto medido de la
+     probabilidad promedio es un continuo, y con grilla fina aparece un acantilado
+     angosto: entre umbral 0,75 y 0,80 se caen 360 marcas y la precision salta de
+     0,307 a 0,853. La grilla gruesa se lo saltaba entero. Se elimino la abstraccion y
+     quedo un test que fija que el promedio no cae sobre los escalones
