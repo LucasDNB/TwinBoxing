@@ -39,4 +39,4 @@ Thumbs.db
 # === Inicial ===
 *.pt
 test-inicial/runs
-.claude/worktrees/
+.claude/
