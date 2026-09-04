@@ -37,6 +37,19 @@ POR QUE EXISTE
      ultimo, y ese error va en la direccion segura: se pierden negativos verdaderos en vez
      de inventarlos.
 
+  5. LA POSE INTERPOLADA NO ES UNA POSE OBSERVADA. Cuando la identidad tiene un hueco, el
+     anotador lo rellena interpolando linealmente entre los dos extremos. Es la mejor
+     estimacion disponible, pero no es un dato medido, y una recta entre dos puntos no
+     tiene la firma temporal que el detector busca.
+
+     Entran por defecto, porque sacarlas quita cuadros positivos. Con `interpolados=False`
+     se las trata como lo que son -no sabemos- y salen de la mascara, igual que los amagues
+     y los cuadros fuera del tramo anotado.
+
+     Importa desparejo. Medido: el 23,6% de los golpes de Sparring contiene algun cuadro
+     interpolado, contra 3,3% en sparring-3 y 0% en las cuatro fuentes nuevas. Sparring es
+     el peor fold en las cuatro rondas, y esa es la explicacion mas probable.
+
   LIMITACION CONOCIDA: los eventos `aborted` no llegan al export en ningun espacio de clases,
   asi que sus cuadros quedan como O. Son 9 sobre 676 (1,3%): se declara y no se corrige, que
   corregirlo pedia que el detector leyera el annot.json y dejara de consumir la interfaz.
@@ -139,8 +152,15 @@ def remuestrear_segmentos(
     return salida, ajustados
 
 
-def construir(npz: Path, fps_destino: float = FPS_DESTINO) -> Fuente:
-    """Arma los tensores de una fuente a partir de su export `sequence`."""
+def construir(
+    npz: Path, fps_destino: float = FPS_DESTINO, interpolados: bool = True
+) -> Fuente:
+    """
+    Arma los tensores de una fuente a partir de su export `sequence`.
+
+    Con `interpolados=False`, los cuadros de pose rellenada salen de la mascara: no son un
+    dato observado y el modelo no deberia responder por ellos.
+    """
     npz = Path(npz)
     meta_path = npz.with_name(npz.name.replace(".npz", ".meta.json"))
     if not meta_path.is_file():
@@ -154,7 +174,7 @@ def construir(npz: Path, fps_destino: float = FPS_DESTINO) -> Fuente:
 
     d = np.load(npz)
     kp, sc = d["keypoints"], d["kp_score"]
-    labels, valid = d["labels"], d["valid"]
+    labels, valid, interp = d["labels"], d["valid"], d["interpolated"]
     lanes = [str(x) for x in d["lanes"]]
     clases = [str(x) for x in d["classes"]]
     fps = float(meta["video"]["fps"])
@@ -170,6 +190,7 @@ def construir(npz: Path, fps_destino: float = FPS_DESTINO) -> Fuente:
     idx = indice_remuestreo(T, fps, fps_destino)
     T_nuevo = len(idx)
     kp_r, sc_r, valid_r = kp[:, idx], sc[:, idx], valid[:, idx]
+    interp_r = interp[:, idx]
 
     n_carriles = labels.shape[0] * labels.shape[1]
     F = np.zeros((n_carriles, T_nuevo, N_FEATURES), np.float32)
@@ -186,6 +207,8 @@ def construir(npz: Path, fps_destino: float = FPS_DESTINO) -> Fuente:
             f, ok = features_de(kp_r[p], sc_r[p], brazo)
             F[i] = f
             U[i] = ok & valid_r[p]
+            if not interpolados:
+                U[i] &= ~interp_r[p]
 
             segs = segmentos_de(labels[p, c])
             golpes = [s for s in segs if s.clase != i_amague]
@@ -222,6 +245,8 @@ def construir(npz: Path, fps_destino: float = FPS_DESTINO) -> Fuente:
         "golpes": n_ev,
         "amagues_enmascarados": n_amagues,
         "segmentos_ajustados_por_colision": n_ajustados,
+        "interpolados_en_mascara": interpolados,
+        "cuadros_interpolados": int(interp_r.sum()),
         "cuadros_usables": int(U.sum()),
         "cuadros_O": int(((L == 0) & U).sum()),
         "cuadros_B": int(((L == 1) & U).sum()),
