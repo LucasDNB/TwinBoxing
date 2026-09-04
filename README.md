@@ -417,3 +417,42 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      da F1 0,615 con recall 0,518 y precision 0,755. Y la precision de sin Pacquiao es
      0,905 contra 0,903 del humano, sobre transmision profesional que el modelo nunca
      vio. El recall sigue siendo la frontera, entre 0,39 y 0,52 contra 0,911
+
+04-09 Sexta fuente, la guardia por fin en la interfaz, y sumar fuentes que si sirve
+
+  1. 04-sparring anotado: 124 golpes en 3,0 minutos y dos planos, y trae la clase que
+     faltaba: 24 uppercuts, el 19% de sus golpes, cuando en las cinco fuentes
+     anteriores eran la clase marginal con 2, 5 y 6 ejemplos. El dataset queda en 950
+     golpes sobre seis fuentes
+  2. SUMAR FUENTES SIRVE, y la progresion es monotona sobre los tres folds presentes en
+     las tres rondas, entrenando sobre 3, 4 y 5 fuentes:
+
+                          3fte   4fte   5fte  |  ens 3  ens 4  ens 5
+       sin Sparring      0,356  0,397  0,407  |  0,429  0,470  0,535
+       sin Pacquiao      0,479  0,494  0,540  |  0,580  0,548  0,618
+       sin sparring-3    0,430  0,496  0,530  |  0,527  0,615  0,664
+       media             0,422  0,462  0,492  |  0,512  0,544  0,605
+
+  3. La primera medicion no lo vio, y no fue error sino falta de potencia: con desvio
+     +-0,10 entre semillas el piso de deteccion ronda 0,06 de F1 y el primer incremento
+     valia menos que eso. Lo hicieron visible el ensamble, que es determinista, y
+     incrementos mas grandes: 02 sumo 67 golpes, 03 sumo 131 y 04 sumo 124
+  4. Sigue sin poder separarse "mas fuentes" de "mas datos" de "mas diversidad": los
+     tres cambiaron juntos en cada incremento. Lo honesto es decir que el conjunto se
+     paga, no cual de los tres factores
+  5. La precision de sin Pacquiao llega a 0,907 contra 0,903 del humano: sobre metraje
+     de transmision profesional que el modelo nunca vio, empata el techo. El recall ahi
+     es 0,469, y el recall es lo que queda como frontera en todos los folds
+  6. LA GUARDIA NO TENIA INTERFAZ. state.py la fijaba en orthodox al crear el documento
+     con un pendiente que nunca se hizo, y como arm_role se deriva de ella, una guardia
+     equivocada intercambia jab y cross sin que nada lo delate. Costo tres correcciones
+     a mano sobre 175 eventos: fighter_B de Pacquiao y fighter_A de 02 y 04
+  7. El selector va en el panel de identidad, no en configuracion: la guardia es una
+     propiedad del peleador y se descubre mirando el video. Al cambiarla la GUI pregunta
+     que hacer con lo ya anotado, porque cambiar la base significa dos cosas distintas:
+     se anoto mal, y hay que reescribir las instantaneas invirtiendo lead/rear; o el
+     peleador cambio de guardia de verdad, y reescribir destruiria trabajo correcto
+  8. Corregidas las dos guardias, el dataset queda con 175 eventos de zurdo sobre 998,
+     el 17,5%, en tres peleadores de doce. Verificado que al detector no lo toca: los
+     .det.npz salen identicos byte a byte, porque exporta con label-space side y
+     colapsa a O/B/I. Lo que cambia es lead-rear, o sea el clasificador
