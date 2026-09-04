@@ -200,8 +200,11 @@ class Session:
                 keypoint_format=KeypointFormat(meta.get("keypoint_format", "coco17")),
                 keypoint_sources={"0-16": "yolov8l-pose"},
             ),
-            # Provisorias: la guardia real la fija el anotador en el bloque 5. Se elige
-            # ortodoxa para los dos porque es lo mas frecuente, no porque se sepa.
+            # Punto de partida, no un dato: se elige ortodoxa porque es lo mas frecuente,
+            # no porque se sepa. La real la fija el anotador desde el panel de identidad
+            # cuando ve pegar unos golpes, y al cambiarla se le ofrece reescribir los
+            # eventos ya anotados. Dejar esto sin interfaz costo tres correcciones a mano
+            # sobre 175 eventos.
             guard_a=Guard.ORTHODOX,
             guard_b=Guard.ORTHODOX,
         )

@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import pytest
 
-from boxtwin.core.schema import AnnotationDoc, Event, EventMetrics
+from boxtwin.core.schema import AnnotationDoc, Event, EventMetrics, GuardOverride
 from boxtwin.core.types import (
+    ArmRole,
     Completeness,
     FighterId,
     Guard,
@@ -26,8 +27,10 @@ from boxtwin.core.undo import (
     CompositeCommand,
     DeleteEvent,
     EditEvent,
+    SetGuard,
     UndoStack,
 )
+from boxtwin.core.validation import validate_document
 
 from tests.conftest import T0
 
@@ -227,3 +230,96 @@ def test_deshacer_sin_nada_no_explota(doc_min: AnnotationDoc) -> None:
     pila = UndoStack(doc_min)
     assert pila.undo() is None
     assert pila.redo() is None
+
+
+# -- SetGuard --------------------------------------------------------------
+
+
+def _con_dos_golpes(doc_min):
+    """A tira uno de izquierda y uno de derecha, los dos con la guardia del documento."""
+    for i, side in enumerate((Side.LEFT, Side.RIGHT)):
+        doc_min.events.append(ev(
+            f"g{i}", fighter=FighterId.A, side=side,
+            start_frame=10 + i * 50, end_frame=16 + i * 50,
+            guard=doc_min.fighters[FighterId.A].guard,
+        ))
+    return doc_min
+
+
+def test_setguard_cambia_la_guardia_base(doc_min):
+    antes_b = doc_min.fighters[FighterId.B].guard
+    SetGuard(FighterId.A, Guard.SOUTHPAW).do(doc_min)
+    assert doc_min.fighters[FighterId.A].guard is Guard.SOUTHPAW
+    assert doc_min.fighters[FighterId.B].guard is antes_b
+
+
+def test_setguard_resincroniza_y_le_invierte_el_rol_a_lo_anotado(doc_min):
+    # Es el caso "se anoto mal": el jab y el cross estaban intercambiados.
+    doc = _con_dos_golpes(doc_min)
+    izq, der = doc.events
+    assert izq.arm_role is ArmRole.LEAD and der.arm_role is ArmRole.REAR
+
+    SetGuard(FighterId.A, Guard.SOUTHPAW, resync_events=True).do(doc)
+    assert all(e.guard is Guard.SOUTHPAW for e in doc.events)
+    assert izq.arm_role is ArmRole.REAR and der.arm_role is ArmRole.LEAD
+
+
+def test_setguard_sin_resincronizar_no_toca_lo_anotado(doc_min):
+    # Es el caso "cambio de guardia de verdad": lo anotado antes estaba bien.
+    doc = _con_dos_golpes(doc_min)
+    SetGuard(FighterId.A, Guard.SOUTHPAW, resync_events=False).do(doc)
+    assert doc.fighters[FighterId.A].guard is Guard.SOUTHPAW
+    assert all(e.guard is Guard.ORTHODOX for e in doc.events)
+    assert doc.events[0].arm_role is ArmRole.LEAD
+
+
+def test_setguard_se_deshace_entero(doc_min):
+    doc = _con_dos_golpes(doc_min)
+    cmd = SetGuard(FighterId.A, Guard.SOUTHPAW, resync_events=True)
+    cmd.do(doc)
+    cmd.undo(doc)
+    assert doc.fighters[FighterId.A].guard is Guard.ORTHODOX
+    assert all(e.guard is Guard.ORTHODOX for e in doc.events)
+
+
+def test_setguard_no_toca_al_otro_peleador(doc_min):
+    doc = _con_dos_golpes(doc_min)
+    doc.events.append(ev("gb", fighter=FighterId.B, guard=Guard.ORTHODOX,
+                         start_frame=200, end_frame=206))
+    SetGuard(FighterId.A, Guard.SOUTHPAW).do(doc)
+    assert doc.event_by_id("gb").guard is Guard.ORTHODOX
+
+
+def test_setguard_respeta_los_overrides_al_resincronizar(doc_min):
+    doc = _con_dos_golpes(doc_min)
+    doc.fighters[FighterId.A].guard_overrides.append(
+        GuardOverride(start_frame=55, end_frame_excl=70, guard=Guard.ORTHODOX)
+    )
+    SetGuard(FighterId.A, Guard.SOUTHPAW, resync_events=True).do(doc)
+    assert doc.events[0].guard is Guard.SOUTHPAW
+    assert doc.events[1].guard is Guard.ORTHODOX, "el override manda sobre la base"
+
+
+def test_setguard_deja_la_validacion_limpia(doc_min):
+    doc = _con_dos_golpes(doc_min)
+    SetGuard(FighterId.A, Guard.SOUTHPAW, resync_events=True).do(doc)
+    assert not [i for i in validate_document(doc) if i.code == "EV_GUARD_MISMATCH"]
+
+
+def test_setguard_sin_resincronizar_deja_el_aviso(doc_min):
+    doc = _con_dos_golpes(doc_min)
+    SetGuard(FighterId.A, Guard.SOUTHPAW, resync_events=False).do(doc)
+    avisos = [i for i in validate_document(doc) if i.code == "EV_GUARD_MISMATCH"]
+    assert len(avisos) == 2
+
+
+def test_setguard_pasa_por_el_historial(doc_min):
+    doc = _con_dos_golpes(doc_min)
+    pila = UndoStack(doc)
+    pila.do(SetGuard(FighterId.A, Guard.SOUTHPAW))
+    assert doc.fighters[FighterId.A].guard is Guard.SOUTHPAW
+    pila.undo()
+    assert doc.fighters[FighterId.A].guard is Guard.ORTHODOX
+    pila.redo()
+    assert doc.fighters[FighterId.A].guard is Guard.SOUTHPAW
+    assert all(e.guard is Guard.SOUTHPAW for e in doc.events)
