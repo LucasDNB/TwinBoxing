@@ -456,3 +456,26 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      el 17,5%, en tres peleadores de doce. Verificado que al detector no lo toca: los
      .det.npz salen identicos byte a byte, porque exporta con label-space side y
      colapsa a O/B/I. Lo que cambia es lead-rear, o sea el clasificador
+  9. Septima y ultima fuente, 01-sparring: 99 golpes, la unica con camara en mano
+     dentro del ring. Y la mas barata de anotar de todo el dataset pese a ser la mas
+     caotica visualmente: 162 asignaciones contra 518 de 03 y 438 de 02, porque la
+     camara adentro del ring recorta el publico (149 tracks contra 375 a 473) y quedo
+     en un plano unico. El dataset cierra en 1046 golpes y 147.848 cuadros-carril
+ 10. LA CAMARA EN MANO NO ERA EL PROBLEMA. Se esperaba que fuera el fold mas dificil y
+     es el segundo mejor: entrenando sobre las otras seis, sin-01-sparring da precision
+     0,924, la mas alta de los siete y por encima del 0,903 humano. Es lo que el diseno
+     de las features predecia: centradas en el punto medio de los hombros y escaladas
+     por max(ancho de hombros, largo del torso), un paneo mueve la imagen y no mueve
+     nada en el espacio de features
+ 11. Y LA CURVA SE APLANO. El ensamble sobre los folds comunes venia 0,512, 0,544 y
+     0,605 con los tres primeros incrementos; el cuarto da 0,604, o sea +0,000, y el
+     efecto medio sobre todos los folds es +0,013, dentro del ruido. Un punto no
+     alcanza para declarar saturacion, pero si para decir que sumar fuentes de este
+     tipo ya no es la palanca que era
+ 12. El fold dificil es otro: sin-Sparring, peor por margen amplio en las cuatro rondas,
+     0,519 con precision 0,561 cuando el resto esta entre 0,70 y 0,92. Sparring es la
+     unica fuente a 640x360 contra 1080p de las otras seis, y la hipotesis es
+     comprobable: reprocesar una de 1080p a 640x360 y ver si su fold cae al mismo lugar
+ 13. Queda el recall como frontera: entre 0,47 y 0,59 contra 0,911 del humano, mientras
+     la precision ya esta entre 0,56 y 0,92. Ahi queda casi todo el error, y el ensamble
+     lo empeora porque compra precision sacrificando recall

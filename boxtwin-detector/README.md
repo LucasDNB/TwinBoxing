@@ -289,17 +289,26 @@ Promediar las probabilidades de cinco semillas gana en los cuatro folds cruzados
 | Partición | Golpes | Una corrida | Desvío | **Ensamble** | recall | precisión |
 |---|---|---|---|---|---|---|
 | En distribución (`sparring-3`) | 81 | 0,445 | 0,090 | 0,409 | 0,691 | 0,290 |
-| sin `02-sparring` | 62 | 0,451 | 0,134 | 0,542 | 0,419 | 0,765 |
-| sin `03-sparring` | 129 | 0,577 | 0,104 | **0,651** | 0,550 | 0,798 |
-| sin `04-sparring` | 120 | 0,508 | 0,112 | 0,581 | 0,450 | 0,818 |
-| sin `Sparring` | 114 | 0,407 | 0,113 | 0,535 | 0,509 | 0,563 |
-| sin `Pacquiao` | 145 | 0,540 | 0,115 | 0,618 | 0,469 | **0,907** |
-| sin `sparring-3` | 380 | 0,530 | 0,114 | **0,664** | 0,566 | 0,802 |
+| sin `01-sparring` | 96 | 0,510 | 0,101 | 0,658 | 0,510 | **0,924** |
+| sin `02-sparring` | 62 | 0,511 | 0,133 | 0,585 | 0,500 | 0,705 |
+| sin `03-sparring` | 129 | 0,568 | 0,105 | **0,676** | 0,589 | 0,792 |
+| sin `04-sparring` | 120 | 0,496 | 0,100 | 0,596 | 0,467 | 0,824 |
+| sin `Sparring` | 114 | 0,400 | 0,091 | 0,519 | 0,482 | 0,561 |
+| sin `Pacquiao` | 145 | 0,585 | 0,083 | 0,651 | 0,572 | 0,754 |
+| sin `sparring-3` | 380 | 0,530 | 0,106 | 0,643 | 0,545 | 0,784 |
 | *Techo humano* | | | | *0,907* | *0,911* | *0,903* |
 
-Seis fuentes, 950 golpes. El fold más confiable —`sin sparring-3`, con 380 golpes en
-validación— da **F1 0,664**. Y la precisión de `sin Pacquiao` es **0,907**, contra 0,903 del
-humano: sobre transmisión profesional que el modelo nunca vio, empata el techo.
+Siete fuentes, 1046 golpes. El mejor fold es `sin 03-sparring` con **0,676**, y el más
+confiable —`sin sparring-3`, con 380 golpes en validación— da 0,643.
+
+**La cámara en mano no era el problema.** `01-sparring` es la única filmada desde adentro del
+ring con cámara en mano, y el fold que la deja afuera da **precisión 0,924**, la más alta de
+todas y por encima del 0,903 humano. Las features están centradas en los hombros y escaladas
+por el torso, así que un paneo mueve la imagen y no mueve nada en el espacio de features.
+
+**El fold difícil es `sin Sparring`**, peor por margen amplio en las cuatro rondas: 0,519 con
+precisión 0,561. Es la única fuente a 640x360 contra 1080p de las otras seis. La hipótesis es
+comprobable: reprocesar una fuente de 1080p a 640x360 y ver si su fold cae al mismo lugar.
 
 Pierde en distribución, y es coherente: la ganancia viene de suprimir detecciones espurias, que
 son idiosincrasia de cada corrida. Sobre la misma fuente en que se entrenó, las manías de un
@@ -320,12 +329,16 @@ punto de operación durante una medición entera.
 Sí, y la progresión es monótona. Los tres folds presentes en las tres rondas, entrenando sobre
 3, 4 y 5 fuentes:
 
-| Fold | Golpes | 3 fuentes | 4 | 5 | | Ensamble 3 | 4 | 5 |
-|---|---|---|---|---|---|---|---|---|
-| sin `Sparring` | 114 | 0,356 | 0,397 | 0,407 | | 0,429 | 0,470 | **0,535** |
-| sin `Pacquiao` | 145 | 0,479 | 0,494 | 0,540 | | 0,580 | 0,548 | **0,618** |
-| sin `sparring-3` | 380 | 0,430 | 0,496 | 0,530 | | 0,527 | 0,615 | **0,664** |
-| **media** | | **0,422** | **0,462** | **0,492** | | **0,512** | **0,544** | **0,605** |
+| Fold | 3 | 4 | 5 | 6 | | Ens. 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|---|---|---|
+| sin `Sparring` | 0,356 | 0,397 | 0,407 | 0,400 | | 0,429 | 0,470 | 0,535 | 0,519 |
+| sin `Pacquiao` | 0,479 | 0,494 | 0,540 | 0,585 | | 0,580 | 0,548 | 0,618 | **0,651** |
+| sin `sparring-3` | 0,430 | 0,496 | 0,530 | 0,530 | | 0,527 | 0,615 | **0,664** | 0,643 |
+| **media** | 0,422 | 0,462 | 0,492 | 0,505 | | **0,512** | **0,544** | **0,605** | **0,604** |
+
+**Y en el cuarto incremento se aplanó**: el ensamble venía +0,032 y +0,061, y sumar la séptima
+fuente dio **+0,000**. No alcanza para declarar saturación con un punto, pero sí para decir
+que seguir sumando fuentes de este tipo ya no es la palanca que era.
 
 La primera medición no lo vio, y no fue error sino falta de potencia: con desvío ±0,10 y cinco
 semillas, el piso de detección ronda 0,06 de F1 y el primer incremento valía menos que eso. Lo
