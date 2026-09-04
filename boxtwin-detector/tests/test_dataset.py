@@ -224,3 +224,46 @@ def test_fuente_sin_golpes_queda_toda_enmascarada(tmp_path):
     npz = _export_falso(tmp_path, 30.0, 200, {})
     f = construir(npz)
     assert f.conteos["cuadros_usables"] == 0
+
+
+# -- pose interpolada ------------------------------------------------------
+
+def _con_interpolados(tmp_path, marcados):
+    """Como _export_falso pero marcando cuadros de pose rellenada."""
+    npz = _export_falso(tmp_path, 30.0, 300, {(0, 0): [Segmento(100, 108, 0)]})
+    d = dict(np.load(npz))
+    interp = np.zeros_like(d["interpolated"])
+    interp[0, marcados] = True
+    d["interpolated"] = interp
+    np.savez_compressed(npz, **d)
+    return npz
+
+
+def test_por_defecto_la_pose_interpolada_entra(tmp_path):
+    npz = _con_interpolados(tmp_path, slice(100, 105))
+    f = construir(npz)
+    assert f.conteos["interpolados_en_mascara"] is True
+    assert f.usable[0, 100:105].all()
+
+
+def test_sin_interpolados_salen_de_la_mascara(tmp_path):
+    # No son un dato observado: una recta entre dos puntos no tiene la firma temporal
+    # que el detector busca.
+    npz = _con_interpolados(tmp_path, slice(100, 105))
+    f = construir(npz, interpolados=False)
+    assert f.conteos["interpolados_en_mascara"] is False
+    assert not f.usable[0, 100:105].any()
+    # el resto del mismo golpe, que si se midio, sigue en la mascara
+    assert f.usable[0, 105:109].all(), "solo salen los cuadros rellenados"
+
+
+def test_sacar_interpolados_no_toca_al_otro_peleador(tmp_path):
+    npz = _con_interpolados(tmp_path, slice(100, 105))
+    f = construir(npz, interpolados=False)
+    assert f.usable[2, 100:105].all(), "los carriles de B no se marcaron"
+
+
+def test_el_conteo_de_interpolados_se_reporta(tmp_path):
+    npz = _con_interpolados(tmp_path, slice(50, 70))
+    f = construir(npz)
+    assert f.conteos["cuadros_interpolados"] == 20

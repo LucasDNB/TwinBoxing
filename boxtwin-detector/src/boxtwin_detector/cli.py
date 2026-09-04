@@ -31,7 +31,7 @@ def _build(args: argparse.Namespace) -> int:
         if not Path(npz).is_file():
             print(f"error: no existe {npz}", file=sys.stderr)
             return 1
-        f = construir(npz, args.fps)
+        f = construir(npz, args.fps, interpolados=not args.sin_interpolados)
         salida, man = escribir(f, args.out)
         c = f.conteos
         usables = c["cuadros_usables"]
@@ -437,6 +437,11 @@ def main(argv: list[str] | None = None) -> int:
     b = sub.add_parser("build", help="arma los tensores del detector desde exports sequence")
     b.add_argument("exports", type=Path, nargs="+")
     b.add_argument("--out", type=Path, default=Path("data"))
+    b.add_argument("--sin-interpolados", action="store_true",
+                   help="saca de la mascara los cuadros de pose rellenada. No son un dato "
+                        "observado: una interpolacion es una recta entre dos puntos. Pesa "
+                        "desparejo, del 23,6% de los golpes en Sparring al 0% en las "
+                        "fuentes nuevas.")
     b.add_argument("--fps", type=float, default=FPS_DESTINO,
                    help="fps comun al que se lleva todo. Pacquiao viene a 59,94 y el resto "
                         "a 30; sin esto el mismo golpe dura el doble de cuadros en una "
