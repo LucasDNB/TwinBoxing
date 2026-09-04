@@ -24,6 +24,7 @@ def fuente(nombre="f", T=900, n_carriles=2, F=20, semilla=0):
             feats[c, s : s + 7] += 3.0
     return Fuente(nombre=nombre, features=feats, labels=labels,
                   usable=np.ones((n_carriles, T), bool),
+                  interpolado=np.zeros((n_carriles, T), bool),
                   carriles=[f"c{i}" for i in range(n_carriles)], fps=30.0,
                   conteos={"cobertura": [0, T - 1]})
 

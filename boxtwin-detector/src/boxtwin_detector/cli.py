@@ -310,20 +310,6 @@ def _folds(args: argparse.Namespace) -> int:
     def f1(r, p):
         return 2 * r * p / (r + p) if r + p else 0.0
 
-    def mejor(curvas):
-        """Mejor F1 sobre la curva agregada de todas las fuentes de validacion."""
-        best = None
-        for i, u in enumerate(umbrales):
-            g = sum(c[i]["golpes"] for c in curvas)
-            pr = sum(c[i]["predichos"] for c in curvas)
-            em = sum(c[i]["emparejados"] for c in curvas)
-            r, p = (em / g if g else 0.0), (em / pr if pr else 0.0)
-            v = f1(r, p)
-            if best is None or v > best["f1"]:
-                best = {"umbral": u, "golpes": g, "predichos": pr, "recall": round(r, 4),
-                        "precision": round(p, 4), "f1": round(v, 4)}
-        return best
-
     def probs_modelo(m, est, cfg, vals):
         """P(golpe) por fuente y carril. Se guarda para poder promediar el ensamble."""
         return [[probabilidad_de_golpe(
@@ -334,7 +320,8 @@ def _folds(args: argparse.Namespace) -> int:
         out = []
         for f, ps in zip(vals, probs):
             cob = tuple(f.conteos.get("cobertura", [0, f.T - 1]))
-            out.append(barrer(ps, f.labels, f.usable, us, cobertura=cob, como_score=True))
+            out.append(barrer(ps, f.labels, f.usable, us, cobertura=cob, como_score=True,
+                              interpolado=f.interpolado))
         return out
 
     def mejor_en(us, curvas):
@@ -346,8 +333,19 @@ def _folds(args: argparse.Namespace) -> int:
             r, p = (em / g if g else 0.0), (em / pr if pr else 0.0)
             v = f1(r, p)
             if best is None or v > best["f1"]:
+                # los recall parciales se recomponen desde los conteos y no se promedian:
+                # cada fuente aporta una cantidad distinta de golpes medidos
+                gm = sum(c[i].get("golpes_medidos") or 0 for c in curvas)
+                gr = sum(c[i].get("golpes_rellenados") or 0 for c in curvas)
+                hm = sum(round((c[i].get("recall_medidos") or 0)
+                               * (c[i].get("golpes_medidos") or 0)) for c in curvas)
+                hr = sum(round((c[i].get("recall_rellenados") or 0)
+                               * (c[i].get("golpes_rellenados") or 0)) for c in curvas)
                 best = {"umbral": u, "golpes": g, "predichos": pr, "recall": round(r, 4),
-                        "precision": round(p, 4), "f1": round(v, 4)}
+                        "precision": round(p, 4), "f1": round(v, 4),
+                        "golpes_medidos": gm, "golpes_rellenados": gr,
+                        "recall_medidos": round(hm / gm, 4) if gm else None,
+                        "recall_rellenados": round(hr / gr, 4) if gr else None}
         return best
 
     def curva_heuristica(vals):
@@ -387,7 +385,8 @@ def _folds(args: argparse.Namespace) -> int:
     us_voto = umbrales
     print(f"{n} semillas por fold, alpha {args.alpha}\n")
     print(f"{'fold':>26} {'golpes':>7} | {'una corrida':>12} {'desvio':>7} | "
-          f"{'ensamble':>9} {'recall':>7} {'prec':>6} | {'heuristica':>10}")
+          f"{'ensamble':>9} {'recall':>7} {'prec':>6} | {'rec medidos':>12} "
+          f"{'rellenados':>11} | {'heur':>6}")
     for nombre, train, val in tareas:
         est = Estandarizador.ajustar(train)
         fs, corridas = [], []
@@ -407,8 +406,12 @@ def _folds(args: argparse.Namespace) -> int:
         ens_probs = [[a / n for a in fuente_] for fuente_ in acum]
         e = mejor_en(us_voto, curva_de_probs(ens_probs, val, us_voto))
         h = curva_heuristica(val)
+        rm = e.get("recall_medidos"); rr = e.get("recall_rellenados")
+        s_rm = f"{rm:.3f} ({e['golpes_medidos']})" if rm is not None else "-"
+        s_rr = f"{rr:.3f} ({e['golpes_rellenados']})" if rr is not None else "-"
         print(f"{nombre:>26} {h['golpes']:7d} | {np.mean(fs):12.3f} {np.std(fs):7.3f} | "
-              f"{e['f1']:9.3f} {e['recall']:7.3f} {e['precision']:6.3f} | {h['f1']:10.3f}")
+              f"{e['f1']:9.3f} {e['recall']:7.3f} {e['precision']:6.3f} | {s_rm:>12} "
+              f"{s_rr:>11} | {h['f1']:6.3f}")
         resultados.append({"fold": nombre, "corridas": corridas, "heuristica": h,
                            "ensamble": e,
                            "f1_medio": round(float(np.mean(fs)), 4),

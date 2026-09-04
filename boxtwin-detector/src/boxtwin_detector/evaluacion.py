@@ -20,6 +20,13 @@ POR QUE EXISTE
   diferencia entre los dos numeros dice cuanto del error es del modelo y cuanto del
   preproceso.
 
+  Y el recall separado por si el golpe esta sobre pose MEDIDA o RELLENADA. Cuando la
+  identidad tiene un hueco, el anotador lo interpola linealmente; eso es la mejor estimacion
+  disponible pero no es un dato observado, y una recta entre dos puntos no tiene la firma
+  temporal que el detector busca. Pesa muy desparejo -el 23,6% de los golpes de Sparring
+  contra 0% en las cuatro fuentes nuevas- asi que un promedio sobre todo mezcla el error del
+  detector con el de la anotacion. Separarlos dice cual de los dos se esta midiendo.
+
 QUE HACE
   Compara segmentos predichos contra los anotados y devuelve recall, precision, error de
   fronteras e IoU. Y barre el umbral, que es lo unico honesto cuando hay una perilla.
@@ -39,7 +46,7 @@ from boxtwin.core.agreement import IOU_MINIMO, emparejar
 from boxtwin_detector.bio import Segmento, segmentos_de
 from boxtwin_detector.decodificacion import decodificar, decodificar_score
 
-__all__ = ["evaluar", "barrer", "segmentos_anotados", "alcanzables"]
+__all__ = ["evaluar", "barrer", "segmentos_anotados", "alcanzables", "sobre_pose_medida"]
 
 
 def segmentos_anotados(
@@ -70,11 +77,28 @@ def alcanzables(segs_por_carril: Sequence[Sequence[Segmento]], usable: np.ndarra
     return out
 
 
+def sobre_pose_medida(
+    segs_por_carril: Sequence[Sequence[Segmento]], interpolado: np.ndarray
+) -> list[bool]:
+    """
+    Por cada golpe anotado, si NINGUNO de sus cuadros tiene pose rellenada.
+
+    Basta un cuadro interpolado para contaminarlo: el golpe dura 7 cuadros de mediana, asi
+    que uno solo ya es una fraccion grande de su trayectoria.
+    """
+    out: list[bool] = []
+    for c, segs in enumerate(segs_por_carril):
+        for s in segs:
+            out.append(not bool(interpolado[c, s.inicio : s.fin + 1].any()))
+    return out
+
+
 def evaluar(
     predichos: Sequence[Sequence[Segmento]],
     anotados: Sequence[Sequence[Segmento]],
     usable: np.ndarray | None = None,
     min_iou: float = IOU_MINIMO,
+    interpolado: np.ndarray | None = None,
 ) -> dict:
     """Recall, precision, error de fronteras e IoU, emparejando carril por carril."""
     if len(predichos) != len(anotados):
@@ -117,6 +141,16 @@ def evaluar(
         hall_alc = sum(1 for e, a in zip(encontrado, alc) if a and e)
         out["golpes_alcanzables"] = n_alc
         out["recall_alcanzables"] = round(hall_alc / n_alc, 4) if n_alc else 0.0
+    if interpolado is not None:
+        med = sobre_pose_medida(anotados, interpolado)
+        n_med = sum(med)
+        n_rel = len(med) - n_med
+        h_med = sum(1 for e, m in zip(encontrado, med) if m and e)
+        h_rel = sum(1 for e, m in zip(encontrado, med) if not m and e)
+        out["golpes_medidos"] = n_med
+        out["golpes_rellenados"] = n_rel
+        out["recall_medidos"] = round(h_med / n_med, 4) if n_med else None
+        out["recall_rellenados"] = round(h_rel / n_rel, 4) if n_rel else None
     return out
 
 
@@ -127,6 +161,7 @@ def barrer(
     umbrales: Sequence[float],
     cobertura: tuple[int, int] | None = None,
     como_score: bool = False,
+    interpolado: np.ndarray | None = None,
     **kw,
 ) -> list[dict]:
     """
@@ -147,7 +182,7 @@ def barrer(
             pred = [decodificar_score(l, u, valido=valido, **kw) for l in logits_por_carril]
         else:
             pred = [decodificar(l, umbral=u, valido=valido, **kw) for l in logits_por_carril]
-        fila = evaluar(pred, gt, usable)
+        fila = evaluar(pred, gt, usable, interpolado=interpolado)
         fila["umbral"] = round(float(u), 3)
         filas.append(fila)
     return filas
