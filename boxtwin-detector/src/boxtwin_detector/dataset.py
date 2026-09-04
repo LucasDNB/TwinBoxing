@@ -93,6 +93,7 @@ class Fuente:
     features: np.ndarray   # (carriles, T, F) float32
     labels: np.ndarray     # (carriles, T) int8, O/B/I
     usable: np.ndarray     # (carriles, T) bool
+    interpolado: np.ndarray  # (carriles, T) bool, pose rellenada y no medida
     carriles: list[str]
     fps: float
     conteos: dict = field(default_factory=dict)
@@ -196,6 +197,7 @@ def construir(
     F = np.zeros((n_carriles, T_nuevo, N_FEATURES), np.float32)
     L = np.zeros((n_carriles, T_nuevo), np.int8)
     U = np.zeros((n_carriles, T_nuevo), bool)
+    INT = np.zeros((n_carriles, T_nuevo), bool)
     nombres_carril: list[str] = []
 
     n_ev = n_amagues = n_ajustados = 0
@@ -207,6 +209,7 @@ def construir(
             f, ok = features_de(kp_r[p], sc_r[p], brazo)
             F[i] = f
             U[i] = ok & valid_r[p]
+            INT[i] = interp_r[p]
             if not interpolados:
                 U[i] &= ~interp_r[p]
 
@@ -265,7 +268,7 @@ def construir(
     }
     return Fuente(
         nombre=Path(meta["video"]["name"]).stem,
-        features=F, labels=L, usable=U,
+        features=F, labels=L, usable=U, interpolado=INT,
         carriles=nombres_carril, fps=fps_destino,
         conteos=conteos, procedencia=procedencia,
     )
@@ -280,7 +283,7 @@ def escribir(f: Fuente, out_dir: Path) -> tuple[Path, Path]:
     np.savez_compressed(
         npz,
         features=f.features, labels=f.labels, usable=f.usable,
-        carriles=np.array(f.carriles), fps=np.array(f.fps),
+        interpolado=f.interpolado, carriles=np.array(f.carriles), fps=np.array(f.fps),
     )
     man.write_text(json.dumps(
         {"kind": "boxtwin.detector.dataset", "fuente": f.nombre,
@@ -298,6 +301,7 @@ def leer(npz: Path) -> Fuente:
     return Fuente(
         nombre=man["fuente"],
         features=d["features"], labels=d["labels"], usable=d["usable"],
+        interpolado=d["interpolado"],
         carriles=[str(x) for x in d["carriles"]], fps=float(d["fps"]),
         conteos=man["conteos"], procedencia=man["procedencia"],
     )

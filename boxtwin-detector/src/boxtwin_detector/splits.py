@@ -114,7 +114,8 @@ def partir_en_distribucion(
         conteos["cobertura"] = cob
         conteos["cuadros_usables"] = int(u.sum())
         return Fuente(nombre=f"{f.nombre}:{nombre}", features=f.features, labels=f.labels,
-                      usable=u, carriles=list(f.carriles), fps=f.fps,
+                      usable=u, interpolado=f.interpolado,
+                      carriles=list(f.carriles), fps=f.fps,
                       conteos=conteos, procedencia=dict(f.procedencia))
 
     return copia(tr_m, "train"), copia(va_m, "val")

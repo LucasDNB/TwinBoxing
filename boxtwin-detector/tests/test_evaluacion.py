@@ -2,7 +2,9 @@ import numpy as np
 import pytest
 
 from boxtwin_detector.bio import Segmento
-from boxtwin_detector.evaluacion import alcanzables, barrer, evaluar, segmentos_anotados
+from boxtwin_detector.evaluacion import (
+    alcanzables, barrer, evaluar, segmentos_anotados, sobre_pose_medida,
+)
 
 
 def test_prediccion_perfecta():
@@ -123,3 +125,56 @@ def test_barrer_no_castiga_por_los_golpes_de_afuera():
     fila = barrer([L], labels, usable, [0.5], cobertura=(250, 399))[0]
     assert fila["golpes"] == 1
     assert fila["recall"] == 1.0
+
+
+# -- pose medida contra pose rellenada -------------------------------------
+
+
+def test_un_solo_cuadro_interpolado_contamina_el_golpe():
+    # El golpe dura 7 cuadros de mediana: uno solo ya es una fraccion grande.
+    I = np.zeros((1, 100), bool)
+    I[0, 13] = True
+    gt = [[Segmento(10, 16, 0), Segmento(50, 56, 0)]]
+    assert sobre_pose_medida(gt, I) == [False, True]
+
+
+def test_recall_separado_por_pose_medida_y_rellenada():
+    I = np.zeros((1, 100), bool)
+    I[0, 12:15] = True
+    gt = [[Segmento(10, 16, 0), Segmento(50, 56, 0)]]
+    r = evaluar([[Segmento(50, 56, 0)]], gt, interpolado=I)
+    assert r["golpes_medidos"] == 1 and r["golpes_rellenados"] == 1
+    assert r["recall_medidos"] == 1.0
+    assert r["recall_rellenados"] == 0.0
+    assert r["recall"] == 0.5, "el recall global sigue siendo el de siempre"
+
+
+def test_sin_interpolado_no_se_reporta_la_division():
+    gt = [[Segmento(10, 16, 0)]]
+    r = evaluar([[Segmento(10, 16, 0)]], gt)
+    assert "recall_medidos" not in r
+
+
+def test_una_fuente_sin_interpolacion_reporta_todo_como_medido():
+    # Es el caso de las cuatro fuentes anotadas con el flujo nuevo: 0% interpolado.
+    I = np.zeros((1, 100), bool)
+    gt = [[Segmento(10, 16, 0), Segmento(50, 56, 0)]]
+    r = evaluar([[Segmento(10, 16, 0)]], gt, interpolado=I)
+    assert r["golpes_medidos"] == 2 and r["golpes_rellenados"] == 0
+    assert r["recall_medidos"] == 0.5
+    assert r["recall_rellenados"] is None
+
+
+def test_el_barrido_propaga_la_mascara_de_interpolacion():
+    T = 200
+    L = np.zeros((T, 3)); L[:, 0] = 3.0
+    L[50:60, 0] = -3.0; L[50:60, 2] = 3.0
+    labels = np.zeros((1, T), np.int8)
+    labels[0, 50] = 1; labels[0, 51:60] = 2
+    labels[0, 100] = 1; labels[0, 101:110] = 2
+    usable = np.ones((1, T), bool)
+    I = np.zeros((1, T), bool); I[0, 100:110] = True
+    fila = barrer([L], labels, usable, [0.5], interpolado=I)[0]
+    assert fila["golpes_medidos"] == 1 and fila["golpes_rellenados"] == 1
+    assert fila["recall_medidos"] == 1.0, "el golpe con pose medida se encuentra"
+    assert fila["recall_rellenados"] == 0.0

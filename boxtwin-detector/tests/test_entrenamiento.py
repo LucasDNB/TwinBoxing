@@ -26,6 +26,7 @@ def fuente(nombre="f", T=1000, n_carriles=4, F=20, semilla=0, cobertura=None, de
     usable[:, : cob[0]] = False
     usable[:, cob[1] + 1 :] = False
     return Fuente(nombre=nombre, features=feats, labels=labels, usable=usable,
+                  interpolado=np.zeros((n_carriles, T), bool),
                   carriles=[f"c{i}" for i in range(n_carriles)], fps=30.0,
                   conteos={"cobertura": cob})
 

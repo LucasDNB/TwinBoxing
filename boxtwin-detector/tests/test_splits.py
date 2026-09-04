@@ -62,6 +62,7 @@ def test_partir_en_distribucion_no_comparte_cuadros():
     T = 2000
     f = Fuente(nombre="x", features=np.zeros((4, T, 20), np.float32),
                labels=np.zeros((4, T), np.int8), usable=np.ones((4, T), bool),
+               interpolado=np.zeros((4, T), bool),
                carriles=["a", "b", "c", "d"], fps=30.0,
                conteos={"cobertura": [100, 1899]})
     tr, va = partir_en_distribucion(f, fraccion=0.25, banda=60)
