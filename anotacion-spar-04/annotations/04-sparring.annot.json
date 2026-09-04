@@ -5,7 +5,7 @@
     "app": "boxtwin-annotator",
     "app_version": "0.1.0",
     "created_at": "2026-09-03T18:24:23+00:00",
-    "updated_at": "2026-09-04T02:50:53+00:00"
+    "updated_at": "2026-09-04T03:06:57+00:00"
   },
   "counters": {
     "event": 126,
@@ -13,7 +13,7 @@
     "unreliable": 0,
     "interpolation": 0,
     "combo": 0,
-    "session": 1,
+    "session": 2,
     "op": 31
   },
   "video": {
@@ -43,7 +43,7 @@
   "fighters": {
     "fighter_A": {
       "label": "",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "guard_overrides": []
     },
     "fighter_B": {
@@ -6439,7 +6439,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6454,7 +6454,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "slipped",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6604,7 +6604,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6619,7 +6619,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6664,7 +6664,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6709,7 +6709,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6724,7 +6724,7 @@
       "target": "head",
       "completeness": "aborted",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6754,7 +6754,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6769,7 +6769,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6784,7 +6784,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6799,7 +6799,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6814,7 +6814,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6829,7 +6829,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "slipped",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6859,7 +6859,7 @@
       "target": "body",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6904,7 +6904,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6934,7 +6934,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6949,7 +6949,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6964,7 +6964,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -6979,7 +6979,7 @@
       "target": "body",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -6994,7 +6994,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7009,7 +7009,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7054,7 +7054,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7099,7 +7099,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7114,7 +7114,7 @@
       "target": "body",
       "completeness": "full",
       "landed": "missed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7129,7 +7129,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7144,7 +7144,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7174,7 +7174,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7189,7 +7189,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "unknown",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7204,7 +7204,7 @@
       "target": "body",
       "completeness": "full",
       "landed": "missed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7219,7 +7219,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "slipped",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7234,7 +7234,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "slipped",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7249,7 +7249,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7264,7 +7264,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7279,7 +7279,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "slipped",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7429,7 +7429,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7444,7 +7444,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7459,7 +7459,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7474,7 +7474,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7504,7 +7504,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "slipped",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7549,7 +7549,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7564,7 +7564,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7579,7 +7579,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7594,7 +7594,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7609,7 +7609,7 @@
       "target": "body",
       "completeness": "full",
       "landed": "missed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7789,7 +7789,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7804,7 +7804,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7939,7 +7939,7 @@
       "target": "body",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7954,7 +7954,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -7969,7 +7969,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -7984,7 +7984,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "missed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -8014,7 +8014,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "slipped",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8029,7 +8029,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "slipped",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "partial_occlusion",
       "notes": ""
     },
@@ -8044,7 +8044,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8059,7 +8059,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "missed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8089,7 +8089,7 @@
       "target": "body",
       "completeness": "full",
       "landed": "unknown",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "ambiguous",
       "notes": ""
     },
@@ -8104,7 +8104,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8119,7 +8119,7 @@
       "target": "body",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8134,7 +8134,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "missed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8149,7 +8149,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "slipped",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8164,7 +8164,7 @@
       "target": "body",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8179,7 +8179,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "missed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8194,7 +8194,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "missed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8209,7 +8209,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "landed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8224,7 +8224,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "missed",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8254,7 +8254,7 @@
       "target": "head",
       "completeness": "full",
       "landed": "blocked",
-      "guard": "orthodox",
+      "guard": "southpaw",
       "quality": "clean",
       "notes": ""
     },
@@ -8307,12 +8307,22 @@
         "events_created": 124,
         "events_edited": 0,
         "app_version": "0.1.0"
+      },
+      {
+        "id": "se_0002",
+        "annotator": "lucasb",
+        "started_at": "2026-09-04T03:06:21+00:00",
+        "ended_at": "2026-09-04T03:06:57+00:00",
+        "active_ms": 33941,
+        "events_created": 0,
+        "events_edited": 0,
+        "app_version": "0.1.0"
       }
     ],
     "totals": {
-      "active_ms": 0,
-      "events": 0,
-      "median_ms_per_event": null
+      "active_ms": 2010663,
+      "events": 124,
+      "median_ms_per_event": 3817
     },
     "event_metrics": {
       "ev_0001": {
