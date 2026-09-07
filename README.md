@@ -497,3 +497,23 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      IoU a 0,10 sube de 0,647 a 0,721 mientras las otras no se mueven un solo punto
  17. O sea que el fold sin-Sparring mide en buena parte un cambio de convencion de
      anotacion y no la calidad del detector. Queda sin explicar el 63% de la brecha
+
+07-09 El circuito cerrado: el sistema completo sobre video continuo
+
+  1. tools/pipeline.py reemplaza el disparador heuristico por el detector entrenado y
+     mide sobre sparring-3 entero, con el detector entrenado SIN esa fuente. La
+     precision de deteccion pasa de 0,21 a 0,885: de cuatro marcas falsas por acierto a
+     una cada ocho. Recall 0,484, F1 0,626, IoU medio 0,746
+  2. Las fronteras estan al nivel humano. El acuerdo intra-anotador da 1,12 cuadros al
+     inicio y 1,55 al final; el detector da 1,14 y 0,97. En el borde final es mas
+     consistente con la anotacion que el anotador consigo mismo
+  3. La familia acierta 0,745 sobre los 184 golpes encontrados, con 29 de 68 hooks
+     llamados straight: cuarta medicion independiente del mismo eje, despues del kappa
+     0,881 del anotador, el AUC 0,64 de cinco descriptores y la matriz del clasificador
+  4. DE PUNTA A PUNTA: de los 380 golpes anotados, el sistema encuentra y clasifica bien
+     el 36,1%. Y ese 0,745 de familia esta inflado, porque el clasificador vio la mitad
+     de entrenamiento de ese mismo video
+  5. Eso invierte la prioridad del proyecto. El detector ya no es el cuello de botella
+     en precision, le falta recall. El clasificador si lo es, y peor de lo que el numero
+     muestra: sobre una fuente nueva su parte seria ruido. Hoy el sistema puede
+     ENCONTRAR golpes en un video que nunca vio, pero no decir cuales son
