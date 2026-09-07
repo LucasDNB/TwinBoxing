@@ -15,3 +15,36 @@ dejan una fuente afuera quedaron en o por debajo de su línea de base. Sobre un 
 sea `sparring-3` sus predicciones son ruido.
 
 Lo usa `boxtwin-annotator/tools/demo_vivo.py`.
+
+
+## `poseC3D_7fuentes` y `poseC3D_7fuentes_pesos`
+
+Reentrenamiento sobre las **siete fuentes**: 779 de entrenamiento y 268 de validación,
+partición 75/25 estratificada por fuente y por clase, semilla 42. Contra las 285/96 de una
+sola fuente del modelo anterior, y con las guardias ya corregidas —175 eventos tenían jab y
+cross intercambiados—.
+
+Las dos configuraciones son idénticas salvo por los pesos de clase.
+
+| | top-1 (6 clases) | familia | straight | hook | uppercut |
+|---|---|---|---|---|---|
+| sin pesos | 0,534 | **0,746** | 0,946 | 0,487 | 0,200 |
+| con pesos | 0,526 | 0,694 | 0,904 | **0,289** | **0,520** |
+
+**Los pesos arreglan el uppercut y empeoran el hook.** Sirven para lo primero: 0,200 a 0,520
+sin un dato nuevo. No sirven para lo segundo, y ese es el resultado del experimento.
+
+El acierto por familia del modelo anterior era **0,745**; este da **0,746** con 3,7 veces más
+datos. Ver
+[`../boxtwin-detector/docs/experiments/2026-09-07-hook-no-es-prior.md`](../boxtwin-detector/docs/experiments/2026-09-07-hook-no-es-prior.md).
+
+Los `.pth` no se versionan. Se regeneran con:
+
+```bash
+~/miniforge3/envs/boxtwin_mmaction/bin/python \
+    test-poseConvBoxing/mmaction2/tools/train.py modelos/poseC3D_7fuentes.py \
+    --cfg-options randomness.seed=42
+```
+
+Los `.pkl` de la partición se rearman con el script del experimento; los exports de mmaction
+salen de `boxtwin-annotator` con `export --format mmaction --classes 6 --label-space lead-rear`.
