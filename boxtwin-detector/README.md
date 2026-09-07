@@ -14,7 +14,7 @@ La señal hay que aprenderla en el tiempo.
 
 ## Estado
 
-Se entrega en bloques. **Bloques 1 a 5 terminados**, 128 tests.
+Se entrega en bloques. **Bloques 1 a 5 terminados**, 139 tests. El circuito está cerrado: `tools/pipeline.py` corre el sistema completo sobre video continuo.
 
 | Bloque | Qué | Estado |
 |---|---|---|
@@ -382,6 +382,48 @@ un número en vez de un promedio:
 Las cuatro fuentes anotadas con el flujo nuevo tienen 0% de interpolación y no aparecen acá.
 Separa el error del detector del error de la anotación. Ver
 [`docs/experiments/2026-09-04-recall-por-pose-medida.md`](docs/experiments/2026-09-04-recall-por-pose-medida.md).
+
+## El sistema completo sobre video continuo
+
+```bash
+python tools/pipeline.py sparring-3-rounds --out pipeline/          # detectar
+~/miniforge3/envs/boxtwin_mmaction/bin/python \
+    tools/clasificar_segmentos.py pipeline/sparring-3-rounds.segmentos.json ...   # clasificar
+```
+
+Medido sobre `sparring-3` entero —380 golpes, 9,6 minutos— con el detector entrenado **sin
+esa fuente**:
+
+| | Disparador heurístico (01-09) | **Detector** |
+|---|---|---|
+| Precisión | 0,21 | **0,885** |
+| Recall | — | 0,484 |
+| IoU medio | — | 0,746 |
+| Error de fronteras | — | **1,14 / 0,97** |
+
+Los criterios no son idénticos —el demo medía contención sobre 30 segundos y esto es IoU 0,3
+sobre el video entero— pero el orden sí: de cuatro marcas falsas por acierto a una cada ocho.
+
+**Las fronteras están al nivel humano.** El acuerdo intra-anotador da 1,12 al inicio y 1,55 al
+final; el detector da 1,14 y **0,97**. En el borde final es más consistente con la anotación
+que el anotador consigo mismo.
+
+### De punta a punta
+
+```
+0,484  encontrados          detector, honestamente fuera de distribución
+0,745  familia correcta     clasificador, EN distribución e inflado
+─────
+0,361  de los 380 golpes anotados
+```
+
+La familia se equivoca con el patrón de siempre: **29 de 68 hooks llamados straight**, cuarta
+medición independiente del mismo eje. Y ese 0,745 está inflado porque el clasificador vio la
+mitad de entrenamiento de ese video; sobre una fuente nueva su parte sería ruido.
+
+**Consecuencia: hoy el sistema puede encontrar golpes en un video que nunca vio, pero no
+decir cuáles son.** El cuello de botella dejó de ser la detección. Ver
+[`docs/experiments/2026-09-07-sistema-completo.md`](docs/experiments/2026-09-07-sistema-completo.md).
 
 ## El estado, en una línea
 
