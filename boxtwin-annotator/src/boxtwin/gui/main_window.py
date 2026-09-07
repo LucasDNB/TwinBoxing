@@ -58,7 +58,7 @@ from boxtwin.core.identity_ops import (
 from boxtwin.core.identity import altura_maxima_por_track, rol_en_track
 from boxtwin.core.interpolation import detectar_huecos, detectar_huecos_internos, iou
 from boxtwin.core.types import FighterId, IssueLevel, TrackRole
-from boxtwin.core.undo import AddEvent, DeleteEvent, EditEvent
+from boxtwin.core.undo import AddEvent, DeleteEvent, EditEvent, SetGuard
 from boxtwin.core.reanno import ReannoTrial, TrialLabels, cargar as cargar_reanno
 from boxtwin.core.reanno import guardar as guardar_reanno
 from boxtwin.core.validation import validate_document
@@ -161,6 +161,7 @@ class MainWindow(QMainWindow):
         self.identidad.previsualizarChicos.connect(self._previsualizar_chicos)
         self.identidad.ignorarChicos.connect(self._ignorar_chicos)
         self.identidad.ignorarResto.connect(self._ignorar_resto_del_plano)
+        self.identidad.cambiarGuardia.connect(self._cambiar_guardia)
         self.view.boxDrawn.connect(self._caja_dibujada)
         self.view.clickedAt.connect(self._click_en_video)
         self.reanno.empezar.connect(self._reanno_empezar)
@@ -537,6 +538,48 @@ class MainWindow(QMainWindow):
         self._on_frame(self.player.cursor)
         self.statusBar().showMessage(comando.label, 3000)
         return True
+
+    def _cambiar_guardia(self, fighter, guardia) -> None:
+        """
+        Cambia la guardia del peleador, preguntando que hacer con lo ya anotado.
+
+        La pregunta no es una molestia evitable: el evento guarda la guardia vigente en su
+        inicio y de ahi sale lead/rear, asi que cambiar la base significa dos cosas
+        distintas. Si se anoto mal, los golpes viejos tambien estan mal y hay que
+        reescribirlos; si el peleador cambio de guardia de verdad, lo anotado estaba bien y
+        reescribirlo destruiria trabajo correcto. El anotador es el unico que sabe cual de
+        las dos es.
+        """
+        doc = self.session.doc
+        actual = doc.fighters[fighter].guard
+        if actual is guardia:
+            return
+        desincronizados = [
+            e for e in doc.events
+            if e.fighter is fighter and e.guard is not guardia
+        ]
+        resync = True
+        if desincronizados:
+            r = QMessageBox.question(
+                self,
+                "Guardia",
+                f"Hay {len(desincronizados)} golpes de {fighter.value} anotados con "
+                f"guardia {actual.value}.\n\n"
+                f"¿Se anotó mal desde el principio?\n\n"
+                f"Sí: se les reescribe la guardia y se les invierte lead/rear.\n"
+                f"No: cambió de guardia recién ahora; los golpes anteriores quedan como "
+                f"están.",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                | QMessageBox.StandardButton.Cancel,
+                QMessageBox.StandardButton.Yes,
+            )
+            if r == QMessageBox.StandardButton.Cancel:
+                self.identidad.mostrar_guardias(
+                    {f: fd.guard for f, fd in doc.fighters.items()}
+                )
+                return
+            resync = r == QMessageBox.StandardButton.Yes
+        self._aplicar_identidad(SetGuard(fighter, guardia, resync_events=resync))
 
     def _click_en_video(self, punto) -> None:
         """
@@ -1029,6 +1072,7 @@ class MainWindow(QMainWindow):
         doc = self.session.doc
         self.lista.refrescar(doc)
         self.contador.refrescar(doc)
+        self.identidad.mostrar_guardias({f: fd.guard for f, fd in doc.fighters.items()})
         self.timeline.set_events(doc.events)
         self.timeline.set_unreliable(doc.unreliable_segments)
         self.timeline.set_selected(self._seleccionado)

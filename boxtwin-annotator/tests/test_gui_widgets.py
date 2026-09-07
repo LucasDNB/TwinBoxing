@@ -236,3 +236,54 @@ def test_el_panel_de_reanno_dice_de_que_peleador_es(app) -> None:
     assert "fighter_B" in panel.lbl_intento.text()
     panel.refrescar(DocRe(), True, "ev_0001", False, "fighter_A")
     assert "fighter_A" in panel.lbl_intento.text()
+
+
+# -- selector de guardia ---------------------------------------------------
+
+
+@pytest.fixture
+def panel(app: QApplication):
+    from boxtwin.gui.widgets.identity_panel import IdentityPanel
+
+    return IdentityPanel()
+
+
+def test_el_panel_muestra_la_guardia_del_documento(panel):
+    from boxtwin.core.types import Guard
+
+    panel.mostrar_guardias({FighterId.A: Guard.SOUTHPAW, FighterId.B: Guard.ORTHODOX})
+    assert panel.guardia_de(FighterId.A) is Guard.SOUTHPAW
+    assert panel.guardia_de(FighterId.B) is Guard.ORTHODOX
+
+
+def test_reflejar_el_documento_no_emite(panel):
+    # Si emitiera, deshacer un cambio de guardia lo volveria a aplicar en el acto.
+    from boxtwin.core.types import Guard
+
+    emitidos = []
+    panel.cambiarGuardia.connect(lambda f, g: emitidos.append((f, g)))
+    panel.mostrar_guardias({FighterId.A: Guard.SOUTHPAW, FighterId.B: Guard.SOUTHPAW})
+    panel.mostrar_guardias({FighterId.A: Guard.ORTHODOX, FighterId.B: Guard.ORTHODOX})
+    assert emitidos == []
+
+
+def test_elegir_otra_guardia_emite_una_vez(panel):
+    from boxtwin.core.types import Guard
+
+    panel.mostrar_guardias({FighterId.A: Guard.ORTHODOX, FighterId.B: Guard.ORTHODOX})
+    emitidos = []
+    panel.cambiarGuardia.connect(lambda f, g: emitidos.append((f, g)))
+    cb = panel.cb_guardia[FighterId.A]
+    cb.setCurrentIndex(cb.findData(Guard.SOUTHPAW.value))
+    panel._guardia_elegida(FighterId.A)
+    assert emitidos == [(FighterId.A, Guard.SOUTHPAW)]
+
+
+def test_reelegir_la_misma_guardia_no_emite(panel):
+    from boxtwin.core.types import Guard
+
+    panel.mostrar_guardias({FighterId.A: Guard.ORTHODOX, FighterId.B: Guard.ORTHODOX})
+    emitidos = []
+    panel.cambiarGuardia.connect(lambda f, g: emitidos.append((f, g)))
+    panel._guardia_elegida(FighterId.A)
+    assert emitidos == []

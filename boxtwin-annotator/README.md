@@ -38,6 +38,7 @@ El anotador es el instrumento, y los experimentos que se corrieron con el estan 
 | [19-08](docs/experiments/2026-08-19-hook-vs-straight.md) | Hook contra straight con descriptores 2D | Negativo, mejor AUC 0,64 sobre cinco probados |
 | [19-08](docs/experiments/2026-08-19-protocolo-reanotacion.md) | El protocolo de reanotacion ciega | Media su propia ambiguedad; rehecho |
 | [01-09](docs/experiments/2026-09-01-primer-entrenamiento.md) | Primer entrenamiento con dataset propio | 62,5% en distribucion, no generaliza a una fuente nueva |
+| [01-09](docs/experiments/2026-09-01-disparador-vs-azar.md) | El disparador por extension de muneca | No supera al azar; el salto a candidatos no se construyo |
 
 El dataset propio quedo en 676 eventos sobre tres fuentes. Lo que falta no es del anotador
 sino de lo que viene despues: un **detector** que decida cuando hay golpe. El export

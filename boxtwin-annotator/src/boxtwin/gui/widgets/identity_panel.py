@@ -15,6 +15,13 @@ POR QUE EXISTE
   Los tramos no confiables se marcan, no se borran. Que entren o no al dataset es politica
   del export, y esa politica puede cambiar sin volver a mirar el video.
 
+  LA GUARDIA VIVE ACA y no en un dialogo de configuracion. Es una propiedad del peleador,
+  igual que su identidad, y se descubre mirando el video: hasta que no se ve pegar unos
+  golpes no se sabe si es zurdo. Estuvo sin interfaz hasta el 03-09-2026, fijada en
+  `orthodox` al crear el documento, y eso costo tres correcciones a mano sobre 175 eventos
+  -Pacquiao, 02-sparring y 04-sparring- porque `arm_role` se deriva de la guardia y una
+  guardia equivocada intercambia jab y cross sin que nada lo delate.
+
 QUE HACE
   Muestra los tracks presentes en el cuadro con su rol, permite asignarlos, corregir un
   intercambio desde el cuadro actual, re-sembrar sobre una caja dibujada, marcar tramos y
@@ -43,7 +50,7 @@ from PySide6.QtWidgets import (
 )
 
 from boxtwin.core.interpolation import GapCandidate
-from boxtwin.core.types import FighterId, TrackRole, UnreliableReason
+from boxtwin.core.types import FighterId, Guard, TrackRole, UnreliableReason
 
 __all__ = ["IdentityPanel"]
 
@@ -58,17 +65,38 @@ class IdentityPanel(QWidget):
     rellenarInternos = Signal()
     previsualizarChicos = Signal(float)   # cambio el umbral, recalcular el conteo
     ignorarChicos = Signal(float)         # aplicar
+    cambiarGuardia = Signal(object, object)  # FighterId, Guard
     ignorarResto = Signal()               # todo lo que no sea peleador en este plano
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._candidatos: list[GapCandidate] = []
+        self._guardias: dict[FighterId, Guard] = {}
         self._build_ui()
 
     # -- construccion ------------------------------------------------------
 
     def _build_ui(self) -> None:
         raiz = QVBoxLayout(self)
+
+        # -- guardia de cada peleador
+        g_guardia = QGroupBox("Guardia")
+        f = QFormLayout(g_guardia)
+        self.cb_guardia: dict[FighterId, QComboBox] = {}
+        for fid, etiqueta in ((FighterId.A, "peleador A"), (FighterId.B, "peleador B")):
+            cb = QComboBox()
+            for g in (Guard.ORTHODOX, Guard.SOUTHPAW):
+                # se guarda el .value y no el enum: Qt normaliza el dato a str y devolverlo
+                # tal cual haria fallar toda comparacion por identidad
+                cb.addItem("diestro" if g is Guard.ORTHODOX else "zurdo", g.value)
+            cb.setToolTip(
+                "De la guardia se deriva si cada golpe es de mano adelantada o atrasada.\n"
+                "Una guardia equivocada intercambia jab y cross sin que se note."
+            )
+            cb.activated.connect(lambda _, f=fid: self._guardia_elegida(f))
+            self.cb_guardia[fid] = cb
+            f.addRow(etiqueta, cb)
+        raiz.addWidget(g_guardia)
 
         # -- tracks del cuadro
         g_tracks = QGroupBox("Tracks en este cuadro")
@@ -282,6 +310,35 @@ class IdentityPanel(QWidget):
     def track_seleccionado(self) -> int | None:
         item = self.lista_tracks.currentItem()
         return item.data(Qt.ItemDataRole.UserRole) if item else None
+
+    def guardia_de(self, fighter: FighterId) -> Guard:
+        """La guardia que muestra el combo, como enum y no como el str que devuelve Qt."""
+        return Guard(self.cb_guardia[fighter].currentData())
+
+    def _guardia_elegida(self, fighter: FighterId) -> None:
+        """Solo emite si cambio de verdad: reelegir lo mismo no es una edicion."""
+        nueva = self.guardia_de(fighter)
+        if self._guardias.get(fighter) is nueva:
+            return
+        self.cambiarGuardia.emit(fighter, nueva)
+
+    def mostrar_guardias(self, guardias: dict) -> None:
+        """
+        Refleja el estado del documento sin disparar la senal.
+
+        Se llama tambien despues de deshacer, asi que tiene que poder volver atras sin
+        emitir: si emitiera, deshacer una guardia la volveria a aplicar.
+        """
+        self._guardias = dict(guardias)
+        for fid, cb in self.cb_guardia.items():
+            g = guardias.get(fid)
+            if g is None:
+                continue
+            i = cb.findData(Guard(g).value)
+            if i >= 0 and i != cb.currentIndex():
+                cb.blockSignals(True)
+                cb.setCurrentIndex(i)
+                cb.blockSignals(False)
 
     def _asignar(self, rol: TrackRole) -> None:
         tid = self.track_seleccionado()

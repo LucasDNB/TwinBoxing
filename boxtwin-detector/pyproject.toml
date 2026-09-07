@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "boxtwin-detector"
+description = "Detector temporal de golpes sobre video continuo, para BoxTwin"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [{ name = "Lucas Benitez" }]
+dynamic = ["version"]
+
+# boxtwin aporta el esquema de anotacion y, sobre todo, agreement.emparejar, que es con lo
+# que se midio el acuerdo humano. Evaluar el detector con OTRO emparejador haria que sus
+# numeros no se puedan comparar contra el techo de 0,911 / 0,903, que es el punto.
+dependencies = [
+    "boxtwin-annotator",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+# torch va aparte del armado del dataset: construir y auditar el dataset no necesita GPU, y
+# se hace mucho mas seguido que entrenar.
+train = ["torch>=2.1"]
+
+[project.scripts]
+boxtwin-detector = "boxtwin_detector.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "boxtwin_detector.version.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"

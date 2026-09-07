@@ -1,0 +1,3 @@
+data/
+# Los reportes de folds se regeneran corriendo el comando; llevan su procedencia adentro.
+reporte*.json

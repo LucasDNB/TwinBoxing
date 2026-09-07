@@ -32,6 +32,7 @@ from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
 
 from boxtwin.core.schema import AnnotationDoc, Event, EventMetrics
+from boxtwin.core.types import FighterId, Guard
 
 __all__ = [
     "Command",
@@ -39,6 +40,7 @@ __all__ = [
     "AddEvent",
     "DeleteEvent",
     "EditEvent",
+    "SetGuard",
     "CompositeCommand",
     "DEFAULT_DEPTH",
 ]
@@ -164,6 +166,71 @@ class EditEvent:
         if ev is None:
             raise KeyError(f"no existe el evento {self.event_id}")
         setattr(ev, self.campo, self._antes)
+
+
+@dataclass
+class SetGuard:
+    """
+    Cambia la guardia base de un peleador.
+
+    POR QUE TIENE UN INTERRUPTOR
+      El evento guarda la guardia vigente en su inicio, y `arm_role` se deriva de ESA y no
+      de la del peleador. Eso es a proposito: permite que un peleador cambie de guardia a
+      mitad del combate sin reescribir lo ya anotado.
+
+      Pero hace que cambiar la guardia base signifique dos cosas distintas segun por que se
+      la cambia:
+
+      - SE ANOTO MAL desde el principio. Entonces los eventos ya anotados tambien estan mal
+        y hay que reescribirles la instantanea: `resync_events=True`.
+      - EL PELEADOR CAMBIO de guardia de verdad. Entonces lo anotado estaba bien y no hay
+        que tocarlo; lo que corresponde es un GuardOverride sobre el tramo.
+
+      Conflatearlas es como se pierde trabajo en silencio, asi que el llamador elige. Con
+      `resync_events=False` los eventos viejos quedan con su guardia y la validacion los
+      marca con EV_GUARD_MISMATCH, que es informacion y no un error.
+
+    El estado anterior se lee al ejecutar y no se pide al llamador, igual que en EditEvent.
+    """
+
+    fighter: FighterId
+    guard: Guard
+    resync_events: bool = True
+    label: str = ""
+    _antes: Guard | None = field(default=None, repr=False)
+    _eventos: list[tuple[str, Guard]] = field(default_factory=list, repr=False)
+
+    def __post_init__(self) -> None:
+        if not self.label:
+            self.label = f"guardia {self.fighter.value} = {self.guard.value}"
+
+    def do(self, doc: AnnotationDoc) -> None:
+        fd = doc.fighters.get(self.fighter)
+        if fd is None:
+            raise KeyError(f"no existe el peleador {self.fighter}")
+        self._antes = fd.guard
+        fd.guard = self.guard
+        self._eventos = []
+        if not self.resync_events:
+            return
+        for ev in doc.events:
+            if ev.fighter is not self.fighter:
+                continue
+            vigente = doc.guard_at(ev.fighter, ev.start_frame)
+            if ev.guard is not vigente:
+                self._eventos.append((ev.id, ev.guard))
+                ev.guard = vigente
+
+    def undo(self, doc: AnnotationDoc) -> None:
+        fd = doc.fighters.get(self.fighter)
+        if fd is None:
+            raise KeyError(f"no existe el peleador {self.fighter}")
+        fd.guard = self._antes
+        for eid, antes in self._eventos:
+            ev = doc.event_by_id(eid)
+            if ev is not None:
+                ev.guard = antes
+        self._eventos = []
 
 
 @dataclass

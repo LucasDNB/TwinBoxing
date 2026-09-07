@@ -1,0 +1,5179 @@
+{
+  "schema_version": 1,
+  "kind": "boxtwin.annot",
+  "generator": {
+    "app": "boxtwin-annotator",
+    "app_version": "0.1.0",
+    "created_at": "2026-09-04T13:30:48+00:00",
+    "updated_at": "2026-09-04T15:00:22+00:00"
+  },
+  "counters": {
+    "event": 99,
+    "assignment": 166,
+    "unreliable": 0,
+    "interpolation": 0,
+    "combo": 0,
+    "session": 1,
+    "op": 21
+  },
+  "video": {
+    "path": "/home/lucasb/Proyectos/TwinBoxing/anotacion-spar-01/videos/01-sparring.mp4",
+    "sha256": "6410442dcdb429c60b959566e04599f21034525bf4823687c67186940c5a4769",
+    "size_bytes": 92774230,
+    "mtime": "2026-09-01T19:43:32+00:00",
+    "fps": 30.0,
+    "fps_declared": 30.0,
+    "fps_source": "container_verified",
+    "width": 1920,
+    "height": 1080,
+    "total_frames": 5053,
+    "total_frames_declared": null,
+    "duration_s": 168.433,
+    "codec": "h264"
+  },
+  "pose": {
+    "npz_path": "/home/lucasb/Proyectos/TwinBoxing/anotacion-spar-01/cache/01-sparring.pose.npz",
+    "meta_path": "/home/lucasb/Proyectos/TwinBoxing/anotacion-spar-01/cache/01-sparring.meta.json",
+    "meta_sha256": "74ec12e3860d8258be5169661053ae7b5207bdcb222aa1b7151b36c6fa4ab368",
+    "keypoint_format": "coco17",
+    "keypoint_sources": {
+      "0-16": "yolov8l-pose"
+    }
+  },
+  "fighters": {
+    "fighter_A": {
+      "label": "",
+      "guard": "orthodox",
+      "guard_overrides": []
+    },
+    "fighter_B": {
+      "label": "",
+      "guard": "orthodox",
+      "guard_overrides": []
+    }
+  },
+  "identity": {
+    "assignments": [
+      {
+        "id": "as_0004",
+        "track_id": 1,
+        "role": "fighter_B",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0004",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:03+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0003",
+        "track_id": 2,
+        "role": "fighter_A",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0003",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:02+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0005",
+        "track_id": 3,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0006",
+        "track_id": 4,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0007",
+        "track_id": 5,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0008",
+        "track_id": 7,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0009",
+        "track_id": 10,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0010",
+        "track_id": 11,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0011",
+        "track_id": 12,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0012",
+        "track_id": 13,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0013",
+        "track_id": 16,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0014",
+        "track_id": 19,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0015",
+        "track_id": 20,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0016",
+        "track_id": 23,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0017",
+        "track_id": 24,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0018",
+        "track_id": 25,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 522,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0152",
+        "track_id": 25,
+        "role": "fighter_A",
+        "start_frame": 522,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0006",
+          "at_frame": 522,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:36:02+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0019",
+        "track_id": 26,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0020",
+        "track_id": 27,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0021",
+        "track_id": 29,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 681,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0153",
+        "track_id": 29,
+        "role": "fighter_B",
+        "start_frame": 681,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0007",
+          "at_frame": 681,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:36:24+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0022",
+        "track_id": 30,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0023",
+        "track_id": 31,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0024",
+        "track_id": 32,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0025",
+        "track_id": 33,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0026",
+        "track_id": 34,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0027",
+        "track_id": 35,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0028",
+        "track_id": 37,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 887,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0154",
+        "track_id": 37,
+        "role": "fighter_A",
+        "start_frame": 887,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0008",
+          "at_frame": 887,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:39:36+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0029",
+        "track_id": 39,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0030",
+        "track_id": 40,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0031",
+        "track_id": 41,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0032",
+        "track_id": 42,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0033",
+        "track_id": 43,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0034",
+        "track_id": 44,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0035",
+        "track_id": 45,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0036",
+        "track_id": 46,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0037",
+        "track_id": 47,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0038",
+        "track_id": 49,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0039",
+        "track_id": 50,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 1542,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0155",
+        "track_id": 50,
+        "role": "fighter_B",
+        "start_frame": 1542,
+        "end_frame_excl": 3033,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0009",
+          "at_frame": 1542,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:43:01+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0162",
+        "track_id": 50,
+        "role": "ignore",
+        "start_frame": 3033,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0017",
+          "at_frame": 3033,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T14:03:56+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0040",
+        "track_id": 51,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0041",
+        "track_id": 52,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0042",
+        "track_id": 53,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0043",
+        "track_id": 55,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0044",
+        "track_id": 56,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0045",
+        "track_id": 57,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0046",
+        "track_id": 58,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0047",
+        "track_id": 59,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 1821,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0156",
+        "track_id": 59,
+        "role": "fighter_A",
+        "start_frame": 1821,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0010",
+          "at_frame": 1821,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:44:23+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0048",
+        "track_id": 60,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0049",
+        "track_id": 61,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 1851,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0157",
+        "track_id": 61,
+        "role": "fighter_A",
+        "start_frame": 1851,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0011",
+          "at_frame": 1851,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:44:53+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0050",
+        "track_id": 62,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 1915,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0158",
+        "track_id": 62,
+        "role": "fighter_A",
+        "start_frame": 1915,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0012",
+          "at_frame": 1915,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:45:03+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0051",
+        "track_id": 63,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0052",
+        "track_id": 64,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0053",
+        "track_id": 65,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0054",
+        "track_id": 66,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0055",
+        "track_id": 69,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 2335,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0159",
+        "track_id": 69,
+        "role": "fighter_B",
+        "start_frame": 2335,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0013",
+          "at_frame": 2335,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:46:57+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0056",
+        "track_id": 73,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0057",
+        "track_id": 74,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0058",
+        "track_id": 75,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0059",
+        "track_id": 76,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0060",
+        "track_id": 77,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0061",
+        "track_id": 79,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0062",
+        "track_id": 80,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0063",
+        "track_id": 81,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0064",
+        "track_id": 82,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0065",
+        "track_id": 83,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0066",
+        "track_id": 84,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0067",
+        "track_id": 87,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0068",
+        "track_id": 90,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0069",
+        "track_id": 91,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0070",
+        "track_id": 92,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0071",
+        "track_id": 94,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0072",
+        "track_id": 95,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0073",
+        "track_id": 96,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0074",
+        "track_id": 100,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0075",
+        "track_id": 102,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0076",
+        "track_id": 104,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0077",
+        "track_id": 105,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0078",
+        "track_id": 106,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0079",
+        "track_id": 107,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0080",
+        "track_id": 108,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0081",
+        "track_id": 109,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 3023,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0161",
+        "track_id": 109,
+        "role": "fighter_B",
+        "start_frame": 3023,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0015",
+          "at_frame": 3023,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T14:02:41+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0082",
+        "track_id": 110,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0083",
+        "track_id": 112,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0084",
+        "track_id": 113,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0085",
+        "track_id": 114,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0086",
+        "track_id": 115,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0087",
+        "track_id": 116,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0088",
+        "track_id": 117,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0089",
+        "track_id": 118,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0090",
+        "track_id": 119,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0091",
+        "track_id": 120,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0092",
+        "track_id": 121,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0093",
+        "track_id": 122,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0094",
+        "track_id": 123,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0095",
+        "track_id": 124,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0096",
+        "track_id": 125,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0097",
+        "track_id": 126,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0098",
+        "track_id": 129,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0099",
+        "track_id": 130,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0100",
+        "track_id": 131,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0101",
+        "track_id": 132,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0102",
+        "track_id": 133,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0103",
+        "track_id": 137,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0104",
+        "track_id": 138,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0105",
+        "track_id": 139,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0106",
+        "track_id": 141,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0107",
+        "track_id": 142,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0108",
+        "track_id": 144,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0109",
+        "track_id": 147,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0110",
+        "track_id": 149,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0111",
+        "track_id": 150,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0112",
+        "track_id": 151,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0113",
+        "track_id": 152,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0114",
+        "track_id": 153,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0115",
+        "track_id": 154,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 4117,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0163",
+        "track_id": 154,
+        "role": "fighter_B",
+        "start_frame": 4117,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0018",
+          "at_frame": 4117,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T14:20:41+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0116",
+        "track_id": 155,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0117",
+        "track_id": 156,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0118",
+        "track_id": 157,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0119",
+        "track_id": 158,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0120",
+        "track_id": 159,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0121",
+        "track_id": 162,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0122",
+        "track_id": 163,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0123",
+        "track_id": 164,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0124",
+        "track_id": 166,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0125",
+        "track_id": 167,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0126",
+        "track_id": 168,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0127",
+        "track_id": 169,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0128",
+        "track_id": 170,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0129",
+        "track_id": 172,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 4590,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0165",
+        "track_id": 172,
+        "role": "fighter_B",
+        "start_frame": 4590,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0020",
+          "at_frame": 4590,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T14:52:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0130",
+        "track_id": 173,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0131",
+        "track_id": 176,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0132",
+        "track_id": 178,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0133",
+        "track_id": 179,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0134",
+        "track_id": 180,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0135",
+        "track_id": 181,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0136",
+        "track_id": 182,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0137",
+        "track_id": 185,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0138",
+        "track_id": 186,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0139",
+        "track_id": 191,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0140",
+        "track_id": 192,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 4758,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0166",
+        "track_id": 192,
+        "role": "fighter_A",
+        "start_frame": 4758,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0021",
+          "at_frame": 4758,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T14:58:48+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0141",
+        "track_id": 194,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0142",
+        "track_id": 195,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0143",
+        "track_id": 196,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0144",
+        "track_id": 198,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0145",
+        "track_id": 199,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0146",
+        "track_id": 200,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0147",
+        "track_id": 201,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0148",
+        "track_id": 202,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0149",
+        "track_id": 204,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0150",
+        "track_id": 205,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      },
+      {
+        "id": "as_0151",
+        "track_id": 206,
+        "role": "ignore",
+        "start_frame": 0,
+        "end_frame_excl": 5053,
+        "origin": {
+          "op": "manual",
+          "op_id": "op_0005",
+          "at_frame": 0,
+          "annotator": "lucasb",
+          "created_at": "2026-09-04T13:31:07+00:00",
+          "seed_box_xyxy": null,
+          "seed_iou": null
+        }
+      }
+    ],
+    "manual_tracks": [],
+    "interpolations": []
+  },
+  "unreliable_segments": [],
+  "events": [
+    {
+      "id": "ev_0001",
+      "fighter": "fighter_A",
+      "start_frame": 88,
+      "peak_frame": null,
+      "end_frame": 93,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0002",
+      "fighter": "fighter_A",
+      "start_frame": 180,
+      "peak_frame": null,
+      "end_frame": 188,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0004",
+      "fighter": "fighter_A",
+      "start_frame": 210,
+      "peak_frame": null,
+      "end_frame": 217,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0003",
+      "fighter": "fighter_B",
+      "start_frame": 210,
+      "peak_frame": null,
+      "end_frame": 215,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0005",
+      "fighter": "fighter_B",
+      "start_frame": 227,
+      "peak_frame": null,
+      "end_frame": 234,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "aborted",
+      "landed": "unknown",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0006",
+      "fighter": "fighter_B",
+      "start_frame": 332,
+      "peak_frame": null,
+      "end_frame": 338,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0007",
+      "fighter": "fighter_A",
+      "start_frame": 334,
+      "peak_frame": null,
+      "end_frame": 339,
+      "side": "left",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0008",
+      "fighter": "fighter_A",
+      "start_frame": 415,
+      "peak_frame": null,
+      "end_frame": 421,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0009",
+      "fighter": "fighter_B",
+      "start_frame": 429,
+      "peak_frame": null,
+      "end_frame": 434,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0010",
+      "fighter": "fighter_B",
+      "start_frame": 440,
+      "peak_frame": null,
+      "end_frame": 445,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0011",
+      "fighter": "fighter_B",
+      "start_frame": 446,
+      "peak_frame": null,
+      "end_frame": 452,
+      "side": "right",
+      "punch_type": "hook",
+      "target": "body",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0012",
+      "fighter": "fighter_A",
+      "start_frame": 477,
+      "peak_frame": null,
+      "end_frame": 482,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0013",
+      "fighter": "fighter_B",
+      "start_frame": 486,
+      "peak_frame": null,
+      "end_frame": 493,
+      "side": "right",
+      "punch_type": "hook",
+      "target": "body",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0014",
+      "fighter": "fighter_A",
+      "start_frame": 488,
+      "peak_frame": null,
+      "end_frame": 493,
+      "side": "right",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0015",
+      "fighter": "fighter_B",
+      "start_frame": 502,
+      "peak_frame": null,
+      "end_frame": 509,
+      "side": "left",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0016",
+      "fighter": "fighter_B",
+      "start_frame": 513,
+      "peak_frame": null,
+      "end_frame": 519,
+      "side": "right",
+      "punch_type": "hook",
+      "target": "body",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0017",
+      "fighter": "fighter_B",
+      "start_frame": 525,
+      "peak_frame": null,
+      "end_frame": 529,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0018",
+      "fighter": "fighter_A",
+      "start_frame": 697,
+      "peak_frame": null,
+      "end_frame": 703,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0019",
+      "fighter": "fighter_B",
+      "start_frame": 705,
+      "peak_frame": null,
+      "end_frame": 712,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0020",
+      "fighter": "fighter_B",
+      "start_frame": 729,
+      "peak_frame": null,
+      "end_frame": 735,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0021",
+      "fighter": "fighter_B",
+      "start_frame": 740,
+      "peak_frame": null,
+      "end_frame": 748,
+      "side": "left",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0022",
+      "fighter": "fighter_B",
+      "start_frame": 747,
+      "peak_frame": null,
+      "end_frame": 757,
+      "side": "right",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0023",
+      "fighter": "fighter_B",
+      "start_frame": 765,
+      "peak_frame": null,
+      "end_frame": 771,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0024",
+      "fighter": "fighter_B",
+      "start_frame": 771,
+      "peak_frame": null,
+      "end_frame": 780,
+      "side": "right",
+      "punch_type": "hook",
+      "target": "body",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0025",
+      "fighter": "fighter_A",
+      "start_frame": 780,
+      "peak_frame": null,
+      "end_frame": 787,
+      "side": "right",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0026",
+      "fighter": "fighter_B",
+      "start_frame": 813,
+      "peak_frame": null,
+      "end_frame": 820,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0027",
+      "fighter": "fighter_B",
+      "start_frame": 827,
+      "peak_frame": null,
+      "end_frame": 836,
+      "side": "left",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0028",
+      "fighter": "fighter_A",
+      "start_frame": 1064,
+      "peak_frame": null,
+      "end_frame": 1073,
+      "side": "left",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0029",
+      "fighter": "fighter_A",
+      "start_frame": 1135,
+      "peak_frame": null,
+      "end_frame": 1142,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0030",
+      "fighter": "fighter_B",
+      "start_frame": 1138,
+      "peak_frame": null,
+      "end_frame": 1144,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0031",
+      "fighter": "fighter_A",
+      "start_frame": 1144,
+      "peak_frame": null,
+      "end_frame": 1148,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0032",
+      "fighter": "fighter_A",
+      "start_frame": 1150,
+      "peak_frame": null,
+      "end_frame": 1155,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0033",
+      "fighter": "fighter_A",
+      "start_frame": 1276,
+      "peak_frame": null,
+      "end_frame": 1282,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0034",
+      "fighter": "fighter_A",
+      "start_frame": 1451,
+      "peak_frame": null,
+      "end_frame": 1459,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0035",
+      "fighter": "fighter_A",
+      "start_frame": 1642,
+      "peak_frame": null,
+      "end_frame": 1648,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0036",
+      "fighter": "fighter_B",
+      "start_frame": 1681,
+      "peak_frame": null,
+      "end_frame": 1687,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0037",
+      "fighter": "fighter_B",
+      "start_frame": 1827,
+      "peak_frame": null,
+      "end_frame": 1833,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0038",
+      "fighter": "fighter_B",
+      "start_frame": 2023,
+      "peak_frame": null,
+      "end_frame": 2029,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0039",
+      "fighter": "fighter_A",
+      "start_frame": 2108,
+      "peak_frame": null,
+      "end_frame": 2112,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0040",
+      "fighter": "fighter_B",
+      "start_frame": 2147,
+      "peak_frame": null,
+      "end_frame": 2154,
+      "side": "right",
+      "punch_type": "hook",
+      "target": "body",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0041",
+      "fighter": "fighter_B",
+      "start_frame": 2163,
+      "peak_frame": null,
+      "end_frame": 2169,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0042",
+      "fighter": "fighter_A",
+      "start_frame": 2168,
+      "peak_frame": null,
+      "end_frame": 2174,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0043",
+      "fighter": "fighter_B",
+      "start_frame": 2414,
+      "peak_frame": null,
+      "end_frame": 2422,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0044",
+      "fighter": "fighter_A",
+      "start_frame": 2562,
+      "peak_frame": null,
+      "end_frame": 2568,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0045",
+      "fighter": "fighter_B",
+      "start_frame": 2573,
+      "peak_frame": null,
+      "end_frame": 2581,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0046",
+      "fighter": "fighter_A",
+      "start_frame": 2636,
+      "peak_frame": null,
+      "end_frame": 2639,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0047",
+      "fighter": "fighter_B",
+      "start_frame": 2648,
+      "peak_frame": null,
+      "end_frame": 2654,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "unknown",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0048",
+      "fighter": "fighter_B",
+      "start_frame": 2659,
+      "peak_frame": null,
+      "end_frame": 2664,
+      "side": "right",
+      "punch_type": "hook",
+      "target": "body",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0049",
+      "fighter": "fighter_A",
+      "start_frame": 2661,
+      "peak_frame": null,
+      "end_frame": 2669,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "unknown",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0050",
+      "fighter": "fighter_A",
+      "start_frame": 2673,
+      "peak_frame": null,
+      "end_frame": 2678,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0051",
+      "fighter": "fighter_A",
+      "start_frame": 2687,
+      "peak_frame": null,
+      "end_frame": 2693,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0052",
+      "fighter": "fighter_B",
+      "start_frame": 2808,
+      "peak_frame": null,
+      "end_frame": 2814,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0053",
+      "fighter": "fighter_B",
+      "start_frame": 2824,
+      "peak_frame": null,
+      "end_frame": 2832,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0054",
+      "fighter": "fighter_A",
+      "start_frame": 2833,
+      "peak_frame": null,
+      "end_frame": 2842,
+      "side": "right",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "unknown",
+      "guard": "orthodox",
+      "quality": "ambiguous",
+      "notes": ""
+    },
+    {
+      "id": "ev_0055",
+      "fighter": "fighter_B",
+      "start_frame": 2846,
+      "peak_frame": null,
+      "end_frame": 2852,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0056",
+      "fighter": "fighter_A",
+      "start_frame": 2858,
+      "peak_frame": null,
+      "end_frame": 2863,
+      "side": "right",
+      "punch_type": "uppercut",
+      "target": "body",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0057",
+      "fighter": "fighter_A",
+      "start_frame": 3037,
+      "peak_frame": null,
+      "end_frame": 3044,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "feint",
+      "landed": "unknown",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0058",
+      "fighter": "fighter_B",
+      "start_frame": 3127,
+      "peak_frame": null,
+      "end_frame": 3135,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0059",
+      "fighter": "fighter_A",
+      "start_frame": 3141,
+      "peak_frame": null,
+      "end_frame": 3148,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0060",
+      "fighter": "fighter_A",
+      "start_frame": 3187,
+      "peak_frame": null,
+      "end_frame": 3192,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0061",
+      "fighter": "fighter_A",
+      "start_frame": 3230,
+      "peak_frame": null,
+      "end_frame": 3237,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0062",
+      "fighter": "fighter_B",
+      "start_frame": 3237,
+      "peak_frame": null,
+      "end_frame": 3246,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0063",
+      "fighter": "fighter_B",
+      "start_frame": 3249,
+      "peak_frame": null,
+      "end_frame": 3255,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0064",
+      "fighter": "fighter_B",
+      "start_frame": 3419,
+      "peak_frame": null,
+      "end_frame": 3425,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0065",
+      "fighter": "fighter_B",
+      "start_frame": 3433,
+      "peak_frame": null,
+      "end_frame": 3439,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0066",
+      "fighter": "fighter_A",
+      "start_frame": 3458,
+      "peak_frame": null,
+      "end_frame": 3462,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0067",
+      "fighter": "fighter_B",
+      "start_frame": 3545,
+      "peak_frame": null,
+      "end_frame": 3552,
+      "side": "right",
+      "punch_type": "hook",
+      "target": "body",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0068",
+      "fighter": "fighter_A",
+      "start_frame": 3549,
+      "peak_frame": null,
+      "end_frame": 3554,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0069",
+      "fighter": "fighter_A",
+      "start_frame": 3570,
+      "peak_frame": null,
+      "end_frame": 3575,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0070",
+      "fighter": "fighter_A",
+      "start_frame": 3605,
+      "peak_frame": null,
+      "end_frame": 3612,
+      "side": "left",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0071",
+      "fighter": "fighter_A",
+      "start_frame": 3612,
+      "peak_frame": null,
+      "end_frame": 3617,
+      "side": "right",
+      "punch_type": "uppercut",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0072",
+      "fighter": "fighter_A",
+      "start_frame": 3647,
+      "peak_frame": null,
+      "end_frame": 3654,
+      "side": "left",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0073",
+      "fighter": "fighter_B",
+      "start_frame": 3677,
+      "peak_frame": null,
+      "end_frame": 3684,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0074",
+      "fighter": "fighter_B",
+      "start_frame": 3693,
+      "peak_frame": null,
+      "end_frame": 3700,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "partial_occlusion",
+      "notes": ""
+    },
+    {
+      "id": "ev_0075",
+      "fighter": "fighter_A",
+      "start_frame": 3696,
+      "peak_frame": null,
+      "end_frame": 3702,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0076",
+      "fighter": "fighter_A",
+      "start_frame": 3856,
+      "peak_frame": null,
+      "end_frame": 3864,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0077",
+      "fighter": "fighter_A",
+      "start_frame": 3910,
+      "peak_frame": null,
+      "end_frame": 3916,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0078",
+      "fighter": "fighter_A",
+      "start_frame": 3918,
+      "peak_frame": null,
+      "end_frame": 3925,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0079",
+      "fighter": "fighter_A",
+      "start_frame": 3938,
+      "peak_frame": null,
+      "end_frame": 3945,
+      "side": "right",
+      "punch_type": "uppercut",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0080",
+      "fighter": "fighter_A",
+      "start_frame": 3948,
+      "peak_frame": null,
+      "end_frame": 3954,
+      "side": "left",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0081",
+      "fighter": "fighter_A",
+      "start_frame": 3970,
+      "peak_frame": null,
+      "end_frame": 3976,
+      "side": "left",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0082",
+      "fighter": "fighter_B",
+      "start_frame": 3972,
+      "peak_frame": null,
+      "end_frame": 3981,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0083",
+      "fighter": "fighter_B",
+      "start_frame": 3983,
+      "peak_frame": null,
+      "end_frame": 3990,
+      "side": "left",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0084",
+      "fighter": "fighter_A",
+      "start_frame": 3990,
+      "peak_frame": null,
+      "end_frame": 3995,
+      "side": "left",
+      "punch_type": "uppercut",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0085",
+      "fighter": "fighter_A",
+      "start_frame": 4141,
+      "peak_frame": null,
+      "end_frame": 4147,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0086",
+      "fighter": "fighter_B",
+      "start_frame": 4147,
+      "peak_frame": null,
+      "end_frame": 4152,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0087",
+      "fighter": "fighter_A",
+      "start_frame": 4260,
+      "peak_frame": null,
+      "end_frame": 4266,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0088",
+      "fighter": "fighter_A",
+      "start_frame": 4266,
+      "peak_frame": null,
+      "end_frame": 4273,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0089",
+      "fighter": "fighter_B",
+      "start_frame": 4430,
+      "peak_frame": null,
+      "end_frame": 4438,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0090",
+      "fighter": "fighter_A",
+      "start_frame": 4497,
+      "peak_frame": null,
+      "end_frame": 4506,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0091",
+      "fighter": "fighter_A",
+      "start_frame": 4595,
+      "peak_frame": null,
+      "end_frame": 4600,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0092",
+      "fighter": "fighter_B",
+      "start_frame": 4638,
+      "peak_frame": null,
+      "end_frame": 4646,
+      "side": "right",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "feint",
+      "landed": "unknown",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0093",
+      "fighter": "fighter_B",
+      "start_frame": 4704,
+      "peak_frame": null,
+      "end_frame": 4710,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "body",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0094",
+      "fighter": "fighter_A",
+      "start_frame": 4829,
+      "peak_frame": null,
+      "end_frame": 4838,
+      "side": "right",
+      "punch_type": "uppercut",
+      "target": "head",
+      "completeness": "full",
+      "landed": "blocked",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0095",
+      "fighter": "fighter_A",
+      "start_frame": 4864,
+      "peak_frame": null,
+      "end_frame": 4871,
+      "side": "left",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0096",
+      "fighter": "fighter_A",
+      "start_frame": 4950,
+      "peak_frame": null,
+      "end_frame": 4956,
+      "side": "left",
+      "punch_type": "straight",
+      "target": "head",
+      "completeness": "full",
+      "landed": "slipped",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0097",
+      "fighter": "fighter_A",
+      "start_frame": 4957,
+      "peak_frame": null,
+      "end_frame": 4964,
+      "side": "right",
+      "punch_type": "uppercut",
+      "target": "head",
+      "completeness": "full",
+      "landed": "landed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0098",
+      "fighter": "fighter_B",
+      "start_frame": 4961,
+      "peak_frame": null,
+      "end_frame": 4968,
+      "side": "right",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    },
+    {
+      "id": "ev_0099",
+      "fighter": "fighter_A",
+      "start_frame": 4966,
+      "peak_frame": null,
+      "end_frame": 4973,
+      "side": "left",
+      "punch_type": "hook",
+      "target": "head",
+      "completeness": "full",
+      "landed": "missed",
+      "guard": "orthodox",
+      "quality": "clean",
+      "notes": ""
+    }
+  ],
+  "combo_overrides": [],
+  "process": {
+    "annotators": [
+      {
+        "id": "lucasb",
+        "name": "lucasb"
+      }
+    ],
+    "sessions": [
+      {
+        "id": "se_0001",
+        "annotator": "lucasb",
+        "started_at": "2026-09-04T13:30:49+00:00",
+        "ended_at": null,
+        "active_ms": 1273097,
+        "events_created": 99,
+        "events_edited": 0,
+        "app_version": "0.1.0"
+      }
+    ],
+    "totals": {
+      "active_ms": 0,
+      "events": 0,
+      "median_ms_per_event": null
+    },
+    "event_metrics": {
+      "ev_0001": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:31:20+00:00",
+        "confirmed_at": "2026-09-04T13:31:30+00:00",
+        "active_ms": 4070,
+        "replays": 4,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0002": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:31:37+00:00",
+        "confirmed_at": "2026-09-04T13:31:45+00:00",
+        "active_ms": 1819,
+        "replays": 1,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0003": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:31:52+00:00",
+        "confirmed_at": "2026-09-04T13:32:09+00:00",
+        "active_ms": 10839,
+        "replays": 6,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0004": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:32:12+00:00",
+        "confirmed_at": "2026-09-04T13:32:20+00:00",
+        "active_ms": 2354,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0005": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:32:29+00:00",
+        "confirmed_at": "2026-09-04T13:32:42+00:00",
+        "active_ms": 9317,
+        "replays": 5,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0006": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:32:52+00:00",
+        "confirmed_at": "2026-09-04T13:33:04+00:00",
+        "active_ms": 6349,
+        "replays": 4,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0007": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:33:06+00:00",
+        "confirmed_at": "2026-09-04T13:33:18+00:00",
+        "active_ms": 7721,
+        "replays": 5,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0008": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:33:24+00:00",
+        "confirmed_at": "2026-09-04T13:33:35+00:00",
+        "active_ms": 6936,
+        "replays": 4,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0009": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:33:38+00:00",
+        "confirmed_at": "2026-09-04T13:33:47+00:00",
+        "active_ms": 5282,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0010": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:33:53+00:00",
+        "confirmed_at": "2026-09-04T13:34:14+00:00",
+        "active_ms": 17819,
+        "replays": 10,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0011": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:34:21+00:00",
+        "confirmed_at": "2026-09-04T13:34:39+00:00",
+        "active_ms": 10205,
+        "replays": 8,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0012": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:34:43+00:00",
+        "confirmed_at": "2026-09-04T13:34:57+00:00",
+        "active_ms": 10019,
+        "replays": 6,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0013": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:35:03+00:00",
+        "confirmed_at": "2026-09-04T13:35:15+00:00",
+        "active_ms": 4976,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0014": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:35:20+00:00",
+        "confirmed_at": "2026-09-04T13:35:28+00:00",
+        "active_ms": 3195,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0015": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:35:36+00:00",
+        "confirmed_at": "2026-09-04T13:35:42+00:00",
+        "active_ms": 2686,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0016": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:35:47+00:00",
+        "confirmed_at": "2026-09-04T13:35:56+00:00",
+        "active_ms": 4216,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0017": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:36:06+00:00",
+        "confirmed_at": "2026-09-04T13:36:13+00:00",
+        "active_ms": 3152,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0018": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:36:30+00:00",
+        "confirmed_at": "2026-09-04T13:36:42+00:00",
+        "active_ms": 6975,
+        "replays": 4,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0019": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:36:47+00:00",
+        "confirmed_at": "2026-09-04T13:37:00+00:00",
+        "active_ms": 8759,
+        "replays": 5,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0020": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:37:06+00:00",
+        "confirmed_at": "2026-09-04T13:37:15+00:00",
+        "active_ms": 4942,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0021": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:37:21+00:00",
+        "confirmed_at": "2026-09-04T13:37:43+00:00",
+        "active_ms": 14268,
+        "replays": 7,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0022": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:37:45+00:00",
+        "confirmed_at": "2026-09-04T13:37:57+00:00",
+        "active_ms": 4689,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0023": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:38:00+00:00",
+        "confirmed_at": "2026-09-04T13:38:10+00:00",
+        "active_ms": 5990,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0024": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:38:11+00:00",
+        "confirmed_at": "2026-09-04T13:38:22+00:00",
+        "active_ms": 5756,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0025": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:38:24+00:00",
+        "confirmed_at": "2026-09-04T13:38:35+00:00",
+        "active_ms": 5230,
+        "replays": 4,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0026": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:38:43+00:00",
+        "confirmed_at": "2026-09-04T13:39:10+00:00",
+        "active_ms": 20710,
+        "replays": 11,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0027": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:39:19+00:00",
+        "confirmed_at": "2026-09-04T13:39:27+00:00",
+        "active_ms": 3465,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0028": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:41:18+00:00",
+        "confirmed_at": "2026-09-04T13:41:32+00:00",
+        "active_ms": 3051,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0029": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:41:41+00:00",
+        "confirmed_at": "2026-09-04T13:41:47+00:00",
+        "active_ms": 2476,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0030": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:41:48+00:00",
+        "confirmed_at": "2026-09-04T13:41:55+00:00",
+        "active_ms": 2859,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0031": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:41:58+00:00",
+        "confirmed_at": "2026-09-04T13:42:04+00:00",
+        "active_ms": 3531,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0032": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:42:07+00:00",
+        "confirmed_at": "2026-09-04T13:42:12+00:00",
+        "active_ms": 2447,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0033": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:42:21+00:00",
+        "confirmed_at": "2026-09-04T13:42:27+00:00",
+        "active_ms": 3624,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0034": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:42:38+00:00",
+        "confirmed_at": "2026-09-04T13:42:47+00:00",
+        "active_ms": 3515,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0035": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:43:11+00:00",
+        "confirmed_at": "2026-09-04T13:43:22+00:00",
+        "active_ms": 5918,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0036": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:43:32+00:00",
+        "confirmed_at": "2026-09-04T13:44:11+00:00",
+        "active_ms": 22388,
+        "replays": 19,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0037": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:44:27+00:00",
+        "confirmed_at": "2026-09-04T13:44:36+00:00",
+        "active_ms": 3377,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0038": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:45:19+00:00",
+        "confirmed_at": "2026-09-04T13:45:27+00:00",
+        "active_ms": 4769,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0039": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:45:35+00:00",
+        "confirmed_at": "2026-09-04T13:45:47+00:00",
+        "active_ms": 8260,
+        "replays": 5,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0040": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:45:54+00:00",
+        "confirmed_at": "2026-09-04T13:46:10+00:00",
+        "active_ms": 8374,
+        "replays": 6,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0041": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:46:14+00:00",
+        "confirmed_at": "2026-09-04T13:46:28+00:00",
+        "active_ms": 5258,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0042": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:46:30+00:00",
+        "confirmed_at": "2026-09-04T13:46:40+00:00",
+        "active_ms": 3756,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0043": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:47:06+00:00",
+        "confirmed_at": "2026-09-04T13:47:24+00:00",
+        "active_ms": 10581,
+        "replays": 6,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0044": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:47:36+00:00",
+        "confirmed_at": "2026-09-04T13:47:53+00:00",
+        "active_ms": 6692,
+        "replays": 7,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0045": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:48:00+00:00",
+        "confirmed_at": "2026-09-04T13:48:07+00:00",
+        "active_ms": 2748,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0046": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:48:17+00:00",
+        "confirmed_at": "2026-09-04T13:48:28+00:00",
+        "active_ms": 5014,
+        "replays": 5,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0047": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:48:32+00:00",
+        "confirmed_at": "2026-09-04T13:48:51+00:00",
+        "active_ms": 14957,
+        "replays": 8,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0048": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:49:13+00:00",
+        "confirmed_at": "2026-09-04T13:49:30+00:00",
+        "active_ms": 6006,
+        "replays": 4,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0049": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:49:35+00:00",
+        "confirmed_at": "2026-09-04T13:49:52+00:00",
+        "active_ms": 11239,
+        "replays": 6,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0050": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:49:57+00:00",
+        "confirmed_at": "2026-09-04T13:50:06+00:00",
+        "active_ms": 5009,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0051": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:50:10+00:00",
+        "confirmed_at": "2026-09-04T13:59:41+00:00",
+        "active_ms": 30261,
+        "replays": 288,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0052": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T13:59:49+00:00",
+        "confirmed_at": "2026-09-04T13:59:57+00:00",
+        "active_ms": 2837,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0053": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:00:01+00:00",
+        "confirmed_at": "2026-09-04T14:00:10+00:00",
+        "active_ms": 3244,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0054": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:00:16+00:00",
+        "confirmed_at": "2026-09-04T14:00:30+00:00",
+        "active_ms": 6999,
+        "replays": 4,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0055": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:00:34+00:00",
+        "confirmed_at": "2026-09-04T14:00:49+00:00",
+        "active_ms": 6629,
+        "replays": 4,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0056": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:00:52+00:00",
+        "confirmed_at": "2026-09-04T14:01:03+00:00",
+        "active_ms": 5983,
+        "replays": 5,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0057": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:02:51+00:00",
+        "confirmed_at": "2026-09-04T14:03:37+00:00",
+        "active_ms": 40639,
+        "replays": 21,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0058": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:04:07+00:00",
+        "confirmed_at": "2026-09-04T14:04:17+00:00",
+        "active_ms": 5966,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0059": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:04:20+00:00",
+        "confirmed_at": "2026-09-04T14:04:28+00:00",
+        "active_ms": 3158,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0060": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:04:32+00:00",
+        "confirmed_at": "2026-09-04T14:04:39+00:00",
+        "active_ms": 3289,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0061": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:04:45+00:00",
+        "confirmed_at": "2026-09-04T14:04:52+00:00",
+        "active_ms": 3703,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0062": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:04:56+00:00",
+        "confirmed_at": "2026-09-04T14:05:08+00:00",
+        "active_ms": 6245,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0063": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:05:11+00:00",
+        "confirmed_at": "2026-09-04T14:05:23+00:00",
+        "active_ms": 8121,
+        "replays": 5,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0064": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:12:47+00:00",
+        "confirmed_at": "2026-09-04T14:12:54+00:00",
+        "active_ms": 3420,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0065": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:12:58+00:00",
+        "confirmed_at": "2026-09-04T14:13:05+00:00",
+        "active_ms": 3977,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0066": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:13:11+00:00",
+        "confirmed_at": "2026-09-04T14:13:19+00:00",
+        "active_ms": 1849,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0067": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:13:29+00:00",
+        "confirmed_at": "2026-09-04T14:14:03+00:00",
+        "active_ms": 25379,
+        "replays": 13,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0068": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:14:07+00:00",
+        "confirmed_at": "2026-09-04T14:14:11+00:00",
+        "active_ms": 1563,
+        "replays": 1,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0069": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:14:16+00:00",
+        "confirmed_at": "2026-09-04T14:14:22+00:00",
+        "active_ms": 3621,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0070": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:14:31+00:00",
+        "confirmed_at": "2026-09-04T14:14:41+00:00",
+        "active_ms": 2388,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0071": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:14:54+00:00",
+        "confirmed_at": "2026-09-04T14:16:39+00:00",
+        "active_ms": 8967,
+        "replays": 51,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0072": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:16:46+00:00",
+        "confirmed_at": "2026-09-04T14:16:57+00:00",
+        "active_ms": 4652,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0073": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:17:03+00:00",
+        "confirmed_at": "2026-09-04T14:17:17+00:00",
+        "active_ms": 7758,
+        "replays": 4,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0074": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:17:21+00:00",
+        "confirmed_at": "2026-09-04T14:17:31+00:00",
+        "active_ms": 4541,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0075": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:17:34+00:00",
+        "confirmed_at": "2026-09-04T14:17:42+00:00",
+        "active_ms": 2149,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0076": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:17:51+00:00",
+        "confirmed_at": "2026-09-04T14:18:02+00:00",
+        "active_ms": 5346,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0077": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:18:07+00:00",
+        "confirmed_at": "2026-09-04T14:18:16+00:00",
+        "active_ms": 5769,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0078": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:18:20+00:00",
+        "confirmed_at": "2026-09-04T14:18:36+00:00",
+        "active_ms": 11395,
+        "replays": 6,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0079": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:18:38+00:00",
+        "confirmed_at": "2026-09-04T14:19:05+00:00",
+        "active_ms": 8952,
+        "replays": 5,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0080": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:19:09+00:00",
+        "confirmed_at": "2026-09-04T14:19:20+00:00",
+        "active_ms": 8173,
+        "replays": 5,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0081": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:19:25+00:00",
+        "confirmed_at": "2026-09-04T14:19:33+00:00",
+        "active_ms": 3866,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0082": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:19:37+00:00",
+        "confirmed_at": "2026-09-04T14:19:47+00:00",
+        "active_ms": 3038,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0083": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:20:10+00:00",
+        "confirmed_at": "2026-09-04T14:20:16+00:00",
+        "active_ms": 2558,
+        "replays": 1,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0084": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:20:20+00:00",
+        "confirmed_at": "2026-09-04T14:20:31+00:00",
+        "active_ms": 8017,
+        "replays": 5,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0085": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:23:13+00:00",
+        "confirmed_at": "2026-09-04T14:23:19+00:00",
+        "active_ms": 2299,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0086": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:23:22+00:00",
+        "confirmed_at": "2026-09-04T14:23:31+00:00",
+        "active_ms": 2910,
+        "replays": 4,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0087": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:24:35+00:00",
+        "confirmed_at": "2026-09-04T14:24:42+00:00",
+        "active_ms": 2863,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0088": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:24:43+00:00",
+        "confirmed_at": "2026-09-04T14:24:50+00:00",
+        "active_ms": 3198,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0089": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:25:03+00:00",
+        "confirmed_at": "2026-09-04T14:25:11+00:00",
+        "active_ms": 2912,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0090": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:51:43+00:00",
+        "confirmed_at": "2026-09-04T14:51:50+00:00",
+        "active_ms": 2418,
+        "replays": 1,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0091": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:58:02+00:00",
+        "confirmed_at": "2026-09-04T14:58:10+00:00",
+        "active_ms": 3322,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0092": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:58:15+00:00",
+        "confirmed_at": "2026-09-04T14:58:24+00:00",
+        "active_ms": 5671,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0093": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:58:30+00:00",
+        "confirmed_at": "2026-09-04T14:58:40+00:00",
+        "active_ms": 6444,
+        "replays": 4,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0094": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:59:02+00:00",
+        "confirmed_at": "2026-09-04T14:59:11+00:00",
+        "active_ms": 2978,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0095": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:59:17+00:00",
+        "confirmed_at": "2026-09-04T14:59:26+00:00",
+        "active_ms": 3900,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0096": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:59:32+00:00",
+        "confirmed_at": "2026-09-04T14:59:37+00:00",
+        "active_ms": 2164,
+        "replays": 1,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0097": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:59:40+00:00",
+        "confirmed_at": "2026-09-04T14:59:49+00:00",
+        "active_ms": 3791,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0098": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T14:59:53+00:00",
+        "confirmed_at": "2026-09-04T15:00:02+00:00",
+        "active_ms": 2570,
+        "replays": 2,
+        "edits": 0,
+        "last_edited_at": null
+      },
+      "ev_0099": {
+        "annotator": "lucasb",
+        "session_id": "se_0001",
+        "created_at": "2026-09-04T15:00:11+00:00",
+        "confirmed_at": "2026-09-04T15:00:22+00:00",
+        "active_ms": 5679,
+        "replays": 3,
+        "edits": 0,
+        "last_edited_at": null
+      }
+    }
+  },
+  "settings_snapshot": {
+    "interp_max_gap_frames": 60,
+    "interp_min_iou": 0.5,
+    "kp_score_threshold": 0.3,
+    "event_max_duration_frames": 40,
+    "boundary_definitions_version": 2,
+    "same_side_overlap_max_frames": 3,
+    "refire_min_gap_frames": 4,
+    "combo_gap_max_frames": 12,
+    "background_margin_frames": 5,
+    "glove_source": "derived",
+    "glove_extrapolation_k": 0.35,
+    "proxy": {
+      "width": 960,
+      "gop": 12,
+      "crf": 20,
+      "preset": "veryfast"
+    },
+    "player_buffer_mb": 512
+  }
+}

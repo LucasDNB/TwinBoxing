@@ -393,3 +393,18 @@ def test_marca_con_caja_degenerada_no_emite_ancho_cero() -> None:
 
     filtro = _marca([(10.0, 20.0, 10.0, 20.0)], "0xEC584C")
     assert "w=1:h=1" in filtro
+
+
+def test_la_metadata_declara_la_version_de_fronteras(ctx):
+    """
+    Sin este campo, un fold que mide un cambio de convencion se promedia como comparable.
+    Medido: Sparring se anoto bajo la v1 y sus golpes duran 45% mas que los de la v2.
+    """
+    from boxtwin.core.export.base import base_metadata
+
+    meta = base_metadata(ctx, "stats")
+    esperada = ctx.doc.settings_snapshot.boundary_definitions_version
+    assert meta["boundary_definitions_version"] == esperada
+
+    ctx.doc.settings_snapshot.boundary_definitions_version = 99
+    assert base_metadata(ctx, "stats")["boundary_definitions_version"] == 99

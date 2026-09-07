@@ -309,3 +309,191 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      puntos y los hiperparametros mueven cinco. Sigue sumar fuentes, y construir el
      detector de secuencia con carriles BIO, que no esta hecho. El 21% de precision
      del disparador heuristico es la linea de base contra la que se mide
+ 11. Medido que el disparador por extension de muneca NO supera al azar. Con 42
+     golpes por minuto, el 46% de la linea de tiempo esta a menos de medio segundo
+     de un golpe por construccion, y esa es la precision de poner paradas al azar;
+     el disparador saca 0,52 en sparring-3, 0,49 en Sparring y 0,70 en Pacquiao
+     contra 0,46, 0,47 y 0,65. En Sparring es indistinguible del azar
+ 12. La causa es que la guardia vive en 1,0-1,5 anchos de hombro, o sea donde viven
+     los golpes: AUC 0,61 a 0,67 por cuadro, el mismo orden que el 0,64 de hook
+     contra straight. Se descarto construir el salto a candidatos, que iba a usarlo
+     para navegar. Corrige ademas la lectura del demo: sus 66 disparos no son un
+     detector rudimentario sino ruido, y el 21% no habla del clasificador
+ 13. Construido el detector temporal, en boxtwin-detector: una TCN de convoluciones
+     dilatadas con campo receptivo de 63 cuadros que decide por cuadro y por brazo si
+     hay golpe. Cuatro decisiones de dataset que no se ven en los tensores y arruinan
+     el resultado en silencio: remuestrear las tres fuentes a 30 fps porque Pacquiao
+     va a 60 y el mismo golpe dura el doble de cuadros, enmascarar los amagues en vez
+     de darlos por fondo, acotar al tramo anotado, y normalizar por
+     max(ancho de hombros, largo del torso)
+ 14. Normalizar por el ancho de hombros solo estaba roto y se descubrio mirando un
+     golpe real: la guardia de boxeo es de perfil y ahi los hombros se superponen, de
+     16 px en el percentil 1 contra 142 en la mediana. Entre el 19% y el 37% de los
+     cuadros entraban al modelo con extensiones fisicamente imposibles, hasta 680
+     anchos de hombro. Con el torso en la escala, ademas, la feature separa mejor:
+     AUC 0,657 a 0,727 en sparring-3 y 0,639 a 0,744 en Pacquiao
+ 15. Medido por evento con el mismo emparejador del acuerdo intra-anotador, cinco
+     semillas por particion:
+
+                                 golpes    F1     recall  precision   F1 heuristica
+       en distribucion               81   0,445    0,674     0,359          0,248
+       sin Sparring                 114   0,348    0,582     0,280          0,243
+       sin Pacquiao                 145   0,506    0,583     0,493          0,303
+       sin sparring-3               380   0,416    0,589     0,349          0,274
+       techo humano                        0,907   0,911     0,903
+
+ 16. EL DETECTOR NO SE DERRUMBA AL CAMBIAR DE FUENTE, y el clasificador si lo hacia.
+     En distribucion 0,445 contra 0,348, 0,506 y 0,416 en los cruzados, con uno de
+     ellos por encima del de distribucion; el clasificador tenia 25 puntos de ventaja
+     en distribucion y caia a o por debajo de su linea de base en los tres cruzados.
+     No son numeros comparables entre si, pero la forma si: la lectura mas probable es
+     que la representacion era el problema, y que geometria normalizada transfiere
+     donde los heatmaps en pixeles no
+ 17. El ruido entre semillas es mas grande que casi todo lo demas: 0,24 de F1 entre la
+     mejor y la peor de una misma configuracion. El primer barrido de alpha, con una
+     semilla, eligio 0,25 por un 0,634 cuya media real es 0,445; con cinco semillas el
+     barrido no tiene ganador y quedo el default. Y dos corridas con la misma semilla
+     daban distinto porque el modelo se construia antes de sembrar, con los pesos
+     inicializados al azar
+ 18. Lo que falla es la precision, 0,28 a 0,49 contra 0,903 del humano; el recall se
+     sostiene entre 0,58 y 0,67. El umbral no lo arregla porque el modelo esta
+     saturado: solo el 9% de los cuadros cae en la zona indecisa. Con precision 0,35
+     hay dos marcas falsas por cada tres golpes reales, asi que todavia no es un
+     sistema que cuenta golpes
+
+03-09 Cuarta fuente, y la varianza que estaba en el entrenamiento
+
+  1. 02-sparring anotado a ciegas: 67 golpes en 2,8 minutos, 438 asignaciones de
+     identidad y UNA sola colision en la validacion, contra 18 avisos y 15 colisiones
+     de sparring-3. La anotacion mas limpia del dataset
+  2. Tiene la mitad de golpes por minuto que el resto, 23,9 contra 41,7 y 42,5.
+     Verificado que no es anotacion incompleta: la tasa se sostiene entre la primera y
+     la segunda mitad del video. Es un sparring mas medido, y eso lo hace mas dificil
+     en precision porque hay mas fondo verdadero por golpe
+  3. Los tres folds que ya existian pasan de entrenar con dos fuentes a entrenar con
+     tres, y el cambio medio es -0,002. Sumar una fuente no movio nada medible. Con
+     desvio 0,10 sobre cinco semillas el piso de deteccion es 0,06 de F1, asi que lo
+     que se puede afirmar es "no se detecto mejora", no "sumar fuentes no sirve"
+  4. El desvio entre semillas es el MISMO con 62 golpes de validacion que con 380. Si
+     viniera del muestreo de la evaluacion tendria que caer como la raiz del tamano.
+     No cae: la varianza esta en el entrenamiento, no en la medicion
+  5. Promediar las probabilidades de cinco semillas gana en los cuatro folds cruzados,
+     entre +0,05 y +0,10, y pierde -0,04 en distribucion. Es coherente: la ganancia
+     viene de suprimir detecciones espurias, que son idiosincrasia de cada corrida, y
+     sobre la misma fuente en que se entreno esas manias encajan
+
+       particion            golpes   una corrida   ensamble   recall  precision
+       en distribucion          81         0,445      0,409    0,691      0,290
+       sin 02-sparring          62         0,458      0,505    0,435      0,600
+       sin Sparring            114         0,356      0,429    0,307      0,714
+       sin Pacquiao            145         0,479      0,580    0,490      0,710
+       sin sparring-3          380         0,430      0,527    0,382      0,853
+       techo humano                        0,907               0,911      0,903
+
+  6. LA PRECISION DEJO DE SER EL PROBLEMA: de 0,28-0,43 pasa a 0,60-0,85, a un paso
+     del 0,903 humano. Cuatro de cada cinco marcas son un golpe real, que es el umbral
+     que se habia estimado necesario para que la preanotacion fuera rentable. Ahora
+     manda el recall, que bajo a 0,31-0,49
+  7. Una teoria equivocada costo una medicion entera. Parecia que promediar n modelos
+     saturados daba una salida cuantizada en pasos de 1/n, o sea que solo habria n
+     puntos de operacion; sobre eso se barrieron cinco umbrales y el ensamble salio
+     PEOR que una corrida sola en las cinco particiones. El reparto medido de la
+     probabilidad promedio es un continuo, y con grilla fina aparece un acantilado
+     angosto: entre umbral 0,75 y 0,80 se caen 360 marcas y la precision salta de
+     0,307 a 0,853. La grilla gruesa se lo saltaba entero. Se elimino la abstraccion y
+     quedo un test que fija que el promedio no cae sobre los escalones
+  8. Anotada la quinta fuente, 03-sparring: 131 golpes en 2,9 minutos, 45,9 por minuto,
+     la mas intensa del dataset, con 28% de hooks contra 13% de 02-sparring. Una
+     colision en la validacion
+  9. Y ESTA VEZ SUMAR LA FUENTE SI MOVIO LA AGUJA. Pasando de tres a cuatro fuentes de
+     entrenamiento, el cambio medio sobre los folds cruzados es +0,046 en una corrida y
+     +0,048 en ensamble, contra el -0,002 de cuando se sumo la cuarta. El control lo
+     respalda: la particion en distribucion no toca las fuentes nuevas y da numeros
+     identicos bit a bit entre las dos rondas
+ 10. No se puede separar "mas fuentes" de "mas datos" con dos incrementos: 03 es el
+     doble de grande que 02 y bastante mas diverso. Lo que queda establecido es que el
+     techo no estaba donde parecia despues de la primera medicion
+ 11. El fold mas confiable es el mejor: sin sparring-3, con 380 golpes en validacion,
+     da F1 0,615 con recall 0,518 y precision 0,755. Y la precision de sin Pacquiao es
+     0,905 contra 0,903 del humano, sobre transmision profesional que el modelo nunca
+     vio. El recall sigue siendo la frontera, entre 0,39 y 0,52 contra 0,911
+
+04-09 Sexta fuente, la guardia por fin en la interfaz, y sumar fuentes que si sirve
+
+  1. 04-sparring anotado: 124 golpes en 3,0 minutos y dos planos, y trae la clase que
+     faltaba: 24 uppercuts, el 19% de sus golpes, cuando en las cinco fuentes
+     anteriores eran la clase marginal con 2, 5 y 6 ejemplos. El dataset queda en 950
+     golpes sobre seis fuentes
+  2. SUMAR FUENTES SIRVE, y la progresion es monotona sobre los tres folds presentes en
+     las tres rondas, entrenando sobre 3, 4 y 5 fuentes:
+
+                          3fte   4fte   5fte  |  ens 3  ens 4  ens 5
+       sin Sparring      0,356  0,397  0,407  |  0,429  0,470  0,535
+       sin Pacquiao      0,479  0,494  0,540  |  0,580  0,548  0,618
+       sin sparring-3    0,430  0,496  0,530  |  0,527  0,615  0,664
+       media             0,422  0,462  0,492  |  0,512  0,544  0,605
+
+  3. La primera medicion no lo vio, y no fue error sino falta de potencia: con desvio
+     +-0,10 entre semillas el piso de deteccion ronda 0,06 de F1 y el primer incremento
+     valia menos que eso. Lo hicieron visible el ensamble, que es determinista, y
+     incrementos mas grandes: 02 sumo 67 golpes, 03 sumo 131 y 04 sumo 124
+  4. Sigue sin poder separarse "mas fuentes" de "mas datos" de "mas diversidad": los
+     tres cambiaron juntos en cada incremento. Lo honesto es decir que el conjunto se
+     paga, no cual de los tres factores
+  5. La precision de sin Pacquiao llega a 0,907 contra 0,903 del humano: sobre metraje
+     de transmision profesional que el modelo nunca vio, empata el techo. El recall ahi
+     es 0,469, y el recall es lo que queda como frontera en todos los folds
+  6. LA GUARDIA NO TENIA INTERFAZ. state.py la fijaba en orthodox al crear el documento
+     con un pendiente que nunca se hizo, y como arm_role se deriva de ella, una guardia
+     equivocada intercambia jab y cross sin que nada lo delate. Costo tres correcciones
+     a mano sobre 175 eventos: fighter_B de Pacquiao y fighter_A de 02 y 04
+  7. El selector va en el panel de identidad, no en configuracion: la guardia es una
+     propiedad del peleador y se descubre mirando el video. Al cambiarla la GUI pregunta
+     que hacer con lo ya anotado, porque cambiar la base significa dos cosas distintas:
+     se anoto mal, y hay que reescribir las instantaneas invirtiendo lead/rear; o el
+     peleador cambio de guardia de verdad, y reescribir destruiria trabajo correcto
+  8. Corregidas las dos guardias, el dataset queda con 175 eventos de zurdo sobre 998,
+     el 17,5%, en tres peleadores de doce. Verificado que al detector no lo toca: los
+     .det.npz salen identicos byte a byte, porque exporta con label-space side y
+     colapsa a O/B/I. Lo que cambia es lead-rear, o sea el clasificador
+  9. Septima y ultima fuente, 01-sparring: 99 golpes, la unica con camara en mano
+     dentro del ring. Y la mas barata de anotar de todo el dataset pese a ser la mas
+     caotica visualmente: 162 asignaciones contra 518 de 03 y 438 de 02, porque la
+     camara adentro del ring recorta el publico (149 tracks contra 375 a 473) y quedo
+     en un plano unico. El dataset cierra en 1046 golpes y 147.848 cuadros-carril
+ 10. LA CAMARA EN MANO NO ERA EL PROBLEMA. Se esperaba que fuera el fold mas dificil y
+     es el segundo mejor: entrenando sobre las otras seis, sin-01-sparring da precision
+     0,924, la mas alta de los siete y por encima del 0,903 humano. Es lo que el diseno
+     de las features predecia: centradas en el punto medio de los hombros y escaladas
+     por max(ancho de hombros, largo del torso), un paneo mueve la imagen y no mueve
+     nada en el espacio de features
+ 11. Y LA CURVA SE APLANO. El ensamble sobre los folds comunes venia 0,512, 0,544 y
+     0,605 con los tres primeros incrementos; el cuarto da 0,604, o sea +0,000, y el
+     efecto medio sobre todos los folds es +0,013, dentro del ruido. Un punto no
+     alcanza para declarar saturacion, pero si para decir que sumar fuentes de este
+     tipo ya no es la palanca que era
+ 12. El fold dificil es otro: sin-Sparring, peor por margen amplio en las cuatro rondas,
+     0,519 con precision 0,561 cuando el resto esta entre 0,70 y 0,92. Sparring es la
+     unica fuente a 640x360 contra 1080p de las otras seis, y la hipotesis es
+     comprobable: reprocesar una de 1080p a 640x360 y ver si su fold cae al mismo lugar
+ 13. Queda el recall como frontera: entre 0,47 y 0,59 contra 0,911 del humano, mientras
+     la precision ya esta entre 0,56 y 0,92. Ahi queda casi todo el error, y el ensamble
+     lo empeora porque compra precision sacrificando recall
+ 14. El detector casi no encuentra golpes sobre pose interpolada, y ahora se reporta
+     separado: recall 0,535 sobre los medidos contra 0,321 sobre los rellenados en
+     Sparring, 0,592 contra 0,400 en Pacquiao, y 0,561 contra 0,077 en sparring-3, donde
+     encuentra 1 de 13. Es aditivo: F1, recall global y precision salen identicos. Sacar
+     esos cuadros del ENTRENAMIENTO, en cambio, no paga: +0,002, dentro del ruido
+ 15. LA HIPOTESIS DE LA RESOLUCION DEL PUNTO 12 ES FALSA. El preproceso corre con
+     imgsz=640 en las siete fuentes, asi que un cuadro de 1080p se reduce a 640x360
+     antes de la inferencia y el modelo de pose ve lo mismo en todas. Tampoco es la
+     calidad de pose: el kp_score mediano de Sparring es el MAS ALTO de las siete
+ 16. La causa real es que Sparring es la unica fuente con boundary_definitions_version 1,
+     y sus golpes duran 337 ms de mediana contra 200 a 233 ms de las otras seis, un 45%
+     mas. El modelo predice 7 cuadros en todas porque aprendio la convencion v2 que usan
+     seis de los siete, y en Sparring se lo compara contra golpes de 10: sus marcas caen
+     sobre golpes reales pero fallan el IoU 0,3. El 50% de sus falsos positivos cae a
+     menos de medio segundo de un golpe anotado, contra 9 a 25% del resto, y bajando el
+     IoU a 0,10 sube de 0,647 a 0,721 mientras las otras no se mueven un solo punto
+ 17. O sea que el fold sin-Sparring mide en buena parte un cambio de convencion de
+     anotacion y no la calidad del detector. Queda sin explicar el 63% de la brecha

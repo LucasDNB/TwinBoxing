@@ -79,6 +79,14 @@ def base_metadata(ctx: ExportContext, formato: str) -> dict[str, Any]:
 
     created_at queda en UTC con offset explicito: un dataset que se compara entre maquinas
     no puede depender de la zona horaria de la que lo genero.
+
+    boundary_definitions_version dice bajo que definicion de fronteras se anotaron los
+    eventos, y va aca por una razon medida: Sparring.mp4 se anoto bajo la version 1 y todo lo
+    demas bajo la 2, y sus golpes duran 337 ms de mediana contra 200 a 233 ms del resto, un
+    45% mas. Un modelo entrenado sobre la v2 predice duraciones de v2, sus marcas caen sobre
+    golpes reales de la v1 pero fallan el IoU, y se cuentan como falsos positivos. Sin este
+    campo en la metadata, un fold que mide un cambio de convencion se promedia con los demas
+    como si fuera comparable.
     """
     return {
         "kind": "boxtwin.export",
@@ -94,6 +102,7 @@ def base_metadata(ctx: ExportContext, formato: str) -> dict[str, Any]:
             "total_frames": ctx.doc.video.total_frames,
         },
         "annot_sha256": annot_hash(ctx.doc),
+        "boundary_definitions_version": ctx.doc.settings_snapshot.boundary_definitions_version,
         "pose_meta_sha256": ctx.doc.pose.meta_sha256,
         "options": {k: (str(v) if isinstance(v, Path) else v) for k, v in ctx.opciones.items()},
     }
