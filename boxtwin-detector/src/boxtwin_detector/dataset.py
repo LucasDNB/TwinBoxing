@@ -260,6 +260,10 @@ def construir(
         "video": meta["video"]["name"],
         "video_sha256": meta["video"]["sha256"],
         "annot_sha256": meta["annot_sha256"],
+        # None en exports viejos, que no lo declaraban. Un fold cuya fuente de validacion
+        # tiene otra version que las de entrenamiento no es comparable con los demas: mide
+        # un cambio de convencion de anotacion ademas del detector.
+        "boundary_definitions_version": meta.get("boundary_definitions_version"),
         "fps_origen": fps,
         "fps_destino": fps_destino,
         "label_space": meta.get("label_space"),

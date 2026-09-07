@@ -380,10 +380,19 @@ def _folds(args: argparse.Namespace) -> int:
         tareas.append((fold.nombre, [fuentes[n] for n in fold.train],
                        [fuentes[n] for n in fold.val]))
 
+    def version_de(f):
+        return f.procedencia.get("boundary_definitions_version")
+
     resultados = []
+    avisos: list[str] = []
     n = len(args.semillas)
     us_voto = umbrales
-    print(f"{n} semillas por fold, alpha {args.alpha}\n")
+    versiones = {k: version_de(f) for k, f in fuentes.items()}
+    print(f"{n} semillas por fold, alpha {args.alpha}")
+    if any(v is not None for v in versiones.values()):
+        print("  boundary_definitions_version: "
+              + ", ".join(f"{k} v{v}" for k, v in sorted(versiones.items())))
+    print()
     print(f"{'fold':>26} {'golpes':>7} | {'una corrida':>12} {'desvio':>7} | "
           f"{'ensamble':>9} {'recall':>7} {'prec':>6} | {'rec medidos':>12} "
           f"{'rellenados':>11} | {'heur':>6}")
@@ -412,11 +421,24 @@ def _folds(args: argparse.Namespace) -> int:
         print(f"{nombre:>26} {h['golpes']:7d} | {np.mean(fs):12.3f} {np.std(fs):7.3f} | "
               f"{e['f1']:9.3f} {e['recall']:7.3f} {e['precision']:6.3f} | {s_rm:>12} "
               f"{s_rr:>11} | {h['f1']:6.3f}")
+        v_val = {version_de(f) for f in val}
+        v_train = {version_de(f) for f in train}
+        if (v_val - v_train) and None not in (v_val | v_train):
+            avisos.append(
+                f"{nombre}: la validacion esta anotada bajo "
+                f"boundary_definitions_version {sorted(v_val)} y el entrenamiento bajo "
+                f"{sorted(v_train)}. Ese fold mide un cambio de convencion de anotacion "
+                f"ademas del detector, y NO es comparable con los otros."
+            )
         resultados.append({"fold": nombre, "corridas": corridas, "heuristica": h,
+                           "boundary_version_val": sorted(x for x in v_val if x is not None),
+                           "boundary_version_train": sorted(x for x in v_train if x is not None),
                            "ensamble": e,
                            "f1_medio": round(float(np.mean(fs)), 4),
                            "f1_desvio": round(float(np.std(fs)), 4)})
 
+    for a in avisos:
+        print(f"\n  ATENCION: {a}")
     print("\n  techo humano: recall 0,911  precision 0,903  F1 0,907")
     print("  \"una corrida\" es el promedio de las semillas por separado: lo que sale de "
           "entrenar una vez.")

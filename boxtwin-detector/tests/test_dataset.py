@@ -267,3 +267,22 @@ def test_el_conteo_de_interpolados_se_reporta(tmp_path):
     npz = _con_interpolados(tmp_path, slice(50, 70))
     f = construir(npz)
     assert f.conteos["cuadros_interpolados"] == 20
+
+
+def test_la_procedencia_lleva_la_version_de_fronteras(tmp_path):
+    # Sin este campo, un fold que mide un cambio de convencion se promedia con los demas
+    # como si fuera comparable. Medido sobre Sparring, que es v1 contra v2 del resto.
+    import json as _json
+    npz = _export_falso(tmp_path, 30.0, 200, {(0, 0): [Segmento(50, 56, 0)]})
+    meta = tmp_path / "falso.sequence.meta.json"
+    d = _json.loads(meta.read_text())
+    d["boundary_definitions_version"] = 1
+    meta.write_text(_json.dumps(d))
+    f = construir(npz)
+    assert f.procedencia["boundary_definitions_version"] == 1
+
+
+def test_un_export_viejo_sin_el_campo_no_rompe(tmp_path):
+    npz = _export_falso(tmp_path, 30.0, 200, {(0, 0): [Segmento(50, 56, 0)]})
+    f = construir(npz)
+    assert f.procedencia["boundary_definitions_version"] is None
