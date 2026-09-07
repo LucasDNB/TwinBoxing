@@ -383,6 +383,21 @@ Las cuatro fuentes anotadas con el flujo nuevo tienen 0% de interpolación y no 
 Separa el error del detector del error de la anotación. Ver
 [`docs/experiments/2026-09-04-recall-por-pose-medida.md`](docs/experiments/2026-09-04-recall-por-pose-medida.md).
 
+## El estado, en una línea
+
+Sobre los **seis folds comparables** —los siete cruzados menos `sin Sparring`, que el propio
+reporte marca como no comparable— y **932 golpes evaluados**:
+
+| | F1 | recall | precisión |
+|---|---|---|---|
+| Heurística de muñeca | 0,314 | 0,356 | 0,292 |
+| Una corrida sola | 0,533 | | |
+| **Ensamble de 5 semillas** | **0,635** | 0,531 | **0,797** |
+| *Techo humano* | *0,907* | *0,911* | *0,903* |
+
+**El 54% del camino entre la heurística y el techo humano.** Rango por fold: F1 0,585–0,676,
+precisión 0,705–0,924, recall 0,467–0,589.
+
 ## Dónde está el error hoy
 
 Con el ensamble, **la precisión dejó de ser el problema**: 0,60 a 0,85 según el fold, contra
