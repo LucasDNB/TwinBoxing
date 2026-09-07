@@ -517,3 +517,29 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      en precision, le falta recall. El clasificador si lo es, y peor de lo que el numero
      muestra: sobre una fuente nueva su parte seria ruido. Hoy el sistema puede
      ENCONTRAR golpes en un video que nunca vio, pero no decir cuales son
+  6. El hook no es un problema de prior, y reentrenar con 3,7 veces mas datos movio la
+     familia 0,001. El clasificador se rehizo sobre las siete fuentes -779/268 contra
+     285/96 de una sola- y con las guardias corregidas, o sea con 175 etiquetas que
+     antes tenian jab y cross intercambiados. Subirle el peso al hook 2,6 veces EMPEORO
+     su recall, de 0,487 a 0,289: si fuera prior habria pasado lo contrario. El uppercut
+     si era prior y los pesos solos lo llevaron de 0,200 a 0,520. Quinta medicion
+     independiente sobre el mismo eje, y la conclusion es que el hook es una pregunta de
+     sensor y no de dataset
+  7. La app de pruebas, demo_vivo.py, corre ahora el detector entrenado en lugar de la
+     heuristica, y el clasificador de siete fuentes. Verificado que la TCN cruza de
+     torch 2.6 a 2.1, asi que queda autocontenida sin tocar el entorno pinneado
+
+PENDIENTE Y PROXIMO PASO
+
+  Queda a medio camino la prueba sobre un video que el sistema no conoce:
+  anotacion-amateur/ tiene el video preprocesado -boxeo amateur de competencia, camara
+  lejana, arbitro adentro del ring- y le falta solo la asignacion de identidad, que son
+  unos minutos. Es el test mas duro que hay disponible: el ancho de hombros mediano es
+  de 22 px contra 132 en sparring-3, asi que pone a prueba la invariancia a escala de
+  las features, que nunca se probo a ese tamano.
+
+  Y el proximo paso del proyecto es RESOLVER LA IDENTIDAD DE FORMA AUTOMATICA. Es la
+  pieza que sigue siendo enteramente manual y la que se lleva el 73% del tiempo de
+  anotacion, medido. Todo lo demas del pipeline -pose, deteccion, familia- ya corre
+  solo; la identidad no, y es lo que impide correr el sistema sobre un video nuevo sin
+  intervencion humana.

@@ -1,45 +1,47 @@
 #!/usr/bin/env python3
 """
-BoxTwin - Demo de reconocimiento sobre video, con ventana OpenCV.
+BoxTwin - Demo del sistema completo sobre video, con ventana OpenCV.
 
 POR QUE EXISTE
   Los numeros de una matriz de confusion no muestran COMO falla un sistema. Ver el pipeline
-  corriendo sobre video, con los golpes apareciendo en pantalla a medida que pasan, hace
-  visibles cosas que una tabla esconde: que el detector dispara con el movimiento de guardia,
-  que un hook lejano se clasifica como straight, que en el clinch la identidad se mezcla.
+  corriendo sobre video, con los golpes apareciendo a medida que pasan, hace visibles cosas
+  que una tabla esconde: que un hook lejano se clasifica como straight, que en el clinch la
+  identidad se mezcla, que hay golpes que el detector simplemente no ve.
 
-  Tambien es la primera vez que las tres piezas del sistema corren juntas: pose, identidad y
-  clasificacion. Hasta ahora se habian medido por separado.
+QUE CAMBIO RESPECTO DE LA PRIMERA VERSION
+  La version del 01-09 disparaba con una heuristica de extension de muneca, porque el
+  detector no existia. Despues se midio que esa heuristica NO SUPERA AL AZAR: con 42 golpes
+  por minuto, casi la mitad de la linea de tiempo esta a menos de medio segundo de un golpe
+  por construccion, y la heuristica acertaba 0,52 contra 0,46 de tirar dardos.
+
+  Ahora dispara el DETECTOR entrenado, un ensamble de cinco semillas sobre una TCN de
+  convoluciones dilatadas. Medido sobre sparring-3 entero, con el detector entrenado SIN esa
+  fuente: precision 0,885 contra 0,21 de la heuristica, y error de fronteras de 1,14 cuadros
+  al inicio y 0,97 al final, contra 1,12 y 1,55 del acuerdo intra-anotador.
 
   DOS ADVERTENCIAS QUE NO SON LETRA CHICA:
 
-  1. El clasificador NO TIENE CLASE "no hay golpe". Fue entrenado sobre ventanas que siempre
-     contienen uno, asi que a cualquier ventana que se le pase le va a devolver uno de los
-     seis. Por eso hace falta un DETECTOR que decida cuando preguntar, y ese detector no
-     existe todavia: el modelo de secuencia con carriles BIO esta sin construir. Lo que hay
-     aca es un disparador por movimiento de muneca, una heuristica de reemplazo, no un
-     detector entrenado. Sus falsos positivos son suyos, no del clasificador.
+  1. El detector se entrena SIN la fuente que se mira. El checkpoint por defecto es el del
+     fold que deja sparring-3 afuera, asi que sobre ese video lo que se ve es honesto. Sobre
+     otro video hay que pasar el ensamble de SU fold, o se estaria mirando el entrenamiento.
 
-  2. El clasificador solo tiene senal EN DISTRIBUCION. Medido: 62,5% sobre sparring-3 contra
-     37,5% de linea de base, y por debajo de la linea de base en los tres folds que dejan una
-     fuente afuera. Sobre un video que no sea sparring-3, lo que se ve en pantalla es ruido
-     con formato de prediccion.
+  2. El clasificador de familia no generaliza. Reentrenado sobre las siete fuentes acierta
+     0,746 por familia EN DISTRIBUCION, y confunde 38 de 76 hooks con straight. Ese eje esta
+     medido cinco veces por caminos independientes y no mejora con mas datos: reentrenar con
+     3,7 veces mas movio el numero 0,001. Lo que se ve en la etiqueta del golpe es, sobre una
+     fuente nueva, poco mas que el prior.
 
 QUE HACE
-  Reproduce el video con el overlay de pose coloreado por peleador, dispara la clasificacion
-  cuando detecta la extension de un brazo, y muestra los golpes reconocidos en un panel
-  lateral y por consola.
+  Reproduce el video con el overlay de pose coloreado por peleador, corre el detector sobre
+  la secuencia entera, y muestra cada golpe detectado con su familia en un panel lateral.
 
-  La pose sale del cache del preproceso, no se calcula en vivo: el objetivo es mirar la
-  clasificacion, no medir el rendimiento del detector de pose.
+  La pose sale del cache del preproceso y las detecciones se calculan una vez al arrancar:
+  el objetivo es mirar el sistema, no medir su velocidad.
 
 USO
-  python tools/demo_vivo.py <proyecto>
-  python tools/demo_vivo.py <proyecto> --desde 3000 --umbral 0.5 --velocidad 0.5
-  python tools/demo_vivo.py <proyecto> --sin-ventana          # solo consola
-
-  Corre en el entorno boxtwin_mmaction, que es donde vive el modelo:
-  ~/miniforge3/envs/boxtwin_mmaction/bin/python tools/demo_vivo.py ...
+  ~/miniforge3/envs/boxtwin_mmaction/bin/python tools/demo_vivo.py <proyecto>
+  ... --desde 3000 --velocidad 0.5 --umbral 0.85
+  ... --sin-ventana                                   # solo consola
 
   Teclas: espacio pausa, flechas mueven de a un cuadro en pausa, q sale.
 """
@@ -55,6 +57,14 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+
+# El detector vive en el paquete hermano, que no esta instalado en boxtwin_mmaction: ese
+# entorno esta pinneado y no se toca. La TCN es PyTorch puro y corre igual con torch 2.1,
+# verificado, asi que alcanza con ponerlo en el path.
+_RAIZ = Path(__file__).resolve().parents[2]
+for _p in (_RAIZ / "boxtwin-detector" / "src", _RAIZ / "boxtwin-annotator" / "src"):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
 
 CLASES = ["jab", "cross", "lead hook", "rear hook", "lead uppercut", "rear uppercut"]
 
@@ -119,56 +129,64 @@ class Identidad:
 
 
 # ---------------------------------------------------------------------------
-# Disparador por movimiento: el detector que falta
+# Detector: el ensamble entrenado que reemplazo a la heuristica
 # ---------------------------------------------------------------------------
 
 
-class Disparador:
+class Detector:
     """
-    Decide CUANDO preguntarle al clasificador.
+    Decide CUANDO hay un golpe, con el ensamble entrenado.
 
-    Mide la extension de cada muneca respecto del centro de hombros, normalizada por el ancho
-    de hombros para que no dependa de la distancia a camara, y dispara cuando esa extension
-    hace un maximo local por encima de un umbral.
+    Reemplaza a la heuristica de extension de muneca de la primera version, que quedo medida
+    sin superar al azar. Corre una sola vez sobre la secuencia entera al arrancar: son unos
+    segundos y evita reproducir el video a merced de la GPU.
 
-    Es una heuristica, no un detector entrenado, y se nota: dispara con el movimiento de
-    guardia y se pierde golpes cortos. El detector de verdad es el modelo de secuencia con
-    carriles BIO, que todavia no existe. Mientras tanto esto permite ver el clasificador
-    funcionando sin tener que clasificar cada cuadro, que devolveria un golpe por cuadro
-    porque el modelo no tiene clase "no hay golpe".
+    El ensamble tiene que ser el del fold que deja afuera la fuente que se mira. Si se le pasa
+    uno que la vio, lo que se ve en pantalla es el entrenamiento y no una prediccion.
     """
 
-    def __init__(self, umbral_ext: float = 1.6, refractario: int = 20, ventana: int = 5) -> None:
-        self.umbral_ext = umbral_ext
-        self.refractario = refractario
-        self.hist: dict[tuple[str, str], deque] = {}
-        self.ultimo: dict[tuple[str, str], int] = {}
-        self.ventana = ventana
+    def __init__(self, ensamble_path: Path, umbral: float, device: str = "cuda:0") -> None:
+        import torch
 
-    def evaluar(self, rol: str, kp, score, frame: int) -> str | None:
-        """Devuelve 'left'/'right' si hay que disparar para ese brazo, o None."""
-        if min(score[L_SH], score[R_SH]) < 0.3:
-            return None
-        esc = float(np.linalg.norm(kp[L_SH] - kp[R_SH]))
-        if esc < 1e-3:
-            return None
-        centro = (kp[L_SH] + kp[R_SH]) / 2
+        from boxtwin_detector.ensamble import cargar
 
-        for lado, wr in (("left", L_WR), ("right", R_WR)):
-            clave = (rol, lado)
-            h = self.hist.setdefault(clave, deque(maxlen=self.ventana))
-            h.append(float(np.linalg.norm(kp[wr] - centro)) / esc if score[wr] >= 0.3 else 0.0)
-            if len(h) < self.ventana:
-                continue
-            medio = h[len(h) // 2]
-            # Maximo local: el punto medio de la ventana es mayor que sus vecinos.
-            if medio < self.umbral_ext or medio != max(h):
-                continue
-            if frame - self.ultimo.get(clave, -10**9) < self.refractario:
-                continue
-            self.ultimo[clave] = frame
-            return lado
-        return None
+        self.ens = cargar(Path(ensamble_path), torch.device(device))
+        self.umbral = umbral
+        self.device = torch.device(device)
+
+    def segmentos(self, kp_por_rol: dict, sc_por_rol: dict, T: int) -> list[dict]:
+        """
+        Todos los golpes del video, por peleador y brazo.
+
+        kp_por_rol[rol] es (T, 17, 2) con la identidad ya resuelta; los cuadros sin pose van
+        en cero y quedan fuera de la mascara, que es lo que el detector espera.
+        """
+        import numpy as np
+        import torch
+
+        from boxtwin_detector.decodificacion import decodificar_score, probabilidad_de_golpe
+        from boxtwin_detector.entrenamiento import predecir_secuencia
+        from boxtwin_detector.features import features_de
+
+        out = []
+        for rol in ("A", "B"):
+            kp, sc = kp_por_rol[rol], sc_por_rol[rol]
+            for brazo in ("left", "right"):
+                f, usable = features_de(kp, sc, brazo)
+                x = self.ens.estandarizador.aplicar(f)
+                acum = np.zeros(T, np.float64)
+                for m in self.ens.modelos:
+                    acum += probabilidad_de_golpe(
+                        predecir_secuencia(m, x, self.ens.config, self.device))
+                prob = (acum / self.ens.n).astype(np.float32)
+                for s in decodificar_score(prob, self.umbral, valido=usable):
+                    out.append({
+                        "rol": rol, "brazo": brazo,
+                        "inicio": s.inicio, "fin": s.fin,
+                        "prob": float(prob[s.inicio : s.fin + 1].max()),
+                    })
+        out.sort(key=lambda d: d["inicio"])
+        return out
 
 
 # ---------------------------------------------------------------------------
@@ -268,21 +286,18 @@ def dibujar_panel(img, recientes, conteo, frame, fps, pausado):
 def main() -> int:
     p = argparse.ArgumentParser(description="Demo de reconocimiento sobre video.")
     p.add_argument("proyecto", type=Path, help="directorio del proyecto anotado")
-    p.add_argument("--modelo", type=Path,
-                   default=Path("/home/lucasb/Proyectos/TwinBoxing/modelos/poseC3D_sparring3_indist.pth"))
-    p.add_argument("--config", type=Path,
-                   default=Path("/home/lucasb/Proyectos/TwinBoxing/modelos/poseC3D_sparring3_indist.py"))
+    RAIZ = Path("/home/lucasb/Proyectos/TwinBoxing/modelos")
+    p.add_argument("--detector", type=Path, default=RAIZ / "detector_sin_sparring-3.ens.pt",
+                   help="ensamble del fold que deja AFUERA la fuente que se mira. Pasarle uno "
+                        "que la vio es mirar el entrenamiento, no una prediccion.")
+    p.add_argument("--modelo", type=Path, default=RAIZ / "poseC3D_7fuentes.pth")
+    p.add_argument("--config", type=Path, default=RAIZ / "poseC3D_7fuentes.py")
     p.add_argument("--desde", type=int, default=0)
     p.add_argument("--hasta", type=int, default=None)
-    p.add_argument("--umbral", type=float, default=0.0,
-                   help="probabilidad minima para mostrar el golpe. 0 muestra todo, que es lo "
-                        "honesto: el modelo no tiene clase 'no hay golpe' y su confianza no "
-                        "esta calibrada")
-    p.add_argument("--ventana", type=int, default=12, help="cuadros que se le pasan al modelo")
-    p.add_argument("--extension", type=float, default=1.6,
-                   help="extension de muneca, en anchos de hombro, para disparar")
-    p.add_argument("--refractario", type=int, default=20,
-                   help="cuadros minimos entre dos disparos del mismo brazo")
+    p.add_argument("--umbral", type=float, default=0.80,
+                   help="umbral del detector. 0,80 es el punto de mejor F1 medido; bajarlo "
+                        "sube recall y hunde precision, y hay un acantilado angosto entre "
+                        "0,75 y 0,80 donde se caen las marcas espurias")
     p.add_argument("--velocidad", type=float, default=1.0)
     p.add_argument("--ancho", type=int, default=1280)
     p.add_argument("--sin-ventana", action="store_true", help="solo consola")
@@ -315,14 +330,45 @@ def main() -> int:
 
     print(f"video     : {fuente.name}  ({'proxy' if fuente == proxy else 'original'})")
     print(f"pose      : {npz.name}, {cache.n_frames} cuadros")
-    print(f"modelo    : {args.modelo.name}")
-    print(f"disparador: extension >= {args.extension}, refractario {args.refractario} cuadros")
-    print("  OJO: el clasificador no tiene clase 'no hay golpe' y solo tiene senal medida")
-    print("       sobre sparring-3. Fuera de ahi lo que se ve es ruido con formato.")
+    print(f"detector  : {args.detector.name}, umbral {args.umbral}")
+    print(f"familia   : {args.modelo.name}")
+    print("  OJO: el detector tiene que ser el del fold que deja esta fuente afuera.")
+    print("       Y la familia del golpe no generaliza: 38 de 76 hooks se llaman straight,")
+    print("       y ese eje no mejora con mas datos. La etiqueta es lo mas debil que se ve.")
     print()
 
     clf = Clasificador(args.config, args.modelo, args.device)
-    disp = Disparador(args.extension, args.refractario)
+    det = Detector(args.detector, args.umbral, args.device)
+
+    # -- las poses de todo el video, por rol, para correr el detector de una sola vez
+    print("resolviendo identidad y corriendo el detector sobre la secuencia...")
+    T = cache.n_frames
+    kp_rol = {r: np.zeros((T, 17, 2), np.float32) for r in ("A", "B")}
+    sc_rol = {r: np.zeros((T, 17), np.float32) for r in ("A", "B")}
+    for f2 in range(T):
+        for tid2, _, kp2, sc2 in cache.en(f2):
+            rol = ident.rol(tid2, f2)
+            if rol in ("fighter_A", "fighter_B"):
+                kp_rol[rol[-1]][f2] = kp2
+                sc_rol[rol[-1]][f2] = sc2
+    golpes = det.segmentos(kp_rol, sc_rol, T)
+    print(f"  {len(golpes)} golpes detectados\n")
+
+    # -- la familia de cada uno, una vez
+    por_inicio: dict[int, list] = {}
+    for g in golpes:
+        rol = f"fighter_{g['rol']}"
+        a, b = g["inicio"], g["fin"] + 1
+        kp_seg, sc_seg = kp_rol[g["rol"]][a:b], sc_rol[g["rol"]][a:b]
+        if len(kp_seg) >= 3 and sc_seg.sum() > 0:
+            cl, prob = clf(kp_seg, sc_seg, alto_v, ancho_v)
+        else:
+            cl, prob = "?", 0.0
+        g["clase"], g["p_clase"] = cl, prob
+        por_inicio.setdefault(a, []).append(g)
+        print(f"{a:7d}  {a/fps:7.2f}s  {rol:10s} {g['brazo']:5s} {cl:15s} "
+              f"p_det={g['prob']:.2f} p_cls={prob:.2f}")
+    print()
 
     recientes: deque = deque(maxlen=40)
     conteo: dict[str, dict[str, int]] = {"fighter_A": {}, "fighter_B": {}}
@@ -349,32 +395,10 @@ def main() -> int:
                 por_rol[rol] = (kp, sc)
 
         if not pausado:
-            for rol, (kp, sc) in por_rol.items():
-                lado = disp.evaluar(rol, kp, sc, frame)
-                if lado is None:
-                    continue
-                # Ventana centrada en el disparo, con los keypoints de ESE peleador.
-                a = max(0, frame - args.ventana // 2)
-                b = min(cache.n_frames, a + args.ventana)
-                seq_kp, seq_sc = [], []
-                for f2 in range(a, b):
-                    hallado = None
-                    for tid2, _, kp2, sc2 in cache.en(f2):
-                        if ident.rol(tid2, f2) == rol:
-                            hallado = (kp2, sc2)
-                            break
-                    if hallado is None:
-                        hallado = (kp, sc)  # se repite el ultimo visto: no se inventa pose
-                    seq_kp.append(hallado[0])
-                    seq_sc.append(hallado[1])
-                if len(seq_kp) < 3:
-                    continue
-                cl, prob = clf(np.stack(seq_kp), np.stack(seq_sc), alto_v, ancho_v)
-                if prob < args.umbral:
-                    continue
-                recientes.append((frame, rol, cl, prob))
-                conteo[rol][cl] = conteo[rol].get(cl, 0) + 1
-                print(f"{frame:7d}  {frame/fps:7.2f}s  {rol:10s} {cl:15s} p={prob:.2f}")
+            for g in por_inicio.get(frame, []):
+                rol = f"fighter_{g['rol']}"
+                recientes.append((frame, rol, g["clase"], g["p_clase"]))
+                conteo[rol][g["clase"]] = conteo[rol].get(g["clase"], 0) + 1
 
         if not args.sin_ventana:
             vis = img.copy()
