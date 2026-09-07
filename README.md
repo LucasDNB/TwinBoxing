@@ -479,3 +479,21 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
  13. Queda el recall como frontera: entre 0,47 y 0,59 contra 0,911 del humano, mientras
      la precision ya esta entre 0,56 y 0,92. Ahi queda casi todo el error, y el ensamble
      lo empeora porque compra precision sacrificando recall
+ 14. El detector casi no encuentra golpes sobre pose interpolada, y ahora se reporta
+     separado: recall 0,535 sobre los medidos contra 0,321 sobre los rellenados en
+     Sparring, 0,592 contra 0,400 en Pacquiao, y 0,561 contra 0,077 en sparring-3, donde
+     encuentra 1 de 13. Es aditivo: F1, recall global y precision salen identicos. Sacar
+     esos cuadros del ENTRENAMIENTO, en cambio, no paga: +0,002, dentro del ruido
+ 15. LA HIPOTESIS DE LA RESOLUCION DEL PUNTO 12 ES FALSA. El preproceso corre con
+     imgsz=640 en las siete fuentes, asi que un cuadro de 1080p se reduce a 640x360
+     antes de la inferencia y el modelo de pose ve lo mismo en todas. Tampoco es la
+     calidad de pose: el kp_score mediano de Sparring es el MAS ALTO de las siete
+ 16. La causa real es que Sparring es la unica fuente con boundary_definitions_version 1,
+     y sus golpes duran 337 ms de mediana contra 200 a 233 ms de las otras seis, un 45%
+     mas. El modelo predice 7 cuadros en todas porque aprendio la convencion v2 que usan
+     seis de los siete, y en Sparring se lo compara contra golpes de 10: sus marcas caen
+     sobre golpes reales pero fallan el IoU 0,3. El 50% de sus falsos positivos cae a
+     menos de medio segundo de un golpe anotado, contra 9 a 25% del resto, y bajando el
+     IoU a 0,10 sube de 0,647 a 0,721 mientras las otras no se mueven un solo punto
+ 17. O sea que el fold sin-Sparring mide en buena parte un cambio de convencion de
+     anotacion y no la calidad del detector. Queda sin explicar el 63% de la brecha

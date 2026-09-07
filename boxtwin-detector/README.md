@@ -306,9 +306,23 @@ ring con cámara en mano, y el fold que la deja afuera da **precisión 0,924**, 
 todas y por encima del 0,903 humano. Las features están centradas en los hombros y escaladas
 por el torso, así que un paneo mueve la imagen y no mueve nada en el espacio de features.
 
-**El fold difícil es `sin Sparring`**, peor por margen amplio en las cuatro rondas: 0,519 con
-precisión 0,561. Es la única fuente a 640x360 contra 1080p de las otras seis. La hipótesis es
-comprobable: reprocesar una fuente de 1080p a 640x360 y ver si su fold cae al mismo lugar.
+**El fold `sin Sparring` no es comparable con los demás.** Es el peor en las cuatro rondas
+—0,519 con precisión 0,561— y la causa está identificada: `Sparring` es la **única fuente
+anotada bajo `boundary_definitions_version: 1`**, y sus golpes duran 337 ms de mediana contra
+200–233 ms de las otras seis, un 45% más.
+
+El modelo predice 7 cuadros en todas las fuentes, porque aprendió la convención v2 que usan
+seis de los siete. En `Sparring` se lo compara contra golpes de 10, así que sus marcas caen
+sobre golpes reales pero fallan el IoU 0,3 y se cuentan como falsos positivos: el **50% de sus
+FP cae a menos de medio segundo de un golpe anotado**, contra 9–25% del resto.
+
+Se descartaron antes la resolución (el preproceso corre a `imgsz=640` en las siete, la pose ve
+lo mismo), la calidad de pose (su `kp_score` mediano es el **más alto**), la interpolación y la
+densidad de golpes. Ver
+[`docs/experiments/2026-09-04-sparring-fronteras-v1.md`](docs/experiments/2026-09-04-sparring-fronteras-v1.md).
+
+Queda sin explicar el 63% de la brecha: bajando el IoU a 0,10, `Sparring` sube de 0,647 a 0,721
+mientras las otras no se mueven, pero sigue 0,128 abajo.
 
 Pierde en distribución, y es coherente: la ganancia viene de suprimir detecciones espurias, que
 son idiosincrasia de cada corrida. Sobre la misma fuente en que se entrenó, las manías de un
@@ -353,6 +367,21 @@ en cada incremento. Lo honesto es decir que el conjunto se paga, no cuál de los
 
 Ver [`docs/experiments/2026-09-04-sumar-fuentes.md`](docs/experiments/2026-09-04-sumar-fuentes.md)
 y [`2026-09-03-quinta-fuente.md`](docs/experiments/2026-09-03-quinta-fuente.md).
+
+## El recall se reporta separado por pose medida
+
+El detector casi no encuentra golpes cuya pose fue rellenada por interpolación, y ahora eso es
+un número en vez de un promedio:
+
+| Fold | recall pose medida | recall pose rellenada | Brecha |
+|---|---|---|---|
+| sin `Sparring` | 0,535 (86) | 0,321 (28) | −0,214 |
+| sin `Pacquiao` | 0,592 (130) | 0,400 (15) | −0,192 |
+| sin `sparring-3` | 0,561 (367) | **0,077** (13) | **−0,484** |
+
+Las cuatro fuentes anotadas con el flujo nuevo tienen 0% de interpolación y no aparecen acá.
+Separa el error del detector del error de la anotación. Ver
+[`docs/experiments/2026-09-04-recall-por-pose-medida.md`](docs/experiments/2026-09-04-recall-por-pose-medida.md).
 
 ## Dónde está el error hoy
 
