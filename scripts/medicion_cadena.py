@@ -156,21 +156,36 @@ def correr_preproceso(video: Path, destino: Path, reloj: Reloj, cfg_base,
     #    Hace falta para pacquiao, que dura 38 minutos y tiene anotacion sobre los tres
     #    primeros; procesarlo entero gastaria una hora y tres cuartos por corrida para que
     #    las etapas 3 a 5 trabajen sobre el 8% de los cuadros.
+    #    cv2.VideoCapture es un tipo inmutable y no deja reemplazarle read, asi que se
+    #    sustituye la clase por una fabrica que devuelve un proxy.
+    #
+    #    OJO CON LO QUE ESTO NO ACOTA: la deteccion de cortes de plano corre por ffmpeg en
+    #    un subproceso y recorre el archivo entero igual. Sobre un video largo eso deja el
+    #    costo de esa pasada atribuido a un tramo corto, y el ratio sale inflado. Para
+    #    medir un tramo de un video largo conviene recortar el archivo con ffmpeg y correr
+    #    sobre el recorte, que es lo que se hizo con pacquiao; ver el desvio D-8.
     restaurar_read = None
     if max_cuadros:
         import cv2 as _cv2
 
-        _read_orig = _cv2.VideoCapture.read
-        _contador = {"n": 0}
+        _Cap = _cv2.VideoCapture
 
-        def _read_limitado(self, *a, **k):
-            if _contador["n"] >= max_cuadros:
-                return False, None
-            _contador["n"] += 1
-            return _read_orig(self, *a, **k)
+        class _CapLimitada:
+            def __init__(self, *a, **k):
+                self._c = _Cap(*a, **k)
+                self._n = 0
 
-        _cv2.VideoCapture.read = _read_limitado
-        restaurar_read = lambda: setattr(_cv2.VideoCapture, "read", _read_orig)  # noqa: E731
+            def read(self, *a, **k):
+                if self._n >= max_cuadros:
+                    return False, None
+                self._n += 1
+                return self._c.read(*a, **k)
+
+            def __getattr__(self, n):
+                return getattr(self._c, n)
+
+        _cv2.VideoCapture = _CapLimitada
+        restaurar_read = lambda: setattr(_cv2, "VideoCapture", _Cap)  # noqa: E731
 
     # -- envoltura de la inferencia por cuadro. Todo lo que no cae adentro de _inferir
     #    durante el bucle es decodificacion: se deduce por diferencia al final.
@@ -468,8 +483,8 @@ def main() -> int:
     p.add_argument("--annot", type=Path, help="por defecto, el del proyecto del video")
     p.add_argument("--corridas", type=int, default=3)
     p.add_argument("--max-cuadros", type=int, default=None,
-                   help="procesar solo los primeros N cuadros; la duracion informada se "
-                        "ajusta al tramo procesado")
+                   help="procesar solo los primeros N cuadros. Exige que la anotacion "
+                        "declare ese mismo total_frames; ver la nota al rechazarlo")
     p.add_argument("--out", type=Path, default=Path("mediciones/corridas.csv"))
     p.add_argument("--trabajo", type=Path, default=Path("/tmp/boxtwin_medicion"))
     p.add_argument("--modelo-pose", type=Path, default=RAIZ / "yolov8l-pose.pt")
@@ -495,6 +510,26 @@ def main() -> int:
     if faltan:
         print("error: faltan checkpoints:\n  " + "\n  ".join(faltan), file=sys.stderr)
         return 1
+
+    # --max-cuadros solo sirve si la anotacion acompana. El export dimensiona sus arreglos
+    # con doc.video.total_frames y despues pide cada cuadro al cache: si el cache tiene
+    # menos, la etapa de identidad se cae con IndexError a mitad de la corrida. Se rechaza
+    # antes de gastar el pase de pose.
+    if a.max_cuadros:
+        _tf = json.loads(annot.read_text(encoding="utf-8"))["video"]["total_frames"]
+        if _tf != a.max_cuadros:
+            print(
+                f"error: --max-cuadros {a.max_cuadros} pero la anotacion declara {_tf} "
+                "cuadros.\n"
+                "  El export dimensiona con la anotacion y le pide al cache cuadros que no\n"
+                "  tiene. Para medir un tramo de un video largo, recortar el archivo con\n"
+                "  ffmpeg y recortar la anotacion en consecuencia, que es lo que se hizo\n"
+                "  con pacquiao (protocolo.md, desvio D-8). Asi ademas la deteccion de\n"
+                "  cortes de plano, que corre por ffmpeg sobre el archivo entero, se acota\n"
+                "  al tramo y el ratio no sale inflado.",
+                file=sys.stderr,
+            )
+            return 1
 
     dur, fps = duracion_video(video)
     commit = a.commit or subprocess.run(

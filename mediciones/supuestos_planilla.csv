@@ -1,0 +1,4 @@
+id,supuesto,valor,unidad,minimo,maximo,estado,fuente,fecha
+S-19,Relacion de computo por hora de video,1.447,h de computo por hora de video,1.134,2.624,medido,mediciones/corridas.csv (14 corridas en caliente),2026-09-15
+S-17,Consumo electrico por instancia,,W,,,NO MEDIDO,telemetria de la GPU caida (protocolo.md desvio D-3),2026-09-15
+S-04,Costo variable por hora de video,0.8755,USD por hora de video,0.6861,1.5876,derivado,S-19 medido x 0.5260 USD/h (AWS g4dn.xlarge us-east-1) + 15%,2026-09-15

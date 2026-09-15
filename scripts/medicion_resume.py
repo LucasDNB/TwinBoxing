@@ -57,11 +57,25 @@ def main() -> int:
     frio = [r for r in ok if r["estado"] == "frio"]
     cal = [r for r in ok if r["estado"] == "caliente"]
 
-    malas = [r for r in ok if r.get("cache_identico") == "no"]
+    # Una corrida cuyo cache no reproduce al de referencia no se usa: si los track_id
+    # cambiaron, la identidad apunta a otra persona y las etapas 4 y 5 midieron otra cosa.
+    # La excepcion es la divergencia documentada del recorte, que vive fuera del rango
+    # anotado y por lo tanto no toca nada de lo que corre aguas abajo.
+    def usable(r: dict) -> bool:
+        if r.get("cache_identico") != "no":
+            return True
+        return r.get("notas", "").startswith("divergencia-ultimo-cuadro")
+
+    malas = [r for r in ok if not usable(r)]
     if malas:
         print(f"AVISO: {len(malas)} corridas con cache distinto al de referencia. "
               "No se usan para derivar.")
-        cal = [r for r in cal if r.get("cache_identico") != "no"]
+    exc = [r for r in ok if r.get("cache_identico") == "no" and usable(r)]
+    if exc:
+        print(f"AVISO: {len(exc)} corridas se aceptan por excepcion documentada "
+              "(divergencia confinada al ultimo cuadro del recorte).")
+    cal = [r for r in cal if usable(r)]
+    frio = [r for r in frio if usable(r)]
 
     print(f"corridas leidas: {len(filas)}  validas: {len(ok)}  "
           f"frias: {len(frio)}  calientes: {len(cal)}\n")
