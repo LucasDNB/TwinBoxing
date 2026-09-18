@@ -34,6 +34,7 @@ justo en el instante del golpe.
 |---|---|---|
 | [18-09](docs/experiments/2026-09-18-dataset-guantes.md) | ¿El dataset público se parece a video de ring? | Casi nada: su parte útil son 13 s de una pelea |
 | [18-09](docs/experiments/2026-09-18-guante-separa-peleadores.md) | ¿El guante separa peleador de no peleador? | Sí, en las seis fuentes, y el árbitro de látex no lo engaña |
+| [18-09](docs/experiments/2026-09-18-color-del-guante-separa-A-de-B.md) | ¿El color del guante distingue A de B? | 112 de 113 tracks; el único fallo es un empate |
 
 ## Estado
 
@@ -43,7 +44,9 @@ justo en el instante del golpe.
 | 2 | Recortes de persona | hecho |
 | 3 | Entrenamiento | hecho |
 | 4 | Medición contra las fuentes anotadas | hecho |
-| 5 | Sidecar y consumo en el anotador | pendiente |
+| 5 | Color del guante para A contra B | hecho |
+| 6 | Partición global y siembra de perfiles | pendiente |
+| 7 | Sidecar y consumo en el anotador | pendiente |
 
 ## Instalación
 
