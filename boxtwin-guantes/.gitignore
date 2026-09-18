@@ -1,0 +1,16 @@
+# El dataset se regenera desde el zip del export; los videos de prueba, corriendo el script.
+data/
+salidas/
+dsgloves*.zip
+
+# Los pesos no van a git -*.pt ya esta ignorado en la raiz- pero el sidecar si: lleva la
+# procedencia, los ajustes y las metricas, que es lo que hay que poder auditar despues.
+modelos/_corridas/
+modelos/*.pt
+
+*.egg-info/
+__pycache__/
+.pytest_cache/
+
+# Artefactos de corrida de ultralytics. Las metricas que importan viven en el sidecar.
+runs/
