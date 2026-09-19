@@ -108,6 +108,13 @@ class ConfigIdentidadAuto:
     # 02-sparring, que tiene 400 tracks, eso dejaba 45 de 49 candidatos sin evidencia
     # suficiente para votar. El riesgo real es el otro peleador, que es del mismo tamano.
     fraccion_alto_relevante: float = 0.6
+    # Cuanto puede alejarse un guante detectado de donde la pose dice que esta la mano de esa
+    # persona, medido en largos de torso. Sin esto, el filtro cuenta cualquier guante que caiga
+    # DENTRO del recorte y no los guantes DE esa persona: un espectador apoyado en las cuerdas
+    # tiene guantes colgando delante, y el entrenador tiene al peleador a medio metro. Revisados
+    # a ojo, los 20 tracks que recibian rol de peleador sin serlo eran todos eso: gente afuera
+    # del ring, cerca de la camara, con guantes ajenos en el recorte.
+    max_distancia_muneca: float = 1.2
 
 
 @dataclass
@@ -195,6 +202,9 @@ def analizar(
 
                 e.recortes += 1
                 con_color = detector.detectar_con_color(frame, cajas[i])
+                con_color = _solo_los_propios(
+                    con_color, dets.keypoints[i], dets.kp_score[i], cfg
+                )
                 if con_color:
                     e.con_guante += 1
 
@@ -222,6 +232,54 @@ def analizar(
     finally:
         cap.release()
     return ev
+
+
+def _solo_los_propios(detecciones, keypoints, kp_score, cfg):
+    """
+    Se queda con los guantes que caen donde la pose dice que esta la mano de esa persona.
+
+    Un guante DENTRO del recorte no es un guante DE esa persona. Los veinte tracks que
+    recibian rol de peleador sin serlo eran gente afuera del ring, cerca de la camara -y por
+    eso grande- con guantes ajenos adentro del recorte: colgados de las cuerdas, o del
+    peleador que esta a medio metro del otro lado.
+
+    La posicion esperada sale de `derive_gloves`, que extrapola sobre el vector codo-muneca,
+    y la tolerancia se mide en largos de torso para que no dependa de la distancia a la
+    camara. Si no hay torso medible se deja pasar todo: preferimos contar de mas a inventar
+    una referencia que no existe.
+    """
+    from boxtwin.core.constants import COCO17_INDEX
+    from boxtwin.core.gloves import derive_gloves
+
+    HOMBRO_I, HOMBRO_D = COCO17_INDEX["left_shoulder"], COCO17_INDEX["right_shoulder"]
+    CADERA_I, CADERA_D = COCO17_INDEX["left_hip"], COCO17_INDEX["right_hip"]
+
+    if not detecciones:
+        return detecciones
+    kp = np.asarray(keypoints, dtype=np.float64)
+    sc = np.asarray(kp_score, dtype=np.float64)
+
+    hombros = [i for i in (HOMBRO_I, HOMBRO_D) if sc[i] >= 0.3]
+    caderas = [i for i in (CADERA_I, CADERA_D) if sc[i] >= 0.3]
+    if not hombros or not caderas:
+        return detecciones
+    torso = float(np.linalg.norm(kp[hombros].mean(axis=0) - kp[caderas].mean(axis=0)))
+    if torso < 1e-3:
+        return detecciones
+
+    xy, conf = derive_gloves(kp[None, ...].astype(np.float32), sc[None, ...].astype(np.float32))
+    esperadas = [xy[0, j] for j in range(xy.shape[1]) if conf[0, j] >= 0.3]
+    if not esperadas:
+        return detecciones
+
+    tope = cfg.max_distancia_muneca * torso
+    salida = []
+    for caja, color in detecciones:
+        x0, y0, x1, y1 = caja.xyxy
+        centro = np.array([(x0 + x1) / 2.0, (y0 + y1) / 2.0])
+        if any(float(np.linalg.norm(centro - e)) <= tope for e in esperadas):
+            salida.append((caja, color))
+    return salida
 
 
 def _iou(a: np.ndarray, b: np.ndarray) -> float:
