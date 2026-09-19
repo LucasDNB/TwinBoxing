@@ -133,35 +133,65 @@ def test_sin_coexistencia_suficiente_no_siembra():
 # -- piso de separacion -----------------------------------------------------
 
 
-def test_con_guantes_del_mismo_color_no_asigna_nada():
-    # Medido: con separacion 0,449 el reparto salio 13 tracks a A contra 1 a B. Una
-    # asignacion equivocada con cara de correcta es peor que ninguna.
+def test_con_guantes_del_mismo_color_la_geometria_igual_asigna():
+    # Dos tracks que aparecen en el mismo cuadro, cada uno aislado, son dos personas
+    # distintas. Eso no depende del color y por eso vale aunque los guantes sean iguales:
+    # es la razon por la que la coexistencia va antes que la apariencia.
     ev = _dos_peleadores(color_a=ROJO, color_b=(174.0, 198.0, 119.0))
     prop = proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS)
-    assert not prop.semillas
-    assert all(r is TrackRole.IGNORE for r in prop.roles.values())
-    assert any("nunca se separaron" in a for a in prop.avisos)
+    assert prop.roles[1] is not prop.roles[2]
 
 
-def test_pero_los_filtros_de_descarte_igual_se_aplican():
+def test_pero_los_sueltos_no_se_deciden_por_un_color_que_no_distingue():
+    # Un track que nunca coexiste no tiene restriccion geometrica, y con los dos perfiles
+    # casi iguales el voto es una moneda. Medido: con separacion 0,449 el reparto salio 13
+    # tracks a A contra 1 a B, una asignacion equivocada con cara de correcta.
+    ev = _dos_peleadores(color_a=ROJO, color_b=(174.0, 198.0, 119.0))
+    ev[9] = _track(9, ROJO, list(range(1000, 1200, 5)))   # solo, mucho despues
+    prop = proponer(ev, ConfigIdentidadAuto(), total_frames=2000, fps=FPS)
+    assert 9 in prop.sin_asignar
+    assert any("mismo color" in a for a in prop.avisos)
+
+
+def test_los_filtros_de_descarte_no_dependen_de_poder_decidir_a_y_b():
     ev = _dos_peleadores(color_a=ROJO, color_b=(174.0, 198.0, 119.0))
     ev[9] = _track(9, ROJO, list(range(0, 100, 5)), alto=0.2)
     prop = proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS)
-    assert prop.roles[9] is TrackRole.IGNORE, "el descarte no depende de poder decidir A y B"
+    assert prop.roles[9] is TrackRole.IGNORE
 
 
 # -- asignacion -------------------------------------------------------------
 
 
-def test_cada_peleador_se_lleva_sus_tracks():
-    ev = _dos_peleadores()
-    frames = list(range(0, 200, 5))
-    ev[10] = _track(10, ROJO, frames)   # otro fragmento del rojo
-    ev[11] = _track(11, AZUL, frames)   # otro fragmento del azul
-    prop = proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS)
+def test_cada_peleador_se_lleva_sus_fragmentos():
+    # Los fragmentos van DESPUES en el tiempo, que es como se fragmenta de verdad un track:
+    # el id se pierde y aparece otro. Coexistir con el original seria imposible.
+    ev = _dos_peleadores(n=40)
+    tarde = list(range(1000, 1200, 5))
+    ev[10] = _track(10, ROJO, tarde)
+    ev[11] = _track(11, AZUL, tarde)
+    prop = proponer(ev, ConfigIdentidadAuto(), total_frames=2000, fps=FPS)
     assert prop.roles[10] is prop.roles[1]
     assert prop.roles[11] is prop.roles[2]
     assert prop.roles[1] is not prop.roles[2]
+
+
+def test_un_intercambio_mutuo_de_identidad_no_rompe_la_particion():
+    # El caso que ninguna eleccion de semilla arreglaba: el tracker cruza los dos ids entre
+    # las dos personas, asi que el color de cada track mezcla a los dos. Los dos siguen
+    # coexistiendo y separados, y la geometria los sigue repartiendo bien.
+    mitad = [(f, ROJO) for f in range(0, 100, 5)]
+    otra = [(f, AZUL) for f in range(100, 200, 5)]
+    frames = [f for f, _ in mitad + otra]
+    ev = {
+        1: EvidenciaTrack(1, 0, 200, 0.9, 40, 40, mitad + otra, frames,
+                          [(f, 100.0) for f in frames]),
+        2: EvidenciaTrack(2, 0, 200, 0.9, 40, 40,
+                          [(f, AZUL) for f, _ in mitad] + [(f, ROJO) for f, _ in otra],
+                          frames, [(f, 500.0) for f in frames]),
+    }
+    prop = proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS)
+    assert prop.roles[1] is not prop.roles[2], "coexisten: son dos personas, pase lo que pase"
 
 
 def test_un_track_con_pocos_guantes_queda_sin_asignar_y_no_adivinado():

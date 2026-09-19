@@ -77,21 +77,19 @@ class ConfigIdentidadAuto:
     `umbral_guante` cae en el hueco medido entre las dos poblaciones: peleadores de 0,59 para
     arriba, el resto de 0,33 para abajo. 0,45 esta en el medio y lejos de los dos bordes.
 
-    La ventana de siembra ARRANCA en `segundos_semilla` y se extiende sola hasta
-    `segundos_maximos` mientras los dos perfiles no se separen. Cinco segundos alcanzan
-    cuando los guantes son de colores distintos, y no alcanzan cuando no lo son: sobre
-    01-sparring, con cinco segundos los perfiles salieron a tono 7,3 y 172,9 -separacion
-    0,449- mientras que con el video entero daban 3,5 y 9,1. Es poca evidencia, no un color
-    distinto.
+    `segundos_ancla` no recorta la evidencia: la particion usa el video entero. Lo que hace
+    es elegir el componente de REFERENCIA, el que define cual lado es A y contra el que se
+    orientan los demas, entre los que aparecen al principio. La primera version si recortaba
+    -sembraba con los primeros cinco segundos- y era una fuente de errores: sobre 01-sparring
+    los perfiles salian a tono 7,3 y 172,9 con cinco segundos, contra 3,5 y 9,1 con el video
+    entero. Era poca evidencia, no un color distinto.
 
-    `separacion_minima` es un piso duro, no un aviso. Con 0,449 el reparto salio 13 tracks a
-    A contra 1 a B, que es una asignacion equivocada con cara de asignacion. Preferimos no
-    asignar: los filtros de descarte igual sacan 122 de 137 tracks, y lo que queda lo
-    resuelve el anotador viendo cual es cual.
+    `separacion_minima` es un piso duro, no un aviso, y aplica SOLO a los tracks que la
+    coexistencia no resolvio. Con 0,449 el voto por color repartio 13 tracks a A contra 1 a
+    B, que es una asignacion equivocada con cara de asignacion.
     """
 
-    segundos_semilla: float = 5.0
-    segundos_maximos: float = 60.0   # hasta donde se extiende la ventana si no separan
+    segundos_ancla: float = 5.0      # de donde tiene que salir el componente de referencia
     separacion_minima: float = 0.55  # debajo de esto no se asigna A ni B
     paso: int = 5                    # se evalua un cuadro de cada N
     fraccion_altura: float = 0.55
@@ -99,7 +97,9 @@ class ConfigIdentidadAuto:
     min_recortes: int = 15           # menos que esto y la fraccion no significa nada
     min_guantes_voto: int = 10       # menos que esto y el voto se deja sin asignar
     min_coexistencia: int = 3        # cuadros en que las dos semillas tienen que coincidir
-    iteraciones: int = 4             # vueltas de reestimar perfiles y volver a votar
+    # Diferencia minima entre las dos orientaciones posibles de un componente para animarse
+    # a elegir una. Por debajo, el color no esta decidiendo y se deja sin asignar.
+    margen_orientacion: float = 0.25
     iou_max_aislado: float = 0.02    # para muestrear color sin cuerpo del rival adentro
     # Con quien hay que estar aislado: solo con gente de tamano comparable. Un espectador
     # lejano que se superpone con la caja no contamina el parche del guante, pero exigir
@@ -129,15 +129,6 @@ class EvidenciaTrack:
     def fraccion_guante(self) -> float:
         return self.con_guante / self.recortes if self.recortes else 0.0
 
-    def colores_hasta(self, frame: int) -> list[Color]:
-        return [c for f, c in self.colores if f < frame]
-
-    def guantes_hasta(self, frame: int) -> int:
-        return sum(1 for f in self.frames_con_guante if f < frame)
-
-    def x_hasta(self, frame: int) -> float:
-        xs = [x for f, x in self.xs if f < frame]
-        return float(np.median(xs)) if xs else 0.0
 
 
 @dataclass
@@ -248,46 +239,6 @@ def _iou(a: np.ndarray, b: np.ndarray) -> float:
 # Propuesta
 
 
-def _mejor_par(
-    evidencia: dict[int, EvidenciaTrack],
-    candidatos: set[int],
-    limite: int,
-    cfg: ConfigIdentidadAuto,
-) -> tuple[int, int, set[int]] | None:
-    """
-    Los dos tracks que mas veces aparecen A LA VEZ y separados, y los cuadros que comparten.
-
-    La primera version tomaba los dos tracks con mas guantes en la ventana, y eso no dice que
-    sean dos personas: un peleador fragmentado en dos ids da dos semillas de la MISMA
-    persona, y ahi el perfil de A y el de B describen al mismo tipo. El voto reparte entonces
-    casi al azar. Medido contra la anotacion, las tres fuentes donde las semillas cayeron
-    sobre el mismo peleador dieron 57,9%, 53,8% y 89,5%, contra 100% donde cayeron bien.
-
-    Coexistir resuelve eso sin ninguna heuristica de apariencia: dos fragmentos del mismo
-    cuerpo casi nunca estan en el mismo cuadro, y los dos peleadores si lo estan. Se cuentan
-    solo los cuadros donde los DOS tienen color medido, que por construccion son cuadros
-    donde cada uno estaba aislado de la gente de su tamano; si los dos lo estaban en el mismo
-    cuadro, entonces tampoco se superponian entre si.
-    """
-    frames = {
-        t: {f for f, _ in evidencia[t].colores if f < limite}
-        for t in candidatos
-    }
-    frames = {t: fs for t, fs in frames.items() if fs}
-    if len(frames) < 2:
-        return None
-    orden = sorted(frames)
-    mejor, mejor_n = None, 0
-    for i, t1 in enumerate(orden):
-        for t2 in orden[i + 1:]:
-            n = len(frames[t1] & frames[t2])
-            if n > mejor_n:
-                mejor, mejor_n = (t1, t2), n
-    if mejor is None or mejor_n < cfg.min_coexistencia:
-        return None
-    return mejor[0], mejor[1], frames[mejor[0]] & frames[mejor[1]]
-
-
 def proponer(
     evidencia: dict[int, EvidenciaTrack],
     cfg: ConfigIdentidadAuto,
@@ -335,138 +286,74 @@ def proponer(
         )
         return prop
 
-    # -- 3. semilla, con la ventana extendiendose hasta que los perfiles separen ------
-    # Se arranca corto y se extiende. Cinco segundos alcanzan cuando los guantes son de
-    # colores distintos; cuando no lo son, el problema es que hay poca evidencia y no que el
-    # color no sirva, asi que se le da mas video antes de rendirse. Extender no cuesta otra
-    # pasada del detector: cada medicion ya viaja con su cuadro.
-    segundos_video = total_frames / fps if fps > 0 else 0.0
-    ventanas: list[float] = []
-    seg = cfg.segundos_semilla
-    while seg < cfg.segundos_maximos:
-        ventanas.append(seg)
-        seg *= 2
-    ventanas.append(min(cfg.segundos_maximos, segundos_video) if segundos_video else
-                    cfg.segundos_maximos)
-    ventanas = sorted({round(v, 3) for v in ventanas if v > 0})
+    # -- 3. particion por coexistencia -------------------------------------
+    # La geometria primero, porque no se equivoca: dos tracks en el mismo cuadro, cada uno
+    # aislado de la gente de su tamano, son dos personas distintas. Vale aunque los guantes
+    # sean identicos y aunque un track haya cambiado de persona a mitad de camino.
+    limite_ancla = int(cfg.segundos_ancla * fps) if fps > 0 else 0
+    lados, diag_part = particionar(evidencia, candidatos, cfg, limite_ancla)
+    prop.diagnostico.update(diag_part)
 
-    intentos: list[tuple[float, float]] = []
-    elegida = None
-    mejor = None
-    for seg in ventanas:
-        limite = min(int(seg * fps), total_frames) if fps > 0 else total_frames
-        par = _mejor_par(evidencia, candidatos, limite, cfg)
-        if par is None:
-            continue
-        a, b, comunes = par
-        # Quien es A: el que arranca mas a la izquierda. Arbitrario pero deterministico, y le
-        # da al anotador una expectativa estable en vez de un sorteo por id del tracker.
-        if evidencia[a].x_hasta(limite) > evidencia[b].x_hasta(limite):
-            a, b = b, a
-        # Solo los cuadros compartidos: ahi los dos son dos personas distintas.
-        col_a = [c for f, c in evidencia[a].colores if f in comunes]
-        col_b = [c for f, c in evidencia[b].colores if f in comunes]
-        if not col_a or not col_b:
-            continue
-        pa = perfil_de(col_a)
-        pb = perfil_de(col_b)
-        sep = distancia_color(pa, pb)
-        intentos.append((seg, round(sep, 3)))
-        if mejor is None or sep > mejor[-1]:
-            mejor = (seg, a, b, pa, pb, sep)
-        if sep >= cfg.separacion_minima:
-            elegida = (seg, a, b, pa, pb, sep)
-            break
-
-    prop.diagnostico["ventanas_probadas"] = intentos
-
-    if not intentos:
+    if not lados:
         prop.sin_asignar = sorted(candidatos)
         prop.avisos.append(
-            "ningun par de tracks tiene guantes con color en el video: no alcanza para "
-            "sembrar los dos perfiles. Los candidatos quedan sin asignar"
+            "ningun par de tracks coexiste lo suficiente: sin esa restriccion no hay como "
+            "afirmar que dos tracks son dos personas distintas. Quedan sin asignar"
         )
         return prop
 
-    if elegida is None:
-        # Se probaron todas las ventanas y los perfiles nunca separaron. No se asigna: con
-        # separacion 0,449 el reparto salio 13 tracks a A contra 1 a B, que es una asignacion
-        # equivocada con cara de asignacion. Los filtros de descarte SI quedan aplicados.
-        seg, a, b, pa, pb, sep = mejor
-        prop.perfiles = {"fighter_A": pa, "fighter_B": pb}
-        prop.diagnostico["separacion_de_perfiles"] = round(sep, 3)
-        prop.sin_asignar = sorted(candidatos)
-        prop.avisos.append(
-            f"los dos perfiles de color nunca se separaron: el mejor intento fue {sep:.3f} "
-            f"con {seg:g} s, y el piso es {cfg.separacion_minima}. Los guantes de los dos "
-            "peleadores son del mismo color, asi que NO se asigna A ni B: hacerlo produciria "
-            f"un reparto equivocado con cara de correcto. Quedan {len(candidatos)} candidatos "
-            "sin asignar, y los filtros de descarte si se aplicaron"
-        )
-        return prop
-
-    seg, s1, s2, perfil_a, perfil_b, separacion = elegida
-    prop.perfiles = {"fighter_A": perfil_a, "fighter_B": perfil_b}
-    prop.semillas = {"fighter_A": s1, "fighter_B": s2}
+    cols = {t: [c for _, c in evidencia[t].colores] for t in candidatos}
+    perfil_0 = perfil_de([c for t, v in lados.items() if v == 0 for c in cols[t]])
+    perfil_1 = perfil_de([c for t, v in lados.items() if v == 1 for c in cols[t]])
+    separacion = distancia_color(perfil_0, perfil_1)
     prop.diagnostico["separacion_de_perfiles"] = round(separacion, 3)
-    prop.diagnostico["segundos_de_siembra"] = seg
-    if seg > cfg.segundos_semilla:
-        prop.avisos.append(
-            f"con {cfg.segundos_semilla:g} s los perfiles no separaban; hizo falta extender "
-            f"la ventana a {seg:g} s"
-        )
-    if perfil_a[0] == ACROMATICO and perfil_b[0] == ACROMATICO:
-        prop.avisos.append(
-            "los dos peleadores tienen guantes sin color -negros o blancos-: el tono no "
-            "aporta y la decision queda solo en saturacion y brillo"
-        )
 
-    # -- 4. voto, con los perfiles refinandose -----------------------------
-    # Los cuadros compartidos garantizan que las dos semillas son dos personas, pero son
-    # pocos y el perfil sale ruidoso: sobre Sparring, sembrar solo con ellos bajaba el
-    # acierto de 7/9 a 5/9. La salida no es elegir entre las dos cosas sino encadenarlas.
-    # Los compartidos deciden QUIENES son; una vez que hay tracks asignados, los perfiles se
-    # reestiman con todos sus guantes y se vuelve a votar. Converge en dos o tres vueltas y
-    # no puede irse a cualquier lado, porque el punto de partida ya es correcto.
-    cols_por_track = {t: [c for _, c in evidencia[t].colores] for t in candidatos}
-    pa, pb = perfil_a, perfil_b
+    # -- 4. los sueltos, por color -----------------------------------------
+    # Un track que nunca coexiste con ninguno de los ya repartidos no tiene restriccion
+    # geometrica que lo ate, y ahi si decide el color. Si los dos perfiles estan demasiado
+    # juntos no se decide nada: con separacion 0,449 el reparto salio 13 a 1, una asignacion
+    # equivocada con cara de correcta. Lo que la geometria SI decidio se conserva igual.
     votos: dict[int, tuple[int, int]] = {}
-    roles_previos: dict[int, TrackRole] = {}
-
-    for iteracion in range(cfg.iteraciones):
-        roles_iter: dict[int, TrackRole] = {}
-        votos = {}
-        for t in sorted(candidatos):
-            cols = cols_por_track[t]
-            if len(cols) < cfg.min_guantes_voto:
-                continue
-            a = sum(1 for c in cols if distancia_color(c, pa) < distancia_color(c, pb))
-            b = len(cols) - a
-            votos[t] = (a, b)
-            if a != b:
-                roles_iter[t] = TrackRole.A if a > b else TrackRole.B
-
-        if roles_iter == roles_previos:
-            break
-        roles_previos = roles_iter
-
-        nuevos_a = [c for t, r in roles_iter.items() if r is TrackRole.A
-                    for c in cols_por_track[t]]
-        nuevos_b = [c for t, r in roles_iter.items() if r is TrackRole.B
-                    for c in cols_por_track[t]]
-        if not nuevos_a or not nuevos_b:
-            break   # un lado vacio: no hay con que reestimar y se deja el perfil anterior
-        pa, pb = perfil_de(nuevos_a), perfil_de(nuevos_b)
-
-    prop.diagnostico["iteraciones"] = iteracion + 1
-    prop.diagnostico["separacion_final"] = round(distancia_color(pa, pb), 3)
-    prop.perfiles = {"fighter_A": pa, "fighter_B": pb}
+    color_sirve = separacion >= cfg.separacion_minima
+    if not color_sirve:
+        prop.avisos.append(
+            f"los dos lados tienen guantes casi del mismo color (separacion {separacion:.3f}, "
+            f"piso {cfg.separacion_minima}). Los {len(lados)} tracks que la coexistencia "
+            "resolvio quedan asignados igual; los demas quedan sin asignar"
+        )
 
     for t in sorted(candidatos):
-        if t in roles_previos:
-            prop.roles[t] = roles_previos[t]
+        if t in lados:
+            continue
+        if not color_sirve or len(cols[t]) < cfg.min_guantes_voto:
+            prop.sin_asignar.append(t)
+            continue
+        a = sum(1 for c in cols[t]
+                if distancia_color(c, perfil_0) < distancia_color(c, perfil_1))
+        b = len(cols[t]) - a
+        votos[t] = (a, b)
+        if a == b:
+            prop.sin_asignar.append(t)   # empate: no se adivina
         else:
-            prop.sin_asignar.append(t)   # pocos guantes o empate: no se adivina
+            lados[t] = 0 if a > b else 1
+
+    # -- 5. cual lado es A --------------------------------------------------
+    # El que arranca mas a la izquierda. Arbitrario pero deterministico: le da al anotador
+    # una expectativa estable en vez de un sorteo por id interno del tracker.
+    def x_medio(valor: int) -> float:
+        xs = [x for t, v in lados.items() if v == valor for _, x in evidencia[t].xs]
+        return float(np.median(xs)) if xs else 0.0
+
+    lado_a = 0 if x_medio(0) <= x_medio(1) else 1
+    for t, v in lados.items():
+        prop.roles[t] = TrackRole.A if v == lado_a else TrackRole.B
+
+    pa, pb = (perfil_0, perfil_1) if lado_a == 0 else (perfil_1, perfil_0)
+    prop.perfiles = {"fighter_A": pa, "fighter_B": pb}
+    prop.semillas = {
+        "fighter_A": min((t for t, v in lados.items() if v == lado_a), default=-1),
+        "fighter_B": min((t for t, v in lados.items() if v != lado_a), default=-1),
+    }
 
     prop.diagnostico["votos"] = votos
     prop.diagnostico["asignados_A"] = sum(1 for r in prop.roles.values() if r is TrackRole.A)
@@ -620,3 +507,159 @@ def puntuar_contra(propuesta: Propuesta, doc: AnnotationDoc) -> dict:
         "peleadores_sin_decidir": len(sin_decidir),
         "peleadores_en_la_verdad": len(verdad),
     }
+
+
+# ---------------------------------------------------------------------------
+# Particion global por coexistencia
+#
+# Una semilla es un punto de apoyo: si esta contaminada -si el tracker le metio dos personas
+# al mismo id- todo lo que cuelgue de ella sale torcido. Sobre Sparring y 03-sparring eso
+# dejaba la particion en 5/9 y 11/19, y ninguna variante de "elegir mejor la semilla" lo
+# arreglo, porque el problema no es cual se elige sino que haya UNA sola.
+#
+# La salida es no apoyarse en una. Si dos tracks aparecen en el mismo cuadro, cada uno
+# aislado de la gente de su tamano, son dos personas distintas. Eso no es una heuristica de
+# apariencia: es geometria, y no se equivoca ni cuando los guantes son del mismo color ni
+# cuando un track cambio de persona. Cada par que coexiste es una restriccion de "estos dos
+# van separados", y el conjunto de esas restricciones es un grafo que hay que pintar de dos
+# colores.
+#
+# El color de guante queda para lo que la geometria no puede: orientar los pedazos sueltos
+# del grafo entre si, porque dos tracks que nunca coexisten no tienen restriccion que los
+# ate.
+
+
+def _componentes(adyacencia: dict[int, set[int]], nodos: list[int]) -> list[list[int]]:
+    vistos: set[int] = set()
+    salida = []
+    for n in nodos:
+        if n in vistos:
+            continue
+        pila, comp = [n], []
+        vistos.add(n)
+        while pila:
+            x = pila.pop()
+            comp.append(x)
+            for y in adyacencia.get(x, ()):  # noqa: SIM118
+                if y not in vistos:
+                    vistos.add(y)
+                    pila.append(y)
+        salida.append(sorted(comp))
+    return salida
+
+
+def _pintar(componente: list[int], adyacencia: dict[int, set[int]]) -> dict[int, int]:
+    """
+    Pinta de dos colores por BFS. Devuelve track -> 0 o 1, sin los que generan conflicto.
+
+    Un conflicto es un ciclo impar: tres tracks que coexisten de a pares, lo que no puede
+    pasar con dos peleadores. Significa que alguna coexistencia es espuria -una deteccion
+    duplicada, alguien del publico del tamano de un peleador- y esos tracks se dejan afuera
+    en vez de forzar una respuesta.
+    """
+    lado: dict[int, int] = {componente[0]: 0}
+    cola = [componente[0]]
+    conflictivos: set[int] = set()
+    while cola:
+        x = cola.pop(0)
+        for y in sorted(adyacencia.get(x, ())):
+            if y not in lado:
+                lado[y] = 1 - lado[x]
+                cola.append(y)
+            elif lado[y] == lado[x]:
+                conflictivos.add(y)
+    for t in conflictivos:
+        lado.pop(t, None)
+    return lado
+
+
+def particionar(
+    evidencia: dict[int, EvidenciaTrack],
+    candidatos: set[int],
+    cfg: ConfigIdentidadAuto,
+    limite_ancla: int = 0,
+) -> tuple[dict[int, int], dict]:
+    """
+    Reparte los candidatos en dos lados: primero por coexistencia, despues por color.
+
+    Devuelve track -> 0 o 1, y un diagnostico. El lado 0 y el 1 todavia no son A y B: cual es
+    cual lo decide despues la posicion en pantalla.
+    """
+    frames = {t: {f for f, _ in evidencia[t].colores} for t in candidatos}
+    frames = {t: fs for t, fs in frames.items() if fs}
+    nodos = sorted(frames)
+    if len(nodos) < 2:
+        return {}, {"motivo": "menos de dos tracks con color medido"}
+
+    adyacencia: dict[int, set[int]] = {t: set() for t in nodos}
+    for i, t1 in enumerate(nodos):
+        for t2 in nodos[i + 1:]:
+            if len(frames[t1] & frames[t2]) >= cfg.min_coexistencia:
+                adyacencia[t1].add(t2)
+                adyacencia[t2].add(t1)
+
+    comps = _componentes(adyacencia, nodos)
+    # Solo sirven los pedazos que tienen los dos lados: un componente de un track suelto no
+    # dice nada por si mismo y se resuelve despues por color.
+    pintados = [(_pintar(c, adyacencia), c) for c in comps]
+    con_dos = [(l, c) for l, c in pintados if len(set(l.values())) == 2]
+    if not con_dos:
+        return {}, {"motivo": "ningun grupo de tracks coexiste; no hay restriccion geometrica",
+                    "componentes": len(comps)}
+
+    def perfil_lado(lado_map, valor):
+        cols = [c for t, v in lado_map.items() if v == valor
+                for _, c in evidencia[t].colores]
+        return perfil_de(cols) if cols else None
+
+    # El ancla: el componente mas grande de entre los que ya aparecen al principio del
+    # video. Su lado 0 es el lado 0 global y los demas se orientan contra el. Que salga del
+    # principio no es una restriccion tecnica sino una decision de producto: el anotador
+    # abre el video, ve los primeros segundos y sabe cual es A sin tener que adivinarlo.
+    def empieza_temprano(lado_map) -> bool:
+        return any(
+            any(f < limite_ancla for f, _ in evidencia[t].colores) for t in lado_map
+        )
+
+    con_dos.sort(key=lambda x: -len(x[0]))
+    tempranos = [x for x in con_dos if empieza_temprano(x[0])] if limite_ancla else []
+    ancla_temprana = bool(tempranos)
+    if not tempranos:
+        tempranos = con_dos
+    base, _ = tempranos[0]
+    # El resto se orienta contra el ancla, empezando por los mas grandes.
+    otros = [x for x in con_dos if x[0] is not base]
+    salida = dict(base)
+    p0, p1 = perfil_lado(base, 0), perfil_lado(base, 1)
+
+    # Los demas componentes se orientan por color contra el de referencia. La geometria ya
+    # dijo que adentro de cada uno van separados; falta saber cual de sus dos lados es cual.
+    invertidos = sin_orientar = 0
+    for lado_map, _ in otros:
+        q0, q1 = perfil_lado(lado_map, 0), perfil_lado(lado_map, 1)
+        if None in (p0, p1, q0, q1):
+            sin_orientar += 1
+            continue
+        directo = distancia_color(q0, p0) + distancia_color(q1, p1)
+        cruzado = distancia_color(q0, p1) + distancia_color(q1, p0)
+        # Orientar un componente contra otro es lo unico que la geometria no puede, porque
+        # por definicion no comparten un solo cuadro. Si las dos orientaciones dan casi lo
+        # mismo, el color no esta decidiendo nada y ponerlo igual es tirar una moneda: se
+        # deja el componente sin asignar y lo resuelve el anotador, que si puede mirarlo.
+        if abs(directo - cruzado) < cfg.margen_orientacion:
+            sin_orientar += 1
+            continue
+        invertir = cruzado < directo
+        invertidos += int(invertir)
+        for t, v in lado_map.items():
+            salida[t] = (1 - v) if invertir else v
+
+    diag = {
+        "componentes": len(comps),
+        "componentes_con_dos_lados": len(con_dos),
+        "tracks_por_coexistencia": len(salida),
+        "componentes_invertidos_por_color": invertidos,
+        "componentes_sin_orientar": sin_orientar,
+        "ancla_del_principio": ancla_temprana,
+    }
+    return salida, diag

@@ -259,10 +259,9 @@ def build_parser() -> argparse.ArgumentParser:
     ia.add_argument("--modelo", type=Path, required=True,
                     help="pesos del detector de guantes, entrenado sobre recortes de persona")
     ia.add_argument("--segundos", type=float, default=5.0,
-                    help="con cuantos segundos iniciales se siembran los dos perfiles. Si no "
-                         "separan, la ventana se extiende sola hasta --segundos-max")
-    ia.add_argument("--segundos-max", type=float, default=60.0, dest="segundos_max",
-                    help="hasta donde se extiende la ventana de siembra")
+                    help="de que parte del principio del video sale el grupo de referencia, "
+                         "el que define cual peleador es A. No recorta la evidencia: la "
+                         "particion usa el video entero")
     ia.add_argument("--separacion-minima", type=float, default=0.55, dest="separacion_minima",
                     help="separacion de color por debajo de la cual NO se asigna A ni B. Con "
                          "0,449 el reparto salio 13 tracks a A contra 1 a B: una asignacion "
@@ -398,8 +397,8 @@ def _cmd_identidad_auto(args: argparse.Namespace) -> int:
     doc, _ = load_doc(paths.annot)
     cache = PoseCache.open(paths.npz)
     cfg = ConfigIdentidadAuto(
-        segundos_semilla=args.segundos, segundos_maximos=args.segundos_max,
-        separacion_minima=args.separacion_minima, paso=args.paso,
+        segundos_ancla=args.segundos, separacion_minima=args.separacion_minima,
+        paso=args.paso,
         umbral_guante=args.umbral_guante, fraccion_altura=args.fraccion_altura,
     )
     detector = DetectorGuantes(str(args.modelo), device=args.device)
@@ -427,8 +426,14 @@ def _cmd_identidad_auto(args: argparse.Namespace) -> int:
     print(f"  pasan el filtro de guante (>= {cfg.umbral_guante}): "
           f"{d.get('candidatos_tras_guante', 0)}")
     if prop.semillas:
-        usados = d.get("segundos_de_siembra", cfg.segundos_semilla)
-        print(f"\nsembrado con los primeros {usados:g} s:")
+        print(f"\nparticion: {d.get('tracks_por_coexistencia', 0)} tracks resueltos por "
+              f"coexistencia en {d.get('componentes_con_dos_lados', 0)} grupo/s"
+              + ("" if d.get("ancla_del_principio")
+                 else f"  [el grupo de referencia NO aparece en los primeros "
+                      f"{cfg.segundos_ancla:g} s]"))
+        if d.get("componentes_sin_orientar"):
+            print(f"  {d['componentes_sin_orientar']} grupo/s sin orientar: el color no "
+                  "distinguia entre las dos posibilidades")
         for rol, tid in prop.semillas.items():
             t, sat, val = prop.perfiles[rol]
             tono = "sin color" if t < 0 else f"tono {t:.1f}"
