@@ -30,6 +30,8 @@ MODULOS_CORE = [
     "boxtwin.core.posecache",
     "boxtwin.core.identity",
     "boxtwin.core.gloves",
+    "boxtwin.core.deteccion_guantes",
+    "boxtwin.core.identidad_auto",
     "boxtwin.core.undo",
     "boxtwin.core.metrics",
     "boxtwin.core.interpolation",
