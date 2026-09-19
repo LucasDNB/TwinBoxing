@@ -88,11 +88,39 @@ def test_un_track_sin_guantes_se_descarta_aunque_sea_alto():
     assert prop.roles[9] is TrackRole.IGNORE
 
 
-def test_un_track_con_poquisimos_recortes_no_decide_nada():
+def test_lo_que_no_se_pudo_medir_no_se_marca_ignore():
+    # La distincion que costo 61 tracks de peleador, el 33%: `ignore` es "se midio y no es
+    # peleador", no "no se pudo medir". Marcar lo segundo como lo primero es afirmar algo no
+    # comprobado, y la afirmacion es invisible: el track desaparece del export sin que nadie
+    # lo vea faltar.
     ev = _dos_peleadores()
-    ev[9] = _track(9, ROJO, [0, 5], recortes=2)
+    ev[9] = _track(9, ROJO, [1000, 1005], recortes=2)
+    prop = proponer(ev, ConfigIdentidadAuto(), total_frames=2000, fps=FPS)
+    assert prop.roles.get(9) is not TrackRole.IGNORE
+    assert 9 in prop.sin_asignar
+
+
+def test_lo_que_si_se_midio_y_no_tiene_guantes_va_a_ignore():
+    # El arbitro: adentro del ring, del tamano de un peleador, cuadros de sobra para medirlo,
+    # y sin guantes de boxeo.
+    ev = _dos_peleadores()
+    ev[9] = EvidenciaTrack(
+        track_id=9, primer_frame=0, ultimo_frame=400, alto_max=0.95,
+        recortes=200, con_guante=10,   # fraccion 0,05
+    )
     prop = proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS)
     assert prop.roles[9] is TrackRole.IGNORE
+
+
+def test_un_fragmento_corto_de_alguien_con_guantes_se_rescata():
+    # Pasa altura y guante, pero duro pocos cuadros. Antes se perdia por no haber podido
+    # medirlo; ahora la coexistencia lo ubica.
+    ev = _dos_peleadores()
+    corto = _track(9, ROJO, [10, 15, 20, 25], recortes=4)
+    ev[9] = corto
+    prop = proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS)
+    assert prop.roles.get(9) in (TrackRole.A, TrackRole.B) or 9 in prop.sin_asignar
+    assert prop.roles.get(9) is not TrackRole.IGNORE
 
 
 # -- siembra ----------------------------------------------------------------

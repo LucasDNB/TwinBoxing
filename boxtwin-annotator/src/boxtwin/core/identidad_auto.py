@@ -96,7 +96,8 @@ class ConfigIdentidadAuto:
     umbral_guante: float = 0.45
     min_recortes: int = 15           # menos que esto y la fraccion no significa nada
     min_guantes_voto: int = 10       # menos que esto y el voto se deja sin asignar
-    min_coexistencia: int = 3        # cuadros en que las dos semillas tienen que coincidir
+    min_coexistencia: int = 3        # cuadros en que dos tracks tienen que coincidir
+    min_guantes_rescate: int = 3     # guantes minimos para rescatar un fragmento corto
     # Diferencia minima entre las dos orientaciones posibles de un componente para animarse
     # a elegir una. Por debajo, el color no esta decidiendo y se deja sin asignar.
     margen_orientacion: float = 0.25
@@ -264,27 +265,70 @@ def proponer(
     umbral_alto = cfg.fraccion_altura * alto_maximo
     pasan_altura = {t for t, e in evidencia.items() if e.alto_max >= umbral_alto}
 
-    # -- 2. guante ----------------------------------------------------------
-    candidatos = {
+    # -- 2. guante, y que significa descartar ------------------------------
+    # Hay tres situaciones y antes se mezclaban las tres en `ignore`:
+    #
+    #   MEDIDO Y NO ES PELEADOR: recortes suficientes y fraccion de guante baja. El arbitro,
+    #   el entrenador, el cronometrista. Eso si es ignore, y es lo que el filtro sabe hacer.
+    #
+    #   MEDIDO Y ES PELEADOR: entra al nucleo, que es con lo que se arma la particion.
+    #
+    #   NO SE PUDO MEDIR: un fragmento de pocos cuadros, o un track que quedo chico en un
+    #   plano abierto. Marcarlo ignore es afirmar algo que no se comprobo, y la afirmacion
+    #   es invisible: el track desaparece del export y nadie lo ve faltar. Medido, eso se
+    #   llevaba 61 de 185 tracks de peleador, el 33%, de los cuales 31 eran fragmentos de
+    #   menos de quince recortes y 23 habian quedado bajos.
+    #
+    # Ahora el tercero queda SIN ASIGNAR, que es lo que el modulo hace con todo lo que no
+    # puede decidir, y ademas se le da una segunda oportunidad mas abajo.
+    nucleo = {
         t for t in pasan_altura
         if evidencia[t].recortes >= cfg.min_recortes
         and evidencia[t].fraccion_guante >= cfg.umbral_guante
     }
+    # El rescate es para UN caso concreto y no para todo lo que tenga un guante: el track
+    # que pasa altura y guante pero se quedo corto de cuadros. Son fragmentos de alguien que
+    # ya se comprobo que es del tamano de un peleador y que lleva guantes, y descartarlos por
+    # durar poco es descartar por no haber podido medir.
+    #
+    # La version amplia de esto -cualquier track con un guante- metia 104 tracks con rol de
+    # peleador que la anotacion no tiene como tal, y es el error caro: keypoints de otro
+    # cuerpo exportados como peleador, invisibles en el overlay. La causa era una falla
+    # logica: coexistir con A prueba que NO es A, no que SEA B, y eso ultimo solo se sigue si
+    # ya se sabe que es peleador.
+    #
+    # Los que quedan bajos NO se rescatan, y hay un numero atras: bajar el umbral de altura
+    # de 0,55 a 0,35 rescata 7 peleadores y cuela 47 que no lo son. No hay umbral que separe,
+    # asi que esos quedan sin asignar y los mira una persona.
+    rescatables = {
+        t for t in pasan_altura
+        if t not in nucleo
+        and evidencia[t].con_guante >= cfg.min_guantes_rescate
+        and evidencia[t].fraccion_guante >= cfg.umbral_guante
+    }
     for t in evidencia:
-        if t not in candidatos:
-            prop.roles[t] = TrackRole.IGNORE
+        if t in nucleo or t in rescatables:
+            continue
+        if evidencia[t].recortes >= cfg.min_recortes:
+            prop.roles[t] = TrackRole.IGNORE      # medido: no es peleador
+        else:
+            prop.sin_asignar.append(t)            # no alcanzo para decir nada
 
     prop.diagnostico = {
         "tracks": len(evidencia),
         "umbral_altura": round(umbral_alto, 4),
         "pasan_altura": len(pasan_altura),
-        "candidatos_tras_guante": len(candidatos),
+        "nucleo": len(nucleo),
+        "rescatables": len(rescatables),
     }
-    if not candidatos:
+    if not nucleo:
+        prop.sin_asignar.extend(sorted(rescatables))
         prop.avisos.append(
-            "ningun track pasa los filtros de altura y guante; no hay a quien asignar"
+            "ningun track pasa altura y guante con evidencia suficiente: no hay nucleo con "
+            "que armar la particion"
         )
         return prop
+    candidatos = nucleo
 
     # -- 3. particion por coexistencia -------------------------------------
     # La geometria primero, porque no se equivoca: dos tracks en el mismo cuadro, cada uno
@@ -336,6 +380,43 @@ def proponer(
             prop.sin_asignar.append(t)   # empate: no se adivina
         else:
             lados[t] = 0 if a > b else 1
+
+    # -- 4b. rescate -------------------------------------------------------
+    # Los que no entraron al nucleo tienen guantes igual. Se los engancha con las dos reglas
+    # que ya estan, en orden de confianza: si coexisten con un track ya repartido son la otra
+    # persona -geometria, no se discute- y si no, decide el color. Lo que ninguna de las dos
+    # resuelve queda sin asignar, no ignore: no se comprobo que no sea peleador.
+    frames_lado = {t: {f for f, _ in evidencia[t].colores} for t in lados}
+    rescatados_geo = rescatados_color = 0
+    for t in sorted(rescatables):
+        fs = {f for f, _ in evidencia[t].colores}
+        vecino = None
+        if fs:
+            for u, v in lados.items():
+                if len(fs & frames_lado.get(u, set())) >= cfg.min_coexistencia:
+                    vecino = 1 - v
+                    break
+        if vecino is not None:
+            lados[t] = vecino
+            cols[t] = [c for _, c in evidencia[t].colores]
+            rescatados_geo += 1
+            continue
+        propios = [c for _, c in evidencia[t].colores]
+        if not color_sirve or len(propios) < cfg.min_guantes_voto:
+            prop.sin_asignar.append(t)
+            continue
+        a = sum(1 for c in propios
+                if distancia_color(c, perfil_0) < distancia_color(c, perfil_1))
+        b = len(propios) - a
+        if a == b:
+            prop.sin_asignar.append(t)
+        else:
+            lados[t] = 0 if a > b else 1
+            cols[t] = propios
+            rescatados_color += 1
+
+    prop.diagnostico["rescatados_por_coexistencia"] = rescatados_geo
+    prop.diagnostico["rescatados_por_color"] = rescatados_color
 
     # -- 5. cual lado es A --------------------------------------------------
     # El que arranca mas a la izquierda. Arbitrario pero deterministico: le da al anotador
