@@ -375,29 +375,32 @@ def _cmd_preprocess(args: argparse.Namespace) -> int:
 
 
 def _cmd_identidad_auto(args: argparse.Namespace) -> int:
-    from boxtwin.core.annotations import load as load_doc, save as save_doc
+    from boxtwin.core.annotations import save as save_doc
     from boxtwin.core.deteccion_guantes import DetectorGuantes
     from boxtwin.core.identidad_auto import (
         AsignarIdentidadAuto, ConfigIdentidadAuto, analizar, cargar_evidencia,
         guardar_evidencia, proponer, puntuar_contra,
     )
     from boxtwin.core.posecache import PoseCache
-    from boxtwin.core.project import project_paths
+    from boxtwin.core.project import cargar_o_crear, project_paths
 
     paths = project_paths(args.video)
     if not paths.npz.is_file():
         print(f"error: falta el cache de pose ({paths.npz.name}). Corre primero preprocess",
               file=sys.stderr)
         return 1
-    if not paths.annot.is_file():
-        print(f"error: falta el archivo de anotacion ({paths.annot.name})", file=sys.stderr)
-        return 1
     if not Path(args.modelo).is_file():
         print(f"error: no existe el modelo {args.modelo}", file=sys.stderr)
         return 1
 
-    doc, _ = load_doc(paths.annot)
     cache = PoseCache.open(paths.npz)
+    # Si el video nunca se abrio en el anotador no tiene documento, y este comando existe
+    # justamente para correr sin que nadie lo abra. Se crea vacio desde el meta del
+    # preproceso, que es de donde lo sacaria la GUI.
+    nuevo = not paths.annot.is_file()
+    doc, _ = cargar_o_crear(paths, cache.meta)
+    if nuevo:
+        print(f"no habia anotacion: se creo {paths.annot.name}", file=sys.stderr)
     cfg = ConfigIdentidadAuto(
         segundos_ancla=args.segundos, separacion_minima=args.separacion_minima,
         paso=args.paso,
@@ -425,8 +428,8 @@ def _cmd_identidad_auto(args: argparse.Namespace) -> int:
     print(f"\n{d.get('tracks', 0)} tracks en el cache")
     print(f"  pasan el filtro de altura (>= {d.get('umbral_altura', 0):.3f}): "
           f"{d.get('pasan_altura', 0)}")
-    print(f"  pasan el filtro de guante (>= {cfg.umbral_guante}): "
-          f"{d.get('candidatos_tras_guante', 0)}")
+    print(f"  pasan el filtro de guante (>= {cfg.umbral_guante}): {d.get('nucleo', 0)}"
+          f"   (+{d.get('rescatables', 0)} fragmentos cortos rescatables)")
     if prop.semillas:
         print(f"\nparticion: {d.get('tracks_por_coexistencia', 0)} tracks resueltos por "
               f"coexistencia en {d.get('componentes_con_dos_lados', 0)} grupo/s"
