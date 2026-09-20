@@ -74,8 +74,13 @@ class ConfigIdentidadAuto:
     de gimnasio y una transmision de television no comparten escala, y un umbral fijo que
     anda en uno deja pasar a todo el publico del otro.
 
-    `umbral_guante` cae en el hueco medido entre las dos poblaciones: peleadores de 0,59 para
-    arriba, el resto de 0,33 para abajo. 0,45 esta en el medio y lejos de los dos bordes.
+    `umbral_guante` NO es una constante universal sino una propiedad del detector, y
+    olvidarlo costo una conclusion equivocada. Con el detector original el hueco entre las
+    dos poblaciones iba de 0,33 a 0,59 y 0,45 caia en el medio. El detector reentrenado con
+    material propio da fracciones sistematicamente mas bajas, y con 0,45 dejaba a Sparring
+    sin nucleo -tres tracks, ninguna pareja que coexista- o sea que una fuente que andaba
+    dejaba de andar. Movido a 0,30 esa fuente vuelve y los falsos positivos bajan de 17 a 8.
+    Si se cambia el modelo, hay que recalibrar esto.
 
     `segundos_ancla` no recorta la evidencia: la particion usa el video entero. Lo que hace
     es elegir el componente de REFERENCIA, el que define cual lado es A y contra el que se
@@ -93,7 +98,7 @@ class ConfigIdentidadAuto:
     separacion_minima: float = 0.55  # debajo de esto no se asigna A ni B
     paso: int = 5                    # se evalua un cuadro de cada N
     fraccion_altura: float = 0.55
-    umbral_guante: float = 0.45
+    umbral_guante: float = 0.30
     min_recortes: int = 15           # menos que esto y la fraccion no significa nada
     min_guantes_voto: int = 10       # menos que esto y el voto se deja sin asignar
     min_coexistencia: int = 3        # cuadros en que dos tracks tienen que coincidir

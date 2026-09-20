@@ -7,6 +7,10 @@ dsgloves*.zip
 # procedencia, los ajustes y las metricas, que es lo que hay que poder auditar despues.
 modelos/_corridas/
 modelos/*.pt
+# Corridas alternativas de entrenamiento; los pesos se regeneran, el sidecar de la que
+# quedo elegida vive en modelos/.
+modelos-neg/
+modelos-corr/
 
 *.egg-info/
 __pycache__/

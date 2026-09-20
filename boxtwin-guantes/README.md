@@ -35,6 +35,7 @@ justo en el instante del golpe.
 | [18-09](docs/experiments/2026-09-18-dataset-guantes.md) | ¿El dataset público se parece a video de ring? | Casi nada: su parte útil son 13 s de una pelea |
 | [18-09](docs/experiments/2026-09-18-guante-separa-peleadores.md) | ¿El guante separa peleador de no peleador? | Sí, en las seis fuentes, y el árbitro de látex no lo engaña |
 | [18-09](docs/experiments/2026-09-18-color-del-guante-separa-A-de-B.md) | ¿El color del guante distingue A de B? | 112 de 113 tracks; el único fallo es un empate |
+| [20-09](docs/experiments/2026-09-20-negativos-del-propio-material.md) | ¿Sirven negativos duros del propio material? | Sí, pero solo con la unidad correcta: falsos de 17 a 8 |
 
 ## Estado
 

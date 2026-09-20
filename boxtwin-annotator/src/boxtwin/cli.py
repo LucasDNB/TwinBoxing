@@ -267,9 +267,11 @@ def build_parser() -> argparse.ArgumentParser:
                          "0,449 el reparto salio 13 tracks a A contra 1 a B: una asignacion "
                          "equivocada con cara de correcta")
     ia.add_argument("--paso", type=int, default=5, help="se evalua un cuadro de cada N")
-    ia.add_argument("--umbral-guante", type=float, default=0.45, dest="umbral_guante",
+    ia.add_argument("--umbral-guante", type=float, default=0.30, dest="umbral_guante",
                     help="fraccion minima de recortes con guante para considerar peleador. "
-                         "El hueco medido va de 0,33 a 0,59, asi que 0,45 esta en el medio")
+                         "Es una propiedad DEL DETECTOR y no una constante: el original pedia "
+                         "0,45 y el reentrenado con material propio da fracciones mas bajas y "
+                         "pide 0,30. Si cambia el modelo, recalibrar")
     ia.add_argument("--fraccion-altura", type=float, default=0.55, dest="fraccion_altura",
                     help="alto minimo relativo al track mas alto del video. Relativo y no "
                          "absoluto porque un gimnasio y una transmision no comparten escala")
