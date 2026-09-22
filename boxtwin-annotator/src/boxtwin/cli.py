@@ -269,9 +269,8 @@ def build_parser() -> argparse.ArgumentParser:
     ia.add_argument("--paso", type=int, default=5, help="se evalua un cuadro de cada N")
     ia.add_argument("--umbral-guante", type=float, default=0.30, dest="umbral_guante",
                     help="fraccion minima de recortes con guante para considerar peleador. "
-                         "Es una propiedad DEL DETECTOR y no una constante: el original pedia "
-                         "0,45 y el reentrenado con material propio da fracciones mas bajas y "
-                         "pide 0,30. Si cambia el modelo, recalibrar")
+                         "Depende del detector y del material: en transmision conviene 0,40, "
+                         "que saca al arbitro sin perder nada")
     ia.add_argument("--min-guantes-voto", type=int, default=5, dest="min_guantes_voto",
                     help="guantes minimos para que un track vote su color. Los tracks de "
                          "transmision son mucho mas cortos que los de gimnasio")
@@ -431,7 +430,8 @@ def _cmd_identidad_auto(args: argparse.Namespace) -> int:
     print(f"\n{d.get('tracks', 0)} tracks en el cache")
     print(f"  pasan el filtro de altura (>= {d.get('umbral_altura', 0):.3f}): "
           f"{d.get('pasan_altura', 0)}")
-    print(f"  pasan el filtro de guante (>= {cfg.umbral_guante}): {d.get('nucleo', 0)}"
+    print(f"  pasan el filtro de guante (>= {d.get('umbral_guante', 0):.2f}): "
+          f"{d.get('nucleo', 0)}"
           f"   (+{d.get('rescatables', 0)} fragmentos cortos rescatables)")
     if prop.semillas:
         print(f"\nparticion: {d.get('tracks_por_coexistencia', 0)} tracks resueltos por "
