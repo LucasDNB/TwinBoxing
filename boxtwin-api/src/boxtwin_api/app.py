@@ -496,28 +496,18 @@ def ticket(
     return {"ticket": emitir_ticket(usuario.id, s.id, cfg.secreto), "minutos": 30}
 
 
-@app.get("/videos/{sesion_id}/stream")
-def stream(
-    sesion_id: str,
-    t: str = "",
-    range: str = Header(default=""),
-    authorization: str = Header(default=""),
-    db: Session = Depends(obtener_sesion),
-):
+def _servir_con_rangos(ruta: Path, range: str):
     """
-    El video con soporte de rangos, que es lo que hace posible saltar a un evento.
+    Sirve un archivo con soporte de rangos, que es lo que hace posible saltar a un evento.
 
-    Sin 206, el navegador tiene que bajar el archivo entero antes de poder posicionarse en
-    el minuto 12, y la linea de tiempo -que es la funcion que convierte un numero dudoso en
-    una herramienta de revision- deja de servir.
+    Sin 206 el navegador tiene que bajar el archivo entero antes de poder posicionarse en el
+    minuto 12, y la linea de tiempo -que es la funcion que convierte un numero dudoso en una
+    herramienta de revision- deja de servir.
+
+    Vive aparte porque hay dos videos que servir, el original y el procesado, y la logica de
+    rangos es la misma: tenerla dos veces es tenerla mal una de las dos.
     """
-    u = usuario_por_ticket_o_header(sesion_id, t, authorization, db)
-    s = sesion_del_usuario(sesion_id, u, db)
-    ruta = cfg.dir_sesion(s.id) / "videos" / s.video_nombre
-    if not ruta.is_file():
-        raise HTTPException(404, "no esta el video de esta sesion")
     total = ruta.stat().st_size
-
     inicio, fin = 0, total - 1
     m = re.match(r"bytes=(\d*)-(\d*)", range or "")
     if m and (m.group(1) or m.group(2)):
@@ -549,6 +539,49 @@ def stream(
     return StreamingResponse(
         leer(), status_code=206 if m else 200, media_type="video/mp4", headers=cabeceras
     )
+
+
+@app.get("/videos/{sesion_id}/stream")
+def stream(
+    sesion_id: str,
+    t: str = "",
+    range: str = Header(default=""),
+    authorization: str = Header(default=""),
+    db: Session = Depends(obtener_sesion),
+):
+    """El video original de la sesion."""
+    u = usuario_por_ticket_o_header(sesion_id, t, authorization, db)
+    s = sesion_del_usuario(sesion_id, u, db)
+    ruta = cfg.dir_sesion(s.id) / "videos" / s.video_nombre
+    if not ruta.is_file():
+        raise HTTPException(404, "no esta el video de esta sesion")
+    return _servir_con_rangos(ruta, range)
+
+
+# GET y HEAD: la interfaz pregunta con HEAD si el video ya esta, porque solo le interesa
+# la existencia y el archivo pesa. FastAPI NO enruta HEAD solo por declarar GET -devuelve
+# 405- asi que hay que pedirlo.
+@app.api_route("/videos/{sesion_id}/procesado", methods=["GET", "HEAD"])
+def procesado(
+    sesion_id: str,
+    t: str = "",
+    range: str = Header(default=""),
+    authorization: str = Header(default=""),
+    db: Session = Depends(obtener_sesion),
+):
+    """
+    El video con los dos peleadores marcados y una consola por peleador.
+
+    Es una etapa aparte y la ultima, asi que puede no existir todavia cuando la Fight-Card ya
+    esta lista. El 404 es entonces un estado normal y no un error: la interfaz muestra el
+    original mientras tanto.
+    """
+    u = usuario_por_ticket_o_header(sesion_id, t, authorization, db)
+    s = sesion_del_usuario(sesion_id, u, db)
+    ruta = cfg.dir_sesion(s.id) / "procesado.mp4"
+    if not ruta.is_file():
+        raise HTTPException(404, "el video procesado todavia no esta")
+    return _servir_con_rangos(ruta, range)
 
 
 @app.get("/salud")

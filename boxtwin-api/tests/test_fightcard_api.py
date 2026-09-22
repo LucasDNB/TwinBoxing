@@ -167,6 +167,40 @@ def test_un_rango_de_los_ultimos_bytes(cliente, lista):
     assert len(r.content) == 5
 
 
+# -- video procesado --------------------------------------------------------
+
+
+def test_el_procesado_es_404_mientras_no_exista(cliente, lista):
+    # Es una etapa aparte y la ultima, asi que puede faltar cuando la Fight-Card ya esta.
+    # El 404 es un estado normal del flujo, no un error, y la interfaz cae al original.
+    r = cliente.get(f"/videos/{lista}/procesado")
+    assert r.status_code == 404
+
+
+def test_el_procesado_se_sirve_por_rangos_igual_que_el_original(cliente, lista, entorno):
+    d = entorno["cfg"].dir_sesion(lista)
+    (d / "procesado.mp4").write_bytes(b"video procesado de prueba")
+    r = cliente.get(f"/videos/{lista}/procesado", headers={"Range": "bytes=0-9"})
+    assert r.status_code == 206
+    assert len(r.content) == 10
+    assert r.headers["accept-ranges"] == "bytes"
+
+
+def test_head_sirve_para_saber_si_el_procesado_esta(cliente, lista, entorno):
+    # La interfaz pregunta con HEAD y no con GET: solo le interesa si existe, y el archivo
+    # pesa. Si HEAD no estuviera enrutado, la vista se quedaria siempre con el original.
+    assert cliente.head(f"/videos/{lista}/procesado").status_code == 404
+    (entorno["cfg"].dir_sesion(lista) / "procesado.mp4").write_bytes(b"x" * 32)
+    assert cliente.head(f"/videos/{lista}/procesado").status_code == 200
+
+
+def test_el_procesado_de_otro_usuario_no_se_sirve(cliente, registrado, lista, entorno):
+    (entorno["cfg"].dir_sesion(lista) / "procesado.mp4").write_bytes(b"x" * 32)
+    r = cliente.post("/auth/registro", json={"email": "otro@x.com", "clave": "sparring2026"})
+    cliente.headers["Authorization"] = f"Bearer {r.json()['token']}"
+    assert cliente.get(f"/videos/{lista}/procesado").status_code == 404
+
+
 # -- ticket de video --------------------------------------------------------
 
 

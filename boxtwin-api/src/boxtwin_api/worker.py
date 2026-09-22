@@ -100,6 +100,12 @@ def comando_de(trabajo: Trabajo, sesion: Sesion) -> list[list[str]]:
             [*cfg.cmd_boxtwin, "tipos", str(directorio)],
         ]
 
+    if trabajo.etapa == "render":
+        cmd = [*cfg.cmd_boxtwin, "render", str(directorio)]
+        if p.get("ancho_consola"):
+            cmd += ["--ancho-consola", str(p["ancho_consola"])]
+        return [cmd]
+
     raise RuntimeError(f"etapa desconocida: {trabajo.etapa}")
 
 
@@ -182,6 +188,17 @@ def correr(una_vuelta: bool = False, worker: str | None = None) -> int:
                         from boxtwin_api.cola import encolar
 
                         encolar(db, trabajo.sesion_id, "clasificar")
+                        db.commit()
+                    # El video procesado va ultimo y se encadena aca por la misma razon:
+                    # se arma sobre la Fight-Card, asi que tiene que existir, y muestra el
+                    # tipo de cada golpe, asi que conviene despues de clasificar. Sin
+                    # clasificador se encadena directamente despues de completar.
+                    elif trabajo.etapa == "clasificar" or (
+                        trabajo.etapa == "completar" and estado == "listo"
+                    ):
+                        from boxtwin_api.cola import encolar
+
+                        encolar(db, trabajo.sesion_id, "render")
                         db.commit()
                 hechos += 1
 

@@ -26,6 +26,10 @@ const TIPOS = ['jab', 'cross', 'hook', 'uppercut']
 export default function FightCard({ sesionId, fc, alCambiar }) {
   const video = useRef(null)
   const [ticket, setTicket] = useState(null)
+  // El video procesado es la ultima etapa, asi que puede no estar cuando la Fight-Card ya
+  // se muestra. Mientras no este se usa el original: es preferible un video sin marcas a un
+  // hueco, porque la linea de tiempo ya sirve igual.
+  const [hayProcesado, setHayProcesado] = useState(false)
   const [activo, setActivo] = useState(null)
   const [filtro, setFiltro] = useState('todos')
   const [corrigiendo, setCorrigiendo] = useState(null)
@@ -41,6 +45,18 @@ export default function FightCard({ sesionId, fc, alCambiar }) {
       vivo = false
     }
   }, [sesionId])
+
+  useEffect(() => {
+    if (!ticket) return
+    let vivo = true
+    // HEAD y no GET: solo interesa si existe, y el archivo pesa.
+    fetch(`/videos/${sesionId}/procesado?t=${encodeURIComponent(ticket)}`, { method: 'HEAD' })
+      .then((r) => vivo && setHayProcesado(r.ok))
+      .catch(() => vivo && setHayProcesado(false))
+    return () => {
+      vivo = false
+    }
+  }, [sesionId, ticket, fc])
 
   const eventos = useMemo(() => {
     const todos = []
@@ -85,11 +101,21 @@ export default function FightCard({ sesionId, fc, alCambiar }) {
             controls
             playsInline
             preload="metadata"
-            src={`/videos/${sesionId}/stream?t=${encodeURIComponent(ticket)}`}
+            src={
+              hayProcesado
+                ? `/videos/${sesionId}/procesado?t=${encodeURIComponent(ticket)}`
+                : `/videos/${sesionId}/stream?t=${encodeURIComponent(ticket)}`
+            }
           />
         ) : (
           <div className="sin_imagen alto">cargando el video…</div>
         )}
+        {ticket && !hayProcesado ? (
+          <p className="nota_video" role="status">
+            El video con los golpes marcados se esta armando. Mientras tanto se muestra el
+            original, que ya sirve para saltar a cada evento.
+          </p>
+        ) : null}
       </div>
 
       <p className="margen" role="note">{textoDeMargen(fc)}</p>

@@ -59,7 +59,7 @@ ESTADOS_SESION = (
     "subida", "en_cola", "procesando", "espera_siembra", "completando", "listo", "fallo",
 )
 ESTADOS_TRABAJO = ("en_cola", "tomado", "listo", "fallo")
-ETAPAS = ("procesar", "completar", "clasificar")
+ETAPAS = ("procesar", "completar", "clasificar", "render")
 
 
 def ahora() -> datetime:

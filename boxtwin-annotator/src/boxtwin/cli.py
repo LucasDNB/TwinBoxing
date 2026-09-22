@@ -356,6 +356,25 @@ def build_parser() -> argparse.ArgumentParser:
                     help="exactitud de familia medida del checkpoint sobre fuente no "
                          "vista. Va al documento para que el numero se lea con su margen")
 
+    rv = sub.add_parser(
+        "render",
+        help="escribe el video procesado: los dos peleadores marcados y una consola para cada uno",
+        description=(
+            "Se arma sobre fightcard.json y NO vuelve a correr el detector: esa es la "
+            "fuente que la interfaz muestra, con las correcciones ya aplicadas, y rehacer "
+            "la deteccion aca daria un video que no coincide con los numeros de al lado. "
+            "Se dibujan solo los dos peleadores: marcar al publico sugiere que el sistema "
+            "los esta contando."
+        ),
+    )
+    rv.add_argument("sesion", type=Path)
+    rv.add_argument("--out", type=Path, default=None,
+                    help="por defecto <sesion>/procesado.mp4")
+    rv.add_argument("--ancho-consola", type=int, default=300, dest="ancho_consola",
+                    help="ancho de cada consola en pixeles")
+    rv.add_argument("--desde", type=int, default=0)
+    rv.add_argument("--hasta", type=int, default=None)
+
     co = sub.add_parser(
         "corregir",
         help="corrige el tipo de un golpe y lo guarda como etiqueta nueva",
@@ -674,6 +693,23 @@ def _cmd_corregir(args: argparse.Namespace) -> int:
     return 1
 
 
+def _cmd_render(args: argparse.Namespace) -> int:
+    from boxtwin.mvp.render import renderizar
+    from boxtwin.mvp.sesion import Progreso
+
+    directorio = Path(args.sesion)
+    prog = Progreso(directorio, "render")
+    try:
+        destino = renderizar(
+            directorio, salida=args.out, ancho_consola=args.ancho_consola,
+            desde=args.desde, hasta=args.hasta, progreso=prog,
+        )
+    finally:
+        prog.terminar()
+    print(f"video procesado en {destino}")
+    return 0
+
+
 def _cmd_export(args: argparse.Namespace) -> int:
     from boxtwin.core.annotations import load as load_doc
     from boxtwin.core.export import ExportContext, exportadores
@@ -959,6 +995,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_tipos(args)
         if args.comando == "corregir":
             return _cmd_corregir(args)
+        if args.comando == "render":
+            return _cmd_render(args)
     except KeyboardInterrupt:
         print("\ninterrumpido. El trabajo hecho quedo persistido: volve a correr el "
               "mismo comando para reanudar.", file=sys.stderr)
