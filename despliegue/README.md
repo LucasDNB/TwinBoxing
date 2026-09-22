@@ -27,10 +27,16 @@ cd ~/Proyectos/TwinBoxing
 # 1. el frontend construido, que la API va a servir
 cd boxtwin-web && npm install && npm run build && cd ..
 
-# 2. los paquetes en el entorno
-#    OJO: este es el unico paso que toca twinboxing_env. boxtwin-api trae fastapi,
-#    sqlalchemy y uvicorn, que hoy no estan ahi. Ninguno toca torch, numpy ni ultralytics.
-conda run -n twinboxing_env pip install -e ./boxtwin-annotator -e ./boxtwin-detector -e ./boxtwin-api
+# 2. el paquete de la API en el entorno
+#    Las dependencias (fastapi, sqlalchemy, uvicorn, python-multipart, email-validator)
+#    YA estan instaladas en twinboxing_env desde el 22-09, y no movieron nada: pydantic
+#    quedo en 2.13.4 y torch, numpy, opencv y ultralytics no se tocaron.
+#    Falta solo el paquete, y recien se puede una vez que esta rama este en el checkout
+#    principal: un editable apuntando a un worktree se rompe cuando el worktree se borra.
+conda run -n twinboxing_env pip install -e ./boxtwin-api
+
+#    boxtwin-annotator y boxtwin-detector NO hay que reinstalarlos: ya estan editables
+#    contra este mismo directorio, asi que el merge les alcanza.
 
 # 3. el entorno de los servicios
 mkdir -p ~/boxtwin/datos
@@ -61,9 +67,13 @@ Las units se pueden validar sin arrancarlas:
 systemd-analyze verify despliegue/systemd/boxtwin-*.service
 ```
 
-Hasta que corras el paso 2 va a avisar que `uvicorn` no existe, y tiene razón: viene con
-`boxtwin-api`. Si falta `/etc/boxtwin.env`, el servicio no arranca en vez de arrancar sin
-configuración, que es lo que se quiere: media configuración es peor que ninguna.
+Las dos validan desde el 22-09, con `uvicorn` ya instalado. Si falta `/etc/boxtwin.env`,
+el servicio no arranca en vez de arrancar sin configuración, que es lo que se quiere: media
+configuración es peor que ninguna.
+
+Verificado que `twinboxing_env` sirve la app completa: un solo origen, el video entero por
+la API y los 46 eventos de la sesión real. Lo único que todavía corre por `PYTHONPATH` en
+vez de por el paquete instalado es `boxtwin_api`, por lo del paso 2.
 
 ```bash
 # 6. el túnel
