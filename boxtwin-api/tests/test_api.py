@@ -390,3 +390,87 @@ def test_el_estado_trae_el_avance_de_la_etapa_en_curso(cliente, registrado, ento
 def test_sin_etapa_corriendo_no_hay_avance(cliente, registrado):
     sid = subir_video(cliente).json()["job_id"]
     assert cliente.get(f"/jobs/{sid}").json()["progreso"] is None
+
+
+# -- columnas nuevas sobre una base que ya existe ----------------------------
+
+
+def test_una_columna_nueva_se_agrega_a_una_tabla_que_ya_tiene_filas(tmp_path, monkeypatch):
+    """
+    create_all crea tablas nuevas pero NO altera las existentes, asi que agregar una columna
+    al modelo dejaba una instalacion andando rota al primer reinicio: el codigo la pide y la
+    base no la tiene, y el sintoma aparece recien al abrir una sesion vieja.
+
+    Se simula la base anterior creandola entera y sacandole las dos columnas nuevas, que es
+    exactamente el estado del despliegue antes de este cambio.
+    """
+    import sqlalchemy as sa
+
+    from boxtwin_api import db as mod_db
+
+    ruta = tmp_path / "vieja.db"
+    motor = sa.create_engine(f"sqlite:///{ruta}")
+    mod_db.Base.metadata.create_all(motor)
+    nuevas = {"boxeador_a_id", "boxeador_b_id"}
+    viejas = [c.name for c in mod_db.Base.metadata.tables["sesiones"].columns
+              if c.name not in nuevas]
+    with motor.begin() as con:
+        con.execute(sa.text("DROP TABLE boxeadores"))
+        # SQLite no deja borrar una columna que participa de una clave foranea, asi que la
+        # tabla se rehace con las columnas de antes.
+        con.execute(sa.text("ALTER TABLE sesiones RENAME TO sesiones_vieja"))
+        con.execute(sa.text(
+            f"CREATE TABLE sesiones AS SELECT {', '.join(viejas)} FROM sesiones_vieja WHERE 0"
+        ))
+        con.execute(sa.text("DROP TABLE sesiones_vieja"))
+        con.execute(sa.text(
+            "INSERT INTO usuarios (id, email, hash_clave, creado) "
+            "VALUES ('u1', 'a@b.com', 'x', '2026-01-01')"
+        ))
+        con.execute(sa.text(
+            "INSERT INTO sesiones (id, usuario_id, nombre, estado, video_nombre, "
+            "descanso_s, creada, actualizada) "
+            "VALUES ('s1', 'u1', 'spar.mp4', 'listo', 'spar.mp4', 60, "
+            "'2026-01-01', '2026-01-01')"
+        ))
+    motor.dispose()
+
+    monkeypatch.setattr(mod_db, "engine", sa.create_engine(f"sqlite:///{ruta}"))
+    agregadas = mod_db._columnas_faltantes()
+    assert sorted(agregadas) == ["sesiones.boxeador_a_id", "sesiones.boxeador_b_id"]
+
+    with mod_db.engine.begin() as con:
+        cols = {r[1] for r in con.execute(sa.text("PRAGMA table_info(sesiones)"))}
+        # La sesion que ya estaba sigue ahi: se agregan columnas, no se recrea la tabla.
+        assert con.execute(sa.text("SELECT count(*) FROM sesiones")).scalar() == 1
+    assert "boxeador_a_id" in cols and "boxeador_b_id" in cols
+
+
+def test_no_se_repite_si_ya_estan(tmp_path, monkeypatch):
+    import sqlalchemy as sa
+
+    from boxtwin_api import db as mod_db
+
+    ruta = tmp_path / "nueva.db"
+    monkeypatch.setattr(mod_db, "engine", sa.create_engine(f"sqlite:///{ruta}"))
+    mod_db.Base.metadata.create_all(mod_db.engine)
+    assert mod_db._columnas_faltantes() == []
+
+
+def test_una_columna_obligatoria_sin_default_no_se_inventa(tmp_path, monkeypatch):
+    """
+    Agregarla pediria un valor para las filas que ya estan, y ese valor no lo puede elegir
+    un programa. Se para y se dice, en vez de poner algo plausible.
+    """
+    import sqlalchemy as sa
+
+    from boxtwin_api import db as mod_db
+
+    ruta = tmp_path / "corta.db"
+    motor = sa.create_engine(f"sqlite:///{ruta}")
+    with motor.begin() as con:
+        con.execute(sa.text("CREATE TABLE sesiones (id TEXT PRIMARY KEY)"))
+    motor.dispose()
+    monkeypatch.setattr(mod_db, "engine", sa.create_engine(f"sqlite:///{ruta}"))
+    with pytest.raises(RuntimeError, match="a mano"):
+        mod_db._columnas_faltantes()
