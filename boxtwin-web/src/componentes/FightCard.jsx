@@ -137,6 +137,20 @@ export default function FightCard({ sesionId, fc, alCambiar }) {
             const rondas = fc.peleadores[p]?.por_round || []
             const caida = fc.lectura?.caida_entre_rounds?.[p]
             const tope = Math.max(1, ...rondas.map((r) => r.total))
+            // Con un solo round no hay nada que comparar y una barra sola al 100% no
+            // informa: informa el numero. Las barras aparecen cuando hay dos o mas.
+            if (rondas.length < 2) {
+              const r = rondas[0]
+              return (
+                <div className="bloque_round" key={p}>
+                  <h3>Peleador {p}</h3>
+                  <p>
+                    Round {r.round}: <strong>{r.total}</strong> golpes,{' '}
+                    {r.por_minuto} por minuto.
+                  </p>
+                </div>
+              )
+            }
             return (
               <div className="bloque_round" key={p}>
                 <h3>Peleador {p}</h3>
