@@ -313,17 +313,33 @@ def proponer(
     cfg: ConfigIdentidadAuto,
     total_frames: int,
     fps: float,
+    semillas: tuple[int, int] | None = None,
 ) -> Propuesta:
     """
     Decide un rol por track a partir de la evidencia.
 
     El orden importa y cada filtro saca lo que el anterior no puede. Lo que no se puede
     decidir queda SIN ASIGNAR: un track sin rol se ve en el overlay, un rol equivocado no.
+
+    Con `semillas` -el par de tracks que una persona senalo como A y como B- el rol deja de
+    decidirse por posicion en pantalla, y los dos tracks entran al nucleo aunque los filtros
+    los hayan descartado: si alguien los eligio mirando el video, la altura y el guante no
+    tienen nada que agregar sobre si son peleadores.
     """
     prop = Propuesta(roles={}, rangos={})
     if not evidencia:
         prop.avisos.append("el cache no tiene ningun track")
         return prop
+
+    if semillas:
+        faltan = [t for t in semillas if t not in evidencia]
+        if faltan:
+            raise ValueError(
+                f"la semilla {faltan[0]} no es un track del cache; "
+                f"hay {len(evidencia)} tracks medidos"
+            )
+        if semillas[0] == semillas[1]:
+            raise ValueError("las dos semillas son el mismo track")
 
     for tid, e in evidencia.items():
         prop.rangos[tid] = (e.primer_frame, min(e.ultimo_frame + 1, total_frames))
@@ -355,6 +371,8 @@ def proponer(
         if evidencia[t].recortes >= cfg.min_recortes
         and evidencia[t].fraccion_guante >= umbral_g
     }
+    if semillas:
+        nucleo |= set(semillas)
     # El rescate es para UN caso concreto y no para todo lo que tenga un guante: el track
     # que pasa altura y guante pero se quedo corto de cuadros. Son fragmentos de alguien que
     # ya se comprobo que es del tamano de un peleador y que lleva guantes, y descartarlos por
@@ -389,6 +407,7 @@ def proponer(
         "umbral_guante": round(umbral_g, 4),
         "pasan_altura": len(pasan_altura),
         "nucleo": len(nucleo),
+        "nucleo_tracks": sorted(nucleo),
         "rescatables": len(rescatables),
     }
     if not nucleo:
@@ -405,8 +424,21 @@ def proponer(
     # aislado de la gente de su tamano, son dos personas distintas. Vale aunque los guantes
     # sean identicos y aunque un track haya cambiado de persona a mitad de camino.
     limite_ancla = int(cfg.segundos_ancla * fps) if fps > 0 else 0
-    lados, diag_part = particionar(evidencia, candidatos, cfg, limite_ancla)
+    lados, diag_part = particionar(evidencia, candidatos, cfg, limite_ancla, semillas)
     prop.diagnostico.update(diag_part)
+
+    if semillas:
+        if diag_part.get("semillas_en_conflicto"):
+            prop.avisos.append(
+                "las dos semillas coexisten con los mismos tracks y la geometria las pone "
+                "del mismo lado: o son fragmentos de la misma persona, o alguna "
+                "coexistencia es espuria"
+            )
+        # Lo que la persona afirmo entra aunque la geometria no haya podido ubicarlo: un
+        # track sin cuadros aislados no tiene coexistencia medible, y eso no lo hace menos
+        # el peleador que alguien senalo mirando el video.
+        for t, v in zip(semillas, (0, 1)):
+            lados.setdefault(t, v)
 
     if not lados:
         prop.sin_asignar = sorted(candidatos)
@@ -495,16 +527,24 @@ def proponer(
         xs = [x for t, v in lados.items() if v == valor for _, x in evidencia[t].xs]
         return float(np.median(xs)) if xs else 0.0
 
-    lado_a = 0 if x_medio(0) <= x_medio(1) else 1
+    # Con semilla no se adivina: el lado de la semilla A es A.
+    if semillas and semillas[0] in lados:
+        lado_a = lados[semillas[0]]
+    else:
+        lado_a = 0 if x_medio(0) <= x_medio(1) else 1
     for t, v in lados.items():
         prop.roles[t] = TrackRole.A if v == lado_a else TrackRole.B
 
     pa, pb = (perfil_0, perfil_1) if lado_a == 0 else (perfil_1, perfil_0)
     prop.perfiles = {"fighter_A": pa, "fighter_B": pb}
-    prop.semillas = {
-        "fighter_A": min((t for t, v in lados.items() if v == lado_a), default=-1),
-        "fighter_B": min((t for t, v in lados.items() if v != lado_a), default=-1),
-    }
+    if semillas:
+        prop.semillas = {"fighter_A": semillas[0], "fighter_B": semillas[1]}
+    else:
+        prop.semillas = {
+            "fighter_A": min((t for t, v in lados.items() if v == lado_a), default=-1),
+            "fighter_B": min((t for t, v in lados.items() if v != lado_a), default=-1),
+        }
+    prop.diagnostico["siembra"] = "humana" if semillas else "automatica"
 
     prop.diagnostico["votos"] = votos
     prop.diagnostico["asignados_A"] = sum(1 for r in prop.roles.values() if r is TrackRole.A)
@@ -729,12 +769,21 @@ def particionar(
     candidatos: set[int],
     cfg: ConfigIdentidadAuto,
     limite_ancla: int = 0,
+    semillas: tuple[int, int] | None = None,
 ) -> tuple[dict[int, int], dict]:
     """
     Reparte los candidatos en dos lados: primero por coexistencia, despues por color.
 
     Devuelve track -> 0 o 1, y un diagnostico. El lado 0 y el 1 todavia no son A y B: cual es
-    cual lo decide despues la posicion en pantalla.
+    cual lo decide despues la posicion en pantalla, salvo que haya semillas: ahi la semilla A
+    ES el lado 0.
+
+    `semillas` es el par de tracks que una persona senalo como A y como B. Cambia dos cosas y
+    ninguna es el reparto adentro de un grupo, que lo sigue decidiendo la geometria: cual
+    grupo es el de referencia, y como se orientan los demas. Eso es justo donde el camino
+    automatico se equivoca, porque orientar un grupo contra otro es lo unico que la
+    coexistencia no puede hacer -por definicion no comparten un cuadro- y queda en manos del
+    color, que en material nuevo puede no separar.
     """
     frames = {t: {f for f, _ in evidencia[t].colores} for t in candidatos}
     frames = {t: fs for t, fs in frames.items() if fs}
@@ -778,6 +827,28 @@ def particionar(
     if not tempranos:
         tempranos = con_dos
     base, _ = tempranos[0]
+
+    # El ancla la fija la semilla, si hay. Una persona miro el video y dijo "este es A", y
+    # eso es evidencia mas fuerte que la que tienen las dos reglas de arriba.
+    conflicto = False
+    if semillas:
+        sa, sb = semillas
+        con_a = next((m for m, _ in con_dos if sa in m), None)
+        con_b = next((m for m, _ in con_dos if sb in m), None)
+        elegido = con_a if con_a is not None else con_b
+        if elegido is not None:
+            base = elegido
+            ancla = sa if sa in base else sb
+            objetivo = 0 if ancla == sa else 1
+            if base[ancla] != objetivo:
+                for t in list(base):
+                    base[t] = 1 - base[t]
+        # Las dos semillas en el mismo grupo y del mismo lado: la coexistencia dice que son
+        # la misma persona y la persona dice que son dos. Una de las dos esta equivocada y
+        # no hay forma de saber cual desde aca, asi que se declara en vez de elegir.
+        if con_a is not None and con_a is con_b and con_a[sa] == con_a[sb]:
+            conflicto = True
+
     # El resto se orienta contra el ancla, empezando por los mas grandes.
     otros = [x for x in con_dos if x[0] is not base]
     salida = dict(base)
@@ -785,8 +856,19 @@ def particionar(
 
     # Los demas componentes se orientan por color contra el de referencia. La geometria ya
     # dijo que adentro de cada uno van separados; falta saber cual de sus dos lados es cual.
-    invertidos = sin_orientar = 0
+    invertidos = sin_orientar = por_semilla = 0
     for lado_map, _ in otros:
+        # El grupo que contiene a la otra semilla se orienta con ella y no con el color: el
+        # mismo argumento de arriba, evidencia humana sobre evidencia de apariencia.
+        if semillas:
+            sa, sb = semillas
+            fijo = sa if sa in lado_map else (sb if sb in lado_map else None)
+            if fijo is not None:
+                invertir = lado_map[fijo] != (0 if fijo == sa else 1)
+                for t, v in lado_map.items():
+                    salida[t] = (1 - v) if invertir else v
+                por_semilla += 1
+                continue
         q0, q1 = perfil_lado(lado_map, 0), perfil_lado(lado_map, 1)
         if None in (p0, p1, q0, q1):
             sin_orientar += 1
@@ -813,4 +895,8 @@ def particionar(
         "componentes_sin_orientar": sin_orientar,
         "ancla_del_principio": ancla_temprana,
     }
+    if semillas:
+        diag["ancla_por_semilla"] = True
+        diag["componentes_orientados_por_semilla"] = por_semilla
+        diag["semillas_en_conflicto"] = conflicto
     return salida, diag

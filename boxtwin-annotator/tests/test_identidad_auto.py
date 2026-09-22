@@ -323,3 +323,99 @@ def test_con_forzar_si_la_pisa(doc_min):
     ]
     AsignarIdentidadAuto(_propuesta_simple(), forzar=True).do(doc_min)
     assert 7 not in {a.track_id for a in doc_min.identity.assignments}
+
+
+# -- siembra humana ---------------------------------------------------------
+#
+# El paso 4 del flujo del MVP: una persona mira dos recortes y dice cual es cual. Lo que se
+# fija aca es que esa afirmacion mande sobre las dos reglas que pueden equivocarse -la
+# orientacion por color y la eleccion de A por posicion- y que no mande sobre la geometria,
+# que no se equivoca.
+
+
+def test_la_semilla_decide_quien_es_A_y_no_la_posicion():
+    # Sin semilla, A es el que arranca mas a la izquierda: el track 1, que esta en x=100.
+    ev = _dos_peleadores()
+    auto = proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS)
+    assert auto.roles[1] is TrackRole.A
+
+    # Con semilla, A es el que la persona senalo, aunque este a la derecha.
+    con = proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS, semillas=(2, 1))
+    assert con.roles[2] is TrackRole.A
+    assert con.roles[1] is TrackRole.B
+    assert con.diagnostico["siembra"] == "humana"
+
+
+def test_con_guantes_del_mismo_color_la_semilla_orienta_lo_que_el_color_no_puede():
+    # El caso de 01-sparring y del video amateur: los dos de naranja. Dos grupos que no
+    # coexisten entre si, cada uno bien repartido por geometria, y el color no puede decir
+    # cual lado de uno corresponde a cual lado del otro.
+    ev = _dos_peleadores(n=40)
+    tarde = list(range(1000, 1200, 5))
+    ev[10] = _track(10, ROJO, tarde)
+    ev[11] = _track(11, AZUL, tarde)
+    # El segundo grupo va con los ids cruzados respecto del primero: el track 10 es la misma
+    # persona que el 2, no que el 1. Solo una persona mirando el video puede saberlo.
+    prop = proponer(ev, ConfigIdentidadAuto(), total_frames=2000, fps=FPS,
+                    semillas=(1, 10))
+    assert prop.roles[1] is TrackRole.A
+    assert prop.roles[10] is TrackRole.B, "la semilla orienta el grupo que no coexiste"
+    assert prop.roles[11] is TrackRole.A, "y arrastra al resto de su grupo"
+    assert prop.diagnostico["componentes_orientados_por_semilla"] == 1
+
+
+def test_la_semilla_no_pisa_la_geometria():
+    # El track 1 y el 3 nunca coexisten entre si, pero los dos coexisten con el 2, asi que
+    # la geometria los pone del mismo lado: son la misma persona en dos tramos. Si alguien
+    # los senala como los dos peleadores, una de las dos cosas esta mal y no hay forma de
+    # saber cual desde aca. Se declara el conflicto en vez de elegir.
+    ev = {
+        1: _track(1, ROJO, list(range(0, 100, 5))),
+        2: _track(2, AZUL, list(range(0, 200, 5))),
+        3: _track(3, ROJO, list(range(105, 200, 5))),
+    }
+    prop = proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS, semillas=(1, 3))
+    assert prop.diagnostico["semillas_en_conflicto"] is True
+    assert any("mismo lado" in a for a in prop.avisos)
+
+
+def test_un_track_que_los_filtros_descartaron_entra_si_la_persona_lo_eligio():
+    # Un peleador que quedo corto de recortes: el filtro no puede decir nada de el y por eso
+    # lo deja sin asignar. Si alguien lo eligio mirando el video, la duda ya no existe.
+    ev = _dos_peleadores()
+    ev[9] = _track(9, AZUL, [300, 305, 310], recortes=2)
+    sin = proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS)
+    assert 9 in sin.sin_asignar
+
+    con = proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS, semillas=(1, 9))
+    assert con.roles[9] is TrackRole.B
+    assert 9 not in con.sin_asignar
+
+
+def test_una_semilla_sin_color_medido_igual_se_asigna():
+    # Un track sin un solo cuadro aislado no tiene coexistencia medible ni color. La
+    # geometria no puede ubicarlo y no por eso deja de ser el peleador que alguien senalo.
+    ev = _dos_peleadores()
+    ev[8] = EvidenciaTrack(8, 400, 500, 0.9, 30, 25, [], [], [(400, 300.0)])
+    prop = proponer(ev, ConfigIdentidadAuto(), total_frames=600, fps=FPS, semillas=(8, 1))
+    assert prop.roles[8] is TrackRole.A
+    assert prop.roles[1] is TrackRole.B
+
+
+def test_una_semilla_que_no_existe_es_un_error_y_no_un_aviso():
+    ev = _dos_peleadores()
+    with pytest.raises(ValueError, match="no es un track"):
+        proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS, semillas=(1, 99))
+    with pytest.raises(ValueError, match="mismo track"):
+        proponer(ev, ConfigIdentidadAuto(), total_frames=500, fps=FPS, semillas=(1, 1))
+
+
+def test_sin_semilla_nada_cambia():
+    # La regresion que importa: el camino automatico, que es el que esta medido en 82,4%,
+    # tiene que dar exactamente lo mismo que antes de que existiera la siembra.
+    ev = _dos_peleadores(n=40)
+    ev[10] = _track(10, ROJO, list(range(1000, 1200, 5)))
+    prop = proponer(ev, ConfigIdentidadAuto(), total_frames=2000, fps=FPS)
+    assert prop.diagnostico["siembra"] == "automatica"
+    assert "ancla_por_semilla" not in prop.diagnostico
+    assert prop.roles[1] is TrackRole.A and prop.roles[10] is TrackRole.A

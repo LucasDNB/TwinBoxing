@@ -15,6 +15,8 @@ QUE HACE
   export      genera el dataset en alguno de los cuatro formatos.
   reanno      sortea la muestra de reanotacion ciega y calcula el acuerdo.
   probe       muestra los metadatos reales del video sin procesar nada.
+  procesar    etapa 1 del producto: pose, identidad y candidatos para la siembra.
+  completar   etapa 2 del producto: identidad sembrada, detector y Fight-Card.
 
 USO
   boxtwin-annotator preprocess videos/spar.mp4 --project ./proyecto
@@ -292,6 +294,54 @@ def build_parser() -> argparse.ArgumentParser:
                     help="puntuar la propuesta contra las asignaciones manuales del "
                          "documento, sin escribir nada")
 
+    # -- procesar / completar ----------------------------------------------
+    # Las dos etapas del producto. Van separadas porque entre una y otra hay una pregunta
+    # que solo puede contestar una persona -cual cuerpo es cual- y que vale 17 puntos de
+    # acierto en la asignacion de identidad.
+    pc = sub.add_parser(
+        "procesar",
+        help="etapa 1: pose, tracking, evidencia de guante y candidatos para la siembra",
+        description=(
+            "Deja la sesion en espera_siembra con dos recortes para que el usuario diga "
+            "cual es cual. Es reanudable: la evidencia de guante se guarda apenas se "
+            "termina de recorrer el video y no se vuelve a calcular."
+        ),
+    )
+    pc.add_argument("video", type=Path)
+    pc.add_argument("--out", type=Path, required=True, help="directorio de la sesion")
+    pc.add_argument("--modelo-guantes", type=Path, required=True, dest="modelo_guantes")
+    pc.add_argument("--round", type=float, default=None, dest="round_s",
+                    help="duracion del round en segundos. Sin esto la Fight-Card se agrega "
+                         "por sesion y no por round")
+    pc.add_argument("--descanso", type=float, default=60.0, dest="descanso_s")
+    pc.add_argument("--modelo-pose", default="yolov8l-pose.pt", dest="modelo_pose")
+    pc.add_argument("--imgsz", type=int, default=640)
+    pc.add_argument("--device", default="0")
+    pc.add_argument("--rehacer", action="store_true",
+                    help="recalcula la evidencia de guante aunque ya este guardada")
+
+    cp = sub.add_parser(
+        "completar",
+        help="etapa 2: identidad desde las semillas, detector y Fight-Card",
+        description=(
+            "Escribe segmentos.json, poses.npz y fightcard.json. El tipo de golpe NO sale "
+            "de aca: lo agrega la etapa de clasificacion, que corre en boxtwin_mmaction."
+        ),
+    )
+    cp.add_argument("sesion", type=Path)
+    cp.add_argument("--semilla-a", type=int, required=True, dest="semilla_a",
+                    help="track del peleador A, elegido mirando los recortes")
+    cp.add_argument("--semilla-b", type=int, required=True, dest="semilla_b")
+    cp.add_argument("--detector", type=Path, required=True,
+                    help="ensamble congelado del detector de golpes")
+    cp.add_argument("--umbral", type=float, default=0.80,
+                    help="punto de operacion del decodificador. Se declara y no se ajusta "
+                         "por video: moverlo aca hace incomparable la precision medida")
+    cp.add_argument("--retorno-lento-ms", type=float, default=None, dest="retorno_lento_ms",
+                    help="umbral del indicador de retorno. Sin calibrar todavia: sin este "
+                         "valor se reporta el tiempo medido y no se marca nada")
+    cp.add_argument("--device", default=None)
+
     return p
 
 
@@ -492,6 +542,78 @@ def _cmd_identidad_auto(args: argparse.Namespace) -> int:
     save_doc(doc, paths.annot)
     print(f"\n{cmd.aplicados} asignaciones escritas en {paths.annot.name}")
     print("Revisalo en el anotador: los tracks sin asignar salen en su propio color.")
+    return 0
+
+
+def _cmd_procesar(args: argparse.Namespace) -> int:
+    from boxtwin.mvp.orquesta import procesar
+
+    barra = _progress_bar()
+    print(f"video   : {args.video}")
+    print(f"sesion  : {args.out}")
+    ses = procesar(
+        args.video, args.out, args.modelo_guantes,
+        round_s=args.round_s, descanso_s=args.descanso_s,
+        device=args.device, modelo_pose=args.modelo_pose, imgsz=args.imgsz,
+        rehacer=args.rehacer, progreso=barra,
+    )
+    barra(None, None)
+
+    print(f"\nestado: {ses.estado}")
+    for e in ses.etapas:
+        print(f"  {e['etapa']:12s} {e['segundos']:8.1f} s")
+    print(f"  {'total':12s} {ses.segundos_de_maquina:8.1f} s"
+          f"  ({ses.factor_tiempo_real}x la duracion del video)")
+
+    par = (ses.identidad or {}).get("pareja_sugerida")
+    print(f"\ncandidatos ({len(ses.candidatos)}):")
+    for c in ses.candidatos:
+        marca = " <- sugerido" if par and c["track"] in par else ""
+        print(f"  track {c['track']:4d}  cuadro {c['cuadro']:6d}  "
+              f"guante {c['fraccion_guante']:.2f}  {c['recorte'] or 'sin recorte'}{marca}")
+    if par:
+        print(f"\nlos dos sugeridos coexisten en "
+              f"{ses.candidatos[0]['cuadros_de_coexistencia']} cuadros aislados, "
+              "asi que son dos personas distintas")
+    for a in ses.avisos:
+        print(f"\nATENCION: {a}")
+    print(f"\nmira los recortes y corre:\n"
+          f"  boxtwin-annotator completar {args.out} --semilla-a <track> "
+          f"--semilla-b <track> --detector <ensamble.pt>")
+    return 0
+
+
+def _cmd_completar(args: argparse.Namespace) -> int:
+    from boxtwin.mvp.guardia import ConfigGuardia
+    from boxtwin.mvp.orquesta import completar
+    from boxtwin.mvp.sesion import Sesion
+
+    fc = completar(
+        args.sesion, args.semilla_a, args.semilla_b, args.detector,
+        umbral=args.umbral, device=args.device,
+        cfg_guardia=ConfigGuardia(retorno_lento_ms=args.retorno_lento_ms),
+    )
+    ses = Sesion.cargar(args.sesion)
+
+    ident = fc["identidad"]
+    print(f"identidad: A {ident['cobertura_A']:.1%} del video, "
+          f"B {ident['cobertura_B']:.1%}, sin asignar {ident['sin_asignar']:.1%}")
+    a = fc["peleadores"]["A"]["total"]
+    b = fc["peleadores"]["B"]["total"]
+    print(f"\ngolpes DETECTADOS (precision {fc['detector']['precision_medida']}, "
+          f"recall {fc['detector']['recall_medido']})")
+    print(f"  A  {a['total']:4d}   izq {a['izq']:4d}  der {a['der']:4d}")
+    print(f"  B  {b['total']:4d}   izq {b['izq']:4d}  der {b['der']:4d}")
+    for p in ("A", "B"):
+        for r in fc["peleadores"][p]["por_round"]:
+            print(f"  {p} round {r['round']}: {r['total']:4d}  "
+                  f"({r['por_minuto']:.1f} por minuto)")
+    print(f"\n  el recall medido es {fc['detector']['recall_medido']}: el conteo esta por "
+          "debajo del real y lo que se sostiene es la comparacion adentro de la sesion")
+    print(f"\ntiempo de maquina: {ses.segundos_de_maquina:.1f} s "
+          f"({ses.factor_tiempo_real}x la duracion del video)")
+    print(f"\n  -> {Path(args.sesion) / 'fightcard.json'}")
+    print("  el tipo de golpe lo agrega la etapa de clasificacion, en boxtwin_mmaction")
     return 0
 
 
@@ -772,6 +894,10 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_probe(args)
         if args.comando == "identidad-auto":
             return _cmd_identidad_auto(args)
+        if args.comando == "procesar":
+            return _cmd_procesar(args)
+        if args.comando == "completar":
+            return _cmd_completar(args)
     except KeyboardInterrupt:
         print("\ninterrumpido. El trabajo hecho quedo persistido: volve a correr el "
               "mismo comando para reanudar.", file=sys.stderr)
