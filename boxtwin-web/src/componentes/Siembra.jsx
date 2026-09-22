@@ -9,7 +9,7 @@
  * Si el sistema no pudo proponer una pareja, se muestran mas candidatos y elige el usuario.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { api } from '../api.js'
 
 export default function Siembra({ sesion, alSembrar }) {
@@ -17,6 +17,20 @@ export default function Siembra({ sesion, alSembrar }) {
   const [b, setB] = useState(sesion.pareja_sugerida?.[1] ?? null)
   const [error, setError] = useState(null)
   const [enviando, setEnviando] = useState(false)
+  // Un <img src> no puede mandar el header de autorizacion, asi que el recorte entra con
+  // un ticket: media hora, esta sesion y nada mas. Es el mismo que usa el video.
+  const [ticket, setTicket] = useState(null)
+
+  useEffect(() => {
+    let vivo = true
+    api
+      .ticketVideo(sesion.id)
+      .then((r) => vivo && setTicket(r.ticket))
+      .catch(() => vivo && setTicket(null))
+    return () => {
+      vivo = false
+    }
+  }, [sesion.id])
 
   const candidatos = sesion.candidatos || []
   const haySugerencia = Boolean(sesion.pareja_sugerida)
@@ -63,10 +77,14 @@ export default function Siembra({ sesion, alSembrar }) {
               onClick={() => elegir(c.track)}
               aria-pressed={Boolean(rol)}
             >
-              {c.recorte_url ? (
-                <img src={c.recorte_url} alt={`Candidato del track ${c.track}`} loading="lazy" />
+              {c.recorte_url && ticket ? (
+                <img
+                  src={`${c.recorte_url}?t=${encodeURIComponent(ticket)}`}
+                  alt={`Candidato del track ${c.track}`}
+                  loading="lazy"
+                />
               ) : (
-                <div className="sin_imagen">sin recorte</div>
+                <div className="sin_imagen">{c.recorte_url ? '…' : 'sin recorte'}</div>
               )}
               {rol && <span className="rol">{rol}</span>}
               <span className="meta">

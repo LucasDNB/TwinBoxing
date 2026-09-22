@@ -30,14 +30,19 @@ USO
 from __future__ import annotations
 
 import json
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-__all__ = ["ESTADOS", "NOMBRE_ARCHIVO", "Sesion", "ventanas_de_round"]
+__all__ = [
+    "ESTADOS", "NOMBRE_ARCHIVO", "NOMBRE_PROGRESO", "Progreso", "Sesion",
+    "ventanas_de_round",
+]
 
 NOMBRE_ARCHIVO = "sesion.json"
+NOMBRE_PROGRESO = "progreso.json"
 VERSION = "0.1"
 
 # El orden es el del flujo y no alfabetico: cada estado solo puede venir del anterior.
@@ -75,6 +80,77 @@ def ventanas_de_round(
         t = fin + max(descanso_s, 0.0)
         n += 1
     return ventanas
+
+
+class Progreso:
+    """
+    El avance de una etapa larga, en un archivo que la API puede leer mientras corre.
+
+    POR QUE EN UN ARCHIVO APARTE
+      `sesion.json` se escribe cuando la etapa TERMINA, asi que mientras corre no hay nada
+      que mirar. Y la etapa que mas tarda es la primera: sobre 30 minutos de video, la pose
+      son unos 45 minutos con la pantalla quieta. Una rueda girando 45 minutos se lee como
+      que se colgo, y el usuario recarga, o se va.
+
+      El worker corre las etapas como subprocesos, asi que tampoco puede informar por
+      memoria compartida: entre los dos procesos lo unico que hay es el disco.
+
+    SE ESCRIBE CON THROTTLE porque el callback de pose se llama a 150 cuadros por segundo y
+    no tiene sentido tocar el disco a esa frecuencia: alcanza con una vez por segundo, que
+    es mas seguido de lo que un ojo distingue en una barra.
+    """
+
+    def __init__(self, directorio, etapa: str, cada_s: float = 1.0, encadena=None) -> None:
+        self.ruta = Path(directorio) / NOMBRE_PROGRESO
+        self.etapa = etapa
+        self.cada_s = cada_s
+        self.encadena = encadena          # el callback de la consola, si lo hay
+        self.desde = time.time()
+        self._ultimo = 0.0
+
+    def __call__(self, hecho, total) -> None:
+        if self.encadena is not None:
+            self.encadena(hecho, total)
+        # (None, None) es como el anotador avisa que termino.
+        if hecho is None:
+            return self.terminar()
+        ahora_s = time.time()
+        if ahora_s - self._ultimo < self.cada_s:
+            return None
+        self._ultimo = ahora_s
+        self._escribir(int(hecho), int(total or 0))
+        return None
+
+    def _escribir(self, hecho: int, total: int) -> None:
+        d = {
+            "etapa": self.etapa,
+            "hecho": hecho,
+            "total": total,
+            "fraccion": round(hecho / total, 4) if total else None,
+            "desde": self.desde,
+            "segundos": round(time.time() - self.desde, 1),
+        }
+        try:
+            tmp = self.ruta.with_suffix(".json.tmp")
+            tmp.write_text(json.dumps(d))
+            tmp.replace(self.ruta)
+        except OSError:
+            # El progreso es cosmetico: si no se puede escribir, la etapa sigue igual.
+            pass
+
+    def terminar(self) -> None:
+        self.ruta.unlink(missing_ok=True)
+
+
+def leer_progreso(directorio) -> dict | None:
+    """Lo que la API le muestra al que espera, o None si no hay etapa corriendo."""
+    ruta = Path(directorio) / NOMBRE_PROGRESO
+    if not ruta.is_file():
+        return None
+    try:
+        return json.loads(ruta.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
 
 
 @dataclass

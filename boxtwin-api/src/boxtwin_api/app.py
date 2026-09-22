@@ -140,6 +140,29 @@ def _puede_registrarse(codigo: str) -> None:
         raise HTTPException(403, "el codigo de invitacion no es correcto")
 
 
+def usuario_por_ticket_o_header(
+    sesion_id: str, t: str, authorization: str, db: Session
+) -> Usuario:
+    """
+    El usuario, entrando por el header o por un ticket de esta sesion.
+
+    Existe porque hay dos elementos del navegador que NO pueden mandar headers, y los dos
+    son centrales en este producto: el <video> de la linea de tiempo y el <img> de los
+    recortes de siembra. El ticket es lo unico que pueden llevar, va en la URL, dura media
+    hora y sirve para una sola sesion.
+    """
+    uid = leer_ticket(t, sesion_id, cfg.secreto) if t else None
+    if uid is None:
+        token = authorization[7:] if authorization.lower().startswith("bearer ") else ""
+        uid = leer_token(token, cfg.secreto) if token else None
+    if uid is None:
+        raise HTTPException(401, "hace falta iniciar sesion")
+    u = db.get(Usuario, uid)
+    if u is None:
+        raise HTTPException(401, "la cuenta ya no existe")
+    return u
+
+
 @app.post("/auth/registro", response_model=Token)
 def registro(c: Credenciales, db: Session = Depends(obtener_sesion)) -> Token:
     _puede_registrarse(c.invitacion)
@@ -245,7 +268,13 @@ def estado(
     """
     s = sesion_del_usuario(sesion_id, usuario, db)
     d = _sesion_en_disco(s.id)
-    extra: dict = {"candidatos": [], "avisos": [], "etapas": []}
+    extra: dict = {
+        "candidatos": [], "avisos": [], "etapas": [],
+        # Lo escribe la etapa que esta corriendo, en su propio archivo, porque sesion.json
+        # recien se escribe cuando termina. Sobre 30 minutos de video la pose son 45
+        # minutos, y sin esto la pantalla de espera es una rueda quieta.
+        "progreso": _progreso_en_disco(s.id),
+    }
     if d:
         extra["candidatos"] = [
             {**c, "recorte_url": (f"/jobs/{s.id}/candidatos/{c['track']}"
@@ -283,9 +312,18 @@ def listar(
 def recorte(
     track: int,
     sesion_id: str,
-    usuario: Usuario = Depends(usuario_actual),
+    t: str = "",
+    authorization: str = Header(default=""),
     db: Session = Depends(obtener_sesion),
 ) -> FileResponse:
+    """
+    El recorte de un candidato. Entra por header o por ticket, igual que el video.
+
+    Un <img src> no manda headers, asi que sin el ticket el navegador pide la imagen sin
+    token, recibe 401 y dibuja el icono roto: la pantalla de siembra queda inusable
+    justo donde el usuario tiene que mirar dos fotos y elegir.
+    """
+    usuario = usuario_por_ticket_o_header(sesion_id, t, authorization, db)
     s = sesion_del_usuario(sesion_id, usuario, db)
     ruta = cfg.dir_sesion(s.id) / "candidatos" / f"track_{int(track)}.jpg"
     if not ruta.is_file():
@@ -341,6 +379,16 @@ def _sesion_en_disco(sesion_id: str) -> dict | None:
     try:
         return json.loads(ruta.read_text())
     except json.JSONDecodeError:  # pragma: no cover - el worker escribe atomico
+        return None
+
+
+def _progreso_en_disco(sesion_id: str) -> dict | None:
+    ruta = cfg.dir_sesion(sesion_id) / "progreso.json"
+    if not ruta.is_file():
+        return None
+    try:
+        return json.loads(ruta.read_text())
+    except json.JSONDecodeError:
         return None
 
 
@@ -463,18 +511,7 @@ def stream(
     el minuto 12, y la linea de tiempo -que es la funcion que convierte un numero dudoso en
     una herramienta de revision- deja de servir.
     """
-    # Dos formas de entrar: el header, para fetch, y el ticket, para el <video>, que no
-    # puede mandar headers. El ticket vale para esta sesion y para ninguna otra.
-    uid = leer_ticket(t, sesion_id, cfg.secreto) if t else None
-    if uid is None:
-        token = authorization[7:] if authorization.lower().startswith("bearer ") else ""
-        uid = leer_token(token, cfg.secreto) if token else None
-    if uid is None:
-        raise HTTPException(401, "hace falta iniciar sesion")
-    u = db.get(Usuario, uid)
-    if u is None:
-        raise HTTPException(401, "la cuenta ya no existe")
-
+    u = usuario_por_ticket_o_header(sesion_id, t, authorization, db)
     s = sesion_del_usuario(sesion_id, u, db)
     ruta = cfg.dir_sesion(s.id) / "videos" / s.video_nombre
     if not ruta.is_file():

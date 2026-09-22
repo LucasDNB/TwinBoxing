@@ -333,3 +333,60 @@ def test_pero_se_puede_prender_para_desarrollar(entorno, monkeypatch):
     assert c.get("/docs").status_code == 200
     assert c.get("/openapi.json").status_code == 200
     assert c.get("/salud").json()["docs"] is True
+
+
+# -- el recorte, que lo pide un <img> ---------------------------------------
+
+
+def test_el_recorte_entra_con_ticket_porque_un_img_no_manda_headers(
+    cliente, registrado, entorno
+):
+    # El bug del 22-09: la pantalla de siembra mostraba seis iconos rotos. El navegador
+    # pedia la imagen sin token, la API contestaba 401, y el paso donde el usuario tiene
+    # que mirar dos fotos y elegir quedaba inusable.
+    sid = subir_video(cliente).json()["job_id"]
+    _dejar_en_espera_siembra(entorno["cfg"], sid)
+
+    tk = cliente.get(f"/videos/{sid}/ticket").json()["ticket"]
+    r = cliente.get(f"/jobs/{sid}/candidatos/3?t={tk}", headers={"Authorization": ""})
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "image/jpeg"
+
+
+def test_sin_ticket_ni_header_el_recorte_no_sale(cliente, registrado, entorno):
+    sid = subir_video(cliente).json()["job_id"]
+    _dejar_en_espera_siembra(entorno["cfg"], sid)
+    assert cliente.get(f"/jobs/{sid}/candidatos/3",
+                       headers={"Authorization": ""}).status_code == 401
+
+
+def test_un_ticket_de_otra_sesion_no_abre_este_recorte(cliente, registrado, entorno):
+    sid = subir_video(cliente).json()["job_id"]
+    otra = subir_video(cliente, nombre="otra.mp4").json()["job_id"]
+    _dejar_en_espera_siembra(entorno["cfg"], sid)
+    tk = cliente.get(f"/videos/{otra}/ticket").json()["ticket"]
+    assert cliente.get(f"/jobs/{sid}/candidatos/3?t={tk}",
+                       headers={"Authorization": ""}).status_code == 401
+
+
+# -- el avance de la etapa que esta corriendo -------------------------------
+
+
+def test_el_estado_trae_el_avance_de_la_etapa_en_curso(cliente, registrado, entorno):
+    # sesion.json se escribe recien cuando la etapa termina. Sobre 30 minutos de video la
+    # pose son 45 minutos, y sin esto la pantalla de espera es una rueda quieta.
+    sid = subir_video(cliente).json()["job_id"]
+    d = entorno["cfg"].dir_sesion(sid)
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "progreso.json").write_text(json.dumps({
+        "etapa": "pose", "hecho": 1400, "total": 3741,
+        "fraccion": 0.3742, "desde": 0, "segundos": 110.0,
+    }))
+    p = cliente.get(f"/jobs/{sid}").json()["progreso"]
+    assert p["etapa"] == "pose"
+    assert p["hecho"] == 1400 and p["total"] == 3741
+
+
+def test_sin_etapa_corriendo_no_hay_avance(cliente, registrado):
+    sid = subir_video(cliente).json()["job_id"]
+    assert cliente.get(f"/jobs/{sid}").json()["progreso"] is None

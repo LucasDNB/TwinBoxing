@@ -121,6 +121,12 @@ button { font: inherit; cursor: pointer; }
 .progreso .barra { background: var(--acento); height: 100%; transition: width 0.2s; }
 .progreso span { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 600; }
 
+/* -- avance de una etapa larga -- */
+.avance { margin: 14px 0 4px; }
+.encabezado_avance { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.progreso.chico { height: 10px; border-radius: 6px; }
+.progreso.chico .barra { border-radius: 6px; }
+
 /* -- pasos del estado -- */
 .pasos { list-style: none; padding: 0; margin: 12px 0 0; }
 .pasos li { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }

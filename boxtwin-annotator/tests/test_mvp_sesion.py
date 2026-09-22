@@ -116,3 +116,56 @@ def test_sin_duracion_no_hay_factor(tmp_path):
 
 def test_los_estados_son_los_del_flujo():
     assert ESTADOS.index("espera_siembra") < ESTADOS.index("listo")
+
+
+# -- avance de una etapa larga ----------------------------------------------
+
+
+def test_el_avance_se_escribe_y_se_lee(tmp_path):
+    from boxtwin.mvp.sesion import Progreso, leer_progreso
+
+    p = Progreso(tmp_path, "pose", cada_s=0.0)
+    p(1400, 3741)
+    d = leer_progreso(tmp_path)
+    assert d["etapa"] == "pose"
+    assert (d["hecho"], d["total"]) == (1400, 3741)
+    assert d["fraccion"] == pytest.approx(0.3742, abs=1e-4)
+
+
+def test_el_avance_no_toca_el_disco_en_cada_cuadro(tmp_path):
+    # El callback de pose se llama a 150 cuadros por segundo. Escribir a esa frecuencia es
+    # tocar el disco 150 veces para mover una barra que el ojo no distingue.
+    from boxtwin.mvp.sesion import Progreso, leer_progreso
+
+    p = Progreso(tmp_path, "pose", cada_s=60.0)
+    p(100, 1000)
+    p(200, 1000)
+    p(300, 1000)
+    assert leer_progreso(tmp_path)["hecho"] == 100, "solo la primera escribio"
+
+
+def test_al_terminar_el_avance_desaparece(tmp_path):
+    # Si quedara, la pantalla mostraria un 100% viejo de una etapa que ya no corre.
+    from boxtwin.mvp.sesion import Progreso, leer_progreso
+
+    p = Progreso(tmp_path, "pose", cada_s=0.0)
+    p(500, 1000)
+    p(None, None)
+    assert leer_progreso(tmp_path) is None
+
+
+def test_el_avance_encadena_la_barra_de_la_consola(tmp_path):
+    # La linea de comandos no puede perder su barra por agregar el archivo.
+    from boxtwin.mvp.sesion import Progreso
+
+    vistos = []
+    p = Progreso(tmp_path, "pose", cada_s=0.0, encadena=lambda h, t: vistos.append((h, t)))
+    p(10, 100)
+    p(20, 100)
+    assert vistos == [(10, 100), (20, 100)]
+
+
+def test_sin_archivo_no_hay_avance(tmp_path):
+    from boxtwin.mvp.sesion import leer_progreso
+
+    assert leer_progreso(tmp_path) is None

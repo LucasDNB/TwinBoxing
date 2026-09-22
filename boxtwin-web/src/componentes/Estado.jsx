@@ -9,6 +9,11 @@
 
 import { segundosATiempo } from '../formato.js'
 
+const NOMBRE_ETAPA = {
+  pose: 'Detectando cuerpos',
+  guantes: 'Buscando los guantes',
+}
+
 const PASOS = [
   { estado: 'en_cola', titulo: 'En cola', detalle: 'esperando que se libere la placa' },
   { estado: 'procesando', titulo: 'Detectando cuerpos', detalle: 'pose y seguimiento, cuadro por cuadro' },
@@ -28,6 +33,8 @@ export default function Estado({ sesion }) {
         {sesion.video}
         {sesion.duracion_s ? ` · ${segundosATiempo(sesion.duracion_s)}` : ''}
       </p>
+
+      {sesion.progreso && !fallo && <Barra p={sesion.progreso} />}
 
       {fallo ? (
         <div className="error" role="alert">
@@ -70,6 +77,36 @@ export default function Estado({ sesion }) {
       {(sesion.avisos || []).map((a, k) => (
         <p className="aviso" key={k}>{a}</p>
       ))}
+    </div>
+  )
+}
+
+function Barra({ p }) {
+  const pct = p.fraccion != null ? Math.round(p.fraccion * 100) : null
+  // El restante sale de lo que ya tardo, que es la unica estimacion honesta que hay: el
+  // ritmo depende de cuanta gente haya en el cuadro y no se puede saber de antemano.
+  const restante =
+    p.fraccion > 0.02 && p.segundos > 3
+      ? Math.round((p.segundos / p.fraccion) * (1 - p.fraccion))
+      : null
+
+  return (
+    <div className="avance">
+      <div className="encabezado_avance">
+        <strong>{NOMBRE_ETAPA[p.etapa] || p.etapa}</strong>
+        <span className="sutil">
+          {pct != null ? `${pct}%` : `${p.hecho} cuadros`}
+          {restante != null && ` · faltan ${segundosATiempo(restante)}`}
+        </span>
+      </div>
+      <div className="progreso chico" role="progressbar" aria-valuenow={pct ?? undefined}>
+        <div className="barra" style={{ width: pct != null ? `${pct}%` : '100%' }} />
+      </div>
+      {p.total > 0 && (
+        <p className="ayuda">
+          {p.hecho.toLocaleString('es-AR')} de {p.total.toLocaleString('es-AR')} cuadros
+        </p>
+      )}
     </div>
   )
 }

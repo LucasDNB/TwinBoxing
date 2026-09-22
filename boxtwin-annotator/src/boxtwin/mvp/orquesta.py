@@ -47,7 +47,7 @@ from boxtwin.core.project import ProjectPaths, cargar_o_crear, project_paths
 from boxtwin.mvp.candidatos import elegir, recortar
 from boxtwin.mvp.fightcard import construir
 from boxtwin.mvp.guardia import ConfigGuardia, medir
-from boxtwin.mvp.sesion import Sesion
+from boxtwin.mvp.sesion import Progreso, Sesion
 
 __all__ = [
     "CORRECCIONES",
@@ -114,7 +114,11 @@ def procesar(
     cfg_pre = PreprocessConfig(
         model=modelo_pose, imgsz=imgsz, device=device, tracker=default_tracker_path(),
     )
-    r = preprocess(video_en_sesion, salida, cfg_pre, on_progress=progreso)
+    # La barra de la consola y el archivo que lee la API son el mismo callback: el
+    # segundo encadena al primero, asi que la linea de comandos no pierde nada.
+    avance = Progreso(salida, "pose", encadena=progreso)
+    r = preprocess(video_en_sesion, salida, cfg_pre, on_progress=avance)
+    avance.terminar()
     cache = PoseCache.open(paths.npz)
     doc, _ = cargar_o_crear(paths, cache.meta)
 
@@ -153,11 +157,13 @@ def procesar(
         ses.anotar_etapa("evidencia", 0.0, reutilizada=True, tracks=len(ev))
     else:
         detector = DetectorGuantes(str(modelo_guantes), device=None if device == "0" else device)
+        avance = Progreso(salida, "guantes", encadena=progreso)
         ev = analizar(
             cache, video_en_sesion, detector, cfg_identidad,
             alto_imagen=doc.video.height, fps=doc.video.fps,
-            total_frames=doc.video.total_frames, progreso=progreso,
+            total_frames=doc.video.total_frames, progreso=avance,
         )
+        avance.terminar()
         guardar_evidencia(ev, ruta_ev)
         ses.anotar_etapa("evidencia", time.perf_counter() - t0, tracks=len(ev))
 
@@ -189,6 +195,7 @@ def procesar(
             "ningun par de tracks coexiste lo suficiente como para afirmar que son dos "
             "personas distintas: hay que elegir las dos semillas a mano entre los candidatos"
         )
+    Progreso(salida, "").terminar()
     ses.estado = "espera_siembra"
     ses.guardar()
     return ses
