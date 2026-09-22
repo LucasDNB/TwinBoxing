@@ -110,6 +110,7 @@ entrenador.
 
 - [ ] `BOXTWIN_SECRETO` puesto. `/salud` lo dice.
 - [ ] `BOXTWIN_INVITACION` con un código, no en `abierto`.
+- [ ] `BOXTWIN_DOCS` sin poner, para que `/docs` no quede público. `/salud` lo dice.
 - [ ] Disco: cada sesión deja el video más el cache de pose. No se borra solo.
 - [ ] La estación tiene que estar despierta. Revisar que no se suspenda sola.
 - [ ] La GPU es la misma con la que trabajás. Un entrenamiento tuyo y una sesión de un

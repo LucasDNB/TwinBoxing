@@ -79,6 +79,10 @@ reporta las tres:
 - Con `BOXTWIN_WEB` apuntando al frontend construido, la API lo sirve y queda **un solo
   origen**: alcanza con exponer este puerto y no hace falta CORS.
 
+`/docs`, `/redoc` y `/openapi.json` están **apagados por default**, por el mismo criterio
+que el registro: no filtran datos, pero publican la lista de endpoints a cualquiera que
+tenga la URL. Para desarrollar, `BOXTWIN_DOCS=1`.
+
 Sin `BOXTWIN_DB` usa sqlite, que alcanza mientras haya un solo worker.
 
 Para ponerlo online: [`despliegue/README.md`](../despliegue/README.md).

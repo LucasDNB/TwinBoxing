@@ -66,6 +66,15 @@ class Config:
         default_factory=lambda: os.environ.get("BOXTWIN_INVITACION", "")
     )
 
+    # La documentacion interactiva de FastAPI. Apagada por default por el mismo criterio
+    # que el registro: no filtra datos -toda ruta con datos pide token- pero publica la
+    # lista completa de endpoints a cualquiera que tenga la URL, y detras de un tunel eso
+    # es superficie que nadie pidio. En desarrollo sirve, asi que se prende con una
+    # variable en vez de desaparecer del codigo.
+    docs: bool = field(
+        default_factory=lambda: os.environ.get("BOXTWIN_DOCS", "") not in ("", "0", "no")
+    )
+
     # El frontend construido. Servirlo desde la misma API deja UN solo origen, que es lo que
     # hace que alcance con un tunel y que no haga falta CORS en produccion.
     web: Path | None = field(

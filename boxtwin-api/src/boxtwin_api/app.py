@@ -64,6 +64,9 @@ app = FastAPI(
     lifespan=_ciclo,
     title="BoxTwin",
     version="0.1",
+    docs_url="/docs" if cfg.docs else None,
+    redoc_url="/redoc" if cfg.docs else None,
+    openapi_url="/openapi.json" if cfg.docs else None,
     description=(
         "Analisis tactico de sparring filmado. Reporta golpes DETECTADOS, con la precision "
         "y el recall medidos del detector. No reporta conexion, puntuacion ni veredicto: "
@@ -519,6 +522,7 @@ def salud() -> dict:
         # Las dos cosas que hay que poder mirar desde afuera antes de abrir el tunel.
         "secreto_efimero": cfg.secreto_efimero,
         "registro": cfg.modo_registro,
+        "docs": cfg.docs,
         "frontend": bool(cfg.web and (cfg.web / "index.html").is_file()),
     }
 

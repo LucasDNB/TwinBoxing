@@ -318,3 +318,18 @@ def test_el_frontend_no_tapa_las_rutas_de_la_api(entorno, monkeypatch, tmp_path)
     assert c.get("/salud").json()["ok"] is True
     assert c.post("/auth/login",
                   json={"email": "x@y.com", "clave": "clavelarga1"}).status_code == 401
+
+
+def test_la_documentacion_interactiva_esta_apagada_por_default(cliente):
+    # No filtra datos, pero publica la lista de endpoints a cualquiera que tenga la URL.
+    # Detras de un tunel eso es superficie que nadie pidio.
+    for ruta in ("/docs", "/redoc", "/openapi.json"):
+        assert cliente.get(ruta).status_code == 404, ruta
+    assert cliente.get("/salud").json()["docs"] is False
+
+
+def test_pero_se_puede_prender_para_desarrollar(entorno, monkeypatch):
+    c = _recargar(monkeypatch, BOXTWIN_DOCS="1", BOXTWIN_INVITACION="abierto")
+    assert c.get("/docs").status_code == 200
+    assert c.get("/openapi.json").status_code == 200
+    assert c.get("/salud").json()["docs"] is True
