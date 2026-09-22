@@ -1,0 +1,50 @@
+{
+  "kind": "boxtwin.guantes.modelo",
+  "creado": "2026-09-20T23:09:45.302477+00:00",
+  "config": {
+    "pesos": "yolov8n.pt",
+    "epocas": 80,
+    "imgsz": 320,
+    "batch": 64,
+    "paciencia": 20,
+    "semilla": 0,
+    "device": "0",
+    "flipud": 0.0,
+    "fliplr": 0.5
+  },
+  "datos": "data/recortes-corregidos",
+  "procedencia_de_los_datos": {
+    "kind": "boxtwin.guantes.recortes",
+    "conteos": {
+      "train": {
+        "recortes": 1664,
+        "cajas": 3236
+      },
+      "valid": {
+        "recortes": 306,
+        "cajas": 646
+      },
+      "test": {
+        "recortes": 169,
+        "cajas": 354
+      }
+    },
+    "config": {
+      "margen": 0.08,
+      "alto_minimo": 64,
+      "ratio_min": 0.05,
+      "ratio_max": 0.35,
+      "conf_persona": 0.25
+    },
+    "entrada": "data/roboflow-v3"
+  },
+  "metricas_validacion": {
+    "metrics/precision(B)": 0.8692427976525317,
+    "metrics/recall(B)": 0.7923806159100277,
+    "metrics/mAP50(B)": 0.8768130466203105,
+    "metrics/mAP50-95(B)": 0.6808365953452314,
+    "fitness": 0.6808365953452314
+  },
+  "advertencia": "las metricas de validacion se midieron sobre fotografia de producto: la validacion de este dataset no tiene una sola imagen de ring, porque los cuadros de video son un solo clip y el reparto por procedencia los manda enteros a train. No leer este mAP como rendimiento en ringside",
+  "corrida": "/home/lucasb/Proyectos/TwinBoxing/boxtwin-guantes/modelos-corr/_corridas/guantes"
+}

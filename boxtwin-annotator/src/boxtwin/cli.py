@@ -245,6 +245,53 @@ def build_parser() -> argparse.ArgumentParser:
         help="cuenta los frames decodificando y reconcilia el fps. Tarda lo que tarde el video.",
     )
 
+    ia = sub.add_parser(
+        "identidad-auto",
+        help="asigna identidad a los tracks usando el detector de guantes",
+        description=(
+            "Tres filtros medidos: altura saca al publico, guante saca al arbitro y al "
+            "entrenador, y el color del guante decide A contra B. Lo que no se puede decidir "
+            "queda SIN ASIGNAR y lo resuelve el anotador, que es distinto de adivinarlo."
+        ),
+    )
+    ia.add_argument("video", type=Path)
+    ia.add_argument("--project", type=Path, default=None)
+    ia.add_argument("--modelo", type=Path, required=True,
+                    help="pesos del detector de guantes, entrenado sobre recortes de persona")
+    ia.add_argument("--segundos", type=float, default=5.0,
+                    help="de que parte del principio del video sale el grupo de referencia, "
+                         "el que define cual peleador es A. No recorta la evidencia: la "
+                         "particion usa el video entero")
+    ia.add_argument("--separacion-minima", type=float, default=0.55, dest="separacion_minima",
+                    help="separacion de color por debajo de la cual NO se asigna A ni B. Con "
+                         "0,449 el reparto salio 13 tracks a A contra 1 a B: una asignacion "
+                         "equivocada con cara de correcta")
+    ia.add_argument("--paso", type=int, default=5, help="se evalua un cuadro de cada N")
+    ia.add_argument("--umbral-guante", type=float, default=0.30, dest="umbral_guante",
+                    help="fraccion minima de recortes con guante para considerar peleador. "
+                         "Depende del detector y del material: en transmision conviene 0,40, "
+                         "que saca al arbitro sin perder nada")
+    ia.add_argument("--min-guantes-voto", type=int, default=5, dest="min_guantes_voto",
+                    help="guantes minimos para que un track vote su color. Los tracks de "
+                         "transmision son mucho mas cortos que los de gimnasio")
+    ia.add_argument("--fraccion-altura", type=float, default=0.55, dest="fraccion_altura",
+                    help="alto minimo relativo al track mas alto del video. Relativo y no "
+                         "absoluto porque un gimnasio y una transmision no comparten escala")
+    ia.add_argument("--dry-run", action="store_true", dest="dry_run",
+                    help="calcula y reporta sin escribir el archivo de anotacion")
+    ia.add_argument("--forzar", action="store_true",
+                    help="aplicar aunque el documento ya tenga correcciones manuales, que "
+                         "se descartan")
+    ia.add_argument("--device", default=None, help="device de torch, p.ej. 0 o cpu")
+    ia.add_argument("--guardar-evidencia", type=Path, default=None, dest="guardar_evidencia",
+                    help="volcar lo medido a un json. Recorrer el video cuesta minutos y "
+                         "elegir umbrales sobre lo ya medido cuesta milisegundos")
+    ia.add_argument("--evidencia", type=Path, default=None,
+                    help="usar una evidencia ya guardada en vez de recorrer el video")
+    ia.add_argument("--contra-anotacion", action="store_true", dest="contra_anotacion",
+                    help="puntuar la propuesta contra las asignaciones manuales del "
+                         "documento, sin escribir nada")
+
     return p
 
 
@@ -326,6 +373,125 @@ def _cmd_preprocess(args: argparse.Namespace) -> int:
             "  mitad, asi que puede ser cualquiera de las dos. Verificar con\n"
             "  'boxtwin-annotator probe <video> --count' antes de anotar sobre este cache."
         )
+    return 0
+
+
+def _cmd_identidad_auto(args: argparse.Namespace) -> int:
+    from boxtwin.core.annotations import save as save_doc
+    from boxtwin.core.deteccion_guantes import DetectorGuantes
+    from boxtwin.core.identidad_auto import (
+        AsignarIdentidadAuto, ConfigIdentidadAuto, analizar, cargar_evidencia,
+        guardar_evidencia, proponer, puntuar_contra,
+    )
+    from boxtwin.core.posecache import PoseCache
+    from boxtwin.core.project import cargar_o_crear, project_paths
+
+    paths = project_paths(args.video)
+    if not paths.npz.is_file():
+        print(f"error: falta el cache de pose ({paths.npz.name}). Corre primero preprocess",
+              file=sys.stderr)
+        return 1
+    if not Path(args.modelo).is_file():
+        print(f"error: no existe el modelo {args.modelo}", file=sys.stderr)
+        return 1
+
+    cache = PoseCache.open(paths.npz)
+    # Si el video nunca se abrio en el anotador no tiene documento, y este comando existe
+    # justamente para correr sin que nadie lo abra. Se crea vacio desde el meta del
+    # preproceso, que es de donde lo sacaria la GUI.
+    nuevo = not paths.annot.is_file()
+    doc, _ = cargar_o_crear(paths, cache.meta)
+    if nuevo:
+        print(f"no habia anotacion: se creo {paths.annot.name}", file=sys.stderr)
+    cfg = ConfigIdentidadAuto(
+        segundos_ancla=args.segundos, separacion_minima=args.separacion_minima,
+        paso=args.paso, min_guantes_voto=args.min_guantes_voto,
+        umbral_guante=args.umbral_guante, fraccion_altura=args.fraccion_altura,
+    )
+    detector = DetectorGuantes(str(args.modelo), device=args.device)
+
+    def progreso(f: int, fin: int) -> None:
+        print(f"  cuadro {f}/{fin}", file=sys.stderr)
+
+    if args.evidencia:
+        ev = cargar_evidencia(args.evidencia)
+    else:
+        ev = analizar(
+            cache, paths.video, detector, cfg,
+            alto_imagen=doc.video.height, fps=doc.video.fps,
+            total_frames=doc.video.total_frames, progreso=progreso,
+        )
+        if args.guardar_evidencia:
+            guardar_evidencia(ev, args.guardar_evidencia)
+            print(f"evidencia guardada en {args.guardar_evidencia}", file=sys.stderr)
+    prop = proponer(ev, cfg, doc.video.total_frames, doc.video.fps)
+    d = prop.diagnostico
+
+    print(f"\n{d.get('tracks', 0)} tracks en el cache")
+    print(f"  pasan el filtro de altura (>= {d.get('umbral_altura', 0):.3f}): "
+          f"{d.get('pasan_altura', 0)}")
+    print(f"  pasan el filtro de guante (>= {d.get('umbral_guante', 0):.2f}): "
+          f"{d.get('nucleo', 0)}"
+          f"   (+{d.get('rescatables', 0)} fragmentos cortos rescatables)")
+    if prop.semillas:
+        print(f"\nparticion: {d.get('tracks_por_coexistencia', 0)} tracks resueltos por "
+              f"coexistencia en {d.get('componentes_con_dos_lados', 0)} grupo/s"
+              + ("" if d.get("ancla_del_principio")
+                 else f"  [el grupo de referencia NO aparece en los primeros "
+                      f"{cfg.segundos_ancla:g} s]"))
+        if d.get("componentes_sin_orientar"):
+            print(f"  {d['componentes_sin_orientar']} grupo/s sin orientar: el color no "
+                  "distinguia entre las dos posibilidades")
+        for rol, tid in prop.semillas.items():
+            t, sat, val = prop.perfiles[rol]
+            tono = "sin color" if t < 0 else f"tono {t:.1f}"
+            print(f"  {rol}: track {tid}  ({tono}, sat {sat:.0f}, val {val:.0f})")
+        print(f"  separacion entre perfiles: {d.get('separacion_de_perfiles', 0):.3f}")
+    print(f"\nasignados: {d.get('asignados_A', 0)} tracks a A, "
+          f"{d.get('asignados_B', 0)} a B")
+    print(f"sin asignar, para que los resuelva el anotador: {len(prop.sin_asignar)}"
+          + (f"  {prop.sin_asignar[:12]}" if prop.sin_asignar else ""))
+    for aviso in prop.avisos:
+        print(f"\nATENCION: {aviso}")
+
+    if args.contra_anotacion:
+        pt = puntuar_contra(prop, doc)
+        print("\ncontra las asignaciones manuales del documento:")
+        if not pt.get("evaluables"):
+            print("  el documento no tiene tracks de peleador que la propuesta haya decidido")
+        else:
+            print(f"  tracks evaluables: {pt['evaluables']}")
+            print(f"  acierto de la particion: {pt['aciertos']}/{pt['evaluables']} = "
+                  f"{pt['acierto']:.1%}"
+                  + ("   [las etiquetas A y B salieron invertidas, que no es un error: "
+                     "la propuesta las asigna por posicion]" if pt["etiquetas_invertidas"]
+                     else ""))
+            print(f"  peleadores que los filtros descartaron: "
+                  f"{pt['peleadores_descartados_por_los_filtros']} de "
+                  f"{pt['peleadores_en_la_verdad']}")
+            print(f"  peleadores que quedaron sin decidir: {pt['peleadores_sin_decidir']}")
+        return 0
+
+    if args.dry_run:
+        print("\n--dry-run: no se escribio nada")
+        return 0
+    if not prop.semillas:
+        # Igual se aplican los filtros de descarte: sacan la mayoria de los tracks y eso es
+        # trabajo que el anotador no tiene que repetir, aunque A y B queden sin decidir.
+        if not prop.roles:
+            print("\nno hay nada que aplicar", file=sys.stderr)
+            return 1
+        print("\nno se pudo decidir A contra B, pero los descartes si se aplican")
+
+    cmd = AsignarIdentidadAuto(prop, annotator="identidad-auto", forzar=args.forzar)
+    try:
+        cmd.do(doc)
+    except ValueError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    save_doc(doc, paths.annot)
+    print(f"\n{cmd.aplicados} asignaciones escritas en {paths.annot.name}")
+    print("Revisalo en el anotador: los tracks sin asignar salen en su propio color.")
     return 0
 
 
@@ -604,6 +770,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_bundle(args)
         if args.comando == "probe":
             return _cmd_probe(args)
+        if args.comando == "identidad-auto":
+            return _cmd_identidad_auto(args)
     except KeyboardInterrupt:
         print("\ninterrumpido. El trabajo hecho quedo persistido: volve a correr el "
               "mismo comando para reanudar.", file=sys.stderr)
