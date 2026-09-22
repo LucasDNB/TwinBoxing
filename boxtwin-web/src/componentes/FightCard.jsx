@@ -35,6 +35,26 @@ export default function FightCard({ sesionId, fc, sesion, alCambiar, alVerPerfil
   const [activo, setActivo] = useState(null)
   const [filtro, setFiltro] = useState('todos')
   const [corrigiendo, setCorrigiendo] = useState(null)
+  // Desplegable: son decenas de eventos y ocupan mas que todo el resto junto. Arranca
+  // cerrada y la eleccion se recuerda, porque quien la usa para revisar la abre una vez.
+  const [abierta, setAbierta] = useState(() => {
+    try {
+      return localStorage.getItem('boxtwin.linea_abierta') === '1'
+    } catch {
+      return false
+    }
+  })
+
+  const alternarLinea = () => {
+    setAbierta((v) => {
+      try {
+        localStorage.setItem('boxtwin.linea_abierta', v ? '0' : '1')
+      } catch {
+        /* sin persistencia, dura lo que dure la pestana */
+      }
+      return !v
+    })
+  }
   const [error, setError] = useState(null)
   // El reproductor NO va fijo por default: pegado arriba se come media pantalla y tapa las
   // lecturas de abajo, que son las que el entrenador vino a leer. Queda a eleccion, y la
@@ -188,16 +208,7 @@ export default function FightCard({ sesionId, fc, sesion, alCambiar, alVerPerfil
         ) : null}
       </div>
 
-      <p className="margen" role="note">{textoDeMargen(fc)}</p>
-
       <Boxeadores sesionId={sesionId} alVerPerfil={alVerPerfil} />
-
-      {sinAsignar > 0.05 && (
-        <p className="aviso">
-          El {porcentaje(sinAsignar)} del tiempo hubo alguien en pantalla que el sistema no
-          pudo identificar. Lo de abajo está contado sobre el resto.
-        </p>
-      )}
       {(fc.avisos || []).map((a, i) => (
         <p className="aviso" key={i}>{a}</p>
       ))}
@@ -222,9 +233,17 @@ export default function FightCard({ sesionId, fc, sesion, alCambiar, alVerPerfil
             })}
           </tbody>
         </table>
+        {/* RF6 y RF5 en una linea: el conteo no puede viajar sin su margen ni sin decir
+            cuanto tiempo quedo sin mirar, pero eso cabe al pie de la tabla y no en un
+            bloque de seis renglones arriba de todo. */}
+        <p className="ayuda">{textoDeMargen(fc)}</p>
         <p className="ayuda">
-          Cobertura de identidad: A {porcentaje(ident.cobertura_A)}, B{' '}
-          {porcentaje(ident.cobertura_B)}.
+          Identidad resuelta: A {porcentaje(ident.cobertura_A)}, B{' '}
+          {porcentaje(ident.cobertura_B)}
+          {sinAsignar > 0.005
+            ? ` · ${porcentaje(sinAsignar)} del tiempo con alguien sin identificar`
+            : ''}
+          .
         </p>
       </section>
 
@@ -281,28 +300,38 @@ export default function FightCard({ sesionId, fc, sesion, alCambiar, alVerPerfil
         </section>
       )}
 
-      <Guardia fc={fc} />
-
       <section className="tarjeta">
         <div className="encabezado_linea">
-          <h2>Línea de tiempo</h2>
-          <div className="opciones">
-            {['todos', 'A', 'B'].map((f) => (
-              <button
-                key={f}
-                type="button"
-                className={`chip ${filtro === f ? 'activo' : ''}`}
-                onClick={() => setFiltro(f)}
-              >
-                {f === 'todos' ? 'Los dos' : f}
-              </button>
-            ))}
-          </div>
+          <h2>
+            <button type="button" className="desplegable" onClick={alternarLinea}
+                    aria-expanded={abierta}>
+              <span className="flecha" aria-hidden="true">{abierta ? '▾' : '▸'}</span>
+              Línea de tiempo
+              <span className="sutil"> · {eventos.length}</span>
+            </button>
+          </h2>
+          {abierta && (
+            <div className="opciones">
+              {['todos', 'A', 'B'].map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  className={`chip ${filtro === f ? 'activo' : ''}`}
+                  onClick={() => setFiltro(f)}
+                >
+                  {f === 'todos' ? 'Los dos' : f}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {error && <p className="error" role="alert">{error}</p>}
-        {visibles.length === 0 && <p className="sutil">No se detectó ningún golpe.</p>}
+        {abierta && visibles.length === 0 && (
+          <p className="sutil">No se detectó ningún golpe.</p>
+        )}
 
+        {abierta && (
         <ol className="eventos">
           {visibles.map((ev) => {
             const tipo = nombreDeTipo(ev.tipo, fc.nomenclatura)
@@ -350,6 +379,7 @@ export default function FightCard({ sesionId, fc, sesion, alCambiar, alVerPerfil
             )
           })}
         </ol>
+        )}
       </section>
 
       <section className="tarjeta">
@@ -379,51 +409,5 @@ export default function FightCard({ sesionId, fc, sesion, alCambiar, alVerPerfil
         </p>
       </section>
     </div>
-  )
-}
-
-function Guardia({ fc }) {
-  const resumen = ['A', 'B'].map((p) => {
-    const eventos = fc.peleadores[p]?.guardia || []
-    const medidos = eventos.filter((e) => e.fraccion_opuesta_afuera != null)
-    const caidas = medidos.filter((e) => e.mano_opuesta_caida).length
-    const retornos = eventos.map((e) => e.retorno_ms).filter((x) => x != null)
-    const mediana = retornos.length
-      ? [...retornos].sort((a, b) => a - b)[Math.floor(retornos.length / 2)]
-      : null
-    const noVuelve = eventos.filter((e) => e.retorno_ms == null && e.medible).length
-    return { p, n: eventos.length, medidos: medidos.length, caidas, mediana, noVuelve }
-  })
-
-  if (resumen.every((r) => r.n === 0)) return null
-
-  return (
-    <section className="tarjeta">
-      <h2>Guardia</h2>
-      <p className="ayuda">
-        Indicador nuevo, todavía sin validar contra marcas a mano. La profundidad no se ve en
-        una sola cámara: esto es una estimación sobre la imagen.
-      </p>
-      <table className="numeros">
-        <thead>
-          <tr>
-            <th></th>
-            <th>mano opuesta caída</th>
-            <th>retorno mediano</th>
-            <th>no vuelve</th>
-          </tr>
-        </thead>
-        <tbody>
-          {resumen.map((r) => (
-            <tr key={r.p}>
-              <th scope="row">Peleador {r.p}</th>
-              <td>{r.medidos ? `${r.caidas} de ${r.medidos}` : '—'}</td>
-              <td>{r.mediana != null ? `${Math.round(r.mediana)} ms` : '—'}</td>
-              <td>{r.noVuelve}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
   )
 }

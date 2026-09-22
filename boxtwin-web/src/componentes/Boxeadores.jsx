@@ -77,11 +77,7 @@ export default function Boxeadores({ sesionId, asignados, alAsignar, alVerPerfil
 
   return (
     <section className="boxeadores">
-      <h3>Quien es quien</h3>
-      <p className="ayuda">
-        A y B salen de la posicion en pantalla, asi que no significan lo mismo en otro video.
-        Poniendo el nombre, las sesiones de una misma persona se juntan en un perfil.
-      </p>
+      <h3>Asignar identidad</h3>
 
       <div className="asignacion">
         <label>

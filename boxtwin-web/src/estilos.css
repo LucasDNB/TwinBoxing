@@ -183,6 +183,13 @@ table.numeros.chica td, table.numeros.chica th { font-size: 0.85rem; }
 .barra_round .valor { font-size: 0.85rem; font-weight: 600; }
 
 .encabezado_linea { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+/* El titulo de la linea de tiempo es el que la despliega: son decenas de eventos y ocupan
+   mas que todo el resto junto, asi que arranca cerrada. */
+.desplegable {
+  background: none; border: 0; color: inherit; font: inherit; padding: 0;
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+}
+.desplegable .flecha { color: var(--acento); font-size: 0.9em; }
 
 .eventos { list-style: none; padding: 0; margin: 8px 0 0; }
 .eventos li {

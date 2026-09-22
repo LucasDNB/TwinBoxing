@@ -49,8 +49,8 @@ describe('textoDeMargen', () => {
     expect(t).toContain('89%')
   })
 
-  it('dice detectados y no lanzados', () => {
-    expect(textoDeMargen(fc)).toContain('no golpes lanzados')
+  it('dice DETECTADOS, que es lo que RF6 exige y no es lo mismo que lanzados', () => {
+    expect(textoDeMargen(fc)).toContain('Golpes detectados')
   })
 
   it('dice que el conteo esta por debajo del real', () => {

@@ -40,9 +40,8 @@ export function porcentaje(x, decimales = 0) {
 export function textoDeMargen(fc) {
   const d = (fc && fc.detector) || {}
   return (
-    `Golpes detectados, no golpes lanzados. El detector encuentra alrededor del ` +
-    `${porcentaje(d.recall_medido)} de los golpes reales y acierta en el ` +
-    `${porcentaje(d.precision_medida)} de lo que marca, medido sobre material que no vio. ` +
-    `El conteo está por debajo del real: lo que sirve es comparar adentro de la sesión.`
+    `Golpes detectados: el detector encuentra ~${porcentaje(d.recall_medido)} de los ` +
+    `reales y acierta ~${porcentaje(d.precision_medida)}, sobre material que no vio. ` +
+    `El conteo está por debajo del real; sirve para comparar adentro de la sesión.`
   )
 }
