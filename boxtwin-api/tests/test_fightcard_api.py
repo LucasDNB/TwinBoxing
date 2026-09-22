@@ -165,3 +165,34 @@ def test_un_rango_de_los_ultimos_bytes(cliente, lista):
     r = cliente.get(f"/videos/{lista}/stream", headers={"Range": "bytes=-5"})
     assert r.status_code == 206
     assert len(r.content) == 5
+
+
+# -- ticket de video --------------------------------------------------------
+
+
+def test_el_ticket_sirve_para_reproducir_sin_header(cliente, lista):
+    # Un <video> no puede mandar Authorization. El ticket es lo que puede llevar en la URL.
+    tk = cliente.get(f"/videos/{lista}/ticket").json()["ticket"]
+    r = cliente.get(f"/videos/{lista}/stream?t={tk}", headers={"Authorization": ""})
+    assert r.status_code == 200
+
+
+def test_un_ticket_de_otra_sesion_no_sirve(cliente, registrado, lista):
+    # Lo que hace que el ticket no sea un token en la query: vale para un solo video.
+    otra = subir_video(cliente, nombre="otra.mp4").json()["job_id"]
+    tk = cliente.get(f"/videos/{otra}/ticket").json()["ticket"]
+    r = cliente.get(f"/videos/{lista}/stream?t={tk}", headers={"Authorization": ""})
+    assert r.status_code == 401
+
+
+def test_un_ticket_vencido_no_sirve(cliente, lista, entorno):
+    from boxtwin_api.seguridad import emitir_ticket
+
+    tk = emitir_ticket("x", lista, entorno["cfg"].secreto, minutos=-1)
+    r = cliente.get(f"/videos/{lista}/stream?t={tk}", headers={"Authorization": ""})
+    assert r.status_code == 401
+
+
+def test_sin_ticket_ni_header_no_se_reproduce(cliente, lista):
+    r = cliente.get(f"/videos/{lista}/stream", headers={"Authorization": ""})
+    assert r.status_code == 401

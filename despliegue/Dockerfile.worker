@@ -1,0 +1,70 @@
+# BoxTwin - La imagen del worker.
+#
+# POR QUE DOS ENTORNOS CONDA EN UNA IMAGEN
+#   No se mezclan y no es capricho: el detector corre con torch 2.6 y el clasificador con
+#   torch 2.1 mas el stack de OpenMMLab pinneado contra CUDA 11.8. Un solo entorno pide
+#   mover uno de los dos pines por una razon que no es tecnica. Entre las dos etapas va un
+#   JSON, que es como ya funciona el pipeline medido.
+#
+# EL ORDEN DE LAS CAPAS
+#   mmcv se compila y es donde se van los minutos, asi que va antes del codigo del
+#   proyecto: cambiar una linea de python no puede costar veinte minutos de build.
+#
+# SI ESTA IMAGEN NO SALE A TIEMPO
+#   El plan B esta declarado en el spec y no requiere tocar codigo: la clasificacion corre
+#   afuera del contenedor, en el entorno conda local, leyendo el mismo JSON. Es la variable
+#   BOXTWIN_CMD_CLASIFICADOR. Sin ella, el tipo de golpe queda sin estimar y el resto de la
+#   Fight-Card no depende de el.
+
+FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PATH=/opt/conda/bin:$PATH \
+    PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        wget git ffmpeg libgl1 libglib2.0-0 ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN wget -qO /tmp/mf.sh https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh \
+    && bash /tmp/mf.sh -b -p /opt/conda && rm /tmp/mf.sh
+
+# -- entorno 1: pose, identidad y detector -----------------------------------
+RUN conda create -y -n twinboxing_env python=3.11 && conda clean -afy
+RUN /opt/conda/envs/twinboxing_env/bin/pip install --no-cache-dir \
+        torch==2.6.0 torchvision --index-url https://download.pytorch.org/whl/cu124 \
+    && /opt/conda/envs/twinboxing_env/bin/pip install --no-cache-dir \
+        ultralytics opencv-python-headless pyyaml pydantic numpy
+
+# -- entorno 2: el clasificador, pinneado ------------------------------------
+# Las versiones estan fijas porque el stack de OpenMMLab es fragil y este entorno ya
+# funciona. No se actualiza nada aca sin volver a medir.
+RUN conda create -y -n boxtwin_mmaction python=3.10 && conda clean -afy
+RUN /opt/conda/envs/boxtwin_mmaction/bin/pip install --no-cache-dir \
+        torch==2.1.0 torchvision==0.16.0 --index-url https://download.pytorch.org/whl/cu118
+RUN /opt/conda/envs/boxtwin_mmaction/bin/pip install --no-cache-dir -U openmim \
+    && /opt/conda/envs/boxtwin_mmaction/bin/mim install "mmengine>=0.10" "mmcv==2.1.0" \
+        "mmdet==3.2.0" "mmpose==1.3.2" \
+    && /opt/conda/envs/boxtwin_mmaction/bin/pip install --no-cache-dir \
+        "mmaction2==1.2.0" opencv-python-headless
+
+WORKDIR /app
+COPY boxtwin-annotator /app/boxtwin-annotator
+COPY boxtwin-detector /app/boxtwin-detector
+COPY boxtwin-api /app/boxtwin-api
+
+RUN /opt/conda/envs/twinboxing_env/bin/pip install --no-cache-dir \
+        -e /app/boxtwin-annotator -e /app/boxtwin-detector -e /app/boxtwin-api
+
+# Los pesos NO van adentro de la imagen: se montan. Un checkpoint nuevo no puede pedir
+# rehacer la imagen, y menos un engine de TensorRT, que no se copia entre maquinas (RNF2).
+ENV BOXTWIN_CMD="/opt/conda/envs/twinboxing_env/bin/boxtwin-annotator" \
+    BOXTWIN_CMD_CLASIFICADOR="/opt/conda/envs/boxtwin_mmaction/bin/python /app/boxtwin-detector/tools/clasificar_sesion.py" \
+    BOXTWIN_DATOS=/datos \
+    BOXTWIN_MODELO_GUANTES=/modelos/guantes-v2.pt \
+    BOXTWIN_MODELO_DETECTOR=/modelos/detector-7fuentes.pt \
+    BOXTWIN_CONFIG_CLASIFICADOR=/modelos/poseC3D_7fuentes.py \
+    BOXTWIN_CHECKPOINT_CLASIFICADOR=/modelos/poseC3D_7fuentes.pth
+
+VOLUME ["/datos", "/modelos"]
+CMD ["/opt/conda/envs/twinboxing_env/bin/python", "-m", "boxtwin_api.worker"]

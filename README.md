@@ -529,17 +529,63 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      heuristica, y el clasificador de siete fuentes. Verificado que la TCN cruza de
      torch 2.6 a 2.1, asi que queda autocontenida sin tocar el entorno pinneado
 
+22-09 El MVP: de video crudo a Fight-Card, con un solo paso humano
+
+  1. La pieza que faltaba no era un modelo sino un camino: el detector entraba por
+     Fuente, que sale de un export, que sale de un annot.json que alguien toco. No
+     habia forma de correr el sistema sobre un video sin anotarlo antes, ni para el
+     producto ni para medir de punta a punta sobre una sesion nueva
+  2. boxtwin procesar y boxtwin completar cierran ese camino. Van en dos comandos y no
+     en uno por una razon que no es de ingenieria: entre la pose y el detector hay una
+     pregunta que el sistema contesta bien el 82,4% de las veces y una persona el
+     99,1%, que es cual de los dos cuerpos es cual
+  3. La siembra humana entra en la identidad como parametro opcional. Fija el grupo de
+     referencia, orienta los grupos que el color no puede orientar -que es lo unico que
+     la coexistencia no puede hacer, porque por definicion no comparten un cuadro- y
+     decide quien es A. El camino automatico no cambia y hay un test que lo fija
+  4. EL REMUESTREO NO ERA OPCIONAL. demo_vivo.py corria el detector sobre los keypoints
+     tal cual, y andaba porque sus tres fuentes eran de 30 fps. El campo receptivo del
+     modelo esta en cuadros: un video de celular a 60 fps le duplica la escala temporal
+     de todo lo que vio. boxtwin_detector.inferencia remuestrea antes de las features,
+     que es el mismo orden que usa el armado del dataset
+  5. La Fight-Card declara adentro del documento las tres cosas que no dice: conectados,
+     puntuacion y veredicto. Y el conteo viaja siempre con el recall medido al lado,
+     porque con 0,484 esta por debajo del real y lo que la medicion sostiene es la
+     comparacion adentro de la sesion, no el numero absoluto
+  6. Los indicadores de guardia tienen tres estados y no dos. "La mano esta abajo" y "no
+     se ve la mano" no son lo mismo, y tratarlos igual convierte una oclusion en un
+     descuido tactico. El umbral de retorno lento queda SIN CALIBRAR a proposito: sale
+     de C3, y hasta entonces el indicador reporta el tiempo y no marca nada
+  7. La cola es una tabla con SELECT ... FOR UPDATE SKIP LOCKED y no Redis con Celery.
+     Una pieza menos, y encolar el trabajo y crear la sesion pasan en el mismo commit,
+     asi que no existe el estado "hay sesion y no hay trabajo"
+  8. El worker llama a subprocesos porque los dos entornos conda no se mezclan, y el
+     estado de la sesion lo lee del archivo que escribio el comando y no del codigo de
+     salida: un proceso que termina en 0 y dejo la sesion a medias es un caso real
+  9. Un <video> no puede mandar un header, asi que la API emite un ticket de media hora
+     valido para un solo video. Poner el token de sesion en la query hubiera sido lo
+     peor de los dos mundos: dura dias, sirve para todo y queda en los logs
+ 10. 142 tests nuevos entre los cuatro paquetes, 799 en total, y el circuito verificado
+     de punta a punta contra un servidor HTTP real: registro, subida, candidatos,
+     siembra, Fight-Card, correccion de tipo y export
+ 11. NADA DE ESTO CORRIO SOBRE UN VIDEO DE VERDAD todavia. Los tests usan pose sintetica
+     y una TCN sin entrenar; lo que prueban es que los datos lleguen enteros de una
+     punta a la otra, no que el sistema acierte. La imagen del worker esta escrita y sin
+     construir
+
 PENDIENTE Y PROXIMO PASO
 
-  Queda a medio camino la prueba sobre un video que el sistema no conoce:
-  anotacion-amateur/ tiene el video preprocesado -boxeo amateur de competencia, camara
-  lejana, arbitro adentro del ring- y le falta solo la asignacion de identidad, que son
-  unos minutos. Es el test mas duro que hay disponible: el ancho de hombros mediano es
-  de 22 px contra 132 en sparring-3, asi que pone a prueba la invariancia a escala de
-  las features, que nunca se probo a ese tamano.
+  Correr el circuito completo sobre anotacion-amateur/, que ya esta preprocesado y es
+  el caso mas duro disponible: camara lejana, arbitro adentro del ring, ancho de
+  hombros mediano de 22 px contra 132 en sparring-3, y los dos peleadores con guantes
+  casi del mismo color -separacion 0,133 contra un piso de 0,55-. O sea que el color no
+  va a decidir nada y todo el peso cae en la coexistencia y en la siembra, que es
+  exactamente el caso para el que la siembra existe.
 
-  Y el proximo paso del proyecto es RESOLVER LA IDENTIDAD DE FORMA AUTOMATICA. Es la
-  pieza que sigue siendo enteramente manual y la que se lleva el 73% del tiempo de
-  anotacion, medido. Todo lo demas del pipeline -pose, deteccion, familia- ya corre
-  solo; la identidad no, y es lo que impide correr el sistema sobre un video nuevo sin
-  intervencion humana.
+  Falta antes el checkpoint de produccion del detector: el ensamble de cinco semillas
+  entrenado sobre las siete fuentes. Los que hay son por fold, que sirven para medir y
+  no para producir.
+
+  Despues, las tres mediciones pre-registradas: C1 identidad con siembra sobre las seis
+  fuentes de gimnasio, C3 el indicador de guardia contra 100 golpes marcados a mano, y
+  C5 el tiempo de procesamiento. Detalle en docs/PROXIMOS_PASOS.md.

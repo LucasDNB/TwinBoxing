@@ -1,0 +1,211 @@
+/*
+ * BoxTwin - Estilos.
+ *
+ * Oscuro por defecto y no por gusto: el caso base es un celular en un gimnasio, mirando
+ * video de sparring, que casi siempre es material oscuro. Una interfaz blanca alrededor de
+ * un video oscuro obliga a la pupila a hacer el trabajo dos veces.
+ *
+ * Los botones tienen 44 px de alto minimo, que es el tamano al que una mano transpirada
+ * acierta. No es una convencion copiada: es el ancho del dedo.
+ */
+
+:root {
+  --fondo: #111417;
+  --panel: #1a1e22;
+  --panel2: #22272c;
+  --borde: #2e353c;
+  --texto: #e8ecef;
+  --sutil: #9aa5ad;
+  --acento: #4a9eff;
+  --a: #ff8f3f;
+  --b: #4ad0c0;
+  --alerta: #f0b429;
+  --error: #ff6b6b;
+  --radio: 12px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* El celular en el gimnasio puede tener notch. */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.app { max-width: 720px; margin: 0 auto; padding: 0 12px 64px; }
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 12px 0; position: sticky; top: 0; z-index: 3;
+  background: linear-gradient(var(--fondo) 80%, transparent);
+}
+header .derecha { display: flex; align-items: center; gap: 12px; }
+
+.marca { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+
+.centrado { min-height: 100dvh; display: grid; place-items: center; padding: 16px; }
+.angosta { width: min(420px, 100%); }
+
+.tarjeta {
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 16px;
+  margin: 0 0 16px;
+}
+.tarjeta.tenue { opacity: 0.85; }
+.tarjeta h2 { font-size: 1.05rem; margin: 0 0 12px; }
+.tarjeta h3 { font-size: 0.95rem; margin: 12px 0 6px; color: var(--sutil); }
+
+label { display: block; margin: 0 0 14px; font-size: 0.9rem; color: var(--sutil); }
+label.en_linea { display: flex; align-items: center; gap: 8px; }
+input, select {
+  display: block; width: 100%; margin-top: 6px; min-height: 44px;
+  background: var(--panel2); color: var(--texto);
+  border: 1px solid var(--borde); border-radius: 8px; padding: 8px 10px;
+  font-size: 16px; /* menos de 16 hace que iOS haga zoom al enfocar */
+}
+input[type="file"] { padding: 10px; }
+label.en_linea input { width: 100px; margin: 0; }
+
+fieldset { border: 1px solid var(--borde); border-radius: 8px; margin: 0 0 14px; padding: 12px; }
+legend { color: var(--sutil); font-size: 0.85rem; padding: 0 6px; }
+
+button { font: inherit; cursor: pointer; }
+
+.principal {
+  width: 100%; min-height: 48px; border: 0; border-radius: 10px;
+  background: var(--acento); color: #05121f; font-weight: 650;
+}
+.principal:disabled { background: var(--borde); color: var(--sutil); cursor: not-allowed; }
+
+.enlace {
+  background: none; border: 0; color: var(--acento); padding: 8px 0; text-decoration: none;
+}
+.enlace.chico { font-size: 0.85rem; }
+
+.opciones { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.chip {
+  min-height: 40px; padding: 8px 14px; border-radius: 999px;
+  background: var(--panel2); color: var(--texto);
+  border: 1px solid var(--borde); text-decoration: none; display: inline-flex;
+  align-items: center;
+}
+.chip.activo { background: var(--acento); color: #05121f; border-color: var(--acento); }
+
+.sutil { color: var(--sutil); }
+.ayuda { color: var(--sutil); font-size: 0.85rem; margin: 6px 0 0; }
+.error {
+  color: var(--error); background: #2a1618; border: 1px solid #5a2a2e;
+  border-radius: 8px; padding: 10px 12px; margin: 10px 0;
+}
+.error pre { white-space: pre-wrap; font-size: 0.8rem; margin: 6px 0 0; }
+
+/* El margen del detector. Amarillo y arriba: no es una nota al pie. */
+.margen {
+  background: #2a2413; border-left: 3px solid var(--alerta);
+  border-radius: 6px; padding: 12px 14px; margin: 0 0 16px; font-size: 0.9rem;
+}
+.aviso {
+  background: var(--panel2); border-left: 3px solid var(--sutil);
+  border-radius: 6px; padding: 10px 12px; margin: 0 0 12px; font-size: 0.85rem;
+  color: var(--sutil);
+}
+
+/* -- progreso de subida -- */
+.progreso { position: relative; background: var(--panel2); border-radius: 10px; height: 48px; overflow: hidden; }
+.progreso .barra { background: var(--acento); height: 100%; transition: width 0.2s; }
+.progreso span { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 600; }
+
+/* -- pasos del estado -- */
+.pasos { list-style: none; padding: 0; margin: 12px 0 0; }
+.pasos li { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
+.pasos .punto {
+  width: 10px; height: 10px; border-radius: 50%; background: var(--borde); flex: none;
+}
+.pasos .hecho .punto { background: var(--b); }
+.pasos .actual .punto { background: var(--acento); box-shadow: 0 0 0 4px rgba(74, 158, 255, 0.2); }
+.pasos .pendiente { color: var(--sutil); }
+
+/* -- candidatos de siembra -- */
+.candidatos { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.candidato {
+  position: relative; background: var(--panel2); border: 2px solid var(--borde);
+  border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 6px;
+}
+.candidato.elegido { border-color: var(--acento); }
+.candidato img { width: 100%; height: 180px; object-fit: contain; background: #000; border-radius: 6px; }
+.candidato .rol {
+  position: absolute; top: 10px; left: 10px; width: 30px; height: 30px;
+  display: grid; place-items: center; border-radius: 50%;
+  background: var(--acento); color: #05121f; font-weight: 700;
+}
+.candidato .meta { font-size: 0.75rem; color: var(--sutil); }
+.sin_imagen {
+  display: grid; place-items: center; height: 180px; color: var(--sutil);
+  background: var(--panel2); border-radius: 6px;
+}
+.sin_imagen.alto { height: 200px; }
+
+/* -- fight-card -- */
+.reproductor { position: sticky; top: 56px; z-index: 2; margin: 0 0 12px; }
+.reproductor video { width: 100%; max-height: 42dvh; background: #000; border-radius: var(--radio); display: block; }
+
+table.numeros { width: 100%; border-collapse: collapse; }
+table.numeros th, table.numeros td { padding: 8px 6px; text-align: right; border-bottom: 1px solid var(--borde); }
+table.numeros th[scope="row"], table.numeros thead th:first-child { text-align: left; }
+table.numeros thead th { color: var(--sutil); font-weight: 500; font-size: 0.8rem; }
+table.numeros .grande { font-size: 1.3rem; font-weight: 700; }
+table.numeros.chica td, table.numeros.chica th { font-size: 0.85rem; }
+
+.barras { display: flex; gap: 10px; align-items: flex-end; height: 120px; }
+.barra_round { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+.barra_round .columna { width: 100%; height: 90px; display: flex; align-items: flex-end; background: var(--panel2); border-radius: 6px; }
+.barra_round .relleno { width: 100%; background: var(--acento); border-radius: 6px; min-height: 2px; }
+.barra_round .etiqueta { font-size: 0.75rem; color: var(--sutil); }
+.barra_round .valor { font-size: 0.85rem; font-weight: 600; }
+
+.encabezado_linea { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+.eventos { list-style: none; padding: 0; margin: 8px 0 0; }
+.eventos li {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--borde);
+}
+.eventos li.activo { background: rgba(74, 158, 255, 0.08); }
+.evento {
+  flex: 1; display: flex; align-items: center; gap: 10px; min-height: 48px;
+  background: none; border: 0; color: var(--texto); text-align: left; padding: 6px 0;
+}
+.evento .t { font-variant-numeric: tabular-nums; color: var(--sutil); min-width: 48px; }
+.evento .pel { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; font-size: 0.75rem; font-weight: 700; color: #05121f; }
+.evento .pel_A { background: var(--a); }
+.evento .pel_B { background: var(--b); }
+.evento .brazo { color: var(--sutil); font-size: 0.85rem; min-width: 30px; }
+/* Lo estimado se ve distinto de lo medido, y lo corregido distinto de los dos. */
+.evento .tipo.estimado { color: var(--sutil); font-style: italic; }
+.evento .tipo.corregido { color: var(--b); }
+.evento .tipo.vacio { color: #5c666e; font-size: 0.85rem; }
+.evento .tipo em { font-size: 0.75rem; opacity: 0.7; font-style: normal; margin-left: 4px; }
+.correccion { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; padding: 0 0 10px; }
+
+.lista { list-style: none; padding: 0; margin: 0; }
+.fila {
+  width: 100%; display: flex; align-items: center; gap: 12px; min-height: 52px;
+  background: none; border: 0; border-bottom: 1px solid var(--borde);
+  color: var(--texto); text-align: left;
+}
+.fila strong { flex: 1; }
+.estado { font-size: 0.75rem; padding: 3px 8px; border-radius: 999px; background: var(--panel2); color: var(--sutil); }
+.estado.listo { background: #16342f; color: var(--b); }
+.estado.fallo { background: #2a1618; color: var(--error); }
+
+details summary { cursor: pointer; padding: 8px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}

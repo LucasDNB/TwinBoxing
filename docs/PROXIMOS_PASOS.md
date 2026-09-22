@@ -1,79 +1,101 @@
 # Próximos pasos — retomar acá
 
-Estado al 11-08. La verificación por muestreo está hecha sobre V4, V5, V8, V9 y
-V10. Lo que sigue es reanotación manual, que no se puede delegar.
+Estado al 22-09. La spec del MVP está aprobada (`docs/specs/MVP.md`) y el esqueleto
+está construido y testeado, pero **nada de esto corrió todavía sobre un video de
+verdad**: los tests usan pose sintética y un detector sin entrenar. Eso es lo
+primero.
 
-## Resultado de la verificación
+## Lo que está hecho
 
-| Video | Aciertos /18 | Piso Wilson 95% | Decisión |
-|---|---|---|---|
-| V5 | 18 | 82,4% | usar tal cual |
-| V8 | 17 | 74,2% | usar tal cual |
-| V9 | 17 | 74,2% | usar tal cual |
-| V10 | 15 | 60,8% | reanotar completo |
-| V4 | 12 | 43,7% | reanotar completo |
+| | |
+|---|---|
+| `boxtwin procesar` / `completar` | de video crudo a `fightcard.json`, sin proyecto de anotación |
+| Siembra humana en la identidad | el par de tracks fija el ancla, la orientación y quién es A |
+| `boxtwin_detector.inferencia` | carriles desde keypoints identificados, con remuestreo a 30 fps |
+| Indicadores de guardia | los dos, con el umbral de retorno **sin calibrar** |
+| `fightcard.json` v0.1 | golpes detectados con su recall al lado, tipo aparte y rotulado |
+| `boxtwin-api` | cola en tabla, worker por subproceso, export, corrección de tipo |
+| `boxtwin-web` | los seis pasos del flujo |
+| `despliegue/` | Dockerfiles y compose, **nunca construidos** |
 
-V4 venía figurando como confiable con 5 de 5. Eso no era evidencia: el piso
-Wilson de 5/5 es 56,6% y el 66,7% real cae adentro de ese intervalo.
+## 1. Correr el circuito sobre material real (primero, y bloquea todo)
 
-Cero clips sin golpe en los 90 de muestra. La segmentación temporal de estos
-cinco videos está intacta y el daño es solo de clase.
-
-## 1. Chequeo temprano de V3 (primero, son 3 minutos)
-
-```bash
-cd ~/Proyectos/TwinBoxing/test-BoxingVI
-python ../scripts/boxingvi_annot.py --csv ./clips/manifest_filtrado.csv \
-    --videos V3 --shuffle --out ./clips/reanotado.csv
-```
-
-Frenar a los ~50 clips y mirar la tasa de "sin golpe". `reanotado.csv` se
-escribe incrementalmente y se lee sin frenar el server:
+`anotacion-amateur/` ya está preprocesado y es el caso más duro que hay: cámara
+lejana, árbitro adentro del ring, ancho de hombros mediano de 22 px contra 132 en
+`sparring-3`. Pone a prueba la invariancia a escala de las features, que nunca se
+probó a ese tamaño.
 
 ```bash
-python -c "import pandas as pd; d=pd.read_csv('clips/reanotado.csv'); d=d[d.video_key=='V3']; print(len(d), (d.nueva_cls=='sin golpe').mean())"
+cd ~/Proyectos/TwinBoxing
+boxtwin-annotator procesar anotacion-amateur/videos/<video>.mp4 \
+    --out sesiones/amateur --modelo-guantes boxtwin-guantes/modelos/guantes-v2.pt \
+    --round 120
+# mirar sesiones/amateur/candidatos/*.jpg y elegir
+boxtwin-annotator completar sesiones/amateur --semilla-a <t> --semilla-b <t> \
+    --detector modelos/detector-7fuentes.pt
 ```
 
-Si se acerca al 42% de V2, las ventanas de V3 también están rotas, reclasificar
-no alcanza y hay que resegmentar. Es el único bloque grande cuya segmentación
-sigue sin verificar, y son 810 clips en juego.
+Ojo con el amateur: los dos llevan guantes casi del mismo color (separación 0,133
+contra un piso de 0,55), así que el color no va a decidir nada y todo el peso cae
+en la coexistencia y en la siembra. Es exactamente el caso para el que se hizo la
+siembra, y es la prueba de si alcanza.
 
-Cuidado: `reanotado.csv` ya tiene los 232 clips de V2. El script reanuda por
-`clip` así que no los repite, pero al analizar hay que filtrar por `video_key`.
+**Falta el checkpoint de producción del detector**: el ensamble de cinco semillas
+entrenado sobre las siete fuentes. Los que hay son por fold, para medir. Uno
+entrenado con todo no sirve para medir pero es el que corresponde en producción, y
+hay que guardarlo con `boxtwin_detector.ensamble.guardar`.
 
-## 2. Reanotar V4 (559 clips, ~28 min)
+## 2. Medir C1: identidad con siembra humana
 
-```bash
-python ../scripts/boxingvi_annot.py --csv ./clips/manifest_filtrado.csv \
-    --videos V4 --shuffle --out ./clips/reanotado.csv
-```
+Umbral pre-registrado ≥ 95% de tracks bien asignados sobre las seis fuentes de
+gimnasio, sembrando con los dos tracks que elegiría el usuario. Ya existe
+`puntuar_contra`, que compara una propuesta contra las asignaciones manuales del
+documento, así que la medición es barata: correr `proponer` con semillas sobre
+cada fuente anotada y puntuar.
 
-Prioridad sobre V10 porque V4 aporta 75 de los 136 Rear Hook que sobreviven al
-descarte de V1 y V2, y sus 2 Rear Hook de muestra salieron los dos mal, los dos
-como Rear Uppercut. Al terminar, recontar la clase.
+Si no llega, el plan B está declarado: corrección manual por track en la web.
 
-## 3. Reanotar V10 (151 clips, ~9 min) y después V3 completo
+## 3. Medir C3: el indicador de guardia
 
-Mismo comando cambiando `--videos`.
+100 golpes de `sparring-3` marcados a mano (volvió a guardia sí/no, mano opuesta
+caída sí/no) contra lo que dice el indicador. Umbral de acuerdo 80% en cada uno.
 
-## 4. Consolidación
+De esta medición sale además el umbral de retorno lento, que **hoy no existe**: el
+módulo reporta el tiempo medido y no marca nada, a propósito. Fijar el umbral antes
+de mirar los datos, sobre la mediana.
 
-- Excluir los 209 clips de placas de V1 (`clips/placas.csv`). Discutible si V1
-  se descarta entero, que es lo que hoy parece.
-- Rehacer el split. La validación aguanta: 83% de ella es V5 y V9, que pasaron.
-  El problema es train, donde tras descartar V1 y V2 el único bloque limpio son
-  los 199 clips de V8.
-- Recalcular pesos de clase.
-- Decidir si Rear Hook sigue siendo viable como clase.
-- Muestra de 18 para V7, que pasa como confiable con 3 clips mirados.
-- Decidir V1 con la tasa de descarte que deje V3.
+Si no valida, F5 sale del MVP y se declara como línea futura. El volumen y la línea
+de tiempo sostienen el producto solos.
 
-## 5. Recién ahí, Fase D
+## 4. Medir C5: tiempo de procesamiento
 
-Extracción de pose sobre el dataset final (`boxingvi_pose.py`).
+Umbral 2x la duración del video. La instrumentación ya está: `sesion.json` guarda
+segundos por etapa y `factor_tiempo_real` los divide por la duración. El tiempo de
+máquina no cuenta la espera humana de la siembra, que es lo correcto y lo que una
+medición a reloj de pared mezclaría.
 
-## Aparte: experimentos que no dependen del dataset
+## 5. La imagen del worker
 
-El Capítulo 4 no se escribe sin el benchmark de perfiles de despliegue (§6 de
-CLAUDE.md). Se puede correr en paralelo a toda la anotación y hoy es el
-verdadero cuello de botella para la escritura.
+`despliegue/Dockerfile.worker` lleva los dos entornos conda. Está escrito y sin
+construir, y ahí es donde el riesgo 3 de la spec dice que suelen irse los días:
+mmcv pinneado contra CUDA 11.8 compilando adentro de una imagen.
+
+Si no sale, el plan B no toca código: `BOXTWIN_CMD_CLASIFICADOR` apunta al entorno
+conda local y la clasificación corre afuera del contenedor leyendo el mismo JSON.
+
+## 6. Lo que queda abierto y hay que decidir
+
+- **La nomenclatura rioplatense.** La spec fija que cross es el gancho y eso está
+  puesto. Falta decidir cómo se llaman en pantalla el hook y el uppercut; hoy
+  quedan con su nombre en inglés, que es lo que se usa en el gimnasio, en vez de
+  inventarles una traducción. Es criterio de dominio, no de código.
+- **El clasificador.** Entra al MVP sin umbral y se registra por versión de
+  checkpoint (C7). Cada corrección del entrenador es una etiqueta nueva sobre
+  material que el modelo no vio, y se guarda en `correcciones.jsonl` con el
+  checkpoint que produjo la original. Eso es lo que le falta para generalizar.
+
+## Aparte: los experimentos que no dependen de nada de esto
+
+El benchmark de perfiles de despliegue sigue sin hacerse y el Capítulo 4 no se
+escribe sin él (§6 de CLAUDE.md). Hoy es el verdadero cuello de botella para la
+escritura, y se puede correr en paralelo a todo lo de arriba.

@@ -26,7 +26,7 @@ import json
 import secrets
 import time
 
-__all__ = ["emitir_token", "hashear", "leer_token", "verificar"]
+__all__ = ["emitir_ticket", "emitir_token", "hashear", "leer_ticket", "leer_token", "verificar"]
 
 _N, _R, _P = 2**14, 8, 1
 
@@ -82,5 +82,44 @@ def leer_token(token: str, secreto: str) -> str | None:
     except (ValueError, json.JSONDecodeError):
         return None
     if int(d.get("exp", 0)) < time.time():
+        return None
+    return str(d.get("u")) or None
+
+
+def emitir_ticket(usuario_id: str, sesion_id: str, secreto: str, minutos: int = 30) -> str:
+    """
+    Un permiso corto para UN video.
+
+    Existe porque un elemento <video> no puede mandar un header: el navegador pide la URL
+    solo, con sus rangos, y no hay forma de meterle el Authorization. La salida habitual es
+    poner el token en la query, y el token de sesion en una query es lo peor de los dos
+    mundos: dura dias, sirve para todo y queda escrito en los logs del servidor, en el
+    historial y en el Referer.
+
+    Este dura media hora, sirve para una sola sesion y para nada mas.
+    """
+    cuerpo = _b64(
+        json.dumps({
+            "u": usuario_id, "v": sesion_id, "exp": int(time.time()) + minutos * 60
+        }).encode()
+    )
+    firma = _b64(hmac.new(secreto.encode(), cuerpo.encode(), hashlib.sha256).digest())
+    return f"{cuerpo}.{firma}"
+
+
+def leer_ticket(ticket: str, sesion_id: str, secreto: str) -> str | None:
+    """El usuario, si el ticket es valido Y es para esta sesion."""
+    try:
+        cuerpo, firma = ticket.split(".")
+    except ValueError:
+        return None
+    esperada = _b64(hmac.new(secreto.encode(), cuerpo.encode(), hashlib.sha256).digest())
+    if not hmac.compare_digest(firma, esperada):
+        return None
+    try:
+        d = json.loads(_de_b64(cuerpo))
+    except (ValueError, json.JSONDecodeError):
+        return None
+    if int(d.get("exp", 0)) < time.time() or d.get("v") != sesion_id:
         return None
     return str(d.get("u")) or None

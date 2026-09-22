@@ -40,7 +40,14 @@ from boxtwin_api.db import crear_tablas, obtener_sesion
 from boxtwin_api.esquemas import Credenciales, EntradaCorreccion, Siembra, Token, sesion_a_dict
 from boxtwin_api.exportar import a_csv, a_html
 from boxtwin_api.modelos import Correccion, Sesion, Trabajo, Usuario
-from boxtwin_api.seguridad import emitir_token, hashear, leer_token, verificar
+from boxtwin_api.seguridad import (
+    emitir_ticket,
+    emitir_token,
+    hashear,
+    leer_ticket,
+    leer_token,
+    verificar,
+)
 
 __all__ = ["app"]
 
@@ -401,11 +408,23 @@ def corregir(
 _TROZO = 1024 * 1024
 
 
+@app.get("/videos/{sesion_id}/ticket")
+def ticket(
+    sesion_id: str,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(obtener_sesion),
+) -> dict:
+    """Un permiso corto para reproducir ESTE video, que es lo que el <video> puede llevar."""
+    s = sesion_del_usuario(sesion_id, usuario, db)
+    return {"ticket": emitir_ticket(usuario.id, s.id, cfg.secreto), "minutos": 30}
+
+
 @app.get("/videos/{sesion_id}/stream")
 def stream(
     sesion_id: str,
+    t: str = "",
     range: str = Header(default=""),
-    usuario: Usuario = Depends(usuario_actual),
+    authorization: str = Header(default=""),
     db: Session = Depends(obtener_sesion),
 ):
     """
@@ -415,7 +434,19 @@ def stream(
     el minuto 12, y la linea de tiempo -que es la funcion que convierte un numero dudoso en
     una herramienta de revision- deja de servir.
     """
-    s = sesion_del_usuario(sesion_id, usuario, db)
+    # Dos formas de entrar: el header, para fetch, y el ticket, para el <video>, que no
+    # puede mandar headers. El ticket vale para esta sesion y para ninguna otra.
+    uid = leer_ticket(t, sesion_id, cfg.secreto) if t else None
+    if uid is None:
+        token = authorization[7:] if authorization.lower().startswith("bearer ") else ""
+        uid = leer_token(token, cfg.secreto) if token else None
+    if uid is None:
+        raise HTTPException(401, "hace falta iniciar sesion")
+    u = db.get(Usuario, uid)
+    if u is None:
+        raise HTTPException(401, "la cuenta ya no existe")
+
+    s = sesion_del_usuario(sesion_id, u, db)
     ruta = cfg.dir_sesion(s.id) / "videos" / s.video_nombre
     if not ruta.is_file():
         raise HTTPException(404, "no esta el video de esta sesion")

@@ -81,20 +81,39 @@ frágil. **No actualices nada ahí sin pedir confirmación explícita.**
 ### Rutas
 
 ```
-~/Proyectos/TwinBoxing/          repo, branch testeoDS
-├── scripts/                     scripts versionados
-├── test-BoxingVI/               directorio de trabajo del dataset
-│   ├── clips/<Clase>/<Video>_<inicio>_<fin>.mp4
-│   └── ...
-└── docs/experiments/            changelog de experimentos
+~/Proyectos/TwinBoxing/
+├── boxtwin-annotator/     anotador de escritorio, preproceso, identidad y los dos
+│                          comandos del producto (procesar / completar)
+├── boxtwin-detector/      detector temporal de golpes (TCN) y su inferencia
+├── boxtwin-guantes/       detector de guantes, que es lo que separa peleador de
+│                          arbitro y decide A contra B por color
+├── boxtwin-api/           API, cola en PostgreSQL y worker del MVP
+├── boxtwin-web/           frontend React + Vite
+├── despliegue/            Dockerfiles y compose de un nodo
+├── anotacion-*/           las siete fuentes anotadas, una por directorio
+├── modelos/               configs y checkpoints (los pesos van fuera de git)
+├── scripts/               scripts del dataset BoxingVI, cerrado (ver §4)
+└── docs/                  specs y changelog de experimentos
 ```
 
-Convención de invocación: se corre **desde `test-BoxingVI/`** llamando
-`python ../scripts/nombre.py`.
+Cada paquete se instala con `pip install -e ".[dev]"` sobre `twinboxing_env` y
+tiene sus tests. Los scripts de `scripts/` son de la etapa BoxingVI y se corrían
+desde `test-BoxingVI/`.
 
 ---
 
-## 4. Estado del dataset BoxingVI
+## 4. Estado del dataset BoxingVI (cerrado, se conserva como hallazgo)
+
+**BoxingVI no alimenta ningún modelo del proyecto.** La reanotación quedó sin
+hacer y no se va a hacer: el trabajo se movió a material propio anotado con
+`boxtwin-annotator`, que son siete fuentes y 1046 golpes, y ahí el detector
+aprende algo que transfiere a fuentes nuevas, cosa que sobre BoxingVI nunca
+pasó.
+
+Lo que sigue se conserva entero porque **es el hallazgo metodológico del
+Capítulo 4**: un dataset publicado con anotaciones por debajo del azar y fps
+declarados que son falsos. Eso se reporta, no se esconde. Lo que ya no se
+conserva es el plan de trabajo sobre él.
 
 Dataset público de Kumar et al. (NCVPRIPG 2025). Lo que encontramos ejecutando:
 
@@ -203,87 +222,73 @@ publicado y va documentado como tal en el Capítulo 4.
 
 ---
 
-## 5. Tarea en curso
+## 5. Tarea en curso: el MVP
 
-Verificación ciega por muestreo estratificado, 18 clips por video, mínimo 2 por
-clase presente. Hecha sobre V8, V9, V10 (`clips/muestra_v8v9v10.csv`, seed 42,
-commit `7f6dcd5`) y sobre V4, V5 (`clips/muestra_v4v5.csv`). Falta V7.
+Spec aprobada en `docs/specs/MVP.md`, 21-09. Ocho semanas, del 22-09 al 16-11,
+presentación el 17-11.
 
-Criterio de decisión **fijado antes de mirar los resultados**:
+El producto: un entrenador sube el video del sparring desde el celular, marca
+cuál de los dos peleadores es cuál, y recibe el volumen de golpes detectados por
+brazo y por round, la curva de trabajo, los indicadores de guardia y la
+distribución de tipos rotulada como estimación, con cada evento enlazado al
+instante exacto del video.
 
-| Aciertos sobre 18 | Decisión |
-|---|---|
-| 16 o más | El video se usa tal cual |
-| 11 a 15 | Reanotación completa del video |
-| 10 o menos | Se descarta |
+### De qué se parte, medido
 
-Con 18 de 18 el límite inferior del intervalo de confianza queda cerca del 82%.
-Alcanza para declarar el video usable, no para afirmar calidad del 95%. Eso se
-escribe así en el capítulo, sin inflarlo.
+- Pose y seguimiento: YOLOv8l-pose + BoT-SORT, 2,3x tiempo real sobre la 2080.
+- **Identidad automática** (18 al 22-09): altura, guante y color de guante.
+  82,4% de la partición sobre seis fuentes de gimnasio, 95,7% sobre transmisión.
+  Con los perfiles sembrados desde dos tracks de rol conocido, 99,1%. Toda la
+  diferencia entre 82,4% y 99,1% es la siembra, y por eso el flujo tiene un solo
+  paso humano.
+- Detector de golpes (TCN por brazo), sobre fuente no vista: precisión 0,885,
+  recall 0,484. Ensamble de cinco semillas, F1 0,635 sobre los seis folds
+  comparables contra 0,907 del techo humano.
+- Clasificador de familia (PoseConv3D, `boxtwin_mmaction`): **no generaliza a
+  fuentes nuevas.** El 0,745 medido está inflado. Entra al MVP igual, por
+  decisión de producto, rotulado como estimación y con la versión del checkpoint
+  al lado de cada etiqueta.
 
-El puntaje lo aplica `boxingvi_verifica.py`, no una cuenta a mano. Se escribió
-con el CSV de salida vacío, así que la regla de conteo tampoco se eligió viendo
-los datos, y se niega a aplicar la tabla si el n no es 18.
+### Lo que se construyó
 
-### Cola de reanotación, en este orden
+1. `boxtwin procesar` y `boxtwin completar`: de video crudo a `fightcard.json`
+   sin pasar por un proyecto de anotación. El corte entre los dos es la siembra.
+2. `boxtwin_detector.inferencia`: carriles desde keypoints ya identificados, con
+   remuestreo al timebase del modelo. `demo_vivo.py` se lo salteaba porque sus
+   tres fuentes eran de 30 fps; un video de celular puede venir a 24, 30 o 60.
+3. `boxtwin.mvp.guardia`: los dos indicadores. **El umbral de retorno lento no
+   está calibrado**, así que hoy reporta el tiempo medido y no marca nada.
+4. `boxtwin-api`: cola en una tabla con SKIP LOCKED, worker que llama a los dos
+   entornos conda por subproceso, y la Fight-Card servida con el video por
+   rangos.
+5. `boxtwin-web`: los seis pasos del flujo.
 
-1. **Chequeo temprano de V3**, 50 clips. Es el único bloque grande cuya
-   segmentación sigue sin verificar y su resultado cambia todo el plan: si la
-   tasa de vacíos se acerca al 42% de V2, V3 está muerto como está y hay que
-   resegmentar. Tres minutos para despejar 810 clips de incertidumbre.
-2. **V4 completo**, 559 clips. Aporta 55% de los Rear Hook que sobreviven.
-3. **V10 completo**, 151 clips.
-4. **V3 completo** si pasó el chequeo, 810 clips.
+### Lo que falta, en orden
 
-Total del orden 1520 clips, entre una hora y hora y media a los ritmos medidos
-(2,2 s por clip en V2 no ciego, 3,7 s en la verificación ciega).
+1. **Correr el circuito sobre material real.** Todo lo de arriba está probado
+   con datos sintéticos y con el detector de mentira; sobre video de verdad no
+   corrió nunca. El candidato es `anotacion-amateur/`, que ya está preprocesado.
+2. **Medir C1**: identidad con siembra humana sobre las seis fuentes de
+   gimnasio, umbral ≥ 95%.
+3. **Medir C3**: 100 golpes de `sparring-3` marcados a mano contra el indicador
+   de guardia, umbral de acuerdo 80%. Si no pasa, F5 sale del MVP. De ahí sale
+   también el umbral de retorno lento, que hoy no existe.
+4. **Medir C5**: tiempo de procesamiento, umbral 2x la duración del video. La
+   instrumentación por etapa ya está y la escribe `sesion.json`.
+5. Construir la imagen del worker. Está escrita y **nunca se construyó**: mmcv
+   compilado contra CUDA 11.8 adentro de una imagen es donde suelen irse días.
+6. Sesiones de prueba con usuarios (C4, C6).
 
-### Después de la reanotación
+### Criterios de aceptación
 
-1. Rehacer el split. La validación de hoy es V5 594 + V10 151 + V9 148, y el 83%
-   de ella (V5 y V9) viene de videos que pasaron la muestra, así que aguanta. El
-   daño está en train: descartados V1 y V2, el único bloque limpio que queda son
-   los 199 clips de V8.
-2. Recalcular pesos de clase sobre el dataset consolidado.
-3. Recontar Rear Hook y decidir si sigue siendo viable como clase.
-4. Decidir V1 con el dato de tasa de descarte que deje V3.
-5. Muestra de 18 para V7, que hoy pasa como confiable con 3 clips mirados.
-6. Recién ahí, Fase D: extracción de pose sobre el dataset final.
-
-### Herramientas relevantes
-
-- `boxingvi_clip.py` v0.2 — corte de clips sin reencoding.
-- `boxingvi_split.py` — split por video y pesos de clase.
-- `boxingvi_pose.py` — extracción de pose. Usa heurística de desplazamiento de
-  muñeca normalizado por longitud de torso para elegir al boxeador atacante.
-  Ojo: YOLOv8-pose detecta como personas a los boxeadores pintados en las
-  paredes del gimnasio, y V1 trae 209 clips que son placas de título (ver §4).
-- `boxingvi_placas.py` — detecta placas de título. Mide fracción de píxeles
-  negros y movimiento entre primer y último frame, dos cosas que no dependen de
-  la exposición del video, y antes de contar verifica que la distribución tenga
-  dos poblaciones separadas. Reclasifica desde las métricas guardadas sin releer
-  los videos, así que mover umbrales es instantáneo. Salida: `clips/placas.csv`.
-- `boxingvi_annot.py` — reanotación web. Servidor HTTP local, playback 0,25x,
-  anotación ciega con reveal opcional (tecla E), reanudable, registra tiempo de
-  decisión por clip.
-- `boxingvi_verifica.py` — puntaje de las verificaciones contra la tabla
-  pre-registrada. Reporta los dos denominadores etiquetados, piso Wilson 95%, y
-  si quedan clips en `dudoso` que crucen un umbral se declara indeterminado en
-  vez de redondear para un lado.
-- `boxingvi_muestra.py` — muestreo estratificado para verificación. Determinista
-  por semilla, mezcla las filas para no filtrar la etiqueta por el orden, y se
-  niega a pisar una muestra ya escrita salvo `--force`: resortear después de ver
-  resultados parciales anula el criterio pre-registrado. Sale en el esquema de
-  `manifest_filtrado.csv`, así que `boxingvi_annot.py` la consume sin cambios.
-  Muestra vigente: `clips/muestra_v8v9v10.csv`, 54 clips, seed 42, commit
-  `7f6dcd5` (anterior a toda anotación).
-
----
+Están pre-registrados en la sección 7 de la spec, escritos antes de medir. No se
+tocan después de ver los resultados.
 
 ## 6. Experimentos pendientes que bloquean la escritura
 
-Ninguno de estos depende del dataset. Se pueden correr en paralelo a la
-anotación. **El Capítulo 4 no se escribe sin el primero.**
+Ninguno depende del dataset y ninguno está hecho todavía. **El Capítulo 4 no se
+escribe sin el primero.** El tercero ahora tiene la imagen escrita, aunque sin
+construir.
 
 1. **Benchmark de perfiles de despliegue.** YOLOv8-pose n/s/m/l a 416/480/640 px,
    exportados a TensorRT y ONNX, en desktop y notebook. Medir FPS sostenidos con
@@ -295,7 +300,8 @@ anotación. **El Capítulo 4 no se escribe sin el primero.**
    perfil B es viable.
 3. **PoC de despliegue en nube.** Containerizar el worker, procesar ~20 videos en
    instancia GPU alquilada (presupuesto < 20 USD), medir throughput y costo real
-   por hora de video.
+   por hora de video. `despliegue/Dockerfile.worker` ya lleva los dos entornos
+   conda; falta construirlo, que es donde se van los días por mmcv.
 4. **Pérdida de precisión de pose entre 1080p y 720p.** Decide la estrategia de
    transcodificado en dispositivo antes de subir.
 
@@ -317,6 +323,8 @@ anotación. **El Capítulo 4 no se escribe sin el primero.**
 - **No actualices dependencias** de `boxtwin_mmaction` sin confirmación.
 - Los scripts van a `scripts/`, versionados. Nada de carpetas scratch sin
   versionar: ese patrón ya causó correr versiones viejas repetidas veces.
+- **Nada que produzca un número para la tesis puede quedar sin test.** Cada
+  paquete tiene los suyos y corren con `python -m pytest` desde su directorio.
 
 ### Estilo de código
 
