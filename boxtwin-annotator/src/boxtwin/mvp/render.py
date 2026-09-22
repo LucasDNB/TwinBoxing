@@ -47,6 +47,12 @@ __all__ = ["ANCHO_CONSOLA", "PROCESADO", "renderizar", "dibujar_consola", "compo
 PROCESADO = "procesado.mp4"
 ANCHO_CONSOLA = 300
 
+# El codec del video procesado, y no es un detalle de implementacion. mp4v es MPEG-4 Parte 2
+# y NINGUN navegador lo reproduce en un <video> de HTML5: el archivo se escribe sin error y
+# la pagina muestra un reproductor vacio, que es el peor modo de falla porque no se parece a
+# un fallo. Ademas pesa: los mismos tres minutos son 230 MB en mp4v contra 55 en h264.
+CODEC = "avc1"
+
 # BGR, los mismos del anotador para que el color signifique lo mismo en toda la herramienta.
 COLOR = {"A": (76, 88, 236), "B": (235, 158, 74)}
 
@@ -143,6 +149,36 @@ def componer(img, estado, ancho_consola=ANCHO_CONSOLA):
     return lienzo
 
 
+def _mover_indice_al_principio(ruta: Path) -> bool:
+    """
+    Remuxea el mp4 con el indice adelante, para que empiece a reproducir sin esperar.
+
+    opencv deja el atomo `moov` al final, asi que el navegador tiene que pedir primero el
+    tramo final del archivo y recien despues puede arrancar. Con rangos funciona igual, pero
+    sobre 55 MB la espera se nota justo al abrir la Fight-Card, que es cuando el usuario
+    decide si la herramienta sirve.
+
+    Es copia sin recodificar: segundos, no minutos. Si no hay ffmpeg se deja como esta, que
+    reproduce lo mismo pero arranca mas lento.
+    """
+    import shutil
+    import subprocess
+
+    if not shutil.which("ffmpeg"):
+        return False
+    tmp = ruta.with_suffix(".faststart.mp4")
+    r = subprocess.run(
+        ["ffmpeg", "-y", "-loglevel", "error", "-i", str(ruta),
+         "-c", "copy", "-movflags", "+faststart", str(tmp)],
+        capture_output=True,
+    )
+    if r.returncode != 0 or not tmp.is_file() or tmp.stat().st_size == 0:
+        tmp.unlink(missing_ok=True)
+        return False
+    tmp.replace(ruta)
+    return True
+
+
 def renderizar(
     directorio: Path,
     salida: Path | None = None,
@@ -206,11 +242,14 @@ def renderizar(
     fin = min(hasta or doc.video.total_frames, doc.video.total_frames, len(cache))
     salida = Path(salida) if salida else directorio / PROCESADO
     escritor = cv2.VideoWriter(
-        str(salida), cv2.VideoWriter_fourcc(*"mp4v"), fps,
+        str(salida), cv2.VideoWriter_fourcc(*CODEC), fps,
         (ancho_v + 2 * ancho_consola, alto_v),
     )
     if not escritor.isOpened():
-        raise RuntimeError(f"no se pudo abrir {salida} para escribir")
+        raise RuntimeError(
+            f"no se pudo abrir {salida} para escribir. Si el codec avc1 no esta en este "
+            "opencv, el video saldria en un formato que el navegador no reproduce"
+        )
 
     from collections import deque
 
@@ -254,6 +293,7 @@ def renderizar(
     finally:
         cap.release()
         escritor.release()
+    _mover_indice_al_principio(salida)
     if progreso is not None:
         progreso(fin - desde, fin - desde)
     return salida

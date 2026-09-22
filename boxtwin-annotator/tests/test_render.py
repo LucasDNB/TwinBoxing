@@ -11,7 +11,7 @@ import pytest
 np = pytest.importorskip("numpy")
 cv2 = pytest.importorskip("cv2")
 
-from boxtwin.mvp.render import ANCHO_CONSOLA, COLOR, componer, dibujar_consola
+from boxtwin.mvp.render import ANCHO_CONSOLA, CODEC, COLOR, componer, dibujar_consola
 
 
 def _estado(total_a=0, total_b=0, conteo_a=None, conteo_b=None):
@@ -118,3 +118,34 @@ def test_solo_se_marcan_los_dos_peleadores():
                  if p.role in (TrackRole.A, TrackRole.B) and not p.shadowed]
     assert len(dibujadas) == 2
     assert {p.role for p in dibujadas} == {TrackRole.A, TrackRole.B}
+
+
+# -- el codec ---------------------------------------------------------------
+
+
+def test_el_video_sale_en_algo_que_el_navegador_reproduce(tmp_path):
+    """
+    mp4v se escribe sin error y no se reproduce en HTML5: el usuario ve un reproductor
+    vacio, que no se parece a un fallo y por eso se busca en el lugar equivocado. Este test
+    lo agarra en el unico momento en que es barato.
+    """
+    destino = tmp_path / "prueba.mp4"
+    w = cv2.VideoWriter(str(destino), cv2.VideoWriter_fourcc(*CODEC), 30, (64, 48))
+    assert w.isOpened(), f"el codec {CODEC} no esta disponible en este opencv"
+    for _ in range(6):
+        w.write(np.zeros((48, 64, 3), np.uint8))
+    w.release()
+
+    cap = cv2.VideoCapture(str(destino))
+    try:
+        assert cap.isOpened(), "el archivo no se puede abrir de vuelta"
+        leido = int(cap.get(cv2.CAP_PROP_FOURCC))
+        etiqueta = "".join(chr((leido >> (8 * i)) & 0xFF) for i in range(4))
+    finally:
+        cap.release()
+    # opencv normaliza la etiqueta al leerla -se escribe avc1 y se lee h264- asi que se
+    # aceptan las dos formas del mismo codec. Lo que se rechaza es mp4v, que es el que el
+    # navegador no reproduce.
+    assert etiqueta.lower() in ("avc1", "h264"), (
+        f"salio {etiqueta!r}: si es mp4v o mpeg4, el navegador muestra un reproductor vacio"
+    )
