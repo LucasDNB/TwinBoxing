@@ -33,7 +33,15 @@ QUE CAMBIO RESPECTO DE LA PRIMERA VERSION
 
 QUE HACE
   Reproduce el video con el overlay de pose coloreado por peleador, corre el detector sobre
-  la secuencia entera, y muestra cada golpe detectado con su familia en un panel lateral.
+  la secuencia entera, y lleva UNA CONSOLA POR PELEADOR a cada lado del cuadro: su cuenta
+  acumulada, el desglose por familia y los ultimos golpes a medida que salen.
+
+  Las consolas van al costado y no encima del video, porque superpuestas taparian justo lo
+  que se esta mirando. Y son dos y no una compartida: con las dos columnas juntas hay que
+  leer el rol de cada renglon para saber de quien es el golpe, y mirando el video al mismo
+  tiempo eso no se hace.
+
+  Con --out escribe el video procesado en vez de -o ademas de- mostrarlo.
 
   La pose sale del cache del preproceso y las detecciones se calculan una vez al arrancar:
   el objetivo es mirar el sistema, no medir su velocidad.
@@ -41,7 +49,7 @@ QUE HACE
 USO
   ~/miniforge3/envs/boxtwin_mmaction/bin/python tools/demo_vivo.py <proyecto>
   ... --desde 3000 --velocidad 0.5 --umbral 0.85
-  ... --sin-ventana                                   # solo consola
+  ... --sin-ventana --out /tmp/procesado.mp4          # escribir sin abrir ventana
 
   Teclas: espacio pausa, flechas mueven de a un cuadro en pausa, q sale.
 """
@@ -244,40 +252,79 @@ def dibujar_pose(img, kp, score, color, umbral=0.3):
             cv2.circle(img, tuple(kp[i].astype(int)), 3, color, -1)
 
 
-def dibujar_panel(img, recientes, conteo, frame, fps, pausado):
-    alto, ancho = img.shape[:2]
-    w = 330
-    panel = img[:, ancho - w:]
-    cv2.rectangle(panel, (0, 0), (w, alto), (20, 20, 20), -1)
-    img[:, ancho - w:] = cv2.addWeighted(panel, 0.75, img[:, ancho - w:], 0.25, 0)
-    x = ancho - w + 14
+ANCHO_CONSOLA = 300
+
+
+def dibujar_consola(lienzo, x0, ancho, rol, conteo, eventos, fps):
+    """
+    La consola de un peleador: su cuenta acumulada y los golpes a medida que salen.
+
+    Una consola por peleador y no una compartida, que es como estaba. Con las dos columnas
+    juntas hay que leer el rol de cada renglon para saber de quien es el golpe, y mirando el
+    video al mismo tiempo eso no se hace: la vista va al peleador, no a la etiqueta. Separadas
+    y del color de cada uno, la cuenta se lee de reojo.
+    """
+    alto = lienzo.shape[0]
     f = cv2.FONT_HERSHEY_SIMPLEX
+    color = COLOR[rol]
+    cv2.rectangle(lienzo, (x0, 0), (x0 + ancho, alto), (18, 18, 20), -1)
+    cv2.line(lienzo, (x0, 0), (x0, alto), color, 3)
+    x = x0 + 16
 
-    cv2.putText(img, f"cuadro {frame}  {frame/fps:6.1f}s", (x, 28), f, 0.55, (200, 200, 200), 1)
-    if pausado:
-        cv2.putText(img, "PAUSA", (x + 215, 28), f, 0.55, (0, 215, 255), 2)
+    etiqueta = "PELEADOR A" if rol.endswith("A") else "PELEADOR B"
+    cv2.putText(lienzo, etiqueta, (x, 34), f, 0.62, color, 2)
 
-    y = 62
-    for rol in ("fighter_A", "fighter_B"):
-        c = conteo.get(rol, {})
-        cv2.putText(img, rol, (x, y), f, 0.5, COLOR[rol], 2)
-        cv2.putText(img, f"{sum(c.values())}", (x + 250, y), f, 0.6, COLOR[rol], 2)
-        y += 20
-        for cl in CLASES:
-            if c.get(cl):
-                cv2.putText(img, f"   {cl:15s} {c[cl]:3d}", (x, y), f, 0.42, (185, 185, 185), 1)
-                y += 16
-        y += 10
+    total = sum(conteo.values())
+    cv2.putText(lienzo, str(total), (x, 92), f, 1.6, color, 3)
+    cv2.putText(lienzo, "golpes", (x + 12 + 34 * len(str(total)), 92), f, 0.5, (150, 150, 150), 1)
 
-    cv2.line(img, (x - 4, y), (ancho - 12, y), (70, 70, 70), 1)
+    y = 124
+    cv2.line(lienzo, (x - 6, y), (x0 + ancho - 14, y), (60, 60, 60), 1)
     y += 24
-    cv2.putText(img, "ultimos golpes", (x, y), f, 0.45, (150, 150, 150), 1)
+    for cl in CLASES:
+        n = conteo.get(cl, 0)
+        tono = (190, 190, 190) if n else (85, 85, 85)
+        cv2.putText(lienzo, cl, (x, y), f, 0.44, tono, 1)
+        cv2.putText(lienzo, f"{n:3d}", (x0 + ancho - 52, y), f, 0.48, color if n else (85, 85, 85),
+                    2 if n else 1)
+        y += 21
+
+    y += 8
+    cv2.line(lienzo, (x - 6, y), (x0 + ancho - 14, y), (60, 60, 60), 1)
     y += 22
-    for fr, rol, cl, p in list(recientes)[-12:][::-1]:
-        cv2.putText(img, f"{fr:6d} {cl:14s} {p:.2f}", (x, y), f, 0.44, COLOR[rol], 1)
-        y += 18
-        if y > alto - 30:
+    cv2.putText(lienzo, "ultimos", (x, y), f, 0.42, (130, 130, 130), 1)
+    y += 20
+    # Del mas nuevo al mas viejo: lo que acaba de pasar es lo que se esta mirando.
+    for fr, cl, pr in list(eventos)[::-1]:
+        if y > alto - 14:
             break
+        cv2.putText(lienzo, f"{fr/fps:6.1f}s", (x, y), f, 0.4, (120, 120, 120), 1)
+        cv2.putText(lienzo, cl[:13], (x + 56, y), f, 0.42, color, 1)
+        cv2.putText(lienzo, f"{pr:.2f}", (x0 + ancho - 46, y), f, 0.38, (120, 120, 120), 1)
+        y += 18
+
+
+def componer(img, conteo, eventos, frame, fps, pausado, ancho_consola=ANCHO_CONSOLA):
+    """
+    Arma el cuadro final: consola de A, el video, consola de B.
+
+    Las consolas van al costado y no encima del video. Superpuestas taparian justo lo que se
+    esta mirando, y el punto de esto es poder ver el golpe y su etiqueta a la vez.
+    """
+    alto, ancho = img.shape[:2]
+    lienzo = np.zeros((alto, ancho + 2 * ancho_consola, 3), np.uint8)
+    lienzo[:, ancho_consola:ancho_consola + ancho] = img
+    dibujar_consola(lienzo, 0, ancho_consola, "fighter_A", conteo["fighter_A"],
+                    eventos["fighter_A"], fps)
+    dibujar_consola(lienzo, ancho_consola + ancho, ancho_consola, "fighter_B",
+                    conteo["fighter_B"], eventos["fighter_B"], fps)
+
+    f = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(lienzo, f"cuadro {frame}   {frame/fps:6.1f}s", (ancho_consola + 14, alto - 14),
+                f, 0.5, (210, 210, 210), 1)
+    if pausado:
+        cv2.putText(lienzo, "PAUSA", (ancho_consola + 220, alto - 14), f, 0.5, (0, 215, 255), 2)
+    return lienzo
 
 
 # ---------------------------------------------------------------------------
@@ -300,7 +347,16 @@ def main() -> int:
                         "0,75 y 0,80 donde se caen las marcas espurias")
     p.add_argument("--velocidad", type=float, default=1.0)
     p.add_argument("--ancho", type=int, default=1280)
-    p.add_argument("--sin-ventana", action="store_true", help="solo consola")
+    p.add_argument("--sin-ventana", action="store_true", help="no abrir ventana")
+    p.add_argument("--ancho-consola", type=int, default=ANCHO_CONSOLA, dest="ancho_consola",
+                   # El %% va escapado: argparse formatea el help con %, y un % suelto lo
+                   # rompe al imprimir --help.
+                   help="ancho de cada consola en pixeles. Sobre el proxy de 960 las de 300 "
+                        "se llevan el 38%% del cuadro; sobre el original de 1920, el 24%%")
+    p.add_argument("--out", type=Path, default=None,
+                   help="escribir el video procesado, con una consola por peleador a cada "
+                        "lado. Funciona con --sin-ventana, que es como conviene para un "
+                        "video largo")
     p.add_argument("--device", default="cuda:0")
     args = p.parse_args()
 
@@ -370,7 +426,8 @@ def main() -> int:
               f"p_det={g['prob']:.2f} p_cls={prob:.2f}")
     print()
 
-    recientes: deque = deque(maxlen=40)
+    # Una cola por peleador: cada consola muestra la suya.
+    eventos: dict[str, deque] = {"fighter_A": deque(maxlen=30), "fighter_B": deque(maxlen=30)}
     conteo: dict[str, dict[str, int]] = {"fighter_A": {}, "fighter_B": {}}
     hasta = min(args.hasta or cache.n_frames, cache.n_frames)
 
@@ -378,6 +435,10 @@ def main() -> int:
         cap.set(cv2.CAP_PROP_POS_FRAMES, args.desde)
     frame = args.desde
     pausado = False
+    # Se dibuja si hay que mostrarlo o si hay que escribirlo. El escritor se crea con el
+    # primer cuadro, que es cuando se sabe el tamano del lienzo con las dos consolas.
+    dibuja = (not args.sin_ventana) or args.out is not None
+    escritor = None
     espera_ms = max(1, int(1000 / (fps * max(args.velocidad, 0.01))))
 
     while frame < hasta:
@@ -397,10 +458,10 @@ def main() -> int:
         if not pausado:
             for g in por_inicio.get(frame, []):
                 rol = f"fighter_{g['rol']}"
-                recientes.append((frame, rol, g["clase"], g["p_clase"]))
+                eventos[rol].append((frame, g["clase"], g["p_clase"]))
                 conteo[rol][g["clase"]] = conteo[rol].get(g["clase"], 0) + 1
 
-        if not args.sin_ventana:
+        if dibuja:
             vis = img.copy()
             for tid, bbox, kp, sc in dets:
                 rol = ident.rol(tid, frame)
@@ -411,11 +472,23 @@ def main() -> int:
                 k[:, 0] *= esc_x
                 k[:, 1] *= esc_y
                 dibujar_pose(vis, k, sc, color)
-            dibujar_panel(vis, recientes, conteo, frame, fps, pausado)
-            h, w = vis.shape[:2]
+            lienzo = componer(vis, conteo, eventos, frame, fps, pausado, args.ancho_consola)
+
+            if args.out is not None and not pausado:
+                if escritor is None:
+                    alto_l, ancho_l = lienzo.shape[:2]
+                    escritor = cv2.VideoWriter(
+                        str(args.out), cv2.VideoWriter_fourcc(*"mp4v"), fps, (ancho_l, alto_l)
+                    )
+                    if not escritor.isOpened():
+                        raise SystemExit(f"no se pudo abrir {args.out} para escribir")
+                escritor.write(lienzo)
+
+        if not args.sin_ventana:
+            h, w = lienzo.shape[:2]
             if w != args.ancho:
-                vis = cv2.resize(vis, (args.ancho, round(h * args.ancho / w)))
-            cv2.imshow("BoxTwin - reconocimiento", vis)
+                lienzo = cv2.resize(lienzo, (args.ancho, round(h * args.ancho / w)))
+            cv2.imshow("BoxTwin - reconocimiento", lienzo)
 
             k = cv2.waitKey(1 if pausado else espera_ms) & 0xFF
             if k == ord("q"):
@@ -435,6 +508,9 @@ def main() -> int:
             frame += 1
 
     cap.release()
+    if escritor is not None:
+        escritor.release()
+        print(f"\nvideo procesado en {args.out}")
     if not args.sin_ventana:
         cv2.destroyAllWindows()
 
