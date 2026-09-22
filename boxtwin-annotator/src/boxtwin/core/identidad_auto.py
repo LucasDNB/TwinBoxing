@@ -100,7 +100,12 @@ class ConfigIdentidadAuto:
     fraccion_altura: float = 0.55
     umbral_guante: float = 0.30
     min_recortes: int = 15           # menos que esto y la fraccion no significa nada
-    min_guantes_voto: int = 10       # menos que esto y el voto se deja sin asignar
+    # Guantes minimos para que un track vote su color. Estaba en 10 y bajarlo a 5 sale
+    # gratis en gimnasio -87 aciertos de 105 contra 86 de 103, un falso mas- y paga en
+    # transmision, donde los tracks son mucho mas cortos: sobre Pacquiao recupera 7
+    # peleadores que quedaban sin decidir y sube la particion de 94,9% a 95,7% sin agregar
+    # un solo falso positivo.
+    min_guantes_voto: int = 5
     min_coexistencia: int = 3        # cuadros en que dos tracks tienen que coincidir
     min_guantes_rescate: int = 3     # guantes minimos para rescatar un fragmento corto
     # Diferencia minima entre las dos orientaciones posibles de un componente para animarse

@@ -272,6 +272,9 @@ def build_parser() -> argparse.ArgumentParser:
                          "Es una propiedad DEL DETECTOR y no una constante: el original pedia "
                          "0,45 y el reentrenado con material propio da fracciones mas bajas y "
                          "pide 0,30. Si cambia el modelo, recalibrar")
+    ia.add_argument("--min-guantes-voto", type=int, default=5, dest="min_guantes_voto",
+                    help="guantes minimos para que un track vote su color. Los tracks de "
+                         "transmision son mucho mas cortos que los de gimnasio")
     ia.add_argument("--fraccion-altura", type=float, default=0.55, dest="fraccion_altura",
                     help="alto minimo relativo al track mas alto del video. Relativo y no "
                          "absoluto porque un gimnasio y una transmision no comparten escala")
@@ -403,7 +406,7 @@ def _cmd_identidad_auto(args: argparse.Namespace) -> int:
         print(f"no habia anotacion: se creo {paths.annot.name}", file=sys.stderr)
     cfg = ConfigIdentidadAuto(
         segundos_ancla=args.segundos, separacion_minima=args.separacion_minima,
-        paso=args.paso,
+        paso=args.paso, min_guantes_voto=args.min_guantes_voto,
         umbral_guante=args.umbral_guante, fraccion_altura=args.fraccion_altura,
     )
     detector = DetectorGuantes(str(args.modelo), device=args.device)
