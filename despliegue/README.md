@@ -48,14 +48,31 @@ sudo cp despliegue/systemd/boxtwin-*.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now boxtwin-api boxtwin-worker
 
+#    Y DESPUES DE CADA MERGE, los dos. El paquete es editable, asi que el codigo nuevo
+#    esta en disco al instante, pero el proceso sigue con el que importo al arrancar.
+#    El frontend NO necesita restart -se sirve de disco- pero si npm run build.
+sudo systemctl restart boxtwin-api boxtwin-worker
+
 # 5. verificar ANTES de exponer nada
 curl -s localhost:8000/salud
 ```
 
-`/salud` tiene que devolver las tres cosas bien:
+`/salud` tiene que devolver esto:
 
 ```json
-{"ok": true, "secreto_efimero": false, "registro": "invitacion", "frontend": true}
+{"ok": true, "secreto_efimero": false, "registro": "invitacion", "frontend": true,
+ "arrancado": "2026-09-22T18:40:00+00:00", "commit": "b28ab63"}
+```
+
+**Mirá `arrancado` y `commit` después de cada deploy.** Un servicio que quedó corriendo
+código viejo no se distingue de uno al día mirando la app: las rutas que todavía no tiene
+contesta **405**, porque las atiende el montaje del frontend, que sólo acepta GET. Eso se
+lee como un bug del método y no como lo que es. Costó dos rondas de diagnóstico el 22-09.
+
+```bash
+# el commit que corre el servicio contra el que esta en disco
+curl -s localhost:8000/salud | python3 -c "import sys,json; print(json.load(sys.stdin)['commit'])"
+git -C ~/Proyectos/TwinBoxing rev-parse --short HEAD
 ```
 
 Si `secreto_efimero` es `true`, faltó `BOXTWIN_SECRETO` y cada reinicio va a desloguear a

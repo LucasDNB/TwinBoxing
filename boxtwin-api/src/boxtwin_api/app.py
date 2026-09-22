@@ -27,6 +27,7 @@ import json
 import re
 import shutil
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
@@ -59,6 +60,34 @@ from boxtwin_api.seguridad import (
 )
 
 __all__ = ["app"]
+
+# Cuando arranco ESTE proceso, y sobre que commit. Las dos cosas se miran desde afuera con
+# GET /salud, y existen porque ya costaron dos rondas de diagnostico: un servicio que quedo
+# corriendo codigo viejo contesta 405 a las rutas que todavia no tiene -las atiende el
+# montaje del frontend, que solo acepta GET- y eso se lee como un bug del codigo nuevo.
+ARRANCADO = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _commit() -> str | None:
+    """El commit del checkout donde vive el paquete, leido del archivo, sin subprocesos."""
+    try:
+        raiz = Path(__file__).resolve().parents[3] / ".git"
+        cabeza = (raiz / "HEAD").read_text().strip()
+        if cabeza.startswith("ref: "):
+            ref = raiz / cabeza[5:]
+            if not ref.is_file():          # empaquetado en packed-refs
+                nombre = cabeza[5:]
+                for linea in (raiz / "packed-refs").read_text().splitlines():
+                    if linea.endswith(" " + nombre):
+                        return linea.split()[0][:7]
+                return None
+            return ref.read_text().strip()[:7]
+        return cabeza[:7]
+    except OSError:
+        return None
+
+
+COMMIT = _commit()
 
 
 @asynccontextmanager
@@ -757,6 +786,9 @@ def salud() -> dict:
         "secreto_efimero": cfg.secreto_efimero,
         "registro": cfg.modo_registro,
         "docs": cfg.docs,
+        # Para poder contestar desde afuera "esto corre el codigo que creo que corre".
+        "arrancado": ARRANCADO,
+        "commit": COMMIT,
         "frontend": bool(cfg.web and (cfg.web / "index.html").is_file()),
     }
 

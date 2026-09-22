@@ -474,3 +474,43 @@ def test_una_columna_obligatoria_sin_default_no_se_inventa(tmp_path, monkeypatch
     monkeypatch.setattr(mod_db, "engine", sa.create_engine(f"sqlite:///{ruta}"))
     with pytest.raises(RuntimeError, match="a mano"):
         mod_db._columnas_faltantes()
+
+
+# -- el frontend no puede tapar a la API ------------------------------------
+
+
+def test_el_montaje_del_frontend_va_ultimo(entorno, monkeypatch, tmp_path):
+    """
+    El mount en "/" matchea TODO, asi que cualquier ruta declarada despues queda tapada.
+
+    Y el sintoma es enganoso: una ruta tapada no da 404 sino 405, porque el que contesta es
+    StaticFiles y solo acepta GET y HEAD. Eso se lee como un bug del metodo y no como una
+    ruta que no existe, y costo dos rondas de diagnostico el 22-09.
+    """
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    (dist / "index.html").write_text("<!doctype html><title>BoxTwin</title>")
+    c = _recargar(monkeypatch, BOXTWIN_WEB=str(dist), BOXTWIN_INVITACION="abierto")
+
+    from starlette.routing import Mount
+
+    import boxtwin_api.app as app_mod
+
+    rutas = app_mod.app.router.routes
+    montajes = [i for i, r in enumerate(rutas) if isinstance(r, Mount) and r.path == ""]
+    assert montajes, "el frontend tiene que estar montado"
+    assert montajes[0] == len(rutas) - 1, (
+        "el montaje del frontend tiene que ser la ULTIMA ruta: lo que venga despues "
+        "queda tapado y contesta 405"
+    )
+    # Y la comprobacion de verdad, por HTTP: un POST a una ruta de la API no puede caer
+    # en el frontend.
+    assert c.post("/auth/login",
+                  json={"email": "x@y.com", "clave": "clavelarga1"}).status_code == 401
+
+
+def test_salud_dice_cuando_arranco_el_proceso(cliente):
+    # Un servicio que quedo corriendo codigo viejo no se distingue de uno al dia sin esto.
+    d = cliente.get("/salud").json()
+    assert d["arrancado"], "hace falta para saber si el proceso es de antes del deploy"
+    assert "commit" in d
