@@ -60,6 +60,20 @@ class ConfigGuardia:
     entre la muneca y la nariz. Se mide en anchos de hombro y no en pixeles porque la
     distancia a la camara cambia entre un video y otro, y un umbral en pixeles mide el zoom.
 
+    MEDIDO EL 22-09 SOBRE amateur_estatico Y HAY QUE DECIRLO: con 0,6 el indicador marca la
+    mano opuesta caida en 40 de 41 golpes, que leido como tactica diria que dos amateurs de
+    competencia pelean dos minutos con la guardia abajo. Sobre 3127 cuadros con pose
+    confiable, la muneca esta a 1,4-1,75 anchos de hombro de la nariz de mediana y solo el
+    2-6% de los cuadros cae bajo 0,6. Tiene sentido geometrico: en guardia el puno esta al
+    lado del menton, y del menton a la nariz ya hay distancia. El 0,6 no describe "mano
+    arriba" sino "mano tocandose la cara".
+
+    NO se cambio el default, a proposito: la definicion esta pre-registrada en la spec como
+    criterio de dominio a confirmar por Lucas, y moverla mirando estos datos seria elegir el
+    criterio despues de ver el resultado. El p10 medido anda entre 0,75 y 1,09, asi que la
+    calibracion de C3 probablemente termine cerca de 1,0. Ver
+    docs/experiments/2026-09-22-mvp-sobre-video-real.md
+
     `retorno_lento_ms` es el unico numero sin calibrar del modulo y por eso es None por
     defecto: con un valor inventado el indicador diria "guardia baja" sin que nadie haya
     comprobado que eso es guardia baja. Con None se reporta el tiempo medido y nada mas.

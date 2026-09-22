@@ -568,24 +568,40 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
  10. 142 tests nuevos entre los cuatro paquetes, 799 en total, y el circuito verificado
      de punta a punta contra un servidor HTTP real: registro, subida, candidatos,
      siembra, Fight-Card, correccion de tipo y export
- 11. NADA DE ESTO CORRIO SOBRE UN VIDEO DE VERDAD todavia. Los tests usan pose sintetica
-     y una TCN sin entrenar; lo que prueban es que los datos lleguen enteros de una
-     punta a la otra, no que el sistema acierte. La imagen del worker esta escrita y sin
-     construir
+ 11. Y CORRIO SOBRE VIDEO REAL, sobre amateur_estatico, que el sistema nunca vio: 120 s
+     de boxeo de competencia con camara lejana y 18,4 px de ancho de hombros mediano
+     contra 132 en sparring-3. 131,9 s de maquina sobre 120,1 s de video, o sea 1,098x,
+     con el criterio en 2x. El 99,6% de ese tiempo es pose y guantes: todo lo que el MVP
+     agrego -identidad, features, detector, indicadores- suma 0,54 s
+ 12. LA SIEMBRA HACE LO QUE SE ESPERABA Y NO POR EL MOTIVO QUE SE CREIA. Sobre la misma
+     evidencia, el camino automatico se abstiene con separacion de color 0,097 contra un
+     piso de 0,55 y deja 15 de 20 tracks sin asignar; con las dos semillas la separacion
+     da 1,375 y quedan 7 sin asignar. La diferencia no es el color de los guantes, que es
+     lo que decia el riesgo 1 del spec, sino cual componente de coexistencia se usa de
+     ancla: el automatico elegia uno con los dos lados contaminados
+ 13. EL INDICADOR DE GUARDIA NO MIDE LO QUE DICE MEDIR, y se vio antes de C3. Con el
+     umbral pre-registrado de 0,6 anchos de hombro marca la mano opuesta caida en 40 de
+     41 golpes, que leido como tactica diria que dos amateurs pelean dos minutos con la
+     guardia abajo. Sobre 3127 cuadros con pose confiable la muneca esta a 1,4-1,75
+     anchos de la nariz de mediana y solo el 2-6% cae bajo 0,6: el 0,6 no describe "mano
+     arriba" sino "mano tocandose la cara". El default NO se cambio, porque moverlo
+     mirando estos datos seria elegir el criterio despues de ver el resultado
+ 14. Lo que la corrida no prueba: no hay anotacion de ese video, asi que no se midio ni
+     precision ni recall sobre el, y los 46 golpes no se compararon contra nada. El tipo
+     de golpe no se estimo. La imagen del worker sigue escrita y sin construir
 
 PENDIENTE Y PROXIMO PASO
 
-  Correr el circuito completo sobre anotacion-amateur/, que ya esta preprocesado y es
-  el caso mas duro disponible: camara lejana, arbitro adentro del ring, ancho de
-  hombros mediano de 22 px contra 132 en sparring-3, y los dos peleadores con guantes
-  casi del mismo color -separacion 0,133 contra un piso de 0,55-. O sea que el color no
-  va a decidir nada y todo el peso cae en la coexistencia y en la siembra, que es
-  exactamente el caso para el que la siembra existe.
+  Medir C1, que es la unica de las tres mediciones pre-registradas que quedo sin poder
+  tomarse: cuantos tracks quedan bien asignados con siembra humana, sobre las seis
+  fuentes de gimnasio, umbral 95%. Sobre el amateur no se pudo porque su annot.json no
+  tiene identidad anotada, y las seis que si la tienen necesitan una pasada del detector
+  de guantes cada una, del orden de 25 s por cada 2 minutos de video. Ya existe
+  puntuar_contra, asi que lo unico que falta es esa pasada.
 
-  Falta antes el checkpoint de produccion del detector: el ensamble de cinco semillas
-  entrenado sobre las siete fuentes. Los que hay son por fold, que sirven para medir y
-  no para producir.
+  Antes de C3 hay que corregir el radio de la zona de guardia, que es decision de
+  dominio y no de codigo: el p10 medido anda entre 0,75 y 1,09 anchos de hombro, contra
+  el 0,6 pre-registrado.
 
-  Despues, las tres mediciones pre-registradas: C1 identidad con siembra sobre las seis
-  fuentes de gimnasio, C3 el indicador de guardia contra 100 golpes marcados a mano, y
-  C5 el tiempo de procesamiento. Detalle en docs/PROXIMOS_PASOS.md.
+  Detalle en docs/PROXIMOS_PASOS.md y en
+  docs/experiments/2026-09-22-mvp-sobre-video-real.md.

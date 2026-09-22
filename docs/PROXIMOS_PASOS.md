@@ -1,9 +1,12 @@
 # Próximos pasos — retomar acá
 
-Estado al 22-09. La spec del MVP está aprobada (`docs/specs/MVP.md`) y el esqueleto
-está construido y testeado, pero **nada de esto corrió todavía sobre un video de
-verdad**: los tests usan pose sintética y un detector sin entrenar. Eso es lo
-primero.
+Estado al 22-09. La spec del MVP está aprobada (`docs/specs/MVP.md`), el esqueleto
+está construido y testeado, y el circuito **ya corrió una vez sobre video real**:
+`amateur_estatico`, 120 s, en 1,098x tiempo real, con 46 golpes detectados. Lo que
+salió de ahí está en
+[`docs/experiments/2026-09-22-mvp-sobre-video-real.md`](experiments/2026-09-22-mvp-sobre-video-real.md)
+y cambia dos cosas de este plan: la siembra hace lo que se esperaba pero por otro
+motivo, y el indicador de guardia no mide lo que dice medir.
 
 ## Lo que está hecho
 
@@ -40,10 +43,9 @@ contra un piso de 0,55), así que el color no va a decidir nada y todo el peso c
 en la coexistencia y en la siembra. Es exactamente el caso para el que se hizo la
 siembra, y es la prueba de si alcanza.
 
-**Falta el checkpoint de producción del detector**: el ensamble de cinco semillas
-entrenado sobre las siete fuentes. Los que hay son por fold, para medir. Uno
-entrenado con todo no sirve para medir pero es el que corresponde en producción, y
-hay que guardarlo con `boxtwin_detector.ensamble.guardar`.
+El checkpoint de producción ya existe: `modelos/detector_7fuentes.ens.pt`, ensamble
+de cinco semillas (42, 1, 2, 3, 4) sobre las siete fuentes, 20 features. Es el que
+usó la corrida del 22-09.
 
 ## 2. Medir C1: identidad con siembra humana
 
@@ -63,6 +65,14 @@ caída sí/no) contra lo que dice el indicador. Umbral de acuerdo 80% en cada un
 De esta medición sale además el umbral de retorno lento, que **hoy no existe**: el
 módulo reporta el tiempo medido y no marca nada, a propósito. Fijar el umbral antes
 de mirar los datos, sobre la mediana.
+
+**Y hay que revisar el radio de la zona antes de medir.** Sobre `amateur_estatico`,
+con 0,6 anchos de hombro el indicador marca la mano opuesta caída en 40 de 41
+golpes, y la muñeca está a 1,4–1,75 anchos de la nariz de mediana: el 0,6 no
+describe «mano arriba» sino «mano tocándose la cara». El p10 medido anda entre 0,75
+y 1,09. El default no se tocó porque la definición está pre-registrada y moverla
+mirando esos datos sería elegir el criterio después de ver el resultado; corregirla
+es una decisión de dominio y va antes de correr C3, no después.
 
 Si no valida, F5 sale del MVP y se declara como línea futura. El volumen y la línea
 de tiempo sostienen el producto solos.
