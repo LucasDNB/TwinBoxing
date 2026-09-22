@@ -36,7 +36,10 @@ __all__ = [
     "PRECISION_DETECTOR",
     "RECALL_DETECTOR",
     "NOMBRE_EN_PANTALLA",
+    "aplicar_correcciones",
+    "aplicar_tipos",
     "construir",
+    "correccion",
     "id_de_golpe",
 ]
 
@@ -233,4 +236,106 @@ def _lectura(fc: dict) -> dict:
             f"del detector es {fc['detector']['recall_medido']}. Lo que la medicion sostiene "
             "es la comparacion adentro de la sesion, no el numero absoluto"
         ),
+    }
+
+
+def aplicar_tipos(fc: dict, tipos: dict, checkpoint: str, exactitud: float | None = None) -> dict:
+    """
+    Pega los tipos que produjo la etapa de clasificacion, sobre la Fight-Card ya escrita.
+
+    Es la misma operacion con la que se reclasifica una sesion vieja cuando sale un
+    checkpoint nuevo (RF12), asi que no puede depender de nada que se haya perdido: entra
+    por el id del golpe, que sale del carril y del cuadro y no de la posicion en la lista.
+
+    Una correccion del entrenador NO se pisa. Un modelo nuevo puede mejorar el promedio y
+    seguir equivocandose justo donde una persona ya miro y dijo otra cosa.
+    """
+    fc["clasificador"] = {
+        **fc.get("clasificador", {}),
+        "checkpoint": checkpoint,
+        "exactitud_familia_fuente_no_vista": exactitud,
+        "estimado": True,
+    }
+    for datos in fc["peleadores"].values():
+        for g in datos["golpes"]:
+            t = tipos.get(g["id"])
+            if not t:
+                continue
+            if g.get("corregido"):
+                # Se guarda igual, para poder medir despues cuanto mejoro el modelo sobre
+                # los casos que una persona ya habia corregido.
+                g["tipo_modelo_nuevo"] = t.get("tipo")
+                continue
+            g["tipo"] = t.get("tipo")
+            g["confianza_tipo"] = t.get("confianza")
+            g["tipo_clasificador"] = t.get("crudo")
+    return fc
+
+
+def aplicar_correcciones(fc: dict, correcciones: list[dict]) -> dict:
+    """
+    Aplica las correcciones del entrenador sin borrar lo que dijo el modelo.
+
+    Cada correccion queda como un registro aparte -RF10- y aca solo se refleja en la
+    vista: el golpe pasa a mostrar el tipo corregido y conserva cual era el original y que
+    checkpoint lo produjo. Esa pareja es exactamente la etiqueta nueva que al clasificador
+    le falta: material que no vio, juzgado por alguien que sabe.
+    """
+    por_id: dict[str, dict] = {}
+    for c in correcciones:
+        # La ultima correccion de un mismo golpe gana, y las anteriores siguen en el
+        # registro. Cambiar de opinion es legitimo; perder el rastro no.
+        por_id[c["golpe"]] = c
+    for datos in fc["peleadores"].values():
+        for g in datos["golpes"]:
+            c = por_id.get(g["id"])
+            if not c:
+                continue
+            g["corregido"] = {
+                "tipo": c["tipo"],
+                "tipo_original": c.get("tipo_original", g.get("tipo")),
+                "checkpoint_original": c.get("checkpoint"),
+                "cuando": c.get("cuando"),
+                "por": c.get("por"),
+            }
+            g["tipo"] = c["tipo"]
+            g["confianza_tipo"] = None   # ya no es una estimacion del modelo
+    return fc
+
+
+def correccion(
+    golpe: str, tipo: str, fc: dict, por: str | None = None, cuando: str | None = None
+) -> dict:
+    """
+    El registro de una correccion, con todo lo que hace falta para usarla como etiqueta.
+
+    Lleva el video y el checkpoint porque sin eso no se puede saber sobre que material ni
+    contra que modelo se midio, y una etiqueta sin procedencia no entra a un dataset.
+    """
+    from datetime import datetime
+
+    original = None
+    for datos in fc["peleadores"].values():
+        for g in datos["golpes"]:
+            if g["id"] == golpe:
+                original = g
+                break
+    if original is None:
+        raise ValueError(f"la Fight-Card no tiene un golpe {golpe!r}")
+    if tipo not in NOMBRE_EN_PANTALLA:
+        raise ValueError(f"tipo desconocido: {tipo!r}, se esperaba {sorted(NOMBRE_EN_PANTALLA)}")
+    return {
+        "golpe": golpe,
+        "tipo": tipo,
+        "tipo_original": original.get("tipo"),
+        "tipo_clasificador": original.get("tipo_clasificador"),
+        "confianza_original": original.get("confianza_tipo"),
+        "checkpoint": fc.get("clasificador", {}).get("checkpoint"),
+        "video": fc.get("video", {}).get("nombre"),
+        "t_inicio": original.get("t_inicio"),
+        "t_fin": original.get("t_fin"),
+        "cuadro_inicio": original.get("cuadro_inicio"),
+        "cuadro_fin": original.get("cuadro_fin"),
+        "por": por,
+        "cuando": cuando or datetime.now().astimezone().isoformat(),
     }

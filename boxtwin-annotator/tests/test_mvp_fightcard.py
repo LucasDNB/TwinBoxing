@@ -151,3 +151,83 @@ def test_la_nomenclatura_de_pantalla_es_rioplatense(sesion):
 
 def test_la_version_del_contrato_esta_declarada(sesion):
     assert construir(sesion, [])["version"] == VERSION_FIGHTCARD
+
+
+# -- tipos y correcciones ---------------------------------------------------
+
+
+def _fc_con_dos_golpes(sesion):
+    return construir(sesion, [_Golpe("A", "left", 10.0), _Golpe("A", "right", 20.0)])
+
+
+def test_reclasificar_no_pisa_lo_que_corrigio_una_persona(sesion):
+    # El caso que importa cuando sale un checkpoint nuevo: puede mejorar el promedio y
+    # seguir equivocandose justo donde alguien ya miro y dijo otra cosa. Esas correcciones
+    # son las etiquetas mas caras que tiene el proyecto.
+    from boxtwin.mvp.fightcard import aplicar_correcciones, aplicar_tipos, correccion
+
+    fc = _fc_con_dos_golpes(sesion)
+    ids = [g["id"] for g in fc["peleadores"]["A"]["golpes"]]
+    fc = aplicar_tipos(fc, {ids[0]: {"tipo": "cross", "confianza": 0.6, "crudo": "cross"}},
+                       checkpoint="v1.pth")
+    fc = aplicar_correcciones(fc, [correccion(ids[0], "hook", fc, por="lucas")])
+    assert fc["peleadores"]["A"]["golpes"][0]["tipo"] == "hook"
+
+    fc = aplicar_tipos(fc, {ids[0]: {"tipo": "jab", "confianza": 0.9, "crudo": "jab"}},
+                       checkpoint="v2.pth")
+    g = fc["peleadores"]["A"]["golpes"][0]
+    assert g["tipo"] == "hook", "la correccion manda"
+    assert g["tipo_modelo_nuevo"] == "jab", "y lo que dijo el modelo nuevo se guarda igual"
+
+
+def test_la_correccion_guarda_con_que_comparar(sesion):
+    # RF10: sin el checkpoint y el video, la correccion no sirve como etiqueta porque no
+    # se sabe sobre que material ni contra que modelo se midio.
+    from boxtwin.mvp.fightcard import aplicar_tipos, correccion
+
+    fc = _fc_con_dos_golpes(sesion)
+    gid = fc["peleadores"]["A"]["golpes"][0]["id"]
+    fc = aplicar_tipos(fc, {gid: {"tipo": "cross", "confianza": 0.6, "crudo": "cross"}},
+                       checkpoint="poseC3D_7fuentes.pth")
+    c = correccion(gid, "uppercut", fc, por="lucas")
+    assert c["tipo_original"] == "cross"
+    assert c["checkpoint"] == "poseC3D_7fuentes.pth"
+    assert c["video"] == "spar.mp4"
+    assert c["cuadro_inicio"] == 300
+
+
+def test_un_tipo_corregido_deja_de_tener_confianza_del_modelo(sesion):
+    from boxtwin.mvp.fightcard import aplicar_correcciones, aplicar_tipos, correccion
+
+    fc = _fc_con_dos_golpes(sesion)
+    gid = fc["peleadores"]["A"]["golpes"][0]["id"]
+    fc = aplicar_tipos(fc, {gid: {"tipo": "cross", "confianza": 0.6, "crudo": "cross"}},
+                       checkpoint="v1.pth")
+    fc = aplicar_correcciones(fc, [correccion(gid, "jab", fc)])
+    assert fc["peleadores"]["A"]["golpes"][0]["confianza_tipo"] is None
+
+
+def test_la_ultima_correccion_de_un_golpe_gana(sesion):
+    from boxtwin.mvp.fightcard import aplicar_correcciones, correccion
+
+    fc = _fc_con_dos_golpes(sesion)
+    gid = fc["peleadores"]["A"]["golpes"][0]["id"]
+    cs = [correccion(gid, "jab", fc), correccion(gid, "hook", fc)]
+    fc = aplicar_correcciones(fc, cs)
+    assert fc["peleadores"]["A"]["golpes"][0]["corregido"]["tipo"] == "hook"
+
+
+def test_no_se_corrige_a_un_tipo_que_no_existe(sesion):
+    from boxtwin.mvp.fightcard import correccion
+
+    fc = _fc_con_dos_golpes(sesion)
+    gid = fc["peleadores"]["A"]["golpes"][0]["id"]
+    with pytest.raises(ValueError, match="tipo desconocido"):
+        correccion(gid, "volea", fc)
+
+
+def test_no_se_corrige_un_golpe_que_no_esta(sesion):
+    from boxtwin.mvp.fightcard import correccion
+
+    with pytest.raises(ValueError, match="no tiene un golpe"):
+        correccion("A-izq-99999", "jab", _fc_con_dos_golpes(sesion))

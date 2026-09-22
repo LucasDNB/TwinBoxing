@@ -342,6 +342,29 @@ def build_parser() -> argparse.ArgumentParser:
                          "valor se reporta el tiempo medido y no se marca nada")
     cp.add_argument("--device", default=None)
 
+    tp = sub.add_parser(
+        "tipos",
+        help="aplica tipos.json sobre la Fight-Card, respetando las correcciones",
+        description=(
+            "La etapa de clasificacion corre en boxtwin_mmaction y deja tipos.json. Esto "
+            "lo pega a la Fight-Card. Es tambien la operacion de reclasificar una sesion "
+            "vieja con un checkpoint nuevo, sin repetir pose ni deteccion."
+        ),
+    )
+    tp.add_argument("sesion", type=Path)
+    tp.add_argument("--exactitud", type=float, default=None,
+                    help="exactitud de familia medida del checkpoint sobre fuente no "
+                         "vista. Va al documento para que el numero se lea con su margen")
+
+    co = sub.add_parser(
+        "corregir",
+        help="corrige el tipo de un golpe y lo guarda como etiqueta nueva",
+    )
+    co.add_argument("sesion", type=Path)
+    co.add_argument("golpe", help="id del golpe, como sale en la Fight-Card")
+    co.add_argument("tipo", choices=["jab", "cross", "hook", "uppercut"])
+    co.add_argument("--por", default=None, help="quien corrige")
+
     return p
 
 
@@ -615,6 +638,40 @@ def _cmd_completar(args: argparse.Namespace) -> int:
     print(f"\n  -> {Path(args.sesion) / 'fightcard.json'}")
     print("  el tipo de golpe lo agrega la etapa de clasificacion, en boxtwin_mmaction")
     return 0
+
+
+def _cmd_tipos(args: argparse.Namespace) -> int:
+    from boxtwin.mvp.orquesta import aplicar_tipos_a_sesion
+
+    fc = aplicar_tipos_a_sesion(args.sesion, exactitud=args.exactitud)
+    con_tipo = sum(
+        1 for p in fc["peleadores"].values() for g in p["golpes"] if g["tipo"]
+    )
+    total = sum(len(p["golpes"]) for p in fc["peleadores"].values())
+    corregidos = sum(
+        1 for p in fc["peleadores"].values() for g in p["golpes"] if g["corregido"]
+    )
+    print(f"checkpoint {fc['clasificador']['checkpoint']}")
+    print(f"  {con_tipo} de {total} golpes con tipo estimado")
+    if corregidos:
+        print(f"  {corregidos} correcciones del entrenador conservadas")
+    print("\n  El tipo es una ESTIMACION y esta rotulado como tal: el clasificador no")
+    print("  generaliza a fuentes nuevas.")
+    return 0
+
+
+def _cmd_corregir(args: argparse.Namespace) -> int:
+    from boxtwin.mvp.orquesta import registrar_correccion
+
+    fc = registrar_correccion(args.sesion, args.golpe, args.tipo, por=args.por)
+    for p in fc["peleadores"].values():
+        for g in p["golpes"]:
+            if g["id"] == args.golpe:
+                c = g["corregido"]
+                print(f"{args.golpe}: {c['tipo_original']} -> {c['tipo']}")
+                print("  guardada como etiqueta nueva, sin pisar la original")
+                return 0
+    return 1
 
 
 def _cmd_export(args: argparse.Namespace) -> int:
@@ -898,6 +955,10 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_procesar(args)
         if args.comando == "completar":
             return _cmd_completar(args)
+        if args.comando == "tipos":
+            return _cmd_tipos(args)
+        if args.comando == "corregir":
+            return _cmd_corregir(args)
     except KeyboardInterrupt:
         print("\ninterrumpido. El trabajo hecho quedo persistido: volve a correr el "
               "mismo comando para reanudar.", file=sys.stderr)

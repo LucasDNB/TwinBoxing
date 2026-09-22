@@ -50,12 +50,17 @@ from boxtwin.mvp.guardia import ConfigGuardia, medir
 from boxtwin.mvp.sesion import Sesion
 
 __all__ = [
+    "CORRECCIONES",
     "EVIDENCIA",
+    "FIGHTCARD",
     "POSES",
     "SEGMENTOS",
-    "FIGHTCARD",
+    "TIPOS",
+    "aplicar_tipos_a_sesion",
     "completar",
+    "leer_fightcard",
     "procesar",
+    "registrar_correccion",
     "series_por_peleador",
 ]
 
@@ -407,3 +412,77 @@ def _jsonable(d: dict) -> dict:
         else:
             salida[k] = v
     return salida
+
+
+# ---------------------------------------------------------------------------
+# Tipos y correcciones
+# ---------------------------------------------------------------------------
+
+TIPOS = "tipos.json"
+CORRECCIONES = "correcciones.jsonl"
+
+
+def leer_fightcard(directorio: Path) -> dict:
+    ruta = Path(directorio) / FIGHTCARD
+    if not ruta.is_file():
+        raise FileNotFoundError(
+            f"no hay Fight-Card en {directorio}: corre primero 'completar'"
+        )
+    return json.loads(ruta.read_text())
+
+
+def escribir_fightcard(directorio: Path, fc: dict) -> Path:
+    ruta = Path(directorio) / FIGHTCARD
+    tmp = ruta.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(fc, indent=2, ensure_ascii=False) + "\n")
+    tmp.replace(ruta)
+    return ruta
+
+
+def leer_correcciones(directorio: Path) -> list[dict]:
+    ruta = Path(directorio) / CORRECCIONES
+    if not ruta.is_file():
+        return []
+    return [json.loads(l) for l in ruta.read_text().splitlines() if l.strip()]
+
+
+def aplicar_tipos_a_sesion(directorio: Path, exactitud: float | None = None) -> dict:
+    """
+    Pega tipos.json sobre la Fight-Card, y vuelve a aplicar las correcciones encima.
+
+    El orden importa y es el unico que tiene sentido: primero lo que dijo el modelo nuevo,
+    despues lo que dijo la persona. Al reves, publicar un checkpoint le borraria al
+    entrenador todas las correcciones que hizo, que son justo las etiquetas mas caras que
+    tiene el proyecto.
+    """
+    from boxtwin.mvp.fightcard import aplicar_correcciones, aplicar_tipos
+
+    directorio = Path(directorio)
+    d = json.loads((directorio / TIPOS).read_text())
+    fc = leer_fightcard(directorio)
+    fc = aplicar_tipos(fc, d.get("tipos", {}), d.get("checkpoint", ""), exactitud)
+    fc = aplicar_correcciones(fc, leer_correcciones(directorio))
+    escribir_fightcard(directorio, fc)
+    return fc
+
+
+def registrar_correccion(
+    directorio: Path, golpe: str, tipo: str, por: str | None = None
+) -> dict:
+    """
+    Guarda la correccion del entrenador y la refleja en la Fight-Card. F14 y RF10.
+
+    Se appendea a un jsonl y no se pisa nada: cada correccion es una etiqueta nueva sobre
+    material que el modelo no vio, que es exactamente lo que le falta para generalizar. Un
+    registro que se sobrescribe deja de ser un dataset.
+    """
+    from boxtwin.mvp.fightcard import aplicar_correcciones, correccion
+
+    directorio = Path(directorio)
+    fc = leer_fightcard(directorio)
+    c = correccion(golpe, tipo, fc, por=por)
+    with (directorio / CORRECCIONES).open("a") as f:
+        f.write(json.dumps(c, ensure_ascii=False) + "\n")
+    fc = aplicar_correcciones(fc, leer_correcciones(directorio))
+    escribir_fightcard(directorio, fc)
+    return fc
