@@ -602,6 +602,41 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      directorio de trabajo, que en un servicio no es el que uno cree, y eso ya habia
      costado una corrida
 
+22-09 El producto medido contra la anotacion manual, y el cuello de botella cambio de lugar
+
+  1. Cinco sesiones subidas por la web y procesadas enteras por el circuito del producto,
+     emparejadas contra el annot.json del mismo video -verificado por sha256- con el mismo
+     emparejador de siempre, IoU 0,3. Son 546 golpes anotados a mano
+  2. De punta a punta: recall 0,432 y precision 0,805. El sistema no inventa golpes, y
+     sobre Sparring las 27 marcas caen TODAS a menos de medio segundo de un golpe anotado
+  3. LAS CINCO FUENTES ESTAN ADENTRO DEL ENTRENAMIENTO del detector, asi que esto mide el
+     comportamiento del producto en distribucion y no generaliza nada. Ningun numero de acá
+     se compara con los 0,885 / 0,484 de la spec, que se midieron sobre fuente no vista
+  4. EL 18% DE LOS GOLPES CAE EN CUADROS SIN IDENTIDAD RESUELTA: 98 de 546 que ningun
+     detector podria encontrar porque el carril de ese peleador esta en cero. Esa perdida
+     no aparecia en ninguna medicion anterior, porque en los folds la identidad venia
+     resuelta a mano. Es enteramente de la identidad automatica
+  5. Descontandola, el detector encuentra 0,528 de lo que si pudo ver, que es la forma
+     comparable con el 0,484 de fuente no vista y esta apenas arriba, como corresponde a
+     material en distribucion
+  6. Sparring es el caso que ordena todo: recall 0,160, tres veces abajo del resto, con el
+     peleador A identificado el 26,8% del video y 47% de los golpes invisibles. De 453
+     tracks el nucleo son 30 y la coexistencia resolvio 22
+  7. Y NO ES LA CONVENCION DE FRONTERAS, que era la explicacion que el proyecto tenia a
+     mano para Sparring. Relajando el IoU de 0,30 a 0,05 el recall va de 0,160 a 0,184: el
+     problema no es que las marcas fallen el solapamiento sino que hay 27 marcas para 125
+     golpes. La separacion de color dio 0,354 contra un piso de 0,55, asi que el color se
+     abstuvo bien, y sin color lo unico que reparte es la coexistencia
+  8. El cuello de botella del producto es la COBERTURA de identidad, no el detector. Donde
+     la identidad cubre bien -02-sparring, 97% y 89%- el recall llega a 0,597 con 1% de
+     golpes invisibles
+  9. boxtwin-annotator medir deja la medicion reproducible, y la separacion entre "no lo
+     marco" y "no lo pudo ver" esta en boxtwin.mvp.medicion con sus tests
+ 10. Tres arreglos de la interfaz que salieron de usarla: el reproductor ya no va pegado
+     arriba tapando las lecturas, el video con marcas dejo de decir "se esta armando"
+     cuando no hay nadie armandolo -no existia forma de encolar esa etapa para una sesion
+     vieja- y el 404 de los perfiles era el servicio corriendo codigo viejo
+
 PENDIENTE Y PROXIMO PASO
 
   Medir C1, que es la unica de las tres mediciones pre-registradas que quedo sin poder

@@ -24,8 +24,9 @@ import { nombreDeTipo, porcentaje, segundosATiempo, textoDeMargen } from '../for
 
 const TIPOS = ['jab', 'cross', 'hook', 'uppercut']
 
-export default function FightCard({ sesionId, fc, alCambiar, alVerPerfil }) {
+export default function FightCard({ sesionId, fc, sesion, alCambiar, alVerPerfil }) {
   const video = useRef(null)
+  const caja = useRef(null)
   const [ticket, setTicket] = useState(null)
   // El video procesado es la ultima etapa, asi que puede no estar cuando la Fight-Card ya
   // se muestra. Mientras no este se usa el original: es preferible un video sin marcas a un
@@ -35,6 +36,42 @@ export default function FightCard({ sesionId, fc, alCambiar, alVerPerfil }) {
   const [filtro, setFiltro] = useState('todos')
   const [corrigiendo, setCorrigiendo] = useState(null)
   const [error, setError] = useState(null)
+  // El reproductor NO va fijo por default: pegado arriba se come media pantalla y tapa las
+  // lecturas de abajo, que son las que el entrenador vino a leer. Queda a eleccion, y la
+  // eleccion se recuerda.
+  const [fijo, setFijo] = useState(() => {
+    try {
+      return localStorage.getItem('boxtwin.video_fijo') === '1'
+    } catch {
+      return false
+    }
+  })
+
+  const alternarFijo = () => {
+    setFijo((v) => {
+      try {
+        localStorage.setItem('boxtwin.video_fijo', v ? '0' : '1')
+      } catch {
+        /* sin persistencia, dura lo que dure la pestana */
+      }
+      return !v
+    })
+  }
+
+  // Quien esta armando el video con marcas, si es que alguien lo esta armando.
+  const render = (sesion?.trabajos || []).filter((t) => t.etapa === 'render').pop()
+  const armando = render && ['en_cola', 'tomado'].includes(render.estado)
+  const [pedido, setPedido] = useState(false)
+
+  const armar = async () => {
+    setError(null)
+    try {
+      await api.pedirRender(sesionId)
+      setPedido(true)
+    } catch (e) {
+      setError(e.message)
+    }
+  }
 
   useEffect(() => {
     let vivo = true
@@ -77,6 +114,13 @@ export default function FightCard({ sesionId, fc, alCambiar, alVerPerfil }) {
     // movimiento, que es antes de que se haga evidente. Caer justo ahi se siente tarde.
     v.currentTime = Math.max(0, ev.t_inicio - 0.5)
     v.play().catch(() => {})
+    // Sin el reproductor fijo hay que traerlo a la vista, si no el salto no se ve.
+    if (!fijo && caja.current) {
+      const r = caja.current.getBoundingClientRect()
+      if (r.bottom < 0 || r.top > window.innerHeight * 0.5) {
+        caja.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
+    }
   }
 
   const corregir = async (ev, tipo) => {
@@ -95,7 +139,7 @@ export default function FightCard({ sesionId, fc, alCambiar, alVerPerfil }) {
 
   return (
     <div className="fightcard">
-      <div className="reproductor">
+      <div className={`reproductor ${fijo ? 'fijo' : ''}`} ref={caja}>
         {ticket ? (
           <video
             ref={video}
@@ -111,10 +155,35 @@ export default function FightCard({ sesionId, fc, alCambiar, alVerPerfil }) {
         ) : (
           <div className="sin_imagen alto">cargando el video…</div>
         )}
+        <div className="barra_video">
+          <button type="button" className="enlace chico" onClick={alternarFijo}>
+            {fijo ? 'soltar el video' : 'fijar el video arriba'}
+          </button>
+          {hayProcesado && <span className="sutil">con los golpes marcados</span>}
+        </div>
+
         {ticket && !hayProcesado ? (
           <p className="nota_video" role="status">
-            El video con los golpes marcados se esta armando. Mientras tanto se muestra el
-            original, que ya sirve para saltar a cada evento.
+            {armando || pedido ? (
+              <>
+                El video con los golpes marcados se está armando. Mientras tanto se muestra
+                el original, que ya sirve para saltar a cada evento.
+              </>
+            ) : render?.estado === 'fallo' ? (
+              <>
+                No se pudo armar el video con las marcas.{' '}
+                <button type="button" className="enlace chico" onClick={armar}>
+                  reintentar
+                </button>
+              </>
+            ) : (
+              <>
+                Esta sesión no tiene el video con los golpes marcados.{' '}
+                <button type="button" className="enlace chico" onClick={armar}>
+                  armarlo ahora
+                </button>
+              </>
+            )}
           </p>
         ) : null}
       </div>

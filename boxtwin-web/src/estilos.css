@@ -158,8 +158,15 @@ button { font: inherit; cursor: pointer; }
 .sin_imagen.alto { height: 200px; }
 
 /* -- fight-card -- */
-.reproductor { position: sticky; top: 56px; z-index: 2; margin: 0 0 12px; }
+/* El reproductor NO va pegado arriba por default: fijo se come media pantalla y tapa las
+   lecturas de abajo, que son las que el entrenador vino a leer. Con .fijo el usuario lo
+   pega, y ahi se le recorta el alto para que deje ver algo mas que el video. */
+.reproductor { margin: 0 0 12px; }
+.reproductor.fijo { position: sticky; top: 56px; z-index: 2; }
 .reproductor video { width: 100%; max-height: 42dvh; background: #000; border-radius: var(--radio); display: block; }
+.reproductor.fijo video { max-height: 30dvh; }
+.barra_video { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.barra_video .sutil { font-size: 0.8rem; }
 
 table.numeros { width: 100%; border-collapse: collapse; }
 table.numeros th, table.numeros td { padding: 8px 6px; text-align: right; border-bottom: 1px solid var(--borde); }

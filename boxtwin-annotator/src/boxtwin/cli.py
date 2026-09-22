@@ -375,6 +375,25 @@ def build_parser() -> argparse.ArgumentParser:
     rv.add_argument("--desde", type=int, default=0)
     rv.add_argument("--hasta", type=int, default=None)
 
+    me = sub.add_parser(
+        "medir",
+        help="mide una o varias sesiones contra su anotacion manual",
+        description=(
+            "Empareja los golpes de la Fight-Card contra los del annot.json con el mismo "
+            "criterio que el resto del proyecto, IoU 0,3, y separa lo que el detector no "
+            "marco de lo que no pudo ver porque no habia identidad resuelta. Sin esa "
+            "separacion, un recall bajo se le atribuye al detector y se trabaja sobre el "
+            "modelo equivocado."
+        ),
+    )
+    me.add_argument("sesiones", type=Path, nargs="+")
+    me.add_argument("--anotaciones", type=Path, nargs="+", required=True,
+                    dest="anotaciones",
+                    help="directorios donde buscar los annot.json. Se indexan por nombre "
+                         "de archivo de video")
+    me.add_argument("--json", type=Path, default=None,
+                    help="ademas del reporte, volcar los numeros a un archivo")
+
     co = sub.add_parser(
         "corregir",
         help="corrige el tipo de un golpe y lo guarda como etiqueta nueva",
@@ -710,6 +729,84 @@ def _cmd_render(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_medir(args: argparse.Namespace) -> int:
+    import json
+
+    import numpy as np
+
+    from boxtwin.mvp.medicion import medir_sesion
+
+    # Los annot.json se indexan por el nombre del video, que es lo unico que comparten con
+    # la sesion. Se saltean los .bak y los de reanotacion, que no son la anotacion vigente.
+    anotaciones = {}
+    for base in args.anotaciones:
+        for f in sorted(Path(base).rglob("*.annot.json")):
+            if any(x in f.name for x in (".bak", "reanno", "medido")):
+                continue
+            try:
+                d = json.loads(f.read_text())
+            except json.JSONDecodeError:
+                continue
+            if d.get("events"):
+                anotaciones[Path(d["video"]["path"]).name] = d
+
+    if not anotaciones:
+        print("error: no encontre ninguna anotacion con eventos", file=sys.stderr)
+        return 1
+
+    print(f"{'fuente':24s} {'anot':>5s} {'marcas':>7s} {'empar':>6s} {'recall':>7s} "
+          f"{'prec':>6s} {'sin id':>7s} {'rec.vis':>8s}")
+    print("-" * 80)
+    filas, salida = [], {}
+    for ses in args.sesiones:
+        ruta = Path(ses) / "fightcard.json"
+        if not ruta.is_file():
+            print(f"{Path(ses).name:24s}  sin fightcard.json, salteada", file=sys.stderr)
+            continue
+        fc = json.loads(ruta.read_text())
+        nombre = fc["video"]["nombre"]
+        if nombre not in anotaciones:
+            print(f"{nombre:24s}  sin anotacion manual, salteada", file=sys.stderr)
+            continue
+        poses = Path(ses) / "poses.npz"
+        valid = np.load(poses)["valid"] if poses.is_file() else None
+
+        r = medir_sesion(fc, anotaciones[nombre], valid)
+        salida[nombre] = r.a_dict()
+        filas.append(r)
+        print(f"{nombre:24s} {r.anotados:5d} {r.marcas:7d} {r.emparejados:6d} "
+              f"{r.recall:7.3f} {r.precision:6.3f} "
+              f"{r.sin_identidad / r.anotados if r.anotados else 0:6.0%} "
+              f"{r.recall_sobre_visible:8.3f}")
+
+    if not filas:
+        return 1
+    tot_a = sum(r.anotados for r in filas)
+    tot_m = sum(r.marcas for r in filas)
+    tot_e = sum(r.emparejados for r in filas)
+    tot_si = sum(r.sin_identidad for r in filas)
+    tot_v = sum(r.visibles for r in filas)
+    tot_ev = sum(r.encontrados_visibles for r in filas)
+    print("-" * 80)
+    print(f"{'TOTAL':24s} {tot_a:5d} {tot_m:7d} {tot_e:6d} {tot_e / tot_a:7.3f} "
+          f"{tot_e / tot_m if tot_m else 0:6.3f} {tot_si / tot_a:6.0%} "
+          f"{tot_ev / tot_v if tot_v else 0:8.3f}")
+    print(f"\n  El {tot_si / tot_a:.0%} de los golpes anotados cae en cuadros sin identidad")
+    print("  resuelta: ahi no hay detector que valga. Lo que queda es del detector.")
+
+    if args.json:
+        args.json.write_text(json.dumps(
+            {"por_fuente": salida,
+             "total": {"anotados": tot_a, "marcas": tot_m, "emparejados": tot_e,
+                       "recall": round(tot_e / tot_a, 4),
+                       "precision": round(tot_e / tot_m, 4) if tot_m else None,
+                       "fraccion_sin_identidad": round(tot_si / tot_a, 4),
+                       "recall_sobre_visible": round(tot_ev / tot_v, 4) if tot_v else None}},
+            indent=2, ensure_ascii=False) + "\n")
+        print(f"\n  -> {args.json}")
+    return 0
+
+
 def _cmd_export(args: argparse.Namespace) -> int:
     from boxtwin.core.annotations import load as load_doc
     from boxtwin.core.export import ExportContext, exportadores
@@ -995,6 +1092,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_tipos(args)
         if args.comando == "corregir":
             return _cmd_corregir(args)
+        if args.comando == "medir":
+            return _cmd_medir(args)
         if args.comando == "render":
             return _cmd_render(args)
     except KeyboardInterrupt:

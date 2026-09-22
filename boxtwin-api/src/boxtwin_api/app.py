@@ -592,6 +592,43 @@ def procesado(
     return _servir_con_rangos(ruta, range)
 
 
+@app.post("/jobs/{sesion_id}/render", status_code=202)
+def pedir_render(
+    sesion_id: str,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(obtener_sesion),
+) -> dict:
+    """
+    Encola el armado del video con las marcas.
+
+    Existe porque el render se encadena despues de completar, y eso deja afuera a toda
+    sesion que se proceso antes de que la etapa existiera: no hay ningun trabajo que lo
+    arme y la interfaz se queda diciendo "se esta armando" para siempre. Tambien es el
+    camino para reintentarlo cuando fallo.
+
+    Se niega si ya hay uno esperando, que es lo que evita que tocar dos veces el boton
+    encole dos renders del mismo video sobre la unica GPU que hay.
+    """
+    s = sesion_del_usuario(sesion_id, usuario, db)
+    if s.estado != "listo":
+        raise HTTPException(
+            409, f"la sesion esta en '{s.estado}': el video con marcas se arma sobre la "
+                 "Fight-Card, asi que tiene que estar lista"
+        )
+    pendiente = db.scalar(
+        select(Trabajo).where(
+            Trabajo.sesion_id == s.id,
+            Trabajo.etapa == "render",
+            Trabajo.estado.in_(("en_cola", "tomado")),
+        )
+    )
+    if pendiente is not None:
+        return {"job_id": s.id, "estado": pendiente.estado, "ya_estaba": True}
+    encolar(db, s.id, "render")
+    db.commit()
+    return {"job_id": s.id, "estado": "en_cola", "ya_estaba": False}
+
+
 # ---------------------------------------------------------------------------
 # Boxeadores y perfiles
 

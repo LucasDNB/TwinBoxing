@@ -169,6 +169,7 @@ export default function App() {
               <FightCard
                 sesionId={sesionId}
                 fc={fc}
+                sesion={sesion}
                 alCambiar={recargarFightcard}
                 alVerPerfil={setPerfilId}
               />

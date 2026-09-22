@@ -115,6 +115,8 @@ export const api = {
 
   ticketVideo: (id) => pedir(`/videos/${id}/ticket`),
 
+  pedirRender: (id) => pedir(`/jobs/${id}/render`, { method: 'POST' }),
+
   // La subida va con XMLHttpRequest y no con fetch por una sola razon: fetch no reporta
   // progreso de subida, y un video de celular puede tardar minutos. Una barra que no se
   // mueve durante tres minutos se lee como que se colgo.
