@@ -68,6 +68,7 @@ def comando_de(trabajo: Trabajo, sesion: Sesion) -> list[list[str]]:
             str(directorio / "videos" / sesion.video_nombre),
             "--out", str(directorio),
             "--modelo-guantes", str(cfg.modelo_guantes),
+            "--modelo-pose", str(cfg.modelo_pose),
             "--device", cfg.device,
         ]
         if p.get("round_s"):

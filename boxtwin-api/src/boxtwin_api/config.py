@@ -54,6 +54,27 @@ class Config:
     secreto_efimero: bool = field(
         default_factory=lambda: not os.environ.get("BOXTWIN_SECRETO")
     )
+
+    # Quien puede crearse una cuenta. El default es CERRADO y es a proposito: apenas esto
+    # sale por un tunel, una instancia con el registro abierto es una GPU ajena gratis para
+    # cualquiera que tenga la URL. Abrirlo es una decision, no un olvido.
+    #
+    #   sin setear  -> nadie se registra, y el error dice como habilitarlo
+    #   "abierto"   -> cualquiera, que es lo que se quiere en desarrollo
+    #   otra cosa   -> es el codigo de invitacion y hay que presentarlo
+    invitacion: str = field(
+        default_factory=lambda: os.environ.get("BOXTWIN_INVITACION", "")
+    )
+
+    # El frontend construido. Servirlo desde la misma API deja UN solo origen, que es lo que
+    # hace que alcance con un tunel y que no haga falta CORS en produccion.
+    web: Path | None = field(
+        default_factory=lambda: (
+            Path(os.environ["BOXTWIN_WEB"]).expanduser() if os.environ.get("BOXTWIN_WEB")
+            else None
+        )
+    )
+
     horas_de_sesion: int = field(
         default_factory=lambda: int(os.environ.get("BOXTWIN_HORAS_SESION", "72"))
     )
@@ -77,6 +98,12 @@ class Config:
     )
     modelo_guantes: Path = field(
         default_factory=lambda: _ruta("BOXTWIN_MODELO_GUANTES", "modelos/guantes-v2.pt")
+    )
+    # Explicito y no el default de ultralytics: sin esto la ruta se resuelve contra el
+    # directorio de trabajo del proceso, que en un servicio de systemd no es el que uno
+    # cree. Costo una corrida.
+    modelo_pose: Path = field(
+        default_factory=lambda: _ruta("BOXTWIN_MODELO_POSE", "yolov8l-pose.pt")
     )
     modelo_detector: Path = field(
         default_factory=lambda: _ruta("BOXTWIN_MODELO_DETECTOR", "modelos/detector.pt")
@@ -104,6 +131,12 @@ class Config:
     intentos_maximos: int = field(
         default_factory=lambda: int(os.environ.get("BOXTWIN_INTENTOS", "2"))
     )
+
+    @property
+    def modo_registro(self) -> str:
+        if not self.invitacion:
+            return "cerrado"
+        return "abierto" if self.invitacion == "abierto" else "invitacion"
 
     def dir_sesion(self, sesion_id: str) -> Path:
         return self.datos / "sesiones" / sesion_id

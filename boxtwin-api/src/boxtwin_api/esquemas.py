@@ -30,6 +30,9 @@ TIPOS = ("jab", "cross", "hook", "uppercut")
 class Credenciales(BaseModel):
     email: EmailStr
     clave: str = Field(min_length=8, max_length=256)
+    # Solo lo mira el registro. El login lo ignora, asi que cerrar el registro no deja
+    # afuera a los que ya tienen cuenta.
+    invitacion: str = Field(default="", max_length=256)
 
 
 class Token(BaseModel):

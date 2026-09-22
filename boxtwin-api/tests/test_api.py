@@ -221,3 +221,100 @@ def test_se_puede_volver_a_sembrar_una_sesion_lista(cliente, registrado, entorno
         db.commit()
     r = cliente.post(f"/jobs/{sid}/siembra", json={"track_a": 7, "track_b": 3})
     assert r.status_code == 202
+
+
+# -- quien puede crearse una cuenta -----------------------------------------
+#
+# Es lo primero que importa cuando esto sale por un tunel: una instancia con el registro
+# abierto es una GPU ajena gratis para cualquiera que tenga la URL, y la GPU es una sola.
+
+
+def _recargar(monkeypatch, **entorno):
+    """Levanta la app de nuevo con otra configuracion de registro."""
+    import importlib
+    import sys
+
+    for k, v in entorno.items():
+        if v is None:
+            monkeypatch.delenv(k, raising=False)
+        else:
+            monkeypatch.setenv(k, v)
+    import boxtwin_api.config as config
+
+    importlib.reload(config)
+    for nombre in ("boxtwin_api.db", "boxtwin_api.cola", "boxtwin_api.app"):
+        importlib.reload(sys.modules[nombre])
+    import boxtwin_api.app as app_mod
+    from fastapi.testclient import TestClient
+
+    app_mod.crear_tablas()
+    return TestClient(app_mod.app)
+
+
+def test_sin_configurar_nada_el_registro_esta_cerrado(entorno, monkeypatch):
+    # El default seguro. Si alguien despliega y se olvida de la variable, no se abre solo.
+    c = _recargar(monkeypatch, BOXTWIN_INVITACION=None)
+    r = c.post("/auth/registro", json={"email": "a@b.com", "clave": "clavelarga1"})
+    assert r.status_code == 403
+    assert "BOXTWIN_INVITACION" in r.json()["detail"], "y el error dice como abrirlo"
+
+
+def test_con_codigo_hace_falta_el_codigo(entorno, monkeypatch):
+    c = _recargar(monkeypatch, BOXTWIN_INVITACION="gimnasio-2026")
+    sin = c.post("/auth/registro", json={"email": "a@b.com", "clave": "clavelarga1"})
+    assert sin.status_code == 403
+
+    mal = c.post("/auth/registro",
+                 json={"email": "a@b.com", "clave": "clavelarga1", "invitacion": "otro"})
+    assert mal.status_code == 403
+
+    bien = c.post("/auth/registro",
+                  json={"email": "a@b.com", "clave": "clavelarga1",
+                        "invitacion": "gimnasio-2026"})
+    assert bien.status_code == 200
+
+
+def test_cerrar_el_registro_no_deja_afuera_al_que_ya_tiene_cuenta(entorno, monkeypatch):
+    c = _recargar(monkeypatch, BOXTWIN_INVITACION="abierto")
+    c.post("/auth/registro", json={"email": "a@b.com", "clave": "clavelarga1"})
+
+    cerrada = _recargar(monkeypatch, BOXTWIN_INVITACION=None)
+    r = cerrada.post("/auth/login", json={"email": "a@b.com", "clave": "clavelarga1"})
+    assert r.status_code == 200
+
+
+def test_salud_declara_lo_que_hay_que_mirar_antes_de_abrir_el_tunel(cliente):
+    d = cliente.get("/salud").json()
+    assert d["registro"] == "abierto"
+    assert d["secreto_efimero"] is False
+    assert d["frontend"] is False, "en los tests no hay frontend construido"
+
+
+# -- el frontend servido por la misma API -----------------------------------
+
+
+def test_la_api_sirve_el_frontend_si_esta_construido(entorno, monkeypatch, tmp_path):
+    # Un solo origen: con el frontend en otro puerto harian falta dos tuneles y CORS.
+    dist = tmp_path / "dist"
+    (dist / "assets").mkdir(parents=True)
+    (dist / "index.html").write_text("<!doctype html><title>BoxTwin</title>")
+    (dist / "assets" / "app.js").write_text("console.log('hola')")
+
+    c = _recargar(monkeypatch, BOXTWIN_WEB=str(dist), BOXTWIN_INVITACION="abierto")
+    r = c.get("/")
+    assert r.status_code == 200 and "BoxTwin" in r.text
+    assert c.get("/assets/app.js").status_code == 200
+    assert c.get("/salud").json()["frontend"] is True
+
+
+def test_el_frontend_no_tapa_las_rutas_de_la_api(entorno, monkeypatch, tmp_path):
+    # El mount matchea todo, asi que si quedara antes que las rutas, /salud devolveria el
+    # index.html y la app quedaria muerta sin un solo error.
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    (dist / "index.html").write_text("<!doctype html><title>BoxTwin</title>")
+
+    c = _recargar(monkeypatch, BOXTWIN_WEB=str(dist), BOXTWIN_INVITACION="abierto")
+    assert c.get("/salud").json()["ok"] is True
+    assert c.post("/auth/login",
+                  json={"email": "x@y.com", "clave": "clavelarga1"}).status_code == 401

@@ -589,6 +589,18 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
  14. Lo que la corrida no prueba: no hay anotacion de ese video, asi que no se midio ni
      precision ni recall sobre el, y los 46 golpes no se compararon contra nada. El tipo
      de golpe no se estimo. La imagen del worker sigue escrita y sin construir
+ 15. PUESTA ONLINE por systemd y no por Docker: la imagen del worker lleva mmcv compilado
+     contra CUDA 11.8 y no le ahorra nada al primer despliegue, porque la GPU y los pesos
+     van montados igual. Dos units, un archivo de entorno y tailscale funnel, que ya esta
+     instalado en la estacion. El Docker queda para el PoC de nube, que es donde hace
+     falta de verdad
+ 16. Dos cosas que el deploy obligo a arreglar y que eran agujeros: el registro estaba
+     ABIERTO -cualquiera con la URL se creaba cuenta y le mandaba videos a la GPU- y ahora
+     esta cerrado por default, con codigo de invitacion; y la API no servia el frontend,
+     asi que hacian falta dos tuneles y CORS. Verificado en modo produccion que la pagina
+     toca UN solo origen. El modelo de pose tambien paso a ruta explicita: dependia del
+     directorio de trabajo, que en un servicio no es el que uno cree, y eso ya habia
+     costado una corrida
 
 PENDIENTE Y PROXIMO PASO
 

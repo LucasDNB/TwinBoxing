@@ -9,6 +9,7 @@ export default function Ingreso({ alEntrar }) {
   const [modo, setModo] = useState('login')
   const [email, setEmail] = useState('')
   const [clave, setClave] = useState('')
+  const [invitacion, setInvitacion] = useState('')
   const [error, setError] = useState(null)
   const [esperando, setEsperando] = useState(false)
 
@@ -17,7 +18,10 @@ export default function Ingreso({ alEntrar }) {
     setError(null)
     setEsperando(true)
     try {
-      const r = modo === 'login' ? await api.login(email, clave) : await api.registro(email, clave)
+      const r =
+        modo === 'login'
+          ? await api.login(email, clave)
+          : await api.registro(email, clave, invitacion)
       guardarSesion(r.token, r.usuario)
       alEntrar(r.usuario)
     } catch (err) {
@@ -60,6 +64,18 @@ export default function Ingreso({ alEntrar }) {
           />
         </label>
         {modo === 'registro' && <p className="ayuda">Mínimo 8 caracteres.</p>}
+
+        {modo === 'registro' && (
+          <label>
+            Código de invitación
+            <input
+              type="text"
+              autoComplete="off"
+              value={invitacion}
+              onChange={(e) => setInvitacion(e.target.value)}
+            />
+          </label>
+        )}
 
         {error && <p className="error" role="alert">{error}</p>}
 

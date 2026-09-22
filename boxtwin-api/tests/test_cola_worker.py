@@ -206,3 +206,23 @@ def test_un_comando_que_falla_no_tumba_al_worker(entorno, con_sesion, monkeypatc
 
 def test_el_bucle_sin_trabajos_no_hace_nada(entorno):
     assert entorno["worker"].correr(una_vuelta=True, worker="w") == 0
+
+
+def test_el_comando_lleva_el_modelo_de_pose_con_ruta_absoluta(entorno, con_sesion, monkeypatch):
+    # Sin esto la ruta se resuelve contra el directorio de trabajo del proceso, que en un
+    # servicio de systemd no es el que uno cree. Paso en la primera corrida real.
+    import importlib
+
+    monkeypatch.setenv("BOXTWIN_MODELO_POSE", "/modelos/yolov8l-pose.pt")
+    import boxtwin_api.config as config
+
+    importlib.reload(config)
+    importlib.reload(entorno["worker"])
+
+    from boxtwin_api.modelos import Sesion
+
+    cola, db_mod = entorno["cola"], entorno["db"]
+    with db_mod.hacer_sesion() as db:
+        t = cola.reclamar(db, "w")
+        cmd = entorno["worker"].comando_de(t, db.get(Sesion, con_sesion))[0]
+    assert cmd[cmd.index("--modelo-pose") + 1] == "/modelos/yolov8l-pose.pt"

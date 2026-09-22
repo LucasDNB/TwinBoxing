@@ -1,0 +1,32 @@
+# BoxTwin - La API.
+#
+# Escucha SOLO en 127.0.0.1 y eso no es un descuido: quien la expone es el tunel, que
+# proxea a localhost. Atada a 0.0.0.0 quedaria ademas abierta a toda la red del
+# departamento, que es una superficie que nadie pidio.
+#
+# Instalacion:
+#   sudo cp boxtwin-api.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now boxtwin-api
+
+[Unit]
+Description=BoxTwin API
+Documentation=https://github.com/LucasDNB/TwinBoxing
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lucasb
+Group=lucasb
+WorkingDirectory=/home/lucasb/Proyectos/TwinBoxing
+EnvironmentFile=/etc/boxtwin.env
+ExecStart=/home/lucasb/miniforge3/envs/twinboxing_env/bin/uvicorn boxtwin_api.app:app \
+          --host 127.0.0.1 --port 8000 --proxy-headers
+Restart=always
+RestartSec=3
+NoNewPrivileges=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

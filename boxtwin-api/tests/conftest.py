@@ -26,6 +26,11 @@ def entorno(tmp_path, monkeypatch):
     monkeypatch.setenv("BOXTWIN_DATOS", str(tmp_path / "datos"))
     monkeypatch.setenv("BOXTWIN_SECRETO", "secreto-de-prueba-que-no-cambia")
     monkeypatch.setenv("BOXTWIN_CMD", "echo")
+    # El registro esta CERRADO por defecto, asi que los tests lo abren a proposito. Que
+    # haya que escribirlo es parte de lo que se quiere: una instancia con el registro
+    # abierto tiene que ser una decision visible.
+    monkeypatch.setenv("BOXTWIN_INVITACION", "abierto")
+    monkeypatch.delenv("BOXTWIN_WEB", raising=False)
     monkeypatch.setenv("BOXTWIN_INTENTOS", "2")
 
     import boxtwin_api.config as config

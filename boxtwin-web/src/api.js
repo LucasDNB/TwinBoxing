@@ -86,8 +86,11 @@ async function pedir(ruta, opciones = {}) {
 }
 
 export const api = {
-  registro: (email, clave) =>
-    pedir('/auth/registro', { method: 'POST', body: JSON.stringify({ email, clave }) }),
+  registro: (email, clave, invitacion = '') =>
+    pedir('/auth/registro', {
+      method: 'POST',
+      body: JSON.stringify({ email, clave, invitacion }),
+    }),
 
   login: (email, clave) =>
     pedir('/auth/login', { method: 'POST', body: JSON.stringify({ email, clave }) }),

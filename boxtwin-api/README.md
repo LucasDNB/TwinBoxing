@@ -56,20 +56,32 @@ Fight-Card no depende de él.
 ## Correr
 
 ```bash
-export BOXTWIN_DB=postgresql+psycopg://boxtwin@localhost/boxtwin
 export BOXTWIN_DATOS=/datos/boxtwin
 export BOXTWIN_SECRETO=$(openssl rand -hex 32)
-export BOXTWIN_MODELO_GUANTES=modelos/guantes-v2.pt
-export BOXTWIN_MODELO_DETECTOR=modelos/detector-7fuentes.pt
+export BOXTWIN_INVITACION=un-codigo
+export BOXTWIN_WEB=../boxtwin-web/dist
+export BOXTWIN_MODELO_POSE=../yolov8l-pose.pt
+export BOXTWIN_MODELO_GUANTES=../boxtwin-guantes/modelos/guantes-v2.pt
+export BOXTWIN_MODELO_DETECTOR=../modelos/detector_7fuentes.ens.pt
 
-uvicorn boxtwin_api.app:app --host 0.0.0.0 --port 8000
+uvicorn boxtwin_api.app:app --host 127.0.0.1 --port 8000
 python -m boxtwin_api.worker
 ```
 
-Sin `BOXTWIN_SECRETO` el servidor genera uno al arrancar y todas las sesiones abiertas se
-caen en cada reinicio. `GET /salud` lo dice.
+Tres variables que no son opcionales en cuanto esto sale a internet, y `GET /salud`
+reporta las tres:
 
-Sin `BOXTWIN_DB` usa sqlite, que alcanza para desarrollo.
+- Sin `BOXTWIN_SECRETO` el servidor genera uno al arrancar y todas las sesiones abiertas
+  se caen en cada reinicio.
+- Sin `BOXTWIN_INVITACION` el **registro queda cerrado**, que es el default a propósito:
+  una instancia abierta detrás de un túnel es una GPU ajena gratis para cualquiera que
+  tenga la URL. Con un código, hace falta ese código; con `abierto`, cualquiera.
+- Con `BOXTWIN_WEB` apuntando al frontend construido, la API lo sirve y queda **un solo
+  origen**: alcanza con exponer este puerto y no hace falta CORS.
+
+Sin `BOXTWIN_DB` usa sqlite, que alcanza mientras haya un solo worker.
+
+Para ponerlo online: [`despliegue/README.md`](../despliegue/README.md).
 
 ## Endpoints
 
@@ -106,5 +118,5 @@ pip install -e ".[dev]"
 python -m pytest
 ```
 
-47 tests. El bloque que más importa es el de aislamiento entre usuarios (RNF3): no se verifica
+58 tests. El bloque que más importa es el de aislamiento entre usuarios (RNF3): no se verifica
 leyendo el código sino pidiendo cada recurso con el token del otro.

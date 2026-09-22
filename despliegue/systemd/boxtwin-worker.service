@@ -1,0 +1,37 @@
+# BoxTwin - El worker.
+#
+# Uno solo, y es a proposito: hay una sola GPU de 8 GB y dos procesos de pose compitiendo
+# terminan los dos mas lento que uno.
+#
+# TimeoutStopSec es largo porque el worker atiende el SIGTERM terminando el trabajo en
+# curso y recien despues sale. Una pasada de pose sobre media hora de video puede tardar
+# 45 minutos, y matarlo en el medio deja la sesion a mitad de camino: el trabajo vuelve a
+# la cola igual, pero se tira todo el computo.
+#
+# Instalacion:
+#   sudo cp boxtwin-worker.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now boxtwin-worker
+
+[Unit]
+Description=BoxTwin worker (pose, identidad, detector)
+Documentation=https://github.com/LucasDNB/TwinBoxing
+After=network-online.target boxtwin-api.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lucasb
+Group=lucasb
+WorkingDirectory=/home/lucasb/Proyectos/TwinBoxing
+EnvironmentFile=/etc/boxtwin.env
+ExecStart=/home/lucasb/miniforge3/envs/twinboxing_env/bin/python -m boxtwin_api.worker
+Restart=always
+RestartSec=5
+TimeoutStopSec=3600
+KillSignal=SIGTERM
+NoNewPrivileges=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

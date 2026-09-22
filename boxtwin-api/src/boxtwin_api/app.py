@@ -22,6 +22,7 @@ USO
 
 from __future__ import annotations
 
+import hmac
 import json
 import re
 import shutil
@@ -112,8 +113,33 @@ def sesion_del_usuario(sesion_id: str, usuario: Usuario, db: Session) -> Sesion:
     return s
 
 
+def _puede_registrarse(codigo: str) -> None:
+    """
+    Quien se puede crear una cuenta.
+
+    Cerrado por defecto y a proposito: apenas esto sale por un tunel, una instancia con el
+    registro abierto es una GPU ajena gratis para cualquiera que tenga la URL, y la GPU es
+    una sola y esta abajo del escritorio. Abrirlo tiene que ser una decision explicita.
+
+    La comparacion va en tiempo constante porque el codigo es un secreto compartido y
+    compararlo con == filtra por cuanto tarda en fallar.
+    """
+    modo = cfg.modo_registro
+    if modo == "abierto":
+        return
+    if modo == "cerrado":
+        raise HTTPException(
+            403,
+            "el registro esta cerrado en esta instancia. Para abrirlo, BOXTWIN_INVITACION "
+            "con un codigo, o con 'abierto' si no hace falta ninguno",
+        )
+    if not hmac.compare_digest(codigo or "", cfg.invitacion):
+        raise HTTPException(403, "el codigo de invitacion no es correcto")
+
+
 @app.post("/auth/registro", response_model=Token)
 def registro(c: Credenciales, db: Session = Depends(obtener_sesion)) -> Token:
+    _puede_registrarse(c.invitacion)
     email = c.email.lower().strip()
     if db.scalar(select(Usuario).where(Usuario.email == email)):
         raise HTTPException(409, "ya hay una cuenta con ese email")
@@ -487,4 +513,27 @@ def stream(
 
 @app.get("/salud")
 def salud() -> dict:
-    return {"ok": True, "version": app.version, "secreto_efimero": cfg.secreto_efimero}
+    return {
+        "ok": True,
+        "version": app.version,
+        # Las dos cosas que hay que poder mirar desde afuera antes de abrir el tunel.
+        "secreto_efimero": cfg.secreto_efimero,
+        "registro": cfg.modo_registro,
+        "frontend": bool(cfg.web and (cfg.web / "index.html").is_file()),
+    }
+
+
+# ---------------------------------------------------------------------------
+# El frontend, servido por la misma API
+# ---------------------------------------------------------------------------
+#
+# UN SOLO ORIGEN. Con el frontend en otro puerto hacen falta dos tuneles y CORS en
+# produccion; sirviendolo desde aca alcanza con exponer este puerto y nada mas.
+#
+# Va ULTIMO en el archivo y no es cosmetico: Starlette prueba las rutas en orden de
+# registro y este mount matchea todo, asi que cualquier ruta declarada despues quedaria
+# tapada por el index.html.
+if cfg.web and (cfg.web / "index.html").is_file():
+    from fastapi.staticfiles import StaticFiles
+
+    app.mount("/", StaticFiles(directory=str(cfg.web), html=True), name="web")
