@@ -226,3 +226,41 @@ def test_el_comando_lleva_el_modelo_de_pose_con_ruta_absoluta(entorno, con_sesio
         t = cola.reclamar(db, "w")
         cmd = entorno["worker"].comando_de(t, db.get(Sesion, con_sesion))[0]
     assert cmd[cmd.index("--modelo-pose") + 1] == "/modelos/yolov8l-pose.pt"
+
+
+# -- la base compartida entre el worker y la API ----------------------------
+
+
+def test_un_sondeo_en_vacio_no_deja_la_base_bloqueada(entorno):
+    """
+    El worker sondea la cola cada dos segundos, casi siempre sobre una cola vacia. Si ese
+    sondeo deja una transaccion de escritura abierta, sqlite le niega la escritura a la
+    API, y lo que se ve del otro lado es un 500 al registrarse. Paso en produccion el
+    22-09: liberar_abandonados hacia un UPDATE y solo commiteaba si habia cambiado alguna
+    fila, asi que en el caso normal -cero filas- el lock quedaba tomado.
+    """
+    from boxtwin_api.modelos import Usuario
+
+    cola, db_mod = entorno["cola"], entorno["db"]
+    with db_mod.hacer_sesion() as db_worker:
+        assert cola.reclamar(db_worker, "w") is None
+
+        # Con la sesion del worker todavia abierta -que es lo que pasa mientras duerme-,
+        # la API tiene que poder escribir.
+        with db_mod.hacer_sesion() as db_api:
+            db_api.add(Usuario(email="lucas@lucas.com", hash_clave="scrypt$x"))
+            db_api.commit()
+
+    with db_mod.hacer_sesion() as db:
+        assert db.query(Usuario).count() == 1
+
+
+def test_liberar_abandonados_cierra_su_transaccion_aunque_no_libere_nada(entorno):
+    from boxtwin_api.modelos import Usuario
+
+    cola, db_mod = entorno["cola"], entorno["db"]
+    with db_mod.hacer_sesion() as db_worker:
+        assert cola.liberar_abandonados(db_worker) == 0
+        with db_mod.hacer_sesion() as db_api:
+            db_api.add(Usuario(email="otro@x.com", hash_clave="scrypt$x"))
+            db_api.commit()

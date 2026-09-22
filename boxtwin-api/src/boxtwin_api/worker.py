@@ -163,27 +163,32 @@ def correr(una_vuelta: bool = False, worker: str | None = None) -> int:
         with hacer_sesion() as db:
             trabajo = reclamar(db, nombre)
             if trabajo is None:
-                if una_vuelta:
-                    return hechos
-                time.sleep(cfg.espera_s)
-                continue
-            try:
-                estado = ejecutar_trabajo(db, trabajo)
-            except Exception as e:  # noqa: BLE001 - el worker no se puede caer por un video
-                log.exception("el trabajo %s fallo", trabajo.id)
-                fallar(db, trabajo, str(e))
+                # La espera va AFUERA de la sesion. Durmiendo adentro, el worker se pasa
+                # la vida con una conexion abierta contra la base, y sobre sqlite eso le
+                # niega la escritura a la API.
+                pass
             else:
-                terminar(db, trabajo, estado_sesion=estado)
-                # Encadenar la clasificacion aca y no en la API: recien cuando existe
-                # segmentos.json hay algo que clasificar, y eso lo sabe el worker.
-                if trabajo.etapa == "completar" and estado == "listo" and cfg.cmd_clasificador:
-                    from boxtwin_api.cola import encolar
+                try:
+                    estado = ejecutar_trabajo(db, trabajo)
+                except Exception as e:  # noqa: BLE001 - no se cae por un video
+                    log.exception("el trabajo %s fallo", trabajo.id)
+                    fallar(db, trabajo, str(e))
+                else:
+                    terminar(db, trabajo, estado_sesion=estado)
+                    # Encadenar la clasificacion aca y no en la API: recien cuando existe
+                    # segmentos.json hay algo que clasificar, y eso lo sabe el worker.
+                    if (trabajo.etapa == "completar" and estado == "listo"
+                            and cfg.cmd_clasificador):
+                        from boxtwin_api.cola import encolar
 
-                    encolar(db, trabajo.sesion_id, "clasificar")
-                    db.commit()
-            hechos += 1
+                        encolar(db, trabajo.sesion_id, "clasificar")
+                        db.commit()
+                hechos += 1
+
         if una_vuelta:
             return hechos
+        if trabajo is None:
+            time.sleep(cfg.espera_s)
     return hechos
 
 

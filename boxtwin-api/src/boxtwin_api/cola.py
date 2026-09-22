@@ -92,6 +92,9 @@ def reclamar(db: Session, worker: str) -> Trabajo | None:
         select(Trabajo).where(Trabajo.estado == "en_cola").order_by(Trabajo.creado).limit(1)
     ).scalar_one_or_none()
     if fila is None:
+        # El SELECT tambien abrio una transaccion. Cerrarla antes de irse evita que el
+        # sondeo de la cola vacia se quede sentado sobre la base.
+        db.rollback()
         return None
     r = db.execute(
         update(Trabajo)
@@ -158,6 +161,11 @@ def liberar_abandonados(db: Session) -> int:
         .where(Trabajo.estado == "tomado", Trabajo.tomado_en < limite)
         .values(estado="en_cola", tomado_por=None, tomado_en=None)
     )
-    if r.rowcount:
-        db.commit()
+    # Se commitea SIEMPRE, aunque no haya liberado nada, y eso no es prolijidad. sqlite
+    # toma el lock de escritura al empezar el UPDATE, hayan coincidido filas o no, y lo
+    # suelta recien al cerrar la transaccion. Commiteando solo cuando rowcount > 0 -que es
+    # lo que hacia esto- el caso normal, cero filas, dejaba el lock tomado; con el worker
+    # sondeando cada dos segundos, la API no podia escribir nunca y registrarse devolvia
+    # 500. Paso en produccion el 22-09.
+    db.commit()
     return int(r.rowcount or 0)
