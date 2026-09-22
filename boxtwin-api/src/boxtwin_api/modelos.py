@@ -108,6 +108,16 @@ class Sesion(Base):
     semilla_a: Mapped[int | None] = mapped_column(Integer, nullable=True)
     semilla_b: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
+    # A quien corresponde cada lado. Nullable porque una sesion vale sin esto: los numeros
+    # de adentro no dependen de saber el nombre, y obligar a decirlo antes de ver el
+    # resultado seria pedir un dato para dar otro.
+    boxeador_a_id: Mapped[str | None] = mapped_column(
+        ForeignKey("boxeadores.id"), nullable=True, index=True
+    )
+    boxeador_b_id: Mapped[str | None] = mapped_column(
+        ForeignKey("boxeadores.id"), nullable=True, index=True
+    )
+
     creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
     actualizada: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=ahora, onupdate=ahora
@@ -117,6 +127,31 @@ class Sesion(Base):
     trabajos: Mapped[list[Trabajo]] = relationship(
         back_populates="sesion", cascade="all, delete-orphan"
     )
+
+
+class Boxeador(Base):
+    """
+    Una persona que se entrena, con nombre, a la que se le acumulan sesiones.
+
+    Existe porque una sesion suelta no responde la pregunta que el entrenador tiene: no es
+    "cuantos golpes tiro hoy" sino "esta mejorando". Para eso hace falta que el peleador A
+    de hoy y el peleador A de la semana pasada sean la misma persona, y eso el sistema no lo
+    sabe: los nombres A y B se asignan por posicion en pantalla y no significan nada entre
+    sesiones. Lo dice una persona, una vez por sesion.
+
+    La guardia vive aca y no solo en la sesion porque es una propiedad de la persona, no del
+    video. Se puede corregir sin volver a procesar nada.
+    """
+
+    __tablename__ = "boxeadores"
+    __table_args__ = (UniqueConstraint("usuario_id", "nombre", name="uq_boxeador_nombre"),)
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=nuevo_id)
+    usuario_id: Mapped[str] = mapped_column(ForeignKey("usuarios.id"), index=True)
+    nombre: Mapped[str] = mapped_column(String(120))
+    guardia: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    notas: Mapped[str | None] = mapped_column(Text, nullable=True)
+    creado: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
 
 
 class Trabajo(Base):

@@ -74,13 +74,20 @@ def _dibujar_pose(cv2, img, kp, score, color, umbral=0.3):
             cv2.circle(img, (int(kp[i][0]), int(kp[i][1])), 3, color, -1)
 
 
-def dibujar_consola(lienzo, x0, ancho, peleador, conteo, eventos, total_golpes):
+def dibujar_consola(lienzo, x0, ancho, peleador, conteo, eventos, total_golpes,
+                    exactitud=None):
     """
     La consola de un peleador: su cuenta acumulada, el desglose y los ultimos golpes.
 
     El desglose por tipo va en gris cuando el tipo es None, que es el caso sin clasificador
     corrido, y eso NO es lo mismo que cero: es "no se estimo". Mostrarlo como cero seria
     afirmar que no hubo golpes de esa familia.
+
+    El numero que acompana a cada golpe es la CONFIANZA del clasificador, no su precision.
+    Son cosas distintas y confundirlas es el tipo de error que este proyecto no se permite:
+    la confianza es la salida softmax del modelo para ese golpe, y la precision es cuantas
+    veces acierta, medida contra fuente no vista. Por eso el pie de la consola lleva la
+    exactitud medida, que es el numero que dice cuanto vale la etiqueta.
     """
     import cv2
 
@@ -124,12 +131,22 @@ def dibujar_consola(lienzo, x0, ancho, peleador, conteo, eventos, total_golpes):
     cv2.putText(lienzo, "ultimos", (x, y), f, 0.42, (130, 130, 130), 1)
     y += 20
     # Del mas nuevo al mas viejo: lo que acaba de pasar es lo que se esta mirando.
-    for t_s, brazo, tipo in list(eventos)[::-1]:
-        if y > alto - 14:
+    piso = alto - (34 if exactitud is not None else 14)
+    for t_s, brazo, tipo, conf in list(eventos)[::-1]:
+        if y > piso:
             break
         cv2.putText(lienzo, f"{t_s:6.1f}s", (x, y), f, 0.4, (120, 120, 120), 1)
-        cv2.putText(lienzo, (tipo or brazo or "?")[:14], (x + 56, y), f, 0.42, color, 1)
+        cv2.putText(lienzo, (tipo or brazo or "?")[:12], (x + 56, y), f, 0.42, color, 1)
+        if conf is not None:
+            cv2.putText(lienzo, f"{conf*100:3.0f}%", (x0 + ancho - 52, y), f, 0.4,
+                        (140, 140, 140), 1)
         y += 18
+
+    if exactitud is not None:
+        # El numero honesto: cuantas veces acierta la familia sobre material que no vio. Va
+        # abajo y en gris porque no es un resultado del video sino una propiedad del modelo.
+        cv2.putText(lienzo, f"familia: acierta {exactitud*100:.0f}%", (x, alto - 16), f,
+                    0.38, (115, 115, 115), 1)
 
 
 def componer(img, estado, ancho_consola=ANCHO_CONSOLA):
@@ -137,12 +154,13 @@ def componer(img, estado, ancho_consola=ANCHO_CONSOLA):
     import cv2
 
     alto, ancho = img.shape[:2]
+    exactitud = estado.get("exactitud")
     lienzo = np.zeros((alto, ancho + 2 * ancho_consola, 3), np.uint8)
     lienzo[:, ancho_consola:ancho_consola + ancho] = img
     dibujar_consola(lienzo, 0, ancho_consola, "A", estado["A"]["conteo"],
-                    estado["A"]["eventos"], estado["A"]["total"])
+                    estado["A"]["eventos"], estado["A"]["total"], exactitud)
     dibujar_consola(lienzo, ancho_consola + ancho, ancho_consola, "B", estado["B"]["conteo"],
-                    estado["B"]["eventos"], estado["B"]["total"])
+                    estado["B"]["eventos"], estado["B"]["total"], exactitud)
     f = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(lienzo, estado["pie"], (ancho_consola + 14, alto - 14), f, 0.5,
                 (210, 210, 210), 1)
@@ -256,6 +274,9 @@ def renderizar(
     estado = {
         p: {"conteo": {}, "eventos": deque(maxlen=30), "total": 0} for p in ("A", "B")
     }
+    estado["exactitud"] = (fc.get("clasificador") or {}).get(
+        "exactitud_familia_fuente_no_vista"
+    )
     if desde:
         cap.set(cv2.CAP_PROP_POS_FRAMES, desde)
 
@@ -269,7 +290,7 @@ def renderizar(
                 e = estado[pel]
                 tipo = g.get("tipo")
                 e["conteo"][tipo] = e["conteo"].get(tipo, 0) + 1
-                e["eventos"].append((f / fps, g.get("brazo"), tipo))
+                e["eventos"].append((f / fps, g.get("brazo"), tipo, g.get("confianza_tipo")))
                 e["total"] += 1
 
             # Solo los dos peleadores. El publico, el arbitro y la otra pareja del gimnasio

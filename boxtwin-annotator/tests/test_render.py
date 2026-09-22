@@ -87,7 +87,7 @@ def test_un_tipo_sin_estimar_no_se_muestra_como_cero():
 def test_los_ultimos_golpes_van_del_mas_nuevo_al_mas_viejo():
     a = np.zeros((400, 300, 3), np.uint8)
     b = np.zeros((400, 300, 3), np.uint8)
-    ev = deque([(1.0, "izq", "jab"), (2.0, "der", "cross")])
+    ev = deque([(1.0, "izq", "jab", 0.9), (2.0, "der", "cross", 0.8)])
     dibujar_consola(a, 0, 300, "A", {}, ev, 2)
     dibujar_consola(b, 0, 300, "A", {}, deque(reversed(ev)), 2)
     assert not (a == b).all(), "el orden importa y se ve"
@@ -118,6 +118,40 @@ def test_solo_se_marcan_los_dos_peleadores():
                  if p.role in (TrackRole.A, TrackRole.B) and not p.shadowed]
     assert len(dibujadas) == 2
     assert {p.role for p in dibujadas} == {TrackRole.A, TrackRole.B}
+
+
+# -- la precision del tipo --------------------------------------------------
+
+
+def test_la_confianza_de_cada_golpe_se_dibuja():
+    a = np.zeros((400, 300, 3), np.uint8)
+    b = np.zeros((400, 300, 3), np.uint8)
+    dibujar_consola(a, 0, 300, "A", {"jab": 1}, deque([(1.0, "izq", "jab", 0.91)]), 1)
+    dibujar_consola(b, 0, 300, "A", {"jab": 1}, deque([(1.0, "izq", "jab", 0.42)]), 1)
+    assert not (a == b).all(), "dos confianzas distintas tienen que verse distinto"
+
+
+def test_un_golpe_sin_confianza_no_inventa_un_numero():
+    # Sin clasificador corrido no hay confianza, y dibujar un 0% seria afirmar que el modelo
+    # esta seguro de que no sabe.
+    con = np.zeros((400, 300, 3), np.uint8)
+    sin = np.zeros((400, 300, 3), np.uint8)
+    dibujar_consola(con, 0, 300, "A", {}, deque([(1.0, "izq", "jab", 0.0)]), 1)
+    dibujar_consola(sin, 0, 300, "A", {}, deque([(1.0, "izq", "jab", None)]), 1)
+    assert not (con == sin).all()
+
+
+def test_la_exactitud_medida_va_aparte_de_la_confianza():
+    """
+    La confianza es la salida softmax para ESE golpe; la exactitud es cuantas veces acierta
+    el modelo, medida contra fuente no vista. Confundirlas seria vender una estimacion como
+    una medicion, y por eso van en lugares distintos de la consola.
+    """
+    sin = np.zeros((400, 300, 3), np.uint8)
+    con = np.zeros((400, 300, 3), np.uint8)
+    dibujar_consola(sin, 0, 300, "A", {"jab": 1}, deque(), 1)
+    dibujar_consola(con, 0, 300, "A", {"jab": 1}, deque(), 1, exactitud=0.746)
+    assert not (sin == con).all(), "la exactitud medida se dibuja cuando existe"
 
 
 # -- el codec ---------------------------------------------------------------

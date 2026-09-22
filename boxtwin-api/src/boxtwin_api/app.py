@@ -38,9 +38,17 @@ from sqlalchemy.orm import Session
 from boxtwin_api.cola import encolar
 from boxtwin_api.config import cfg
 from boxtwin_api.db import crear_tablas, obtener_sesion
-from boxtwin_api.esquemas import Credenciales, EntradaCorreccion, Siembra, Token, sesion_a_dict
+from boxtwin_api.esquemas import (
+    AsignarBoxeadores,
+    Credenciales,
+    EntradaBoxeador,
+    EntradaCorreccion,
+    Siembra,
+    Token,
+    sesion_a_dict,
+)
 from boxtwin_api.exportar import a_csv, a_html
-from boxtwin_api.modelos import Correccion, Sesion, Trabajo, Usuario
+from boxtwin_api.modelos import Boxeador, Correccion, Sesion, Trabajo, Usuario
 from boxtwin_api.seguridad import (
     emitir_ticket,
     emitir_token,
@@ -582,6 +590,125 @@ def procesado(
     if not ruta.is_file():
         raise HTTPException(404, "el video procesado todavia no esta")
     return _servir_con_rangos(ruta, range)
+
+
+# ---------------------------------------------------------------------------
+# Boxeadores y perfiles
+
+
+def _boxeador_del_usuario(bid: str, usuario, db) -> "Boxeador":
+    b = db.get(Boxeador, bid)
+    # El mismo 404 para inexistente y ajeno: distinguirlos le dice a un desconocido cuales
+    # ids existen, igual que en el login.
+    if b is None or b.usuario_id != usuario.id:
+        raise HTTPException(404, "no existe ese boxeador")
+    return b
+
+
+def _boxeador_a_dict(b) -> dict:
+    return {"id": b.id, "nombre": b.nombre, "guardia": b.guardia, "notas": b.notas,
+            "creado": b.creado.isoformat()}
+
+
+@app.post("/boxeadores", status_code=201)
+def crear_boxeador(
+    entrada: EntradaBoxeador,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(obtener_sesion),
+) -> dict:
+    """Da de alta un boxeador. El nombre es unico por usuario, no global."""
+    nombre = entrada.nombre.strip()
+    ya = (
+        db.query(Boxeador)
+        .filter(Boxeador.usuario_id == usuario.id, Boxeador.nombre == nombre)
+        .first()
+    )
+    if ya is not None:
+        raise HTTPException(409, f"ya tenes un boxeador que se llama {nombre}")
+    b = Boxeador(usuario_id=usuario.id, nombre=nombre, guardia=entrada.guardia,
+                 notas=entrada.notas)
+    db.add(b)
+    db.commit()
+    return _boxeador_a_dict(b)
+
+
+@app.get("/boxeadores")
+def listar_boxeadores(
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(obtener_sesion),
+) -> list[dict]:
+    bs = (
+        db.query(Boxeador)
+        .filter(Boxeador.usuario_id == usuario.id)
+        .order_by(Boxeador.nombre)
+        .all()
+    )
+    return [_boxeador_a_dict(b) for b in bs]
+
+
+@app.patch("/boxeadores/{boxeador_id}")
+def editar_boxeador(
+    boxeador_id: str,
+    entrada: EntradaBoxeador,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(obtener_sesion),
+) -> dict:
+    b = _boxeador_del_usuario(boxeador_id, usuario, db)
+    b.nombre = entrada.nombre.strip()
+    b.guardia = entrada.guardia
+    b.notas = entrada.notas
+    db.commit()
+    return _boxeador_a_dict(b)
+
+
+@app.put("/sesiones/{sesion_id}/boxeadores")
+def asignar_boxeadores(
+    sesion_id: str,
+    entrada: AsignarBoxeadores,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(obtener_sesion),
+) -> dict:
+    """
+    Dice a quien corresponde cada lado de una sesion.
+
+    Es la unica forma de que el peleador A de hoy y el de la semana pasada sean la misma
+    persona: A y B se asignan por posicion en pantalla y no significan nada entre videos.
+    Se puede cambiar despues, y cambiarlo solo reescribe esta relacion: ni la Fight-Card ni
+    los golpes se tocan.
+    """
+    s = sesion_del_usuario(sesion_id, usuario, db)
+    for campo, valor in (("boxeador_a_id", entrada.boxeador_a),
+                         ("boxeador_b_id", entrada.boxeador_b)):
+        if valor is not None:
+            _boxeador_del_usuario(valor, usuario, db)
+        setattr(s, campo, valor)
+    db.commit()
+    return {"sesion": s.id, "boxeador_a": s.boxeador_a_id, "boxeador_b": s.boxeador_b_id}
+
+
+@app.get("/boxeadores/{boxeador_id}/perfil")
+def perfil_de_boxeador(
+    boxeador_id: str,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(obtener_sesion),
+) -> dict:
+    """
+    El perfil: las sesiones de este boxeador puestas una al lado de la otra.
+
+    Se arma leyendo las Fight-Cards de disco en cada pedido y no se cachea. Son pocas por
+    boxeador y el entrenador corrige tipos: un perfil cacheado mostraria la version anterior
+    a su correccion, que es justo cuando mira.
+    """
+    from boxtwin_api.perfil import construir_perfil
+
+    b = _boxeador_del_usuario(boxeador_id, usuario, db)
+    sesiones = []
+    for s in db.query(Sesion).filter(Sesion.usuario_id == usuario.id).all():
+        if s.boxeador_a_id == b.id:
+            sesiones.append((s, "A"))
+        if s.boxeador_b_id == b.id:
+            sesiones.append((s, "B"))
+    return construir_perfil(b, sesiones, cfg.dir_sesion)
 
 
 @app.get("/salud")

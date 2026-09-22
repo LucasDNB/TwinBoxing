@@ -215,3 +215,79 @@ details summary { cursor: pointer; padding: 8px 0; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+
+/* --- Boxeadores y perfiles ------------------------------------------------
+   El color de cada lado es el mismo que usa el overlay del video y el resto de
+   la Fight-Card: si A es naranja en el video, tiene que serlo aca tambien, o el
+   color deja de ser una pista y pasa a ser decoracion. */
+
+.boxeadores {
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+  margin: 1rem 0;
+}
+.boxeadores h3 { margin: 0 0 .3rem; font-size: 1rem; }
+.boxeadores .ayuda { color: var(--sutil); font-size: .85rem; margin: 0 0 .9rem; }
+
+.asignacion { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.asignacion label { display: flex; align-items: center; gap: .5rem; }
+.asignacion select {
+  background: var(--panel2);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  padding: .35rem .5rem;
+}
+.lado { font-weight: 600; font-size: .9rem; }
+.lado_a { color: var(--a); }
+.lado_b { color: var(--b); }
+
+.alta { display: flex; gap: .5rem; margin-top: .9rem; flex-wrap: wrap; }
+.alta input {
+  flex: 1 1 14rem;
+  background: var(--panel2);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  padding: .4rem .6rem;
+}
+
+.enlace {
+  background: none;
+  border: none;
+  color: var(--acento);
+  cursor: pointer;
+  padding: 0;
+  font-size: .85rem;
+}
+.enlace:hover { text-decoration: underline; }
+
+.perfil { max-width: 46rem; }
+.perfil h2 { margin: .6rem 0 .2rem; }
+
+.resumen { display: flex; gap: 2rem; margin: 1.2rem 0; flex-wrap: wrap; }
+.resumen .dato { display: flex; flex-direction: column; }
+.resumen .dato strong { font-size: 1.9rem; line-height: 1; }
+.resumen .dato span { color: var(--sutil); font-size: .82rem; margin-top: .25rem; }
+
+.evolucion, .mezcla { list-style: none; padding: 0; margin: .5rem 0 1rem; }
+.evolucion li, .mezcla li {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr 7rem;
+  align-items: center;
+  gap: .8rem;
+  padding: .25rem 0;
+  font-size: .9rem;
+}
+.evolucion .fecha { color: var(--sutil); font-variant-numeric: tabular-nums; }
+.evolucion .cifra, .mezcla .cifra {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--sutil);
+}
+.mezcla .cifra em { color: var(--texto); font-style: normal; }
+
+.barra { background: var(--panel2); border-radius: 3px; height: 8px; overflow: hidden; }
+.barra_relleno { background: var(--acento); height: 100%; }

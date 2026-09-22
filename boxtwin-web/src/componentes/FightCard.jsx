@@ -19,11 +19,12 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, urlExport } from '../api.js'
+import Boxeadores from './Boxeadores.jsx'
 import { nombreDeTipo, porcentaje, segundosATiempo, textoDeMargen } from '../formato.js'
 
 const TIPOS = ['jab', 'cross', 'hook', 'uppercut']
 
-export default function FightCard({ sesionId, fc, alCambiar }) {
+export default function FightCard({ sesionId, fc, alCambiar, alVerPerfil }) {
   const video = useRef(null)
   const [ticket, setTicket] = useState(null)
   // El video procesado es la ultima etapa, asi que puede no estar cuando la Fight-Card ya
@@ -119,6 +120,8 @@ export default function FightCard({ sesionId, fc, alCambiar }) {
       </div>
 
       <p className="margen" role="note">{textoDeMargen(fc)}</p>
+
+      <Boxeadores sesionId={sesionId} alVerPerfil={alVerPerfil} />
 
       {sinAsignar > 0.05 && (
         <p className="aviso">

@@ -55,6 +55,34 @@ class Siembra(BaseModel):
         return v
 
 
+class EntradaBoxeador(BaseModel):
+    """Un boxeador con nombre. La guardia es opcional: se puede completar despues."""
+
+    nombre: str = Field(min_length=1, max_length=120)
+    guardia: Literal["ortodoxa", "zurda"] | None = None
+    notas: str | None = None
+
+
+class AsignarBoxeadores(BaseModel):
+    """
+    A quien corresponde cada lado de una sesion.
+
+    Los dos son opcionales y se pueden mandar de a uno: sparring contra alguien que no esta
+    cargado es el caso normal, y obligar a nombrar a los dos convertiria una anotacion util
+    en un tramite.
+    """
+
+    boxeador_a: str | None = None
+    boxeador_b: str | None = None
+
+    @field_validator("boxeador_b")
+    @classmethod
+    def distintos(cls, v, info):
+        if v is not None and info.data.get("boxeador_a") == v:
+            raise ValueError("los dos lados no pueden ser el mismo boxeador")
+        return v
+
+
 class EntradaCorreccion(BaseModel):
     tipo: Literal["jab", "cross", "hook", "uppercut"]
 

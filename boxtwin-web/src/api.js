@@ -150,6 +150,24 @@ export const api = {
       x.send(datos)
     })
   },
+
+  // Boxeadores y perfiles. El nombre es lo unico que hace que el peleador A de hoy y el de
+  // la semana pasada sean la misma persona: A y B se asignan por posicion en pantalla.
+  boxeadores: () => pedir('/boxeadores'),
+
+  crearBoxeador: (nombre, guardia = null) =>
+    pedir('/boxeadores', {
+      method: 'POST',
+      body: JSON.stringify({ nombre, guardia }),
+    }),
+
+  asignarBoxeadores: (id, boxeador_a, boxeador_b) =>
+    pedir(`/sesiones/${id}/boxeadores`, {
+      method: 'PUT',
+      body: JSON.stringify({ boxeador_a, boxeador_b }),
+    }),
+
+  perfil: (id) => pedir(`/boxeadores/${id}/perfil`),
 }
 
 export const urlExport = (id, formato) => `/fightcards/${id}/export?formato=${formato}`

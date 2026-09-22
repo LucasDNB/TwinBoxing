@@ -19,6 +19,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { api, cerrarSesion, token, usuario as usuarioGuardado } from './api.js'
 import Estado from './componentes/Estado.jsx'
 import FightCard from './componentes/FightCard.jsx'
+import Perfil from './componentes/Perfil.jsx'
 import Ingreso from './componentes/Ingreso.jsx'
 import Siembra from './componentes/Siembra.jsx'
 import Subir from './componentes/Subir.jsx'
@@ -39,6 +40,9 @@ export default function App() {
   const [fc, setFc] = useState(null)
   const [lista, setLista] = useState([])
   const [error, setError] = useState(null)
+  // El perfil se abre encima de la sesion y no en otra pagina: se entra desde la
+  // Fight-Card, se mira y se vuelve, sin perder donde estaba.
+  const [perfilId, setPerfilId] = useState(null)
 
   useEffect(() => {
     const alCambiar = () => setSesionId(idDeLaUrl())
@@ -123,6 +127,11 @@ export default function App() {
         <p className="error" role="alert" onClick={() => setError(null)}>{error}</p>
       )}
 
+      {perfilId ? (
+        <main>
+          <Perfil boxeadorId={perfilId} alVolver={() => setPerfilId(null)} />
+        </main>
+      ) : (
       <main>
         {!sesionId ? (
           <>
@@ -157,12 +166,18 @@ export default function App() {
               />
             )}
             {sesion.estado === 'listo' && fc && (
-              <FightCard sesionId={sesionId} fc={fc} alCambiar={recargarFightcard} />
+              <FightCard
+                sesionId={sesionId}
+                fc={fc}
+                alCambiar={recargarFightcard}
+                alVerPerfil={setPerfilId}
+              />
             )}
             {sesion.estado === 'listo' && !fc && <p className="sutil">Cargando la Fight-Card…</p>}
           </>
         )}
       </main>
+      )}
     </div>
   )
 }
