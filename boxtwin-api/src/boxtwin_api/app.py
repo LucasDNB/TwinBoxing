@@ -375,7 +375,24 @@ def listar(
     filas = db.scalars(
         select(Sesion).where(Sesion.usuario_id == usuario.id).order_by(Sesion.creada.desc())
     ).all()
-    return [sesion_a_dict(s) for s in filas]
+    # B5: el progreso de las que estan en curso, para que la lista muestre "pose · 64%"
+    # sin un pedido por sesion. Solo esas: leer disco para las listas no aporta nada.
+    from boxtwin_api.panel import EN_CURSO
+
+    return [
+        sesion_a_dict(s, {"progreso": _progreso_en_disco(s.id)} if s.estado in EN_CURSO else None)
+        for s in filas
+    ]
+
+
+@app.get("/panel")
+def panel(
+    usuario: Usuario = Depends(usuario_actual), db: Session = Depends(obtener_sesion)
+) -> dict:
+    """Los indicadores y lo pendiente de la pantalla 01 (B5). Solo del usuario."""
+    from boxtwin_api.panel import construir_panel
+
+    return construir_panel(usuario, db, cfg.dir_sesion, cfg.perfil_preliminar_sesiones)
 
 
 @app.get("/jobs/{sesion_id}/candidatos/{track}")
@@ -704,9 +721,40 @@ def _boxeador_del_usuario(bid: str, usuario, db) -> "Boxeador":
     return b
 
 
-def _boxeador_a_dict(b) -> dict:
-    return {"id": b.id, "nombre": b.nombre, "guardia": b.guardia, "notas": b.notas,
-            "creado": b.creado.isoformat()}
+def _boxeador_a_dict(b, uso: dict | None = None) -> dict:
+    d = {"id": b.id, "nombre": b.nombre, "guardia": b.guardia, "notas": b.notas,
+         "creado": b.creado.isoformat(),
+         # B6
+         "categoria": getattr(b, "categoria", None),
+         "altura_m": getattr(b, "altura_m", None),
+         "envergadura_m": getattr(b, "envergadura_m", None)}
+    if uso is not None:
+        n, ultima = uso.get(b.id, (0, None))
+        d["sesiones"] = n
+        d["ultima_sesion"] = ultima.isoformat() if ultima else None
+    return d
+
+
+def _uso_de_boxeadores(usuario, db) -> dict:
+    """
+    Cuantas sesiones tiene cada boxeador, como A o como B, y la ultima (B5b, B6).
+
+    Dos consultas agrupadas sobre `sesiones`, sin leer Fight-Cards: es lo que la lista y el
+    panel muestran debajo de cada nombre, y no puede costar un archivo por sesion.
+    """
+    from sqlalchemy import func
+
+    uso: dict[str, tuple[int, object]] = {}
+    for col in (Sesion.boxeador_a_id, Sesion.boxeador_b_id):
+        filas = db.execute(
+            select(col, func.count(Sesion.id), func.max(Sesion.creada))
+            .where(Sesion.usuario_id == usuario.id, col.is_not(None))
+            .group_by(col)
+        ).all()
+        for bid, n, ultima in filas:
+            n0, u0 = uso.get(bid, (0, None))
+            uso[bid] = (n0 + n, max(x for x in (u0, ultima) if x is not None))
+    return uso
 
 
 @app.post("/boxeadores", status_code=201)
@@ -742,7 +790,8 @@ def listar_boxeadores(
         .order_by(Boxeador.nombre)
         .all()
     )
-    return [_boxeador_a_dict(b) for b in bs]
+    uso = _uso_de_boxeadores(usuario, db)
+    return [_boxeador_a_dict(b, uso) for b in bs]
 
 
 @app.patch("/boxeadores/{boxeador_id}")

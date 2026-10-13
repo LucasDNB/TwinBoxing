@@ -120,3 +120,19 @@ def test_una_base_vieja_recibe_las_columnas_nuevas_y_sus_sesiones_se_leen(tmp_pa
         d = sesion_a_dict(db.get(Sesion, "s1"))
     assert d["contexto"] == "sparring", "una sesion sin contexto se lee como sparring"
     assert d["consentimiento"] is False, "no se inventa un consentimiento que nadie declaro"
+
+
+def test_una_subida_cortada_a_mitad_no_deja_sesion(cliente, registrado, entorno):
+    # CA-02.3 del lado de la API: cancelar en la web es xhr.abort(), que deja al servidor con
+    # un multipart sin terminar. FastAPI recibe el cuerpo entero antes de llamar a la ruta, y
+    # la sesion se crea recien adentro de la ruta: un cuerpo cortado no llega a crear nada.
+    borde = "----boxtwin"
+    cuerpo = (
+        f"--{borde}\r\nContent-Disposition: form-data; name=\"consentimiento\"\r\n\r\ntrue\r\n"
+        f"--{borde}\r\nContent-Disposition: form-data; name=\"archivo\"; filename=\"spar.mp4\"\r\n"
+        "Content-Type: video/mp4\r\n\r\n" + "x" * 4000
+    ).encode()   # sin el borde de cierre: la subida se corto al 40%
+    r = cliente.post("/videos", content=cuerpo,
+                     headers={"Content-Type": f"multipart/form-data; boundary={borde}"})
+    assert r.status_code in (400, 422)
+    assert cliente.get("/jobs").json() == []
