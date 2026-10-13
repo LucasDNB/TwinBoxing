@@ -85,6 +85,17 @@ class AsignarBoxeadores(BaseModel):
         return v
 
 
+class AsignacionTramo(BaseModel):
+    track: int
+    rol: Literal["A", "B", "ninguno"]
+
+
+class EntradaTramos(BaseModel):
+    """Las decisiones de la revision de tramos (B3). Al menos una."""
+
+    asignaciones: list[AsignacionTramo] = Field(min_length=1, max_length=500)
+
+
 class EntradaCorreccion(BaseModel):
     # "no_golpe" es la etiqueta de falso positivo (B4): el golpe sigue contando como
     # detectado y se suma a los descartados por el entrenador.

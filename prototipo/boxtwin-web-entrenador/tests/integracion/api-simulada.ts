@@ -41,6 +41,7 @@ export interface Mundo {
   pedidos: { metodo: string; ruta: string; cuerpo?: unknown; auth?: string | null }[];
   corregir: "ok" | "422";
   tokenValido: string;
+  tramos: Record<string, unknown> | null;
 }
 
 export function mundoNuevo(): Mundo {
@@ -52,6 +53,14 @@ export function mundoNuevo(): Mundo {
     pedidos: [],
     corregir: "ok",
     tokenValido: "token-bueno",
+    tramos: {
+      cobertura: { A: 0.7948, B: 0.9339, sin_asignar: 0.8554 },
+      separacion_color: 1.375,
+      tramos: [
+        { track: 228, t_desde: 89.5, t_hasta: 104.0, motivo: "color_insuficiente", recorte_url: `/jobs/${jobListo.id}/tramos/228/recorte`, asignado: null },
+        { track: 430, t_desde: 139.2, t_hasta: 142.0, motivo: "sin_coexistencia", recorte_url: null, asignado: null },
+      ],
+    },
   };
 }
 
@@ -159,6 +168,19 @@ export const servidor = setupServer(
       recall_detector: 0.484,
       pendientes: mundo.job.estado === "espera_siembra" ? [{ sesion_id: ID, estado: "espera_siembra", titulo: "Sparring del martes" }] : [],
     });
+  }),
+  http.get("*/jobs/:id/tramos", ({ request }) => {
+    registrar(request);
+    if (!autorizado(request)) return no401();
+    if (!mundo.tramos) return HttpResponse.json({ detail: "esta sesion se proceso antes de la revision de tramos; reprocesala para revisarlos" }, { status: 409 });
+    return HttpResponse.json(mundo.tramos);
+  }),
+  http.put("*/jobs/:id/tramos", async ({ request }) => {
+    const c = await request.json();
+    registrar(request, c);
+    if (!autorizado(request)) return no401();
+    mundo.job = { ...mundo.job, estado: "en_cola" };
+    return HttpResponse.json({ job_id: ID, estado: "en_cola" }, { status: 202 });
   }),
   http.put("*/sesiones/:id/boxeadores", async ({ request }) => {
     const c = await request.json();

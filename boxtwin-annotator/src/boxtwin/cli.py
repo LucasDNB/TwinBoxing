@@ -341,6 +341,9 @@ def build_parser() -> argparse.ArgumentParser:
                     help="umbral del indicador de retorno. Sin calibrar todavia: sin este "
                          "valor se reporta el tiempo medido y no se marca nada")
     cp.add_argument("--device", default=None)
+    cp.add_argument("--manual", action="store_true",
+                    help="aplica las asignaciones de tramos hechas a mano en la web "
+                         "(identidad.asignaciones_manuales de sesion.json)")
 
     tp = sub.add_parser(
         "tipos",
@@ -653,6 +656,7 @@ def _cmd_completar(args: argparse.Namespace) -> int:
         args.sesion, args.semilla_a, args.semilla_b, args.detector,
         umbral=args.umbral, device=args.device,
         cfg_guardia=ConfigGuardia(retorno_lento_ms=args.retorno_lento_ms),
+        manual=args.manual,
     )
     ses = Sesion.cargar(args.sesion)
 

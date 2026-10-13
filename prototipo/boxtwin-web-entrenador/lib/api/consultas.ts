@@ -7,7 +7,7 @@
  * y fallo; se pausa con la pestana oculta. El panel sondea cada 10 s solo si alguna sesion
  * visible esta en curso.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { ErrorApi, pedir, pedirValidado } from "@/lib/api/cliente";
@@ -68,13 +68,28 @@ export function usePanel(activo = true) {
 }
 
 export function useSesion(id: string | null) {
-  return useQuery({
+  const qc = useQueryClient();
+  const q = useQuery({
     queryKey: claves.sesion(id ?? ""),
     queryFn: () => pedirValidado(Sesion, `/jobs/${id}`),
     enabled: !!id,
     refetchInterval: (q) => (enCurso(q.state.data?.estado) ? SONDEO_SESION_MS : false),
     refetchIntervalInBackground: false,
   });
+  // Cuando la sesion termina de nuevo (re-siembra, tramos asignados a mano) la Fight-Card
+  // en cache es la anterior: se tira para que la pantalla muestre la nueva.
+  const estado = q.data?.estado;
+  const previo = useRef(estado);
+  useEffect(() => {
+    if (id && previo.current && previo.current !== "listo" && estado === "listo") {
+      qc.invalidateQueries({ queryKey: claves.fightcard(id) });
+      qc.invalidateQueries({ queryKey: claves.tramos(id) });
+      qc.invalidateQueries({ queryKey: claves.procesado(id) });
+      qc.invalidateQueries({ queryKey: claves.sesiones });
+    }
+    previo.current = estado;
+  }, [estado, id, qc]);
+  return q;
 }
 
 export function useFightCard(id: string | null, habilitada = true) {

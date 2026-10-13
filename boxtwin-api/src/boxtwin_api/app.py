@@ -43,6 +43,7 @@ from boxtwin_api.esquemas import (
     CONTEXTOS,
     PRACTICAS,
     AsignarBoxeadores,
+    EntradaTramos,
     Credenciales,
     EntradaBoxeador,
     EntradaCorreccion,
@@ -51,7 +52,7 @@ from boxtwin_api.esquemas import (
     sesion_a_dict,
 )
 from boxtwin_api.exportar import a_csv, a_html
-from boxtwin_api.modelos import Boxeador, Correccion, Sesion, Trabajo, Usuario
+from boxtwin_api.modelos import AsignacionManual, Boxeador, Correccion, Sesion, Trabajo, Usuario
 from boxtwin_api.seguridad import (
     emitir_ticket,
     emitir_token,
@@ -449,9 +450,128 @@ def siembra(
     s.semilla_a, s.semilla_b = s_in.track_a, s_in.track_b
     s.estado = "en_cola"
     s.error = None
+    # Una semilla nueva redefine que es A y que es B: las asignaciones de tramos hechas con la
+    # anterior dejan de significar lo mismo. Quedan en la base, para auditoria; se sacan de
+    # sesion.json para que el proximo completar manual no las aplique al reves.
+    if disco.get("identidad", {}).get("asignaciones_manuales"):
+        disco["identidad"].pop("asignaciones_manuales")
+        _escribir_sesion_en_disco(s.id, disco)
     encolar(db, s.id, "completar", track_a=s_in.track_a, track_b=s_in.track_b)
     db.commit()
     return {"job_id": s.id, "estado": s.estado}
+
+
+# ---------------------------------------------------------------------------
+# Tramos sin asignar (B3 de la web entrenador)
+# ---------------------------------------------------------------------------
+
+
+def _tramos_en_disco(s: Sesion) -> tuple[dict, list[dict]]:
+    if s.estado != "listo":
+        raise HTTPException(
+            409, f"la sesion esta en '{s.estado}': los tramos se revisan sobre una sesion lista"
+        )
+    disco = _sesion_en_disco(s.id) or {}
+    tramos = (disco.get("identidad") or {}).get("tramos")
+    if tramos is None:
+        raise HTTPException(
+            409, "esta sesion se proceso antes de la revision de tramos; reprocesala para "
+                 "revisarlos"
+        )
+    return disco, tramos
+
+
+@app.get("/jobs/{sesion_id}/tramos")
+def tramos(
+    sesion_id: str,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(obtener_sesion),
+) -> dict:
+    """
+    Lo que la identidad no pudo asignar, para que una persona lo termine (plan B de C1).
+
+    Cada tramo viaja con su motivo y, si ya lo asigno alguien, con esa asignacion: la
+    lista no se achica al asignar, para que una decision se pueda cambiar.
+    """
+    s = sesion_del_usuario(sesion_id, usuario, db)
+    disco, lista = _tramos_en_disco(s)
+    manuales = (disco.get("identidad") or {}).get("asignaciones_manuales") or {}
+    ident = _fightcard(s.id).get("identidad") or {}
+    return {
+        "cobertura": {
+            "A": ident.get("cobertura_A", 0.0),
+            "B": ident.get("cobertura_B", 0.0),
+            "sin_asignar": ident.get("sin_asignar", 0.0),
+        },
+        "separacion_color": ident.get("separacion_color", ident.get("separacion_de_perfiles")),
+        "tramos": [
+            {
+                "track": t["track"],
+                "t_desde": t["t_desde"],
+                "t_hasta": t["t_hasta"],
+                "motivo": t["motivo"],
+                "recorte_url": (f"/jobs/{s.id}/tramos/{t['track']}/recorte"
+                                if t.get("recorte") else None),
+                "asignado": manuales.get(str(t["track"]), t.get("asignado")),
+            }
+            for t in lista
+        ],
+    }
+
+
+@app.get("/jobs/{sesion_id}/tramos/{track}/recorte")
+def recorte_de_tramo(
+    track: int,
+    sesion_id: str,
+    t: str = "",
+    authorization: str = Header(default=""),
+    db: Session = Depends(obtener_sesion),
+) -> FileResponse:
+    """El cuadro central de un tramo. Entra con ticket, igual que los recortes de siembra."""
+    usuario = usuario_por_ticket_o_header(sesion_id, t, authorization, db)
+    s = sesion_del_usuario(sesion_id, usuario, db)
+    ruta = cfg.dir_sesion(s.id) / "tramos" / f"track_{int(track)}.jpg"
+    if not ruta.is_file():
+        raise HTTPException(404, "no hay recorte para ese tramo")
+    return FileResponse(ruta, media_type="image/jpeg")
+
+
+@app.put("/jobs/{sesion_id}/tramos", status_code=202)
+def asignar_tramos(
+    sesion_id: str,
+    entrada: EntradaTramos,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(obtener_sesion),
+) -> dict:
+    """
+    Guarda las asignaciones de la persona y vuelve a correr la segunda etapa con ellas.
+
+    La segunda etapa reutiliza la cache de pose y tracking: aplica la asignacion por color,
+    fuerza las manuales encima y vuelve a correr detector, guardia y clasificacion. Cuesta
+    segundos, no los minutos de la pose.
+    """
+    s = sesion_del_usuario(sesion_id, usuario, db)
+    disco, lista = _tramos_en_disco(s)
+    validos = {int(t["track"]) for t in lista}
+    ajenos = sorted({a.track for a in entrada.asignaciones} - validos)
+    if ajenos:
+        raise HTTPException(422, f"esos tracks no son tramos de esta sesion: {ajenos}")
+    if s.semilla_a is None:
+        raise HTTPException(409, "la sesion no tiene siembra: primero hay que marcar a A y B")
+
+    ident = disco.setdefault("identidad", {})
+    manuales = dict(ident.get("asignaciones_manuales") or {})
+    for a in entrada.asignaciones:
+        manuales[str(a.track)] = a.rol
+        db.add(AsignacionManual(sesion_id=s.id, track=a.track, rol=a.rol, usuario_id=usuario.id))
+    ident["asignaciones_manuales"] = manuales
+    _escribir_sesion_en_disco(s.id, disco)
+
+    s.estado = "en_cola"
+    s.error = None
+    encolar(db, s.id, "completar", track_a=s.semilla_a, track_b=s.semilla_b, manual=True)
+    db.commit()
+    return {"job_id": s.id, "estado": s.estado, "asignaciones": len(manuales)}
 
 
 # ---------------------------------------------------------------------------
@@ -467,6 +587,14 @@ def _sesion_en_disco(sesion_id: str) -> dict | None:
         return json.loads(ruta.read_text())
     except json.JSONDecodeError:  # pragma: no cover - el worker escribe atomico
         return None
+
+
+def _escribir_sesion_en_disco(sesion_id: str, datos: dict) -> None:
+    """Escritura atomica de sesion.json, para que el worker nunca lea uno a medias."""
+    ruta = cfg.dir_sesion(sesion_id) / "sesion.json"
+    tmp = ruta.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(datos, indent=2, ensure_ascii=False) + "\n")
+    tmp.replace(ruta)
 
 
 def _progreso_en_disco(sesion_id: str) -> dict | None:

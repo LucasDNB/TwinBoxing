@@ -82,6 +82,9 @@ def comando_de(trabajo: Trabajo, sesion: Sesion) -> list[list[str]]:
             "--semilla-b", str(p["track_b"]),
             "--detector", str(cfg.modelo_detector),
             "--umbral", str(cfg.umbral_detector),
+            # B3: aplica las asignaciones de tramos hechas en la web. Reutiliza la cache de
+            # pose y tracking: esta etapa nunca corre la pose.
+            *(["--manual"] if p.get("manual") else []),
         ]]
 
     if trabajo.etapa == "clasificar":

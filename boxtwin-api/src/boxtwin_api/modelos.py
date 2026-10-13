@@ -40,6 +40,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 __all__ = [
+    "AsignacionManual",
     "Base",
     "Correccion",
     "ESTADOS_SESION",
@@ -222,4 +223,23 @@ class Correccion(Base):
     tipo_original: Mapped[str | None] = mapped_column(String(32), nullable=True)
     checkpoint: Mapped[str | None] = mapped_column(String(255), nullable=True)
     datos: Mapped[dict] = mapped_column(JSON, default=dict)
+    creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
+
+
+class AsignacionManual(Base):
+    """
+    Un tramo que asigno una persona en la web (B3 de la web entrenador).
+
+    Existe en la base ademas de en sesion.json por la misma razon que la siembra: es una
+    decision humana y tiene que quedar auditable. Y es evidencia: cuantos tramos tuvo que
+    asignar alguien a mano mide cuanto le falta a la identidad automatica (C1) en uso real.
+    """
+
+    __tablename__ = "asignaciones_manuales"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=nuevo_id)
+    sesion_id: Mapped[str] = mapped_column(ForeignKey("sesiones.id"), index=True)
+    track: Mapped[int] = mapped_column(Integer)
+    rol: Mapped[str] = mapped_column(String(8))
+    usuario_id: Mapped[str] = mapped_column(ForeignKey("usuarios.id"))
     creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
