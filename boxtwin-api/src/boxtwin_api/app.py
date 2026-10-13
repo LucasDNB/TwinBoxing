@@ -449,7 +449,7 @@ def siembra(
         raise HTTPException(
             409, f"la sesion esta en '{s.estado}' y todavia no hay candidatos que elegir"
         )
-    individual = (s.contexto or "sparring") in ("bolsa", "sombra")
+    individual = _es_individual(s)
     if s_in.track_b is None and not individual:
         raise HTTPException(422, "en sparring y combate hay que marcar a los dos peleadores")
     if s_in.track_b is not None and individual:
@@ -483,6 +483,10 @@ def siembra(
 # ---------------------------------------------------------------------------
 
 
+def _es_individual(s: Sesion) -> bool:
+    return (s.contexto or "sparring") in ("bolsa", "sombra")
+
+
 def _tramos_en_disco(s: Sesion) -> tuple[dict, list[dict]]:
     if s.estado != "listo":
         raise HTTPException(
@@ -514,12 +518,13 @@ def tramos(
     disco, lista = _tramos_en_disco(s)
     manuales = (disco.get("identidad") or {}).get("asignaciones_manuales") or {}
     ident = _fightcard(s.id).get("identidad") or {}
+    cobertura = {"A": ident.get("cobertura_A", 0.0)}
+    # B8b: en bolsa y sombra hay una sola persona; un B en cero se leeria como "no lo vio".
+    if not _es_individual(s):
+        cobertura["B"] = ident.get("cobertura_B", 0.0)
+    cobertura["sin_asignar"] = ident.get("sin_asignar", 0.0)
     return {
-        "cobertura": {
-            "A": ident.get("cobertura_A", 0.0),
-            "B": ident.get("cobertura_B", 0.0),
-            "sin_asignar": ident.get("sin_asignar", 0.0),
-        },
+        "cobertura": cobertura,
         "separacion_color": ident.get("separacion_color", ident.get("separacion_de_perfiles")),
         "tramos": [
             {
@@ -569,6 +574,8 @@ def asignar_tramos(
     """
     s = sesion_del_usuario(sesion_id, usuario, db)
     disco, lista = _tramos_en_disco(s)
+    if _es_individual(s) and any(a.rol == "B" for a in entrada.asignaciones):
+        raise HTTPException(422, "en bolsa y sombra hay una sola persona: un tramo es A o ninguno")
     validos = {int(t["track"]) for t in lista}
     ajenos = sorted({a.track for a in entrada.asignaciones} - validos)
     if ajenos:

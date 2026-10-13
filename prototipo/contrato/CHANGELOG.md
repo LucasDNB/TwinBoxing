@@ -8,6 +8,11 @@ no conoce los campos nuevos los ignora. Lo que se rompe se dice acá.
 - `peleadores.X.combinaciones` (B10, `01` §3): las ternas izq-der-izq con menos de 0,5 s de
   inicio a inicio, sin solapar. Lleva su regla adentro (`patron`, `separacion`, `max_s`) para
   que el documento diga con qué se contó. Se recalcula al aplicar tipos y correcciones.
+- `detector.medido_en` (B8b, `02` §2): el contexto en que se midió el margen del detector
+  (hoy `sparring`). Una sesión de bolsa o sombra lo compara con su contexto y no muestra el
+  margen de sparring como si fuera suyo.
+- En una sesión de bolsa o sombra, `GET /jobs/{id}/tramos` trae `cobertura` sin `B` y
+  `PUT /jobs/{id}/tramos` rechaza `rol: "B"` con 422.
 - **Rompe** en `GET /boxeadores/{id}/perfil`: `combinaciones` deja de ser la lista de las cinco
   secuencias más frecuentes por tipo y pasa a ser un objeto (`patron`, `total`, `por_minuto`,
   `por_contexto`, `tipos_frecuentes`, `sesiones_con_combinaciones`). La única cliente es la web

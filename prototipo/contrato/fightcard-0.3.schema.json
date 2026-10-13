@@ -46,7 +46,8 @@
       "properties": {
         "checkpoint": { "type": "string" },
         "precision_medida": { "type": "number", "minimum": 0, "maximum": 1 },
-        "recall_medido": { "type": "number", "minimum": 0, "maximum": 1 }
+        "recall_medido": { "type": "number", "minimum": 0, "maximum": 1 },
+        "medido_en": { "enum": ["bolsa", "sombra", "sparring", "combate"] }
       }
     },
     "clasificador": {

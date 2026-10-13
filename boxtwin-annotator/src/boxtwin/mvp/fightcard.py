@@ -154,6 +154,9 @@ def construir(
         "precision_medida": PRECISION_DETECTOR,
         "recall_medido": RECALL_DETECTOR,
         "medido_sobre": "sparring-3 entero, con el detector entrenado sin esa fuente",
+        # B8b (ampliacion 02 §2): el contexto en que se midio el margen. En bolsa o sombra el
+        # detector nunca se midio, y la web no puede mostrar este numero como si lo fuera.
+        "medido_en": "sparring",
         **(detector or {}),
     }
     cla = {

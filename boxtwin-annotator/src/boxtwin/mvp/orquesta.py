@@ -312,6 +312,10 @@ def completar(
     if manual:
         manuales = {int(k): v for k, v in
                     (ses.identidad.get("asignaciones_manuales") or {}).items()}
+        if individual and any(r == "B" for r in manuales.values()):
+            # La API ya lo rechaza (B8b); esto cuida que un sesion.json editado a mano no
+            # meta una segunda persona en una sesion de una.
+            raise ValueError("en una sesion de una sola persona un tramo es A o ninguno, no B")
     asignados_manual = aplicar_manuales(prop, manuales) if manuales else 0
 
     AsignarIdentidadAuto(prop, annotator="boxtwin-completar", forzar=True).do(doc)
