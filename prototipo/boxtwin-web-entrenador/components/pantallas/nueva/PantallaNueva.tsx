@@ -396,11 +396,11 @@ export function PantallaNueva() {
             )}
             {!rondasValidas && <p className="mt-2 text-sm text-error">Cantidad entera y tiempos en mm:ss, por ejemplo 3:00.</p>}
           </Paso>
-
-          <div className="lg:hidden">{columnaDerecha}</div>
         </div>
 
-        <div className="hidden lg:block">{columnaDerecha}</div>
+        {/* Una sola vez: en el celular la grilla es de una columna y esto cae despues de los
+            pasos, que es el orden de 08; en escritorio es la columna derecha de 02. */}
+        <div>{columnaDerecha}</div>
       </div>
 
       {/* Envio: fijo abajo en el celular, encima de la barra de navegacion (08). */}

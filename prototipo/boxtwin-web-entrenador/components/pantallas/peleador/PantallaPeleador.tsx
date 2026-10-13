@@ -10,6 +10,7 @@
  *
  * El perfil no se cachea (CA-06.2): una correccion se ve al volver.
  */
+import { Desplazable } from "@/components/boxtwin/Desplazable";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Encabezado } from "@/components/boxtwin/Encabezado";
@@ -154,7 +155,7 @@ function Contextos({ p, producto }: { p: Perfil; producto?: Producto }) {
       {filas.length === 0 ? (
         <p className="text-sm text-texto-3">Todavía no hay sesiones con contexto.</p>
       ) : (
-        <div className="overflow-x-auto">
+        <Desplazable nombre="Tabla por contexto">
           <table className="w-full min-w-[480px] text-sm">
             <caption className="sr-only">Métricas por contexto</caption>
             <thead>
@@ -178,7 +179,7 @@ function Contextos({ p, producto }: { p: Perfil; producto?: Producto }) {
               ))}
             </tbody>
           </table>
-        </div>
+        </Desplazable>
       )}
       <p className="mt-3 text-sm text-texto-2">{textos.contextoLectura}</p>
       {(!conGuardia || !conR3) && (

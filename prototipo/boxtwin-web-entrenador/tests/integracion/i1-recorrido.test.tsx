@@ -64,7 +64,7 @@ describe("I1 · de la subida a la Fight-Card", () => {
     const f = new File(["x"], "sparring.mp4", { type: "video/mp4" });
     fireEvent.change(screen.getByTestId("input-galeria"), { target: { files: [f] } });
     await screen.findByText(/sparring\.mp4 ·/);
-    await userEvent.click(screen.getAllByLabelText(/dieron su consentimiento/)[0]);
+    await userEvent.click(screen.getByLabelText(/dieron su consentimiento/));
     await userEvent.click(screen.getByRole("button", { name: "Subir y procesar" }));
     act(() => subidas[0].avanzar(64, 100));
     expect(await screen.findByText("Subiendo · 64%")).toBeInTheDocument();

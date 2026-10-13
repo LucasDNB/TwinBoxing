@@ -7,6 +7,7 @@
  * de ese corte es comparar dos programas, no al boxeador consigo mismo. Cada punto lleva a
  * su sesion.
  */
+import { Desplazable } from "@/components/boxtwin/Desplazable";
 import Link from "next/link";
 import type { Perfil } from "@/lib/api/esquemas";
 import { decimal, fechaCorta } from "@/lib/formato";
@@ -37,7 +38,7 @@ export function LineaEvolucion({ evolucion }: { evolucion: Perfil["evolucion"] }
 
   return (
     <div>
-      <div className="overflow-x-auto">
+      <Desplazable nombre="Gráfico de evolución">
         <svg role="img" aria-label={lectura} viewBox={`0 0 ${ancho} ${ALTO + 20}`} style={{ minWidth: Math.min(ancho, 640) }} className="h-auto w-full">
           <line x1="20" x2={ancho - 10} y1={ALTO - 10} y2={ALTO - 10} className="stroke-borde-fuerte" />
           {tramos.map((t, k) => (
@@ -57,7 +58,7 @@ export function LineaEvolucion({ evolucion }: { evolucion: Perfil["evolucion"] }
             </g>
           ))}
         </svg>
-      </div>
+      </Desplazable>
       {tramos.length > 1 && (
         <p className="mt-2 text-xs text-estimado">
           La línea se corta donde cambió el detector: antes y después no se comparan.

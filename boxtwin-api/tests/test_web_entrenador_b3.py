@@ -143,3 +143,23 @@ def test_re_sembrar_saca_las_asignaciones_manuales_del_disco(cliente, lista_con_
     assert "asignaciones_manuales" not in disco["identidad"]
     with entorno["db"].hacer_sesion() as db:
         assert db.query(AsignacionManual).count() == 1, "en la base quedan, para auditoria"
+
+
+def test_con_un_trabajo_en_cola_el_disco_no_hace_retroceder_el_estado(cliente, registrado, entorno):
+    # Encontrado en el e2e: recien sembrada, la sesion esta en_cola y sesion.json todavia dice
+    # espera_siembra porque el worker no la tomo. GET /jobs/{id} no puede devolverla atras.
+    sid = subir_video(cliente).json()["job_id"]
+    d = entorno["cfg"].dir_sesion(sid)
+    (d / "sesion.json").write_text(json.dumps({"estado": "espera_siembra", "candidatos": [
+        {"track": 3, "recorte": None}, {"track": 7, "recorte": None}]}))
+    from boxtwin_api.modelos import Sesion, Trabajo
+
+    with entorno["db"].hacer_sesion() as db:
+        db.get(Sesion, sid).estado = "espera_siembra"
+        for t in db.query(Trabajo).filter(Trabajo.sesion_id == sid):
+            t.estado = "listo"
+        db.commit()
+    assert cliente.get(f"/jobs/{sid}").json()["estado"] == "espera_siembra"
+    cliente.post(f"/jobs/{sid}/siembra", json={"track_a": 3, "track_b": 7})
+    assert cliente.get(f"/jobs/{sid}").json()["estado"] == "en_cola"
+    assert cliente.get(f"/jobs/{sid}").json()["estado"] == "en_cola", "y no cambia al pedir de nuevo"

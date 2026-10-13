@@ -7,6 +7,7 @@
  * probabilidad de victoria. Solo metricas de sparring y combate de cada perfil. Las
  * lecturas salen de reglas fijas (lib/rival.ts) y cada una cita su metrica.
  */
+import { Desplazable } from "@/components/boxtwin/Desplazable";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Encabezado } from "@/components/boxtwin/Encabezado";
@@ -151,7 +152,7 @@ function Comparacion({ pa, pb, producto, superpuestas, onSuperpuestas }: { pa: P
       </EstadoBloque>
 
       <EstadoBloque estado={estadoDe("07.frente", producto)} titulo="Frente a frente" nota="Solo sesiones de sparring y combate de cada perfil.">
-        <div className="overflow-x-auto">
+        <Desplazable nombre="Tabla frente a frente">
           <table className="w-full min-w-[420px] text-sm">
             <caption className="sr-only">Frente a frente</caption>
             <thead>
@@ -177,7 +178,7 @@ function Comparacion({ pa, pb, producto, superpuestas, onSuperpuestas }: { pa: P
               ))}
             </tbody>
           </table>
-        </div>
+        </Desplazable>
       </EstadoBloque>
 
       <EstadoBloque estado={estadoDe("07.lecturas", producto)} titulo="Oportunidades y amenazas">

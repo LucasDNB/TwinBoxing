@@ -13,7 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Encabezado } from "@/components/boxtwin/Encabezado";
 import { NombreEsquina } from "@/components/boxtwin/Esquina";
 import { ErrorConReintento, Esqueleto } from "@/components/boxtwin/Estados";
-import { Tabs, TabsList, TabsTrigger } from "@/components/animate-ui/components/radix/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/animate-ui/components/radix/tabs";
 import { EsperaSesion } from "@/components/pantallas/sesion/EsperaSesion";
 import { VistaVideo } from "@/components/pantallas/sesion/VistaVideo";
 import { VistaFightCard } from "@/components/pantallas/sesion/VistaFightCard";
@@ -101,9 +101,13 @@ function Vistas({ s, fc }: { s: Sesion; fc: FightCard }) {
           <TabsTrigger value="perfiles" className="min-h-11 px-4">Perfiles de la sesión</TabsTrigger>
         </TabsList>
       </div>
-      {vista === "video" && <VistaVideo s={s} fc={fc} />}
-      {vista === "fightcard" && <VistaFightCard s={s} fc={fc} />}
-      {vista === "perfiles" && <VistaPerfiles s={s} fc={fc} />}
+      {/* Solo la vista activa se monta (el video no se carga si se mira la Fight-Card), pero
+          dentro de su TabsContent: el aria-controls de la pestana tiene que apuntar a algo. */}
+      <TabsContent value={vista} transition={{ duration: 0.2, ease: "easeOut" }}>
+        {vista === "video" && <VistaVideo s={s} fc={fc} />}
+        {vista === "fightcard" && <VistaFightCard s={s} fc={fc} />}
+        {vista === "perfiles" && <VistaPerfiles s={s} fc={fc} />}
+      </TabsContent>
     </Tabs>
   );
 }

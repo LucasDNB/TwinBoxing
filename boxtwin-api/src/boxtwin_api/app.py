@@ -339,6 +339,14 @@ def estado(
     """
     s = sesion_del_usuario(sesion_id, usuario, db)
     d = _sesion_en_disco(s.id)
+    trabajos = db.scalars(
+        select(Trabajo).where(Trabajo.sesion_id == s.id).order_by(Trabajo.creado)
+    ).all()
+    # Con un `completar` esperando en la cola, el archivo todavia describe el ciclo ANTERIOR
+    # (espera_siembra, o listo si se re-sembro o se asignaron tramos): el worker no lo tomo.
+    # Hacerle caso hacia retroceder una sesion recien sembrada a espera_siembra, y la web,
+    # que deja de sondear ahi, se quedaba clavada. Encontrado en el e2e de la web entrenador.
+    completar_pendiente = any(t.estado == "en_cola" and t.etapa == "completar" for t in trabajos)
     extra: dict = {
         "candidatos": [], "avisos": [], "etapas": [],
         # Lo escribe la etapa que esta corriendo, en su propio archivo, porque sesion.json
@@ -355,12 +363,10 @@ def estado(
         extra["avisos"] = d.get("avisos", [])
         extra["etapas"] = d.get("etapas", [])
         extra["pareja_sugerida"] = (d.get("identidad") or {}).get("pareja_sugerida")
-        if d.get("estado") and d["estado"] != s.estado and s.estado != "fallo":
+        viejo = completar_pendiente and d.get("estado") in ("espera_siembra", "listo")
+        if d.get("estado") and d["estado"] != s.estado and s.estado != "fallo" and not viejo:
             s.estado = d["estado"]
             db.commit()
-    trabajos = db.scalars(
-        select(Trabajo).where(Trabajo.sesion_id == s.id).order_by(Trabajo.creado)
-    ).all()
     extra["trabajos"] = [
         {"etapa": t.etapa, "estado": t.estado, "intento": t.intento, "error": t.error}
         for t in trabajos

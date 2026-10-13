@@ -76,7 +76,7 @@ describe("02 / 08 · Nueva sesión", () => {
     const boton = screen.getByRole("button", { name: "Subir y procesar" });
     expect(boton).toBeDisabled();
     expect(screen.getByText("Falta confirmar el consentimiento de las personas filmadas.")).toBeInTheDocument();
-    await userEvent.click(screen.getAllByLabelText(/dieron su consentimiento/)[0]);
+    await userEvent.click(screen.getByLabelText(/dieron su consentimiento/));
     await waitFor(() => expect(screen.getByRole("button", { name: "Subir y procesar" })).toBeEnabled());
   });
 
@@ -97,7 +97,7 @@ describe("02 / 08 · Nueva sesión", () => {
     await screen.findByText("Qué se filmó");
     await elegir(video());
     await screen.findByText(/sparring\.mp4 ·/);
-    await userEvent.click(screen.getAllByLabelText(/dieron su consentimiento/)[0]);
+    await userEvent.click(screen.getByLabelText(/dieron su consentimiento/));
     await userEvent.click(screen.getByRole("button", { name: "Subir y procesar" }));
     expect(subidas).toHaveLength(1);
     const d = subidas[0].datos;
@@ -116,7 +116,7 @@ describe("02 / 08 · Nueva sesión", () => {
     await screen.findByText("Qué se filmó");
     await elegir(video("sparring.mp4", 1000));
     await screen.findByText(/sparring\.mp4 ·/);
-    await userEvent.click(screen.getAllByLabelText(/dieron su consentimiento/)[0]);
+    await userEvent.click(screen.getByLabelText(/dieron su consentimiento/));
     await userEvent.click(screen.getByRole("button", { name: "Subir y procesar" }));
     act(() => subidas[0].avanzar(400, 1000));
     expect(await screen.findByText("Subiendo · 40%")).toBeInTheDocument();

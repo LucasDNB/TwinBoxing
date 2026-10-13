@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/animate-ui/components/radix/accordion";
-import { Tabs, TabsList, TabsTrigger } from "@/components/animate-ui/components/radix/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/animate-ui/components/radix/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/animate-ui/components/radix/dropdown-menu";
 import { Button } from "@/components/animate-ui/components/buttons/button";
 import { Download } from "@/components/animate-ui/icons/download";
@@ -71,44 +71,8 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
   const descartados = lados.reduce((a, l) => a + (res[l]?.descartados ?? 0), 0);
   const sinAsignar = fc.identidad.sin_asignar ?? 0;
 
-  return (
-    <div className="flex flex-col gap-4">
-      {/* 1. Margen arriba de todo */}
-      <div>
-        <Margen precision={detector.precision_medida} recall={detector.recall_medido} />
-        <Accordion type="single" collapsible className="mt-1">
-          <AccordionItem value="leer" className="border-0">
-            <AccordionTrigger className="min-h-11 py-2 text-sm text-texto-2">Cómo leer esta tarjeta</AccordionTrigger>
-            <AccordionContent className="space-y-2 text-sm text-texto-2">
-              <p>Los números son golpes que el sistema detectó, no todos los que se tiraron. El detector se midió sobre material que no había visto: de cada 10 golpes que marca, acierta {Math.round(detector.precision_medida * 10)}; de cada 10 golpes que hubo, encuentra {Math.round(detector.recall_medido * 10)}.</p>
-              <p>Por eso lo que más vale es comparar adentro de la sesión: un peleador contra el otro, un round contra otro.</p>
-              <p>El tipo de golpe es una estimación del modelo y se muestra con ≈ y borde punteado. No hay puntaje de rounds ni resultado del combate.</p>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
-
-      {/* 2. Selector de round */}
-      <div className="flex flex-wrap items-center gap-3">
-        {conRounds && rondas.length > 1 ? (
-          <Tabs value={round == null ? "sesion" : String(round)} onValueChange={irRound}>
-            <div className="-mx-4 overflow-x-auto px-4">
-              <TabsList className="w-max">
-                <TabsTrigger value="sesion" className="min-h-11 px-4">Sesión</TabsTrigger>
-                {rondas.map((r) => (
-                  <TabsTrigger key={r.round} value={String(r.round)} className="min-h-11 px-4">R{r.round}</TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
-          </Tabs>
-        ) : (
-          <>
-            <span className="inline-flex min-h-11 items-center rounded-md border border-borde bg-elevado px-4 text-sm">Sesión</span>
-            {rondas.length > 1 && <Rotulo>comparación entre rounds en validación</Rotulo>}
-          </>
-        )}
-      </div>
-
+  const cuerpo = (
+    <>
       {/* 3. Cabecera A y B */}
       <div className={cn("grid gap-3", lados.length > 1 ? "grid-cols-2" : "grid-cols-1")}>
         {lados.map((l) => {
@@ -194,6 +158,51 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
             </p>
           )}
         </section>
+      )}
+
+    </>
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* 1. Margen arriba de todo */}
+      <div>
+        <Margen precision={detector.precision_medida} recall={detector.recall_medido} />
+        <Accordion type="single" collapsible className="mt-1">
+          <AccordionItem value="leer" className="border-0">
+            <AccordionTrigger className="min-h-11 py-2 text-sm text-texto-2">Cómo leer esta tarjeta</AccordionTrigger>
+            <AccordionContent className="space-y-2 text-sm text-texto-2">
+              <p>Los números son golpes que el sistema detectó, no todos los que se tiraron. El detector se midió sobre material que no había visto: de cada 10 golpes que marca, acierta {Math.round(detector.precision_medida * 10)}; de cada 10 golpes que hubo, encuentra {Math.round(detector.recall_medido * 10)}.</p>
+              <p>Por eso lo que más vale es comparar adentro de la sesión: un peleador contra el otro, un round contra otro.</p>
+              <p>El tipo de golpe es una estimación del modelo y se muestra con ≈ y borde punteado. No hay puntaje de rounds ni resultado del combate.</p>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+
+      {/* 2. Selector de round. Con C2 los rounds son pestanas y lo que sigue es su panel. */}
+      {conRounds && rondas.length > 1 ? (
+        <Tabs value={round == null ? "sesion" : String(round)} onValueChange={irRound}>
+          <div className="-mx-4 mb-4 overflow-x-auto px-4">
+            <TabsList className="w-max">
+              <TabsTrigger value="sesion" className="min-h-11 px-4">Sesión</TabsTrigger>
+              {rondas.map((r) => (
+                <TabsTrigger key={r.round} value={String(r.round)} className="min-h-11 px-4">R{r.round}</TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+          <TabsContent value={round == null ? "sesion" : String(round)} transition={{ duration: 0.15, ease: "easeOut" }} className="flex flex-col gap-4">
+            {cuerpo}
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="inline-flex min-h-11 items-center rounded-md border border-borde bg-elevado px-4 text-sm">Sesión</span>
+            {rondas.length > 1 && <Rotulo>comparación entre rounds en validación</Rotulo>}
+          </div>
+          {cuerpo}
+        </>
       )}
 
       {/* 9. No disponible en esta version */}
