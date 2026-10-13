@@ -149,20 +149,10 @@ export function guardiaPorGolpe(p: Peleador): Map<string, NonNullable<Peleador["
   return m;
 }
 
-// -- Combinaciones (04 §06, punto 5; 05 B7) ---------------------------------------
-
-export type Guardia = "ortodoxa" | "zurda" | null | undefined;
-
-/*
- * Adelante o atras, desde la guardia y el brazo. Ortodoxo: izquierdo adelante. Sin guardia
- * cargada no se sabe y se devuelve null: no se inventa un lado.
- */
-export function ladoDelBrazo(brazo: string, guardia: Guardia): "adelante" | "atras" | null {
-  if (guardia !== "ortodoxa" && guardia !== "zurda") return null;
-  const izq = brazo === "izq" || brazo === "left";
-  const adelanteEsIzq = guardia === "ortodoxa";
-  return izq === adelanteEsIzq ? "adelante" : "atras";
-}
+// -- Combinaciones (04 §06, punto 5) ----------------------------------------------
+//
+// Las calcula la API (B7, boxtwin_api/perfil.py): aca solo se nombran. Tener la regla de
+// la pausa en los dos lados seria tenerla mal en uno.
 
 /* Numeracion de gimnasio: 1 jab, 2 recto de atras, 3 y 4 hook, 5 y 6 uppercut. */
 export function numeroDeGimnasio(familia: string, lado: "adelante" | "atras" | null): number | null {
@@ -171,60 +161,6 @@ export function numeroDeGimnasio(familia: string, lado: "adelante" | "atras" | n
   if (!(familia in base)) return null;
   if (familia === "jab" || familia === "cross") return lado === "adelante" ? 1 : 2;
   return base[familia] + (lado === "adelante" ? 0 : 1);
-}
-
-export interface Combinacion {
-  secuencia: { familia: string; lado: "adelante" | "atras" | null }[];
-  n: number;
-}
-
-/*
- * Golpes consecutivos del mismo peleador separados por no mas de `pausa` segundos; las
- * `cuantas` secuencias de 2 o 3 golpes mas frecuentes. Los descartados no cuentan y los
- * corregidos cuentan con su tipo corregido. Un golpe sin tipo corta la cadena: no se puede
- * nombrar una combinacion con un hueco.
- */
-export function combinaciones(golpes: Golpe[], pausa: number, guardia: Guardia, cuantas = 5): Combinacion[] {
-  const validos = golpes
-    .filter((g) => !g.descartado)
-    .slice()
-    .sort((a, b) => a.t_inicio - b.t_inicio);
-  const cadenas: Golpe[][] = [];
-  let actual: Golpe[] = [];
-  for (const g of validos) {
-    const t = tipoEfectivo(g);
-    if (!t) {
-      if (actual.length) cadenas.push(actual);
-      actual = [];
-      continue;
-    }
-    const previo = actual[actual.length - 1];
-    if (previo && g.t_inicio - previo.t_fin <= pausa) actual.push(g);
-    else {
-      if (actual.length) cadenas.push(actual);
-      actual = [g];
-    }
-  }
-  if (actual.length) cadenas.push(actual);
-
-  const conteo = new Map<string, Combinacion>();
-  for (const c of cadenas) {
-    for (const largo of [2, 3]) {
-      for (let i = 0; i + largo <= c.length; i++) {
-        const sec = c.slice(i, i + largo).map((g) => ({
-          familia: tipoEfectivo(g)!,
-          lado: ladoDelBrazo(g.brazo, guardia),
-        }));
-        const clave = sec.map((s) => `${s.familia}:${s.lado}`).join(">");
-        const ya = conteo.get(clave);
-        if (ya) ya.n += 1;
-        else conteo.set(clave, { secuencia: sec, n: 1 });
-      }
-    }
-  }
-  return [...conteo.values()]
-    .sort((a, b) => b.n - a.n || b.secuencia.length - a.secuencia.length)
-    .slice(0, cuantas);
 }
 
 export function nombreDeCombinacion(

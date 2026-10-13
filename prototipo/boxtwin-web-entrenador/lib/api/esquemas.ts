@@ -277,6 +277,7 @@ export const Perfil = z.object({
   })),
   avisos: z.array(z.string()),
   // B7
+  nomenclatura: z.record(z.string(), z.string()).optional(),
   contexto: z.string().optional(),
   sesiones_por_contexto: z.record(z.string(), num).optional(),
   rounds_total: num.optional(),

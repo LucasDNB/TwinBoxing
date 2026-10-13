@@ -42,6 +42,7 @@ export interface Mundo {
   corregir: "ok" | "422";
   tokenValido: string;
   tramos: Record<string, unknown> | null;
+  perfiles: Record<string, Record<string, unknown>>;
 }
 
 export function mundoNuevo(): Mundo {
@@ -53,6 +54,7 @@ export function mundoNuevo(): Mundo {
     pedidos: [],
     corregir: "ok",
     tokenValido: "token-bueno",
+    perfiles: {},
     tramos: {
       cobertura: { A: 0.7948, B: 0.9339, sin_asignar: 0.8554 },
       separacion_color: 1.375,
@@ -156,6 +158,13 @@ export const servidor = setupServer(
     registrar(request);
     if (!autorizado(request)) return no401();
     return HttpResponse.json(mundo.boxeadores);
+  }),
+  http.get("*/boxeadores/:id/perfil", ({ request, params }) => {
+    registrar(request);
+    if (!autorizado(request)) return no401();
+    const p = mundo.perfiles[String(params.id)];
+    if (!p) return HttpResponse.json({ detail: "no existe ese boxeador" }, { status: 404 });
+    return HttpResponse.json(p);
   }),
   http.post("*/boxeadores", async ({ request }) => {
     const c = (await request.json()) as Record<string, unknown>;

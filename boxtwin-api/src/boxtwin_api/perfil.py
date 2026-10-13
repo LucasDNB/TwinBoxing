@@ -243,6 +243,7 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: s
     banderas = banderas or {}
     todas = []
     golpes_de: dict[str, list[dict]] = {}
+    nomenclatura: dict[str, str] = {}
     for ses, lado in sorted(sesiones, key=lambda x: x[0].creada):
         fc = _leer_fightcard(Path(dir_de_sesion(ses.id)))
         if not fc:
@@ -251,6 +252,9 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: s
         if r is None:
             continue
         golpes_de[ses.id] = ((fc.get("peleadores") or {}).get(lado) or {}).get("golpes") or []
+        # La de la Fight-Card mas reciente: los nombres de golpe en pantalla los decide el
+        # contrato (RF11, D7), no la web.
+        nomenclatura = fc.get("nomenclatura") or nomenclatura
         todas.append({
             "sesion_id": ses.id,
             "nombre": ses.nombre,
@@ -303,6 +307,7 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: s
 
     sesiones_por_contexto = {c: sum(1 for x in todas if x["contexto"] == c) for c in CONTEXTOS}
     extendido = {
+        "nomenclatura": nomenclatura,
         "contexto": contexto,
         "sesiones_por_contexto": sesiones_por_contexto,
         "rounds_total": sum(x["rounds"] for x in entradas),

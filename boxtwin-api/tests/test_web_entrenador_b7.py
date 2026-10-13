@@ -136,3 +136,10 @@ def test_rounds_total(cliente, entorno, ana):
     _sesion(cliente, entorno, _fc([_g(1, "jab")], rounds=RONDAS), ana)
     _sesion(cliente, entorno, _fc([_g(1, "jab")]), ana)
     assert cliente.get(f"/boxeadores/{ana}/perfil").json()["rounds_total"] == 4, "3 + 1 sin rounds"
+
+
+def test_el_perfil_trae_la_nomenclatura_del_documento(cliente, entorno, ana):
+    fc = _fc([_g(1, "jab")])
+    fc["nomenclatura"] = {"jab": "jab", "cross": "gancho", "hook": "hook", "uppercut": "uppercut"}
+    _sesion(cliente, entorno, fc, ana)
+    assert cliente.get(f"/boxeadores/{ana}/perfil").json()["nomenclatura"]["cross"] == "gancho"

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import fc01 from "../fixtures/sesion-real/fightcard-0.1.json";
 import fc02 from "../fixtures/sesion-real/fightcard-0.2.json";
-import { FightCard as Esquema, type Golpe } from "@/lib/api/esquemas";
+import { FightCard as Esquema } from "@/lib/api/esquemas";
 import {
-  combinaciones, guardiaPorGolpe, ladoDelBrazo, lecturaRounds, nombreDeCombinacion,
-  normalizarFightCard, numeroDeGimnasio, resumen, sumaDeRounds,
+  guardiaPorGolpe, lecturaRounds, nombreDeCombinacion, normalizarFightCard, numeroDeGimnasio,
+  resumen, sumaDeRounds,
 } from "@/lib/fightcard";
 
 const cargar = (d: unknown) => normalizarFightCard(Esquema.parse(d));
@@ -81,19 +81,7 @@ describe("guardia por golpe", () => {
   });
 });
 
-describe("combinaciones", () => {
-  const g = (t: number, tipo: string | null, brazo = "izq", extra: Partial<Golpe> = {}): Golpe => ({
-    id: `A-${brazo}-${t}`, t_inicio: t, t_fin: t + 0.2, brazo, tipo, confianza_tipo: 0.8,
-    corregido: null, descartado: false, ...extra,
-  });
-
-  it("lado desde guardia y brazo; sin guardia no se inventa", () => {
-    expect(ladoDelBrazo("izq", "ortodoxa")).toBe("adelante");
-    expect(ladoDelBrazo("der", "ortodoxa")).toBe("atras");
-    expect(ladoDelBrazo("izq", "zurda")).toBe("atras");
-    expect(ladoDelBrazo("izq", null)).toBeNull();
-  });
-
+describe("nombre de las combinaciones", () => {
   it("numeracion de gimnasio", () => {
     expect(numeroDeGimnasio("jab", "adelante")).toBe(1);
     expect(numeroDeGimnasio("cross", "atras")).toBe(2);
@@ -103,20 +91,10 @@ describe("combinaciones", () => {
     expect(numeroDeGimnasio("hook", null)).toBeNull();
   });
 
-  it("respeta la pausa, cuenta corregidos con su tipo y saca descartados", () => {
-    const golpes = [
-      g(1, "jab"), g(1.4, "cross", "der"),           // 1-2 (pausa 0,2)
-      g(5, "jab"), g(5.5, "hook", "der", { corregido: { tipo: "cross" } }), // 1-2 corregido
-      g(9, "jab"), g(9.9, "cross", "der"),          // pausa 0,7: no es combinacion
-      g(12, "jab"), g(12.3, "cross", "der", { descartado: true }), // descartado no cuenta
-    ];
-    const c = combinaciones(golpes, 0.5, "ortodoxa");
-    expect(c[0].n).toBe(2);
-    expect(nombreDeCombinacion(c[0], {})).toBe("1-2");
-  });
-
-  it("sin guardia se nombra con la familia", () => {
-    const c = combinaciones([g(1, "jab"), g(1.3, "cross", "der")], 0.5, null);
-    expect(nombreDeCombinacion(c[0], { jab: "jab", cross: "gancho" })).toBe("jab + gancho");
+  it("con lado se nombra con numeros; sin lado, con la familia de la nomenclatura", () => {
+    const con = { secuencia: [{ familia: "jab", lado: "adelante" as const }, { familia: "cross", lado: "atras" as const }] };
+    const sin = { secuencia: [{ familia: "jab", lado: null }, { familia: "cross", lado: null }] };
+    expect(nombreDeCombinacion(con, {})).toBe("1-2");
+    expect(nombreDeCombinacion(sin, { jab: "jab", cross: "gancho" })).toBe("jab + gancho");
   });
 });
