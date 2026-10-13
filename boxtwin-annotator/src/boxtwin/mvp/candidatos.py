@@ -19,6 +19,11 @@ QUE HACE
   Cuando ningun par coexiste lo suficiente devuelve los candidatos sueltos igual, que es el
   caso de "no pude separar dos: elegi vos" del flujo.
 
+  Cada candidato lleva ademas lo que la pantalla de identificacion muestra al lado del
+  recorte (B2 de la web entrenador): el color del guante, el tramo en que esta en cuadro y su
+  altura relativa. El nombre del color es una aproximacion por tono para la pantalla y no
+  entra en ningun calculo: la asignacion sigue usando el perfil HSV.
+
 USO
   from boxtwin.mvp.candidatos import elegir, recortar
   pareja, cands = elegir(evidencia, nucleo, cfg)
@@ -27,10 +32,14 @@ USO
 
 from __future__ import annotations
 
+import colorsys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-__all__ = ["Candidato", "elegir", "recortar"]
+__all__ = ["Candidato", "color_para_pantalla", "elegir", "recortar"]
+
+# Hasta cuantos candidatos se muestran (05 B2). Antes eran 6.
+MAXIMO = 8
 
 # Margen alrededor de la caja, en fracciones de su tamano. El recorte justo al borde de la
 # caja se lee mal: el usuario tiene que reconocer a una persona, no a un bounding box.
@@ -50,16 +59,56 @@ class Candidato:
     cuadros_de_coexistencia: int = 0
     recorte: str | None = None
     avisos: list[str] = field(default_factory=list)
+    # B2: lo que la pantalla muestra al lado del recorte.
+    color_guante: dict | None = None
+    t_desde: float | None = None
+    t_hasta: float | None = None
+    alto_relativo: float | None = None
+    sugerido: bool = False
 
     def a_dict(self) -> dict:
         return asdict(self)
+
+
+def color_para_pantalla(hsv) -> dict:
+    """
+    Un color HSV de OpenCV (tono 0-179, saturacion y valor 0-255) como hex y nombre.
+
+    El nombre es una aproximacion por tono para que el entrenador lea "rojos" o "azules" al
+    lado del recorte. No decide nada: la asignacion compara perfiles, no nombres.
+    """
+    tono, sat, val = (float(x) for x in hsv)
+    if tono < 0:            # acromatico: el detector no pudo medir tono
+        sat = 0.0
+    r, g, b = colorsys.hsv_to_rgb(max(tono, 0.0) / 180.0, sat / 255.0, val / 255.0)
+    hexa = "#{:02X}{:02X}{:02X}".format(round(r * 255), round(g * 255), round(b * 255))
+    if val < 60:
+        nombre = "negros"
+    elif sat < 50:
+        nombre = "blancos" if val > 190 else "grises"
+    else:
+        grados = tono * 2.0
+        if grados < 15 or grados >= 330:
+            nombre = "rojos"
+        elif grados < 45:
+            nombre = "naranjas"
+        elif grados < 70:
+            nombre = "amarillos"
+        elif grados < 165:
+            nombre = "verdes"
+        elif grados < 260:
+            nombre = "azules"
+        else:
+            nombre = "violetas"
+    return {"hex": hexa, "nombre": nombre}
 
 
 def elegir(
     evidencia: dict,
     nucleo: list[int] | set[int],
     min_coexistencia: int = 3,
-    maximo: int = 6,
+    maximo: int = MAXIMO,
+    fps: float | None = None,
 ) -> tuple[tuple[int, int] | None, list[Candidato]]:
     """
     El par que mas coexiste, y hasta `maximo` candidatos ordenados por evidencia.
@@ -106,8 +155,26 @@ def elegir(
             coexiste_con=(mejor[1] if mejor and t == mejor[0]
                           else mejor[0] if mejor and t == mejor[1] else None),
             cuadros_de_coexistencia=mejor_n if mejor and t in mejor else 0,
+            sugerido=bool(mejor and t in mejor),
         )
+        colores = [col for _, col in evidencia[t].colores]
+        if colores:
+            from boxtwin.core.deteccion_guantes import perfil_de
+
+            c.color_guante = color_para_pantalla(perfil_de(colores))
+        if fps:
+            c.t_desde = round(evidencia[t].primer_frame / fps, 2)
+            c.t_hasta = round(evidencia[t].ultimo_frame / fps, 2)
         salida.append(c)
+
+    # Alto sobre la mediana de los candidatos: "mas alto" o "mas bajo" que el resto se lee
+    # sin saber a que distancia estaba la camara.
+    altos = sorted(c.alto for c in salida if c.alto > 0)
+    if altos:
+        mediana = altos[len(altos) // 2] if len(altos) % 2 else (
+            (altos[len(altos) // 2 - 1] + altos[len(altos) // 2]) / 2)
+        for c in salida:
+            c.alto_relativo = round(c.alto / mediana, 3) if mediana > 0 else None
     return mejor, salida
 
 
