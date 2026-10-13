@@ -62,8 +62,12 @@ Si escribís prosa o código que contradiga esto, está mal.
 - **Tracking:** BoT-SORT.
 - **Reconocimiento de acciones:** PoseConv3D (baseline). Fine-tuning previo sobre
   dataset Bhargav: 84,51% top-1 en epoch 8, 270 train / 71 val, 6 clases.
-- **Backend:** Python + FastAPI. **Frontend:** React + Three.js.
-  **Persistencia:** PostgreSQL. **Optimización:** TensorRT.
+- **Backend:** Python + FastAPI. **Persistencia:** PostgreSQL previsto; la estación
+  corre SQLite (`~/boxtwin/datos/boxtwin.db`). **Optimización:** TensorRT.
+- **Frontend:** desde el 13-10, la web entrenador en Next 16 (exportación estática
+  servida por la API), Tailwind 4, componentes de Animate UI con `motion` fijado en
+  12.43.0. `boxtwin-web` (React + Vite) queda de respaldo. Three.js no se usa: el avatar
+  3D está fuera de esta versión.
 - **Hardware:** desktop `desarrollo-lucas` con NVIDIA RTX 2080 Super (8 GB VRAM),
   Ubuntu, más una notebook. El límite de 8 GB de VRAM es real: verificalo antes
   de proponer batch sizes o modelos grandes.
@@ -88,12 +92,16 @@ frágil. **No actualices nada ahí sin pedir confirmación explícita.**
 ├── boxtwin-guantes/       detector de guantes, que es lo que separa peleador de
 │                          arbitro y decide A contra B por color
 ├── boxtwin-api/           API, cola en PostgreSQL y worker del MVP
-├── boxtwin-web/           frontend React + Vite
+├── boxtwin-web/           frontend viejo, React + Vite (respaldo desde el 13-10)
+├── prototipo/             web entrenador: specs/ (SDD), TAREAS.md (registro por
+│                          tarea), contrato/ (JSON Schema de la Fight-Card 0.2) y
+│                          boxtwin-web-entrenador/ (Next 16, la web en producción)
 ├── despliegue/            Dockerfiles y compose de un nodo
 ├── anotacion-*/           las siete fuentes anotadas, una por directorio
 ├── modelos/               configs y checkpoints (los pesos van fuera de git)
 ├── scripts/               scripts del dataset BoxingVI, cerrado (ver §4)
-└── docs/                  specs y changelog de experimentos
+├── docs/                  specs y changelog de experimentos
+└── .github/workflows/     CI de la web entrenador y la API
 ```
 
 Cada paquete se instala con `pip install -e ".[dev]"` sobre `twinboxing_env` y
@@ -262,6 +270,29 @@ instante exacto del video.
    entornos conda por subproceso, y la Fight-Card servida con el video por
    rangos.
 5. `boxtwin-web`: los seis pasos del flujo.
+6. **Web entrenador** (12 y 13-10, desarrollada por SDD sobre `prototipo/specs/`): las
+   nueve pantallas del diseño sobre datos reales, y en la API las tareas B0 a B8
+   (consentimiento obligatorio al subir, panel, revisión de tramos sin asignar a mano,
+   "no fue un golpe", perfil por contexto, Rival Fantasma). Fight-Card 0.2, compatible
+   con 0.1. El registro de cada tarea con su prueba está en `prototipo/TAREAS.md`.
+
+### Web entrenador en producción (13-10)
+
+- La estación sirve la web nueva desde el 13-10 (`BOXTWIN_WEB` apunta a
+  `prototipo/boxtwin-web-entrenador/out`), commit `3a62a39`. Se adelantó a la compuerta
+  del 26-10 por decisión de Lucas.
+- Volver a la web vieja: copiar `~/boxtwin/boxtwin.env.antes-web-nueva.bak` sobre
+  `/etc/boxtwin.env` y `sudo systemctl restart boxtwin-api`. Respaldo de la base previo
+  al deploy: `~/boxtwin/datos/boxtwin.db.antes-del-13-10.bak`.
+- Después de cada merge: `git pull` en `~/Proyectos/TwinBoxing`, `npm ci && npm run
+  build` en `prototipo/boxtwin-web-entrenador`, y reiniciar API y worker. La API agrega
+  sola las columnas nuevas en SQLite; `despliegue/migraciones/2026-10-web-entrenador.sql`
+  es para cuando se pase a PostgreSQL.
+- Decisiones del 13-10: presupuesto de JS inicial de 380 KB por ruta; hook y uppercut
+  en inglés; pausa de combinación 0,5 s; bolsa, sombra y las lecturas del Rival Fantasma
+  se muestran como "En construcción".
+- El e2e encontró y se arregló un bug de la API: con un `completar` en cola o tomado,
+  `GET /jobs/{id}` hacía retroceder la sesión a `espera_siembra`.
 
 ### Lo que falta, en orden
 
@@ -286,6 +317,15 @@ instante exacto del video.
 5. Construir la imagen del worker. Está escrita y **nunca se construyó**: mmcv
    compilado contra CUDA 11.8 adentro de una imagen es donde suelen irse días.
 6. Sesiones de prueba con usuarios (C4, C6).
+7. **Recorrido de la compuerta** (`prototipo/specs/07-plan.md` §2), ahora sobre
+   producción: Android e iPhone reales por el túnel y con datos móviles; filmar, subir,
+   marcar, corregir un golpe y exportar. Anotar tiempo de subida y de procesamiento
+   (insumo de C4 y C5).
+8. **Medir B8** antes de encender `sesiones_individuales`: dos videos propios de bolsa o
+   sombra, persona asignada en ≥ 95% de los cuadros, mirado a ojo sobre el procesado.
+9. Validar los textos de las reglas del Rival Fantasma, que hoy están "En construcción".
+10. Lighthouse (LCP, INP) sobre las pantallas con sesión iniciada. En la estación el e2e
+    corre sin WebKit (falta `libevent`); en el CI corre con WebKit.
 
 ### Criterios de aceptación
 
@@ -343,7 +383,8 @@ Argparse con defaults sensatos. Todo lo que produzca datos, reanudable.
 
 ### Git
 
-Branch `testeoDS`. Commits con mensaje fechado.
+Ramas con PR contra `main`; commits con mensaje fechado. La estación corre `main` desde
+`~/Proyectos/TwinBoxing`, y `GET /salud` dice el commit que está corriendo.
 
 ### Documentación de experimentos
 
