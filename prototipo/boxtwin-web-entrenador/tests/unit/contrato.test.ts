@@ -45,3 +45,25 @@ describe("contrato 0.3 compartido con el worker", () => {
     expect(validar({ ...fc02, conectados: 4 })).toBe(false);
   });
 });
+
+/*
+ * La web y la API se despliegan por separado: la web nueva tiene que leer lo que manda una
+ * API de antes de la ampliacion sin romperse (paso en la estacion el 13-10).
+ */
+import { Perfil, Producto } from "@/lib/api/esquemas";
+import { productoBase } from "../integracion/api-simulada";
+import { perfilDePrueba } from "../integracion/perfil-de-prueba";
+
+describe("compatibilidad con una API anterior a la ampliacion", () => {
+  it("/producto con pausa_combinacion_s y sin banderas nuevas", () => {
+    const viejo = { ...productoBase(), dominio: { pausa_combinacion_s: 0.5, perfil_preliminar_sesiones: 5 } };
+    expect(Producto.safeParse(viejo).success).toBe(true);
+  });
+
+  it("el perfil con la lista de combinaciones de B7 se lee como sin combinaciones", () => {
+    const viejo = perfilDePrueba("b1", "Ana", { combinaciones: [{ secuencia: [{ familia: "jab", lado: "adelante" }], n: 3, estimado: true }] });
+    const r = Perfil.safeParse(viejo);
+    expect(r.success).toBe(true);
+    expect(r.data?.combinaciones).toBeNull();
+  });
+});

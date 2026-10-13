@@ -56,8 +56,10 @@ export const Producto = z.object({
     avatar_3d: z.boolean().optional(),
   }),
   dominio: z.object({
-    // B10: la regla vive en el anotador; null si la instancia no lo tiene instalado.
-    combinacion: z.object({ patron: z.string(), separacion: z.string(), max_s: num }).nullable(),
+    // B10: la regla vive en el anotador; null si la instancia no lo tiene instalado. Opcional:
+    // una API anterior a la ampliacion manda `pausa_combinacion_s` y la web tiene que seguir
+    // andando hasta que se reinicie (la web y la API se despliegan por separado).
+    combinacion: z.object({ patron: z.string(), separacion: z.string(), max_s: num }).nullable().optional(),
     perfil_preliminar_sesiones: num,
   }),
 });
@@ -338,7 +340,8 @@ export const Perfil = z.object({
   })).optional(),
   rounds_promedio: z.array(z.object({ round: num, golpes_por_minuto: num })).nullable().optional(),
   // B10: las izq-der-izq. null si la instancia no tiene el anotador (no se inventa la regla).
-  combinaciones: z.object({
+  // Una API anterior manda la lista por tipo de B7: se lee como null, no como error.
+  combinaciones: z.preprocess((v) => (Array.isArray(v) ? null : v), z.object({
     patron: z.string(),
     total: num,
     por_minuto: numN,
@@ -346,7 +349,7 @@ export const Perfil = z.object({
     tipos_frecuentes: z.array(z.object({ tipos: z.array(z.string()), n: num, estimado: z.boolean() })),
     sesiones_con_combinaciones: num,
     recall_medido: numN.optional(),
-  }).nullable().optional(),
+  }).nullable().optional()),
 });
 export type Perfil = z.infer<typeof Perfil>;
 
