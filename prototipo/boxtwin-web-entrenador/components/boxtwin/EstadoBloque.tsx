@@ -7,10 +7,11 @@
  *   estimacion     "≈", borde punteado ambar y rotulo "estimación", con la version del modelo
  *   apagado        condicionado sin su criterio: NO muestra numeros, dice que criterio falta
  *   no_disponible  plegado, con que pieza falta y por que
+ *   en_construccion  se ve pero no se usa todavia; sin numeros
  *   fuera          no se dibuja
  *
  * Lo que decide el estado es lib/banderas.ts con /producto; este componente solo lo dibuja.
- * Con "apagado" y "no_disponible" los hijos NO se renderizan: un numero condicionado no
+ * Con "apagado", "en_construccion" y "no_disponible" los hijos NO se renderizan: un numero condicionado no
  * puede llegar al DOM ni escondido (I3).
  */
 import type { ReactNode } from "react";
@@ -47,6 +48,20 @@ export function EstadoBloque({ estado, titulo, children, motivo, nota, className
           <AccordionContent className="px-4 pb-4 text-sm text-texto-2">{motivo}</AccordionContent>
         </AccordionItem>
       </Accordion>
+    );
+  }
+
+  if (estado === "en_construccion") {
+    return (
+      <section
+        aria-label={titulo}
+        data-estado="en_construccion"
+        className={cn("rounded-md border border-dashed border-borde-fuerte bg-superficie-2 p-4", className)}
+      >
+        <Rotulo className="text-estimado">en construcción</Rotulo>
+        <h3 className="mt-1 font-display text-lg font-semibold text-texto-2">{titulo}</h3>
+        <p className="mt-1 text-sm text-texto-3">{motivo}</p>
+      </section>
     );
   }
 

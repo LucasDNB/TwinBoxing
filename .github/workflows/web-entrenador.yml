@@ -46,11 +46,8 @@ jobs:
       # 3. Build y ningun dato de demostracion del diseno en out/
       - run: npm run build
       - run: npm run sin-demo
-      # Presupuesto de JS inicial por ruta (03 §9). Informativo hasta que Lucas decida: con
-      # React DOM, el runtime de Next y Motion (que pide Animate UI) el piso medido ya es de
-      # ~192 KB y las pantallas van de 281 a 360 KB. Ver prototipo/TAREAS.md.
+      # Presupuesto de JS inicial por ruta (03 §9, 380 KB desde el 13-10).
       - run: npm run presupuesto
-        continue-on-error: true
 
       # 4. La API, sin GPU (las rutas que necesitan el anotador completo ya se saltean)
       - name: pytest de boxtwin-api

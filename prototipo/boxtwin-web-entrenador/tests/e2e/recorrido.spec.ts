@@ -149,7 +149,7 @@ test("perfil con dos sesiones y rival con dos perfiles", async ({ page, request 
 
   await page.goto(`/rival/?a=${ana}&b=${bea}`);
   await expect(page.getByRole("table", { name: "Frente a frente" })).toBeVisible();
-  await expect(page.getByText(/Tiene 8 cm más de envergadura/)).toBeVisible();
+  await expect(page.getByRole("region", { name: "Oportunidades y amenazas" })).toContainText("en construcción");
   await sinViolacionesSerias(page, "rival");
 
   await page.goto("/sesiones/");

@@ -8,8 +8,10 @@
  */
 import type { Producto } from "@/lib/api/esquemas";
 
-export type EstadoBase = "medido" | "estimacion" | "no_disponible" | "fuera";
-export type EstadoBloque = "medido" | "estimacion" | "apagado" | "no_disponible" | "fuera";
+// "en_construccion" (13-10, decision de Lucas): la funcion se ve en el prototipo pero todavia
+// no se puede usar. Distinto de "no_disponible", que es una pieza que no existe.
+export type EstadoBase = "medido" | "estimacion" | "no_disponible" | "en_construccion" | "fuera";
+export type EstadoBloque = "medido" | "estimacion" | "apagado" | "no_disponible" | "en_construccion" | "fuera";
 export type Bandera = keyof Producto["banderas"];
 
 interface Fila {
@@ -59,7 +61,7 @@ export const BLOQUES = {
   "07.frente_guardia": { base: "medido", bandera: "guardia" },
   "07.frente_r3": { base: "medido", bandera: "comparacion_rounds" },
   "07.cruces": { base: "no_disponible" },
-  "07.lecturas": { base: "medido" },
+  "07.lecturas": { base: "en_construccion" },
   "08.subida": { base: "medido" },
   "09.fightcard": { base: "medido" },
 } as const satisfies Record<string, Fila>;
@@ -72,7 +74,7 @@ export type Bloque = keyof typeof BLOQUES;
  */
 export function estadoDe(bloque: Bloque, producto: Producto | null | undefined): EstadoBloque {
   const f: Fila = BLOQUES[bloque];
-  if (f.base === "fuera" || f.base === "no_disponible") return f.base;
+  if (f.base === "fuera" || f.base === "no_disponible" || f.base === "en_construccion") return f.base;
   if (f.bandera) {
     const encendida = producto?.banderas?.[f.bandera] ?? false;
     if (!encendida) return "apagado";

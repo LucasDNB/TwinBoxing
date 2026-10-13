@@ -28,6 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { HojaPeleador } from "@/components/pantallas/peleadores/HojaPeleador";
+import { AvisoEnConstruccion } from "@/components/boxtwin/EnConstruccion";
 import { ErrorApi, subirConProgreso, type Subida } from "@/lib/api/cliente";
 import { asignarBoxeadores, claves, useBoxeadores, useProducto } from "@/lib/api/consultas";
 import { CONTEXTOS, PRACTICAS, type Contexto } from "@/lib/api/esquemas";
@@ -78,6 +79,7 @@ export function PantallaNueva() {
   // Subida
   const [subida, setSubida] = useState<EstadoSubida>({ fase: "quieta" });
   const [confirmarCancelar, setConfirmarCancelar] = useState(false);
+  const [enConstruccion, setEnConstruccion] = useState(false);
   const enCurso = useRef<Subida | null>(null);
 
   const p = producto.data;
@@ -292,21 +294,28 @@ export function PantallaNueva() {
             <ToggleGroup
               type="single"
               value={contexto}
-              onValueChange={(v) => v && setContexto(v as Contexto)}
+              onValueChange={(v) => {
+                if (!v) return;
+                // Bolsa y sombra se ven, pero hasta validar B8 avisan en vez de elegirse.
+                if (!individuales && !DE_DOS.includes(v as Contexto)) {
+                  setEnConstruccion(true);
+                  return;
+                }
+                setContexto(v as Contexto);
+              }}
               className="grid w-full grid-cols-2 gap-2 md:grid-cols-4"
               aria-label="Qué se filmó"
             >
               {CONTEXTOS.map((c) => {
-                const proximamente = !individuales && !DE_DOS.includes(c);
+                const construccion = !individuales && !DE_DOS.includes(c);
                 return (
                   <ToggleGroupItem
                     key={c}
                     value={c}
-                    disabled={proximamente}
                     className="flex h-auto min-h-16 flex-col items-start gap-0.5 border border-borde px-3 py-2 text-left whitespace-normal"
                   >
                     <span className="font-medium">{NOMBRE_CONTEXTO[c]}</span>
-                    <span className="text-xs text-texto-3">{proximamente ? "Próximamente" : DESCRIPCION_CONTEXTO[c]}</span>
+                    <span className="text-xs text-texto-3">{construccion ? "En construcción" : DESCRIPCION_CONTEXTO[c]}</span>
                   </ToggleGroupItem>
                 );
               })}
@@ -451,6 +460,8 @@ export function PantallaNueva() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AvisoEnConstruccion abierto={enConstruccion} onCerrar={() => setEnConstruccion(false)} texto={textos.enConstruccion.individuales} />
 
       {hojaPara && (
         <HojaPeleador

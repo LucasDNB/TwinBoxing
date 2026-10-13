@@ -96,9 +96,10 @@ Ninguna bloquea el hito 0. Cada una tiene fecha límite por la tarea que la usa:
 
 | Decisión | Para | Antes del | Valor inicial propuesto |
 |---|---|---|---|
-| Nombres en pantalla de hook y uppercut | W6, W8 | 21-10 | se quedan en inglés, como hoy |
-| Pausa máxima entre golpes de una combinación | B7 | 27-10 | 0,5 s |
-| Texto de las cinco reglas de oportunidades y amenazas | W12 | 30-10 | los de `04` §07 |
+| Nombres en pantalla de hook y uppercut | W6, W8 | 21-10 | **Decidido 13-10:** se quedan en inglés |
+| Pausa máxima entre golpes de una combinación | B7 | 27-10 | **Decidido 13-10:** 0,5 s |
+| Texto de las cinco reglas de oportunidades y amenazas | W12 | 30-10 | **Decidido 13-10:** el bloque se muestra "En construcción" hasta validar los textos |
+| Sesiones de bolsa y sombra (B8) | W3 | — | **Decidido 13-10:** se muestran y al elegirlas avisan "En construcción" hasta medir el criterio de B8 |
 | Estado de C2 y C3 a cargar en `/producto` | B5a | cuando se midan | `pendiente` |
 | Si W-F14 y W-F15 (perfil y rival) entran o quedan como diseño | Hito 3 | 26-10 | entran si la compuerta pasa a tiempo |
 

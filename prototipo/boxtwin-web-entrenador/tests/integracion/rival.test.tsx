@@ -39,27 +39,22 @@ describe("07 · Rival Fantasma", () => {
     expect(screen.getByText(/De Bea Ruiz falta la envergadura/)).toBeInTheDocument();
   });
 
-  it("CA-07.1: con C2 y C3 apagados ninguna lectura cita caida ni guardia opuesta", async () => {
+  it("oportunidades y amenazas: En construcción, sin ninguna lectura (CA-07.1 se cumple siempre)", async () => {
+    mundo.producto = productoBase({ comparacion_rounds: true, guardia: true });
     enRuta("/rival/?a=b1&b=b2");
     montar(<PantallaRival />);
-    await screen.findByText("Oportunidades y amenazas");
-    await waitFor(() => expect(mundo.pedidos.some((p) => p.ruta === "/producto")).toBe(true));
-    const bloque = screen.getByRole("region", { name: "Oportunidades y amenazas" });
-    expect(bloque.textContent).not.toMatch(/último round|otra mano/);
-    // Guardias opuestas y ritmo si aplican (12,8 / 15,1 promedio contra 10).
-    expect(within(bloque).getAllByText(/amenaza · guardia$/)).toHaveLength(2);
-    expect(within(bloque).getByText(/oportunidad · golpes por minuto/)).toBeInTheDocument();
-    const tabla = screen.getByRole("table", { name: "Frente a frente" });
-    expect(within(tabla).getAllByText("en validación")).toHaveLength(2);
+    const bloque = await screen.findByRole("region", { name: "Oportunidades y amenazas" });
+    expect(bloque).toHaveAttribute("data-estado", "en_construccion");
+    expect(bloque).toHaveTextContent("en construcción");
+    expect(bloque.textContent).not.toMatch(/oportunidad ·|amenaza ·|último round|otra mano/);
   });
 
-  it("con C2 y C3 aprobados entran caida y guardia opuesta", async () => {
-    mundo.producto = productoBase({ comparacion_rounds: true, guardia: true });
-    (mundo.perfiles.b1 as any).por_contexto[0].guardia_opuesta_arriba = 0.7;
-    (mundo.perfiles.b1 as any).por_contexto[1].guardia_opuesta_arriba = 0.7;
+  it("el frente a frente sigue mostrando lo medido, con lo condicionado en validacion", async () => {
     enRuta("/rival/?a=b1&b=b2");
     montar(<PantallaRival />);
-    expect(await screen.findByText("Su volumen cae 30% en el último round.")).toBeInTheDocument();
-    expect(screen.getByText(/Deja la otra mano abajo más seguido/)).toBeInTheDocument();
+    const tabla = await screen.findByRole("table", { name: "Frente a frente" });
+    await waitFor(() => expect(mundo.pedidos.some((p) => p.ruta === "/producto")).toBe(true));
+    expect(within(tabla).getAllByText("en validación")).toHaveLength(2);
+    expect(within(tabla).getByText("1,80 m")).toBeInTheDocument();
   });
 });

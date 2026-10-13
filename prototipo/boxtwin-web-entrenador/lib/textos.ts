@@ -53,6 +53,13 @@ export const textos = {
   },
   tramosVersionVieja:
     "Esta sesión se procesó antes de la revisión de tramos; reprocesala para revisarlos.",
+  enConstruccion: {
+    titulo: "En construcción",
+    individuales:
+      "Las sesiones de bolsa y sombra todavía se están validando. Por ahora se analizan sparring y combate.",
+    lecturas:
+      "Las lecturas de oportunidades y amenazas se están revisando como criterio de dominio. Mientras tanto, el frente a frente muestra los números medidos.",
+  },
   rivalAviso:
     "Lectura cualitativa entre perfiles ya construidos. No es un pronóstico ni una probabilidad de victoria.",
   separacion(sep: number, piso: number) {

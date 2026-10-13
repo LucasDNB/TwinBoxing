@@ -87,9 +87,18 @@ describe("02 / 08 · Nueva sesión", () => {
     expect((await screen.findAllByText("Entre 11 y 26 min")).length).toBeGreaterThan(0);
   });
 
-  it("bolsa y sombra quedan en 'Próximamente' sin la bandera de B8", async () => {
+  it("bolsa y sombra se ven, y al elegirlas avisan 'En construcción' sin cambiar el contexto", async () => {
     montar(<PantallaNueva />);
-    expect((await screen.findAllByText("Próximamente")).length).toBe(2);
+    expect((await screen.findAllByText("En construcción")).length).toBe(2);
+    const bolsa = screen.getByRole("radio", { name: /Bolsa/ });
+    expect(bolsa).toBeEnabled();
+    await userEvent.click(bolsa);
+    const aviso = await screen.findByRole("alertdialog");
+    expect(aviso).toHaveTextContent("Las sesiones de bolsa y sombra todavía se están validando");
+    await userEvent.click(screen.getByRole("button", { name: "Entendido" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    await waitFor(() => expect(screen.getByRole("radio", { name: /Sparring/ })).toHaveAttribute("aria-checked", "true"));
+    expect(screen.getByRole("radio", { name: /Bolsa/ })).toHaveAttribute("aria-checked", "false");
   });
 
   it("envia contexto, rounds y consentimiento, y al terminar va a la sesion", async () => {

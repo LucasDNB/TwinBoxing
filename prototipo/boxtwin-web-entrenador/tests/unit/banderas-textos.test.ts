@@ -33,6 +33,7 @@ describe("estadoDe: cada fila de 01 §4", () => {
     "01.plan": ["fuera", "fuera"],
     "02.consumo": ["fuera", "fuera"],
     "05.detectados": ["medido", "medido"],
+    "07.lecturas": ["en_construccion", "en_construccion"],
   };
 
   for (const [bloque, [sin, con]] of Object.entries(esperado)) {
@@ -48,7 +49,7 @@ describe("estadoDe: cada fila de 01 §4", () => {
 
   it("ninguna fila queda sin estado", () => {
     for (const b of Object.keys(BLOQUES) as Bloque[]) {
-      expect(["medido", "estimacion", "apagado", "no_disponible", "fuera"]).toContain(estadoDe(b, apagado));
+      expect(["medido", "estimacion", "apagado", "no_disponible", "en_construccion", "fuera"]).toContain(estadoDe(b, apagado));
     }
   });
 });

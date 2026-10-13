@@ -181,7 +181,7 @@ function Comparacion({ pa, pb, producto, superpuestas, onSuperpuestas }: { pa: P
         </Desplazable>
       </EstadoBloque>
 
-      <EstadoBloque estado={estadoDe("07.lecturas", producto)} titulo="Oportunidades y amenazas">
+      <EstadoBloque estado={estadoDe("07.lecturas", producto)} titulo="Oportunidades y amenazas" motivo={textos.enConstruccion.lecturas}>
         {!hayLecturas(lec) ? (
           <p className="text-sm text-texto-2">{SIN_DIFERENCIAS}</p>
         ) : (
