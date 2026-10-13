@@ -25,6 +25,8 @@ __all__ = [
 ]
 
 TIPOS = ("jab", "cross", "hook", "uppercut")
+CONTEXTOS = ("bolsa", "sombra", "sparring", "combate")
+PRACTICAS = ("tecnica_libre", "combinaciones", "defensa")
 
 
 class Credenciales(BaseModel):
@@ -87,6 +89,10 @@ class EntradaCorreccion(BaseModel):
     tipo: Literal["jab", "cross", "hook", "uppercut"]
 
 
+def _boxeador_corto(b) -> dict | None:
+    return {"id": b.id, "nombre": b.nombre} if b is not None else None
+
+
 def sesion_a_dict(s, extra: dict | None = None) -> dict:
     """La sesion como la ve el frontend. La Fight-Card va aparte, que es pesada."""
     d = {
@@ -97,7 +103,15 @@ def sesion_a_dict(s, extra: dict | None = None) -> dict:
         "video": s.video_nombre,
         "duracion_s": s.duracion_s,
         "fps": s.fps,
-        "rounds": {"round_s": s.round_s, "descanso_s": s.descanso_s},
+        "rounds": {"round_s": s.round_s, "descanso_s": s.descanso_s, "cantidad": s.rounds},
+        "contexto": s.contexto or "sparring",
+        "practica": s.practica,
+        "consentimiento": s.consentimiento_en is not None,
+        # Los nombres van en la lista para que la web no pida los peleadores uno por uno.
+        "boxeadores": {
+            "A": _boxeador_corto(s.boxeador_a),
+            "B": _boxeador_corto(s.boxeador_b),
+        },
         "siembra": (
             {"track_a": s.semilla_a, "track_b": s.semilla_b}
             if s.semilla_a is not None else None

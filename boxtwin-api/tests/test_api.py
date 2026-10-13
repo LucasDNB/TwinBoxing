@@ -89,7 +89,8 @@ def test_la_subida_deja_el_trabajo_encolado_en_el_mismo_commit(cliente, registra
 
 
 def test_un_formato_que_no_es_video_se_rechaza(cliente, registrado):
-    r = cliente.post("/videos", files={"archivo": ("apunte.pdf", b"x", "application/pdf")})
+    r = cliente.post("/videos", files={"archivo": ("apunte.pdf", b"x", "application/pdf")},
+                     data={"consentimiento": "true"})
     assert r.status_code == 415
 
 

@@ -78,5 +78,5 @@ def subir_video(cliente, nombre="spar.mp4", **datos):
         "/videos",
         files={"archivo": (nombre, b"no es un video de verdad, nadie lo decodifica aca",
                            "video/mp4")},
-        data={"nombre": "sparring del martes", **datos},
+        data={"nombre": "sparring del martes", "consentimiento": "true", **datos},
     )

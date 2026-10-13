@@ -40,6 +40,8 @@ from boxtwin_api.cola import encolar
 from boxtwin_api.config import cfg
 from boxtwin_api.db import crear_tablas, obtener_sesion
 from boxtwin_api.esquemas import (
+    CONTEXTOS,
+    PRACTICAS,
     AsignarBoxeadores,
     Credenciales,
     EntradaBoxeador,
@@ -233,6 +235,10 @@ def subir(
     nombre: str = Form(default=""),
     round_s: float | None = Form(default=None),
     descanso_s: float = Form(default=60.0),
+    contexto: str = Form(default="sparring"),
+    practica: str = Form(default=""),
+    rounds: str = Form(default=""),
+    consentimiento: str = Form(default=""),
     usuario: Usuario = Depends(usuario_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
@@ -241,7 +247,29 @@ def subir(
 
     El archivo se escribe en disco a medida que llega y no en memoria: 30 minutos de 1080p
     desde un celular son varios gigabytes y un servidor de un nodo no los aguanta en RAM.
+
+    Los campos de contexto y el consentimiento son de B1 (web entrenador). El
+    consentimiento se valida ANTES de leer el archivo: no tiene sentido recibir un gigabyte
+    para rechazarlo despues.
     """
+    if consentimiento.strip().lower() != "true":
+        raise HTTPException(422, "falta el consentimiento de las personas filmadas")
+    if contexto not in CONTEXTOS:
+        raise HTTPException(422, f"contexto tiene que ser uno de {', '.join(CONTEXTOS)}")
+    practica = practica.strip() or None
+    if practica is not None and contexto != "sombra":
+        raise HTTPException(422, "lo que se practico solo se declara en una sesion de sombra")
+    if practica is not None and practica not in PRACTICAS:
+        raise HTTPException(422, f"practica tiene que ser una de {', '.join(PRACTICAS)}")
+    cantidad = None
+    if rounds.strip():
+        try:
+            cantidad = int(rounds)
+        except ValueError:
+            raise HTTPException(422, "rounds tiene que ser un entero") from None
+        if cantidad < 1:
+            raise HTTPException(422, "rounds tiene que ser 1 o mas, o vacio para sin rounds")
+
     ext = Path(archivo.filename or "").suffix.lower()
     if ext not in cfg.formatos:
         raise HTTPException(
@@ -258,6 +286,11 @@ def subir(
         round_s=round_s,
         descanso_s=descanso_s,
         estado="en_cola",
+        contexto=contexto,
+        practica=practica,
+        rounds=cantidad,
+        consentimiento_en=datetime.now(timezone.utc),
+        consentimiento_por=usuario.email,
     )
     db.add(ses)
     db.flush()

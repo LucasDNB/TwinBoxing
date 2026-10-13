@@ -118,12 +118,29 @@ class Sesion(Base):
         ForeignKey("boxeadores.id"), nullable=True, index=True
     )
 
+    # B1 de la web entrenador. Nullable para que el ADD COLUMN de db.py pueda agregarlas a
+    # una tabla con filas; una sesion vieja sin contexto se lee como sparring, que es lo
+    # unico que el producto procesaba antes de que existiera el campo.
+    contexto: Mapped[str | None] = mapped_column(
+        String(16), nullable=True, default="sparring", index=True
+    )
+    practica: Mapped[str | None] = mapped_column(String(24), nullable=True)
+    rounds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Quien declaro el consentimiento de las personas filmadas y cuando (R-09, Ley 25.326).
+    # Es lo que se puede mostrar si alguien pregunta; sin esto no se sube nada nuevo.
+    consentimiento_en: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    consentimiento_por: Mapped[str | None] = mapped_column(String(320), nullable=True)
+
     creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
     actualizada: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=ahora, onupdate=ahora
     )
 
     usuario: Mapped[Usuario] = relationship(back_populates="sesiones")
+    boxeador_a: Mapped["Boxeador | None"] = relationship(foreign_keys=[boxeador_a_id])
+    boxeador_b: Mapped["Boxeador | None"] = relationship(foreign_keys=[boxeador_b_id])
     trabajos: Mapped[list[Trabajo]] = relationship(
         back_populates="sesion", cascade="all, delete-orphan"
     )

@@ -127,6 +127,8 @@ export const api = {
       if (nombre) datos.append('nombre', nombre)
       if (roundS) datos.append('round_s', String(roundS))
       datos.append('descanso_s', String(descansoS ?? 60))
+      // B1: la API rechaza la subida sin el consentimiento de las personas filmadas (R-09).
+      datos.append('consentimiento', 'true')
 
       const x = new XMLHttpRequest()
       x.open('POST', '/videos')

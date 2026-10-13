@@ -26,6 +26,7 @@ export default function Subir({ alSubir }) {
   const [descansoS, setDescansoS] = useState(60)
   const [progreso, setProgreso] = useState(null)
   const [error, setError] = useState(null)
+  const [consentimiento, setConsentimiento] = useState(false)
 
   const enviar = async (e) => {
     e.preventDefault()
@@ -107,6 +108,16 @@ export default function Subir({ alSubir }) {
         </p>
       </fieldset>
 
+      <label className="en_linea">
+        <input
+          type="checkbox"
+          checked={consentimiento}
+          onChange={(e) => setConsentimiento(e.target.checked)}
+        />
+        Las personas que aparecen en el video dieron su consentimiento por escrito y ninguna
+        es menor de 18 años.
+      </label>
+
       {error && <p className="error" role="alert">{error}</p>}
 
       {progreso != null ? (
@@ -115,7 +126,7 @@ export default function Subir({ alSubir }) {
           <span>{Math.round(progreso * 100)}% subido</span>
         </div>
       ) : (
-        <button className="principal" disabled={!archivo}>
+        <button className="principal" disabled={!archivo || !consentimiento}>
           Subir y procesar
         </button>
       )}
