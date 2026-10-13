@@ -662,7 +662,7 @@ PENDIENTE Y PROXIMO PASO
 3. API: B0 a B8. Consentimiento obligatorio al subir, panel, tramos asignados a mano,
    "no fue un golpe", perfil extendido. Sesiones de un peleador escritas pero apagadas
 4. Fight-Card 0.2 con JSON Schema que validan el worker y la web
-5. 149 pruebas de la web, 170 de la API; e2e 6 de 6 en Chromium con axe limpio
+5. 149 pruebas de la web, 166 de la API; e2e 6 de 6 en Chromium con axe limpio
 6. El e2e encontro un bug de la API: con un completar en cola, GET /jobs/{id} hacia
    retroceder la sesion a espera_siembra y la pantalla quedaba clavada
 7. El presupuesto de 200 KB de JS por ruta no se cumple con Animate UI: 281 a 360 KB
