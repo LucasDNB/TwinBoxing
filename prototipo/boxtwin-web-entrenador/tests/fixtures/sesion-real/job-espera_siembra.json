@@ -1,0 +1,142 @@
+{
+ "id": "4ad5553ab817425e8e80bd23c5c931dd",
+ "nombre": "sparring del martes",
+ "estado": "espera_siembra",
+ "error": null,
+ "video": "03-sparring.mp4",
+ "duracion_s": 174.933,
+ "fps": 30.0,
+ "rounds": {
+  "round_s": 180.0,
+  "descanso_s": 60.0,
+  "cantidad": 1
+ },
+ "siembra": null,
+ "creada": "2026-09-22T03:33:45.997135+00:00",
+ "actualizada": "2026-09-22T03:48:25.952153+00:00",
+ "contexto": "sparring",
+ "practica": null,
+ "boxeadores": {
+  "A": null,
+  "B": null
+ },
+ "candidatos": [
+  {
+   "track": 41,
+   "cuadro": 835,
+   "alto": 0.992,
+   "fraccion_guante": 0.9441,
+   "cuadros_con_color": 78,
+   "coexiste_con": 64,
+   "cuadros_de_coexistencia": 38,
+   "recorte": "candidatos/track_41.jpg",
+   "avisos": [],
+   "recorte_url": "/jobs/4ad5553ab817425e8e80bd23c5c931dd/candidatos/41"
+  },
+  {
+   "track": 64,
+   "cuadro": 835,
+   "alto": 0.9927,
+   "fraccion_guante": 0.9249,
+   "cuadros_con_color": 91,
+   "coexiste_con": 41,
+   "cuadros_de_coexistencia": 38,
+   "recorte": "candidatos/track_64.jpg",
+   "avisos": [],
+   "recorte_url": "/jobs/4ad5553ab817425e8e80bd23c5c931dd/candidatos/64"
+  },
+  {
+   "track": 228,
+   "cuadro": 2685,
+   "alto": 0.9906,
+   "fraccion_guante": 0.9231,
+   "cuadros_con_color": 116,
+   "coexiste_con": null,
+   "cuadros_de_coexistencia": 0,
+   "recorte": "candidatos/track_228.jpg",
+   "avisos": [],
+   "recorte_url": "/jobs/4ad5553ab817425e8e80bd23c5c931dd/candidatos/228"
+  },
+  {
+   "track": 124,
+   "cuadro": 1395,
+   "alto": 0.9945,
+   "fraccion_guante": 0.8136,
+   "cuadros_con_color": 62,
+   "coexiste_con": null,
+   "cuadros_de_coexistencia": 0,
+   "recorte": "candidatos/track_124.jpg",
+   "avisos": [],
+   "recorte_url": "/jobs/4ad5553ab817425e8e80bd23c5c931dd/candidatos/124"
+  },
+  {
+   "track": 430,
+   "cuadro": 4175,
+   "alto": 0.9892,
+   "fraccion_guante": 0.9485,
+   "cuadros_con_color": 53,
+   "coexiste_con": null,
+   "cuadros_de_coexistencia": 0,
+   "recorte": "candidatos/track_430.jpg",
+   "avisos": [],
+   "recorte_url": "/jobs/4ad5553ab817425e8e80bd23c5c931dd/candidatos/430"
+  },
+  {
+   "track": 492,
+   "cuadro": 4745,
+   "alto": 0.9891,
+   "fraccion_guante": 0.9138,
+   "cuadros_con_color": 53,
+   "coexiste_con": null,
+   "cuadros_de_coexistencia": 0,
+   "recorte": "candidatos/track_492.jpg",
+   "avisos": [],
+   "recorte_url": "/jobs/4ad5553ab817425e8e80bd23c5c931dd/candidatos/492"
+  }
+ ],
+ "avisos": [
+  "los dos lados tienen guantes casi del mismo color (separacion 0.354, piso 0.55). Los 22 tracks que la coexistencia resolvio quedan asignados igual; los demas quedan sin asignar"
+ ],
+ "etapas": [
+  {
+   "etapa": "preproceso",
+   "segundos": 255.32,
+   "cuando": "2026-09-22T03:33:45.997166+00:00",
+   "cuadros": 5248
+  },
+  {
+   "etapa": "evidencia",
+   "segundos": 223.34,
+   "cuando": "2026-09-22T03:37:29.335629+00:00",
+   "tracks": 453
+  },
+  {
+   "etapa": "identidad",
+   "segundos": 0.02,
+   "cuando": "2026-09-22T03:48:24.990905+00:00",
+   "asignados": 22
+  },
+  {
+   "etapa": "series",
+   "segundos": 0.24,
+   "cuando": "2026-09-22T03:48:25.230034+00:00"
+  },
+  {
+   "etapa": "detector",
+   "segundos": 0.71,
+   "cuando": "2026-09-22T03:48:25.943039+00:00",
+   "golpes": 83
+  },
+  {
+   "etapa": "guardia",
+   "segundos": 0.01,
+   "cuando": "2026-09-22T03:48:25.949442+00:00"
+  }
+ ],
+ "progreso": null,
+ "trabajos": [],
+ "pareja_sugerida": [
+  41,
+  64
+ ]
+}

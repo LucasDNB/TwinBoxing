@@ -37,6 +37,8 @@ let alVencerse: () => void = () => {
   if (typeof window === "undefined") return;
   const aca = window.location.pathname + window.location.search;
   if (window.location.pathname.startsWith("/ingresar")) return;
+  // Recarga completa a proposito: tira la cache de consultas del usuario anterior.
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
   window.location.assign(`/ingresar/?siguiente=${encodeURIComponent(aca)}`);
 };
 

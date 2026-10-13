@@ -37,6 +37,15 @@ def _lista(nombre: str, defecto: str) -> list[str]:
     return [x for x in os.environ.get(nombre, defecto).split() if x]
 
 
+ESTADOS_CRITERIO = ("pendiente", "aprobado", "rechazado")
+
+
+def _criterio(nombre: str) -> str:
+    """El estado de un criterio pre-registrado. Un valor mal escrito cuenta como pendiente."""
+    v = os.environ.get(nombre, "pendiente").strip().lower()
+    return v if v in ESTADOS_CRITERIO else "pendiente"
+
+
 @dataclass
 class Config:
     # sqlite alcanza para desarrollo y para los tests. En produccion es PostgreSQL, que es
@@ -139,6 +148,38 @@ class Config:
     )
     intentos_maximos: int = field(
         default_factory=lambda: int(os.environ.get("BOXTWIN_INTENTOS", "2"))
+    )
+
+    # -- Lo que la web lee de GET /producto (05 B5) -------------------------------------
+    #
+    # El estado de los criterios pre-registrados lo cambia Lucas cuando mide, por entorno y
+    # con fecha. La web no decide nada sobre esto: las banderas salen de aca.
+    c2: str = field(default_factory=lambda: _criterio("BOXTWIN_C2"))
+    c2_fecha: str | None = field(default_factory=lambda: os.environ.get("BOXTWIN_C2_FECHA") or None)
+    c3: str = field(default_factory=lambda: _criterio("BOXTWIN_C3"))
+    c3_fecha: str | None = field(default_factory=lambda: os.environ.get("BOXTWIN_C3_FECHA") or None)
+    # B8: se enciende solo despues de la medicion con criterio fijado en el spec.
+    sesiones_individuales: bool = field(
+        default_factory=lambda: os.environ.get("BOXTWIN_SESIONES_INDIVIDUALES", "") in ("1", "si")
+    )
+    # Factor de procesamiento medido en la campana de costo del Cap 5 (D2). Reemplaza el
+    # "<= 20 min" del diseno, que no salia de ninguna medicion. Se actualiza al medir C5.
+    factor_min: float = field(
+        default_factory=lambda: float(os.environ.get("BOXTWIN_FACTOR_MIN", "1.134"))
+    )
+    factor_mediana: float = field(
+        default_factory=lambda: float(os.environ.get("BOXTWIN_FACTOR_MEDIANA", "1.447"))
+    )
+    factor_max: float = field(
+        default_factory=lambda: float(os.environ.get("BOXTWIN_FACTOR_MAX", "2.624"))
+    )
+    # Decisiones de dominio de Lucas. Valores iniciales del spec, a confirmar antes de la
+    # prueba con usuarios (07 §3).
+    pausa_combinacion_s: float = field(
+        default_factory=lambda: float(os.environ.get("BOXTWIN_PAUSA_COMBINACION", "0.5"))
+    )
+    perfil_preliminar_sesiones: int = field(
+        default_factory=lambda: int(os.environ.get("BOXTWIN_PERFIL_PRELIMINAR", "5"))
     )
 
     @property

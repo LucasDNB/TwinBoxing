@@ -777,6 +777,43 @@ def perfil_de_boxeador(
     return construir_perfil(b, sesiones, cfg.dir_sesion)
 
 
+@app.get("/producto")
+def producto() -> dict:
+    """
+    Lo que la web necesita saber de esta instancia antes de dibujar nada (05 B5).
+
+    Sin autenticacion: no expone datos de nadie. La web nunca decide sola si un bloque
+    condicionado se muestra: las banderas salen de aca, y aca salen del estado de los
+    criterios pre-registrados que Lucas carga por entorno cuando mide.
+    """
+    return {
+        "registro": cfg.modo_registro,
+        "max_bytes": cfg.max_bytes,
+        "max_minutos": cfg.max_minutos,
+        "formatos": list(cfg.formatos),
+        "factor_procesamiento": {
+            "min": cfg.factor_min,
+            "mediana": cfg.factor_mediana,
+            "max": cfg.factor_max,
+            "medido_sobre": "campaña de costo del Cap 5, estación de desarrollo",
+        },
+        "criterios": {
+            "C2": {"estado": cfg.c2, "fecha": cfg.c2_fecha},
+            "C3": {"estado": cfg.c3, "fecha": cfg.c3_fecha},
+        },
+        "banderas": {
+            "comparacion_rounds": cfg.c2 == "aprobado",
+            "guardia": cfg.c3 == "aprobado",
+            "sesiones_individuales": cfg.sesiones_individuales,
+            "postura_2d": False,
+        },
+        "dominio": {
+            "pausa_combinacion_s": cfg.pausa_combinacion_s,
+            "perfil_preliminar_sesiones": cfg.perfil_preliminar_sesiones,
+        },
+    }
+
+
 @app.get("/salud")
 def salud() -> dict:
     return {
@@ -803,7 +840,34 @@ def salud() -> dict:
 # Va ULTIMO en el archivo y no es cosmetico: Starlette prueba las rutas en orden de
 # registro y este mount matchea todo, asi que cualquier ruta declarada despues quedaria
 # tapada por el index.html.
+#
+# Las cabeceras (05 B0): CSP para todo lo estatico, cache larga e inmutable para lo que Next
+# nombra con hash (/_next/static/) y no-cache para los .html, que son los que cambian de un
+# despliegue a otro sin cambiar de nombre. 'unsafe-inline' en estilos porque Motion escribe
+# estilos en linea; las fuentes las sirve el build, asi que font-src queda en 'self'.
+CSP_WEB = (
+    "default-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; "
+    "style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'unsafe-inline'; "
+    "connect-src 'self'; frame-ancestors 'none'; base-uri 'self'"
+)
+
+
+def _cabeceras_web(ruta: str, respuesta) -> None:
+    respuesta.headers["Content-Security-Policy"] = CSP_WEB
+    respuesta.headers["X-Content-Type-Options"] = "nosniff"
+    if ruta.startswith("_next/static/"):
+        respuesta.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    elif respuesta.headers.get("content-type", "").startswith("text/html"):
+        respuesta.headers["Cache-Control"] = "no-cache"
+
+
 if cfg.web and (cfg.web / "index.html").is_file():
     from fastapi.staticfiles import StaticFiles
 
-    app.mount("/", StaticFiles(directory=str(cfg.web), html=True), name="web")
+    class _Web(StaticFiles):
+        async def get_response(self, path, scope):
+            r = await super().get_response(path, scope)
+            _cabeceras_web(path, r)
+            return r
+
+    app.mount("/", _Web(directory=str(cfg.web), html=True), name="web")
