@@ -983,6 +983,7 @@ def asignar_boxeadores(
 @app.get("/boxeadores/{boxeador_id}/perfil")
 def perfil_de_boxeador(
     boxeador_id: str,
+    contexto: str = "todas",
     usuario: Usuario = Depends(usuario_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
@@ -1002,7 +1003,11 @@ def perfil_de_boxeador(
             sesiones.append((s, "A"))
         if s.boxeador_b_id == b.id:
             sesiones.append((s, "B"))
-    return construir_perfil(b, sesiones, cfg.dir_sesion)
+    if contexto != "todas" and contexto not in CONTEXTOS:
+        raise HTTPException(422, f"contexto tiene que ser todas o uno de {', '.join(CONTEXTOS)}")
+    banderas = {"comparacion_rounds": cfg.c2 == "aprobado", "guardia": cfg.c3 == "aprobado"}
+    return construir_perfil(b, sesiones, cfg.dir_sesion, contexto=contexto, banderas=banderas,
+                            pausa=cfg.pausa_combinacion_s)
 
 
 @app.get("/producto")
