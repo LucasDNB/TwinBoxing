@@ -191,7 +191,7 @@ function Indicadores({ panel }: { panel: Panel }) {
         {panel.peleadores_preliminares > 0 && `${panel.peleadores_preliminares} con perfil preliminar`}
       </Indicador>
       <Indicador titulo="Sesiones del mes" valor={m.total}>
-        {[m.listo && `${m.listo} listas`, m.en_curso && `${m.en_curso} en curso`, m.espera_siembra && `${m.espera_siembra} esperan`, m.fallo && `${m.fallo} fallaron`].filter(Boolean).join(" · ")}
+        {[m.listo && `${m.listo} ${m.listo === 1 ? "lista" : "listas"}`, m.en_curso && `${m.en_curso} en curso`, m.espera_siembra && `${m.espera_siembra} ${m.espera_siembra === 1 ? "espera" : "esperan"}`, m.fallo && `${m.fallo} ${m.fallo === 1 ? "falló" : "fallaron"}`].filter(Boolean).join(" · ")}
       </Indicador>
       <Indicador titulo="Rounds analizados" valor={panel.rounds_mes.total}>
         {porContexto.map(([k, v]) => `${v} ${NOMBRE_CONTEXTO[k]?.toLowerCase() ?? k}`).join(" · ")}

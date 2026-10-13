@@ -28,3 +28,22 @@ Una tarea por vez, en el orden de `specs/07-plan.md`. Cada tarea lee solo los ap
 cita, y se cierra con sus pruebas en verde. Las tareas B siguen el Prompt 11: el plan
 (endpoint, payload, tabla, prueba) ya está escrito en `specs/05-api-y-datos.md`; el código
 se escribe contra ese plan y la prueba lo verifica.
+
+## Cómo correrlo
+
+```bash
+cd prototipo/boxtwin-web-entrenador
+npm install
+npm run dev          # http://localhost:3000, reescribe la API a localhost:8000
+npm test             # unitarias e integración (vitest + msw)
+npm run build        # genera out/; la API lo sirve con BOXTWIN_WEB=<ruta>/out
+E2E_SIN_WEBKIT=1 npm run e2e   # punta a punta contra la API real, sin GPU
+```
+
+Las pruebas de la API y del anotador: `python -m pytest` desde `boxtwin-api/`, y
+`PYTHONPATH=src python -m pytest tests/` desde `boxtwin-annotator/`.
+
+## Estado
+
+El detalle por tarea, con su evidencia, está en `TAREAS.md`. Lo que queda abierto y necesita
+a Lucas está al final de ese archivo y en el resumen de la sesión del 13-10.
