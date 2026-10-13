@@ -27,7 +27,7 @@ import { nombresDe } from "@/components/pantallas/sesion/PantallaSesion";
 import { useProcesado, useProducto, useRender, useTicket } from "@/lib/api/consultas";
 import type { Golpe, Sesion } from "@/lib/api/esquemas";
 import { visible } from "@/lib/banderas";
-import { guardiaPorGolpe, lados as ladosDe, tipoEfectivo, type FightCard, type Lado } from "@/lib/fightcard";
+import { golpesEnCombinacion, guardiaPorGolpe, lados as ladosDe, tipoEfectivo, type FightCard, type Lado } from "@/lib/fightcard";
 import { decimal, mmss, nombreDeTipo } from "@/lib/formato";
 import { useEsEscritorio } from "@/lib/medios";
 import { textos } from "@/lib/textos";
@@ -232,6 +232,7 @@ function Consola({
   const p = fc.peleadores[lado];
   const golpes = useMemo(() => [...(p?.golpes ?? [])].sort((a, b) => a.t_inicio - b.t_inicio), [p]);
   const guardia = useMemo(() => (p ? guardiaPorGolpe(p) : new Map()), [p]);
+  const enCombinacion = useMemo(() => golpesEnCombinacion(fc, lado), [fc, lado]);
   const lista = useRef<HTMLOListElement>(null);
   const actual = useMemo(() => {
     let k = -1;
@@ -283,6 +284,9 @@ function Consola({
                       <span className="text-texto-3">sin tipo</span>
                     )}
                     <span className="block text-xs text-texto-3">
+                      {enCombinacion.has(g.id) && (
+                        <span className="mr-2 inline-flex items-center rounded-sm border border-borde-fuerte px-1 font-mono text-[10px] uppercase tracking-[0.08em] text-texto-2">izq-der-izq</span>
+                      )}
                       brazo {g.brazo}
                       {conGuardia && ev?.mano_opuesta_caida != null && ` · guardia ${ev.mano_opuesta_caida ? "caída" : "arriba"}`}
                     </span>

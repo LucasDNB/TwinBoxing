@@ -4,7 +4,8 @@
  * 06 · Perfil tactico (04 §06). Ruta /peleador/?id=&contexto=.
  *
  * Se llama "perfil" y no "gemelo digital": no hay un modelo que simule al boxeador (04 §06).
- * Cada bloque lleva su estado (01 §4): la distribucion y las combinaciones son estimacion,
+ * Cada bloque lleva su estado (01 §4): la distribucion es estimacion, las combinaciones
+ * izq-der-izq son medidas (por brazo; sus tipos van aparte como estimacion, W13),
  * la evolucion y la tabla por contexto son medidas, lo de rounds espera a C2 y lo de guardia
  * a C3, y el mapa de exposicion, el avatar y la distancia no estan en esta version.
  *
@@ -23,7 +24,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/animate-ui/components
 import { usePerfil, useProducto } from "@/lib/api/consultas";
 import { CONTEXTOS, TIPOS_GOLPE, type Perfil, type Producto } from "@/lib/api/esquemas";
 import { estadoDe } from "@/lib/banderas";
-import { nombreDeCombinacion } from "@/lib/fightcard";
 import { decimal, nombreDeTipo, porcentajeAR } from "@/lib/formato";
 import { NOMBRE_CONTEXTO, textos } from "@/lib/textos";
 
@@ -214,26 +214,51 @@ function VolumenPorRound({ p, producto }: { p: Perfil; producto?: Producto }) {
 }
 
 function Combinaciones({ p, producto }: { p: Perfil; producto?: Producto }) {
-  const combos = p.combinaciones ?? [];
-  const pausa = producto?.dominio.pausa_combinacion_s ?? 0.5;
+  const c = p.combinaciones;
+  const regla = producto?.dominio.combinacion;
   return (
     <EstadoBloque
       estado={estadoDe("06.combinaciones", producto)}
-      titulo="Combinaciones frecuentes"
+      titulo="Combinaciones izq-der-izq"
       className="lg:col-span-3"
-      nota={`Golpes del mismo peleador separados por no más de ${decimal(pausa, 1)} s. ${p.boxeador.guardia ? "Numeración de gimnasio: 1 jab, 2 recto de atrás, 3 y 4 hook, 5 y 6 uppercut." : "Sin guardia cargada no se sabe qué mano es la de adelante: se nombran por familia."}`}
+      nota={`Mano izquierda, derecha, izquierda, con menos de ${decimal(regla?.max_s ?? 0.5, 1)} s del inicio de un golpe al del siguiente. Cuenta por brazo, también en zurdos.`}
     >
-      {combos.length === 0 ? (
-        <p className="text-sm text-texto-3">Todavía no hay combinaciones con tipo estimado.</p>
+      {!c ? (
+        <p className="text-sm text-texto-3">Esta instancia no puede contar combinaciones.</p>
       ) : (
-        <ol className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-          {combos.map((c) => (
-            <li key={JSON.stringify(c.secuencia)} className="flex items-center justify-between rounded-sm border border-dashed border-estimado-borde px-3 py-2">
-              <Estimado className="font-display text-xl font-semibold">{nombreDeCombinacion(c, p.nomenclatura ?? {})}</Estimado>
-              <span className="dato text-texto-2">{c.n} veces</span>
-            </li>
-          ))}
-        </ol>
+        <div className="flex flex-col gap-4">
+          {c.total === 0 ? (
+            <p className="text-sm text-texto-2">El sistema no encontró combinaciones completas en estas sesiones.</p>
+          ) : (
+            <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <div><dt className="rotulo">Total</dt><dd className="font-display text-3xl font-semibold">{c.total}</dd></div>
+              <div><dt className="rotulo">Por minuto visto</dt><dd className="font-display text-3xl font-semibold">{c.por_minuto == null ? "—" : decimal(c.por_minuto, 2)}</dd></div>
+              {Object.entries(c.por_contexto).map(([ctx, n]) => (
+                <div key={ctx}><dt className="rotulo">{NOMBRE_CONTEXTO[ctx] ?? ctx}</dt><dd className="font-display text-3xl font-semibold">{n}</dd></div>
+              ))}
+            </dl>
+          )}
+          {/* El recall sale de la Fight-Card mas reciente; sin ninguna leida no hay numero que calificar. */}
+          {c.recall_medido != null && (
+            <p className="rounded-md border-l-2 border-estimado-borde bg-estimado-fondo px-3 py-2 text-sm text-texto-2">
+              {textos.margenCombinaciones(c.recall_medido)}
+            </p>
+          )}
+          {c.tipos_frecuentes.length > 0 && (
+            <div className="rounded-sm border border-dashed border-estimado-borde p-3">
+              <Rotulo className="text-estimado">estimación</Rotulo>
+              <p className="mt-1 text-sm text-texto-2">Tipos más frecuentes dentro de esas combinaciones:</p>
+              <ol className="mt-2 grid gap-2 md:grid-cols-3">
+                {c.tipos_frecuentes.map((t) => (
+                  <li key={t.tipos.join("-")} className="flex items-center justify-between">
+                    <Estimado>{t.tipos.map((x) => nombreDeTipo(x, p.nomenclatura)).join(" · ")}</Estimado>
+                    <span className="dato text-texto-2">{t.n}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </div>
       )}
     </EstadoBloque>
   );

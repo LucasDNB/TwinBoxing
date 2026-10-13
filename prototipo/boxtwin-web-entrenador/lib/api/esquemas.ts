@@ -5,9 +5,11 @@
  *   Para que un componente nunca reciba un documento que no entiende. Si la Fight-Card no
  *   valida, la pantalla muestra el error con la version recibida y no dibuja a medias.
  *
- *   La Fight-Card acepta 0.1 y 0.2 (05 §4). Los campos que agrega la 0.2 son opcionales en
- *   el esquema y `normalizarFightCard` (lib/fightcard.ts) los completa con su valor neutro.
- *   Una version que no es ninguna de las dos se rechaza: no se adivina un contrato nuevo.
+ *   La Fight-Card acepta 0.1, 0.2 y 0.3 (05 §4, ampliacion-13-10). Los campos que agregan
+ *   la 0.2 y la 0.3 son opcionales en el esquema y `normalizarFightCard` (lib/fightcard.ts)
+ *   completa los de 0.2 con su valor neutro; los de 0.3 se calculan solo en el worker, asi que
+ *   en una version vieja quedan ausentes y la pantalla lo dice. Una version que no es ninguna
+ *   de las tres se rechaza: no se adivina un contrato nuevo.
  */
 import { z } from "zod";
 
@@ -45,7 +47,11 @@ export const Producto = z.object({
     sesiones_individuales: z.boolean(),
     postura_2d: z.boolean(),
   }),
-  dominio: z.object({ pausa_combinacion_s: num, perfil_preliminar_sesiones: num }),
+  dominio: z.object({
+    // B10: la regla vive en el anotador; null si la instancia no lo tiene instalado.
+    combinacion: z.object({ patron: z.string(), separacion: z.string(), max_s: num }).nullable(),
+    perfil_preliminar_sesiones: num,
+  }),
 });
 export type Producto = z.infer<typeof Producto>;
 
@@ -180,17 +186,35 @@ export const EventoGuardia = z.object({
   motivo: strN.optional(),
 });
 
+// 0.3 (B10): las ternas izq-der-izq. El patron es por brazo (medido); los tipos, estimacion.
+export const Combinaciones = z.object({
+  patron: z.literal("izq-der-izq"),
+  separacion: z.string(),
+  max_s: num,
+  lista: z.array(z.object({
+    golpes: z.array(z.string()).length(3),
+    t_inicio: num,
+    t_fin: num,
+    tipos: z.array(strN).length(3),
+    round: numN,
+  })),
+  total: num,
+  por_round: z.array(z.object({ round: num, total: num })),
+});
+export type Combinaciones = z.infer<typeof Combinaciones>;
+
 export const Peleador = z.object({
   golpes: z.array(Golpe),
   por_round: z.array(Round),
   total: Conteo,
   guardia: z.array(EventoGuardia).optional(),
   descartados: num.optional(),
+  combinaciones: Combinaciones.optional(),
 });
 export type Peleador = z.infer<typeof Peleador>;
 
 export const FightCard = z.object({
-  version: z.enum(["0.1", "0.2"]),
+  version: z.enum(["0.1", "0.2", "0.3"]),
   video: z.object({
     nombre: strN.optional(),
     duracion_s: num,
@@ -217,6 +241,8 @@ export const FightCard = z.object({
     recall_medido: num,
     medido_sobre: z.string().optional(),
     umbral: numN.optional(),
+    // C11 (ampliacion 01 §5): el recall de ternas, cuando se mida.
+    combinaciones: z.object({ recall_medido: numN.optional() }).optional(),
   }),
   clasificador: z.object({
     checkpoint: z.string().nullable(),
@@ -238,6 +264,12 @@ export const FightCard = z.object({
       }),
     })
     .optional(),
+}).superRefine((fc, ctx) => {
+  // Igual que el schema compartido: una 0.3 trae las combinaciones de cada peleador.
+  if (fc.version !== "0.3") return;
+  for (const [lado, p] of Object.entries(fc.peleadores)) {
+    if (p && !p.combinaciones) ctx.addIssue({ code: "custom", path: ["peleadores", lado, "combinaciones"], message: "una 0.3 trae combinaciones" });
+  }
 });
 export type FightCardCruda = z.infer<typeof FightCard>;
 
@@ -258,8 +290,6 @@ export const EntradaPerfil = z.object({
   exactitud_familia: numN.optional(),
   contexto: z.string().nullable().optional(),
 });
-
-export const PasoCombinacion = z.object({ familia: z.string(), lado: z.enum(["adelante", "atras"]).nullable() });
 
 export const Perfil = z.object({
   boxeador: z.object({
@@ -290,9 +320,16 @@ export const Perfil = z.object({
     caida_ultimo_round: numN,
   })).optional(),
   rounds_promedio: z.array(z.object({ round: num, golpes_por_minuto: num })).nullable().optional(),
-  combinaciones: z.array(z.object({
-    secuencia: z.array(PasoCombinacion), n: num, estimado: z.boolean(),
-  })).optional(),
+  // B10: las izq-der-izq. null si la instancia no tiene el anotador (no se inventa la regla).
+  combinaciones: z.object({
+    patron: z.string(),
+    total: num,
+    por_minuto: numN,
+    por_contexto: z.record(z.string(), num),
+    tipos_frecuentes: z.array(z.object({ tipos: z.array(z.string()), n: num, estimado: z.boolean() })),
+    sesiones_con_combinaciones: num,
+    recall_medido: numN.optional(),
+  }).nullable().optional(),
 });
 export type Perfil = z.infer<typeof Perfil>;
 

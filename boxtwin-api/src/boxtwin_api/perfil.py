@@ -139,7 +139,8 @@ def regla_de_combinacion() -> dict | None:
     return dict(REGLA)
 
 
-def combinaciones(entradas: list[dict], golpes_de: dict[str, list[dict]]) -> dict | None:
+def combinaciones(entradas: list[dict], golpes_de: dict[str, list[dict]],
+                  recall: float | None = None) -> dict | None:
     """
     Las combinaciones izq-der-izq del peleador en las sesiones filtradas (ampliacion 01 §3).
 
@@ -154,6 +155,9 @@ def combinaciones(entradas: list[dict], golpes_de: dict[str, list[dict]]) -> dic
 
     El patron es por brazo, que es medido. Los tipos de cada terna van aparte, como
     estimacion, y solo las ternas con los tres tipos estimados entran en ese conteo.
+
+    `recall` es el que califica el numero en pantalla (01 §4): el de ternas si C11 se midio,
+    si no el de golpes, de la Fight-Card mas reciente.
     """
     try:
         from boxtwin.mvp.combinaciones import REGLA, ternas
@@ -188,6 +192,7 @@ def combinaciones(entradas: list[dict], golpes_de: dict[str, list[dict]]) -> dic
         "por_contexto": por_contexto,
         "tipos_frecuentes": [{"tipos": list(k), "n": n, "estimado": True} for k, n in orden],
         "sesiones_con_combinaciones": con,
+        "recall_medido": recall,
     }
 
 
@@ -270,6 +275,7 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: s
     todas = []
     golpes_de: dict[str, list[dict]] = {}
     nomenclatura: dict[str, str] = {}
+    recall: float | None = None
     for ses, lado in sorted(sesiones, key=lambda x: x[0].creada):
         fc = _leer_fightcard(Path(dir_de_sesion(ses.id)))
         if not fc:
@@ -281,6 +287,8 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: s
         # La de la Fight-Card mas reciente: los nombres de golpe en pantalla los decide el
         # contrato (RF11, D7), no la web.
         nomenclatura = fc.get("nomenclatura") or nomenclatura
+        det = fc.get("detector") or {}
+        recall = (det.get("combinaciones") or {}).get("recall_medido") or det.get("recall_medido")
         todas.append({
             "sesion_id": ses.id,
             "nombre": ses.nombre,
@@ -341,7 +349,7 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: s
         # Sin C2 aprobado, nulo aunque haya datos: el recall puede variar entre rounds y una
         # caida del ultimo round podria ser del detector y no del boxeador (D3).
         "rounds_promedio": _rounds_promedio(entradas) if banderas.get("comparacion_rounds") else None,
-        "combinaciones": combinaciones(entradas, golpes_de),
+        "combinaciones": combinaciones(entradas, golpes_de, recall),
     }
 
     return {

@@ -28,7 +28,10 @@ import { leerToken } from "@/lib/sesion-usuario";
 import { useProducto } from "@/lib/api/consultas";
 import { TIPOS_GOLPE, type Sesion } from "@/lib/api/esquemas";
 import { estadoDe } from "@/lib/banderas";
-import { lados as ladosDe, lecturaRounds, resumen, type FightCard, type Lado, type Resumen } from "@/lib/fightcard";
+import {
+  combinacionesDe, lados as ladosDe, lecturaRounds, recallDeCombinaciones, resumen,
+  type FightCard, type Lado, type Resumen,
+} from "@/lib/fightcard";
 import { decimal, entero, nombreDeTipo, porcentajeAR } from "@/lib/formato";
 import { textos } from "@/lib/textos";
 import { cn } from "@/lib/utils";
@@ -95,6 +98,9 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
           <FilaAB titulo="Golpes por minuto" lados={lados} valores={(l) => res[l]?.porMinuto ?? null} decimales={1} />
         </div>
       </EstadoBloque>
+
+      {/* 4b. Combinaciones izq-der-izq (W13): medido, por brazo. Por round solo con C2, como el resto. */}
+      <Combinaciones fc={fc} lados={lados} round={round} estado={estadoDe("05.combinaciones", p)} />
 
       {/* 5. Filas estimadas */}
       <EstadoBloque
@@ -212,6 +218,30 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
       {/* 10. Exportar */}
       <Exportar s={s} />
     </div>
+  );
+}
+
+function Combinaciones({ fc, lados, round, estado }: { fc: FightCard; lados: Lado[]; round: number | null; estado: ReturnType<typeof estadoDe> }) {
+  const valores = Object.fromEntries(lados.map((l) => [l, combinacionesDe(fc, l, round)])) as Record<Lado, number | null>;
+  const sinDato = lados.every((l) => valores[l] == null);
+  const ninguna = !sinDato && lados.every((l) => valores[l] === 0);
+  return (
+    <EstadoBloque estado={estado} titulo="Combinaciones izq-der-izq">
+      {sinDato ? (
+        <p className="text-sm text-texto-3">{textos.combinacionesVersionVieja}</p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {ninguna ? (
+            <p className="text-sm text-texto-2">{textos.combinacionesVacio}</p>
+          ) : (
+            <FilaAB titulo="Mano izquierda, derecha, izquierda, con menos de medio segundo entre golpes" lados={lados} valores={(l) => valores[l]} />
+          )}
+          <p className="rounded-md border-l-2 border-estimado-borde bg-estimado-fondo px-3 py-2 text-sm text-texto-2">
+            {textos.margenCombinaciones(recallDeCombinaciones(fc))}
+          </p>
+        </div>
+      )}
+    </EstadoBloque>
   );
 }
 

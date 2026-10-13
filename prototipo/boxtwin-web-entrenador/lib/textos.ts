@@ -23,6 +23,13 @@ export const textos = {
   margenDetector(precision: number, recall: number) {
     return `Acierta ${deCada10(precision)} de cada 10 que marca y se le escapa ${seEscapa(recall)}. El volumen real es mayor.`;
   },
+  /* B10 (ampliacion 01 §4). {r} es el recall de golpes, o el de ternas cuando C11 se mida. */
+  margenCombinaciones(recall: number) {
+    return `Para contar una combinación el sistema tiene que encontrar los tres golpes. Encuentra cerca de ${deCada10(recall)} de cada 10 golpes, así que se le escapan la mayoría de las combinaciones: el número sirve para comparar sesiones, no como total real.`;
+  },
+  combinacionesVacio: "El sistema no encontró combinaciones completas en esta sesión.",
+  combinacionesVersionVieja:
+    "Esta sesión se procesó antes de contar combinaciones; al reprocesarla aparecen.",
   margenPanel(recall: number) {
     return `El sistema encuentra cerca de ${deCada10(recall)} de cada 10 golpes: el total real es mayor.`;
   },

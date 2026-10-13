@@ -64,6 +64,17 @@ def test_el_perfil_suma_ternas_por_minuto_con_identidad_y_por_contexto(cliente, 
     assert c["por_contexto"] == {"sparring": 2, "bolsa": 1}
     assert c["sesiones_con_combinaciones"] == 2
     assert c["tipos_frecuentes"][0] == {"tipos": ["jab", "cross", "hook"], "n": 3, "estimado": True}
+    assert c["recall_medido"] is None, "estas Fight-Cards no traen recall"
+
+
+def test_el_recall_del_margen_sale_de_la_fightcard_mas_reciente(cliente, entorno, ana):
+    fc = _fc(_terna(1))
+    fc["detector"]["recall_medido"] = 0.484
+    _sesion(cliente, entorno, fc, ana)
+    assert cliente.get(f"/boxeadores/{ana}/perfil").json()["combinaciones"]["recall_medido"] == 0.484
+    fc["detector"]["combinaciones"] = {"recall_medido": 0.2}
+    _sesion(cliente, entorno, fc, ana)
+    assert cliente.get(f"/boxeadores/{ana}/perfil").json()["combinaciones"]["recall_medido"] == 0.2
 
 
 def test_DA_3_un_zurdo_cuenta_izq_der_izq_literal(cliente, entorno, ana):

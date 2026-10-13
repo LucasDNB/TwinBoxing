@@ -5,6 +5,8 @@
  *
  * Dos carriles (A arriba, B abajo), un tick por golpe, divisiones por round y el cursor del
  * tiempo actual. El cursor se mueve con el tiempo del video y no con una animacion (03 §7).
+ * Cada combinacion izq-der-izq (W13) se marca con un corchete sobre sus tres ticks; tocarlo
+ * lleva al primer golpe, o sea a t_inicio - 0,5 s como cualquier golpe.
  *
  * Es un grupo de botones navegable con flechas (izquierda y derecha: golpe anterior y
  * siguiente del mismo peleador; arriba y abajo: cambiar de peleador), con tabindex movil:
@@ -107,6 +109,25 @@ export function LineaTiempo({
         <div key={l} className="relative mt-3 h-9 first:mt-4">
           <span className={cn("rotulo absolute -left-0.5 -top-3.5 text-[10px]", l === "A" ? "text-a-trazo" : "text-b-trazo")}>{l}</span>
           <div aria-hidden="true" className="absolute inset-x-0 top-1/2 h-px bg-borde" />
+          {(fc.peleadores[l]?.combinaciones?.lista ?? []).filter((c) => dentro(c.t_inicio)).map((c) => {
+            const primero = golpes[l].find((g) => g.id === c.golpes[0]);
+            const ultimo = golpes[l].find((g) => g.id === c.golpes[2]);
+            if (!primero || !ultimo) return null;
+            return (
+              <button
+                key={c.golpes[0]}
+                type="button"
+                data-combinacion={c.golpes[0]}
+                // Fuera del orden de tabulacion: la linea tiene una sola parada (CA-04.4) y el
+                // teclado llega a la misma terna por la lista, donde lleva la insignia.
+                tabIndex={-1}
+                aria-label={`Combinación izquierda, derecha, izquierda de ${nombres[l]}, ${tiempoHablado(c.t_inicio)}`}
+                onClick={() => onElegir(l, primero)}
+                className="absolute -top-2 z-10 h-2.5 min-w-3 -translate-x-1.5 border-x-2 border-t-2 border-texto-2 hover:border-texto focus-visible:outline-2"
+                style={{ left: pos(primero.t_inicio), width: `calc(${pos(Math.min(ultimo.t_inicio, ventana.fin))} - ${pos(primero.t_inicio)} + 12px)` }}
+              />
+            );
+          })}
           {golpes[l].filter((g) => dentro(g.t_inicio)).map((g) => {
             const sel = seleccionado?.id === g.id;
             const foco = enFoco?.id === g.id;
