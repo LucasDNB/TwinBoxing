@@ -57,6 +57,8 @@ jobs:
           cd boxtwin-api && python -m pytest -q
 
       # 5. Playwright y axe contra la API de prueba, con el anotador falso
+      # ffmpeg genera el video de prueba de 8 s que sube el recorrido (tests/e2e/levantar.sh).
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: npx playwright install --with-deps chromium webkit
       - name: punta a punta
         env:
