@@ -102,3 +102,21 @@ Consecuencias (spec `08` §1): el bloque "A la cabeza y al cuerpo" queda "No dis
 este número, la bandera `objetivo` no se enciende y la tanda 2 (W14, C9, B12, W15, B13, W16)
 no se construye. El nivel 2 (punta a punta) no se corrió: necesita procesar las cuatro fuentes
 con el sistema completo en la GPU.
+
+## 6. Nivel 2 (punta a punta), fijado antes de correr
+
+Sin umbral, como dice el spec. Lo que se fija antes de ver números:
+
+1. Las cuatro fuentes de medición se procesan enteras por el producto actual (`procesar` y
+   `completar`, que ya llama a `enriquecer`), en `~/boxtwin/mediciones/c8-nivel2/`, fuera de
+   la base de producción.
+2. Siembra: la pareja que propone el sistema (`pareja_sugerida`). Qué semilla es A y cuál B
+   no importa: los roles se alinean con la anotación tomando la orientación que más empareja,
+   como `medicion.py` el 22-09.
+3. Detector: el de producción, `detector_7fuentes.ens.pt`, que se entrenó con estas cuatro
+   fuentes. Eso hace que los golpes encontrados sean más y con fronteras mejores que en
+   material nuevo; el número de nivel 2 es optimista por ese lado y se dice así.
+4. Emparejamiento: `agreement.emparejar` a IoU 0,3 por carril. La altura se mide sobre los
+   golpes anotados que quedaron emparejados, con la métrica estricta y la de con dato.
+5. Se reporta además el recall del detector sobre golpes anotados a la cabeza y al cuerpo.
+   Es la cuenta de C9, pero C9 no aplica (C8 no pasó): queda como dato.

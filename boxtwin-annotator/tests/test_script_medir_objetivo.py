@@ -54,3 +54,22 @@ def test_las_particiones_son_las_del_spec():
     assert m.CALIBRACION == ("01-sparring", "02-sparring")
     assert set(m.MEDICION) == {"03-sparring", "04-sparring", "sparring-3", "pacquiao_margarito"}
     assert not set(m.CALIBRACION) & set(m.MEDICION)
+
+
+def test_nivel2_empareja_en_la_mejor_orientacion_y_mide_la_altura_de_lo_encontrado():
+    annot = {"events": [
+        {"fighter": "fighter_A", "side": "left", "start_frame": 10, "end_frame": 16, "target": "head"},
+        {"fighter": "fighter_A", "side": "left", "start_frame": 40, "end_frame": 46, "target": "body"},
+        {"fighter": "fighter_B", "side": "right", "start_frame": 70, "end_frame": 76, "target": "head"},
+    ]}
+    # La sesion tiene los roles al reves: el A anotado es su B.
+    fc = {"peleadores": {
+        "A": {"golpes": [{"brazo": "der", "cuadro_inicio": 70, "cuadro_fin": 76, "objetivo": "cuerpo"}]},
+        "B": {"golpes": [{"brazo": "izq", "cuadro_inicio": 11, "cuadro_fin": 16, "objetivo": "cabeza"},
+                         {"brazo": "izq", "cuadro_inicio": 100, "cuadro_fin": 106, "objetivo": "cuerpo"}]},
+    }}
+    pares, extra = m.pares_nivel2(fc, annot)
+    assert extra["roles_invertidos"] is True
+    assert sorted(pares) == [("cabeza", "cabeza"), ("cabeza", "cuerpo")]
+    assert extra["recall_detector_por_altura"]["cuerpo"] == {"anotados": 1, "encontrados": 0, "recall": 0.0}
+    assert extra["recall_detector_por_altura"]["cabeza"]["recall"] == 1.0

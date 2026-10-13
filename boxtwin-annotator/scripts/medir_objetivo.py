@@ -25,6 +25,11 @@ POR QUE EXISTE
 QUE HACE
   calibrar  la tabla de la grilla de tau sobre las fuentes de calibracion y el tau elegido
   medir     con un tau dado, las metricas sobre las fuentes de medicion, por fuente y juntas
+  nivel2    punta a punta: Fight-Cards ya enriquecidas por el producto contra la anotacion.
+            Empareja con el emparejador del proyecto (IoU 0,3), en la orientacion de A y B
+            que mas empareja (como medicion.py), y mide la altura sobre los emparejados. Sin
+            umbral. Suma el recall del detector sobre golpes a la cabeza y al cuerpo, como
+            dato descriptivo (seria C9, que no aplica porque C8 no paso).
   Escribe JSON en --salida. Lee las anotaciones y las caches, no escribe nada en ellas.
 
 USO
@@ -157,6 +162,48 @@ def pares_de_fuente(nombre: str, taus) -> dict[float, list[tuple[str, str | None
     return salida
 
 
+def pares_nivel2(fc: dict, annot: dict) -> tuple[list[tuple[str, str | None]], dict]:
+    """
+    (verdad, prediccion) de los golpes anotados que el sistema encontro, y el recall del
+    detector por altura anotada. La orientacion de A y B es la que mas empareja.
+    """
+    from boxtwin.core.agreement import emparejar
+    from boxtwin.mvp.medicion import LADO, medir_sesion
+
+    invertido = medir_sesion(fc, annot).invertido
+    anotados: dict[str, list[dict]] = {}
+    for e in annot.get("events", []):
+        f = e["fighter"][-1]
+        if invertido:
+            f = "B" if f == "A" else "A"
+        anotados.setdefault(f"{f}-{LADO.get(e['side'], e['side'])}", []).append(e)
+    marcados: dict[str, list[dict]] = {}
+    for p, datos in fc["peleadores"].items():
+        for g in datos["golpes"]:
+            marcados.setdefault(f"{p}-{g['brazo']}", []).append(g)
+    from boxtwin_detector.decodificacion import Segmento
+
+    pares: list[tuple[str, str | None]] = []
+    por_altura = {"cabeza": [0, 0], "cuerpo": [0, 0]}          # [anotados, encontrados]
+    for carril in sorted(set(anotados) | set(marcados)):
+        a = sorted(anotados.get(carril, []), key=lambda e: e["start_frame"])
+        m = sorted(marcados.get(carril, []), key=lambda g: g["cuadro_inicio"])
+        parejas, _, _ = emparejar([Segmento(e["start_frame"], e["end_frame"], 0) for e in a],
+                                  [Segmento(g["cuadro_inicio"], g["cuadro_fin"], 0) for g in m])
+        casados = {i: j for i, j, _ in parejas}
+        for i, e in enumerate(a):
+            verdad = {"head": "cabeza", "body": "cuerpo"}.get(e.get("target"))
+            if verdad is None:
+                continue
+            por_altura[verdad][0] += 1
+            if i in casados:
+                por_altura[verdad][1] += 1
+                pares.append((verdad, m[casados[i]].get("objetivo")))
+    recall = {k: {"anotados": n, "encontrados": f, "recall": _r(f / n) if n else None}
+              for k, (n, f) in por_altura.items()}
+    return pares, {"roles_invertidos": invertido, "recall_detector_por_altura": recall}
+
+
 def main() -> int:
     from boxtwin.mvp.objetivo import GRILLA_TAU, REGLA
 
@@ -167,9 +214,26 @@ def main() -> int:
     me = sub.add_parser("medir")
     me.add_argument("--tau", type=float, required=True)
     me.add_argument("--salida", type=Path, required=True)
+    n2 = sub.add_parser("nivel2")
+    n2.add_argument("--sesion", action="append", required=True, metavar="FUENTE=DIRECTORIO",
+                    help="fuente de medicion y el directorio de su sesion procesada y enriquecida")
+    n2.add_argument("--salida", type=Path, required=True)
     a = ap.parse_args()
 
-    if a.cmd == "calibrar":
+    if a.cmd == "nivel2":
+        juntas: list = []
+        por_fuente = {}
+        for item in a.sesion:
+            fuente, directorio = item.split("=", 1)
+            fc = json.loads((Path(directorio) / "fightcard.json").read_text())
+            annot = json.loads((RAIZ / FUENTES[fuente]).read_text())
+            ps, extra = pares_nivel2(fc, annot)
+            por_fuente[fuente] = {**metricas(ps), **extra,
+                                  "tau": ((fc.get("metodos") or {}).get("objetivo") or {}).get("tau"),
+                                  "detector": (fc.get("detector") or {}).get("checkpoint")}
+            juntas.extend(ps)
+        out = {"regla": REGLA, "nivel": 2, "total": metricas(juntas), "por_fuente": por_fuente}
+    elif a.cmd == "calibrar":
         pares = {t: [] for t in GRILLA_TAU}
         for f in CALIBRACION:
             for t, ps in pares_de_fuente(f, GRILLA_TAU).items():
