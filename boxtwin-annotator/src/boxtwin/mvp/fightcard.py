@@ -46,7 +46,9 @@ __all__ = [
 
 # 0.2 (web entrenador, B3 y B4): suma `descartado` por golpe, `descartados` por peleador y
 # los campos de tramos en `identidad`. Es compatible hacia atras: nada de 0.1 se movio.
-VERSION_FIGHTCARD = "0.2"
+# 0.3 (ampliacion del 13-10): suma `combinaciones` izq-der-izq por peleador (B10). Tambien
+# compatible: nada de 0.2 se movio.
+VERSION_FIGHTCARD = "0.3"
 
 # "No fue un golpe" (B4). No es un tipo: es la etiqueta de falso positivo del detector, que
 # hasta ahora no recibia ninguna senal del producto.
@@ -192,6 +194,22 @@ def construir(
         "avisos": list(getattr(sesion, "avisos", []) or []),
     }
     fc["lectura"] = _lectura(fc)
+    _combinaciones(fc)
+    return fc
+
+
+def _combinaciones(fc: dict) -> dict:
+    """
+    Las ternas izq-der-izq de cada peleador, recalculadas sobre el estado actual del documento.
+
+    Se llama al construir y despues de cada cambio que las puede mover: un "no fue un golpe"
+    rompe una terna y una correccion de tipo cambia lo que se muestra al lado (01 §3).
+    """
+    from boxtwin.mvp.combinaciones import resumen
+
+    rondas = (fc.get("video") or {}).get("rounds") or []
+    for datos in fc["peleadores"].values():
+        datos["combinaciones"] = resumen(datos["golpes"], rondas)
     return fc
 
 
@@ -289,7 +307,7 @@ def aplicar_tipos(fc: dict, tipos: dict, checkpoint: str, exactitud: float | Non
             g["tipo"] = t.get("tipo")
             g["confianza_tipo"] = t.get("confianza")
             g["tipo_clasificador"] = t.get("crudo")
-    return fc
+    return _combinaciones(fc)
 
 
 def aplicar_correcciones(fc: dict, correcciones: list[dict]) -> dict:
@@ -329,7 +347,7 @@ def aplicar_correcciones(fc: dict, correcciones: list[dict]) -> dict:
                 g["descartado"] = False
                 g["tipo"] = c["tipo"]
         datos["descartados"] = sum(1 for g in datos["golpes"] if g.get("descartado"))
-    return fc
+    return _combinaciones(fc)
 
 
 def correccion(

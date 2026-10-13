@@ -175,9 +175,6 @@ class Config:
     )
     # Decisiones de dominio de Lucas. Valores iniciales del spec, a confirmar antes de la
     # prueba con usuarios (07 §3).
-    pausa_combinacion_s: float = field(
-        default_factory=lambda: float(os.environ.get("BOXTWIN_PAUSA_COMBINACION", "0.5"))
-    )
     perfil_preliminar_sesiones: int = field(
         default_factory=lambda: int(os.environ.get("BOXTWIN_PERFIL_PRELIMINAR", "5"))
     )

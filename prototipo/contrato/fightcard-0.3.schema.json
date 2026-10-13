@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://boxtwin/contrato/fightcard-0.2.schema.json",
-  "title": "Fight-Card de BoxTwin, 0.1 y 0.2",
-  "description": "Contrato entre el worker (boxtwin.mvp.fightcard.construir) y la web entrenador (lib/api/esquemas.ts). 0.2 es compatible hacia atras con 0.1 (prototipo/specs/05-api-y-datos.md §4). Golpes DETECTADOS: el documento no puede traer conectados, puntuacion ni veredicto (RF6, RF8).",
+  "$id": "https://boxtwin/contrato/fightcard-0.3.schema.json",
+  "title": "Fight-Card de BoxTwin, 0.1 a 0.3",
+  "description": "Contrato entre el worker (boxtwin.mvp.fightcard.construir) y la web entrenador (lib/api/esquemas.ts). 0.2 es compatible hacia atras con 0.1 (prototipo/specs/05-api-y-datos.md §4) y 0.3 con 0.2 (prototipo/specs/ampliacion-13-10). Cambios en CHANGELOG.md. Golpes DETECTADOS: el documento no puede traer conectados, puntuacion ni veredicto (RF6, RF8).",
   "type": "object",
   "required": ["version", "video", "identidad", "detector", "clasificador", "peleadores", "nomenclatura", "no_incluye"],
   "properties": {
-    "version": { "enum": ["0.1", "0.2"] },
+    "version": { "enum": ["0.1", "0.2", "0.3"] },
     "video": {
       "type": "object",
       "required": ["duracion_s", "fps", "rounds"],
@@ -80,7 +80,7 @@
   },
   "allOf": [
     {
-      "if": { "properties": { "version": { "const": "0.2" } } },
+      "if": { "properties": { "version": { "enum": ["0.2", "0.3"] } } },
       "then": {
         "properties": {
           "identidad": { "required": ["tramos_total", "tramos_asignados_auto", "tramos_asignados_manual", "separacion_color"] },
@@ -88,6 +88,19 @@
             "properties": {
               "A": { "$ref": "#/$defs/peleador_02" },
               "B": { "$ref": "#/$defs/peleador_02" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "version": { "const": "0.3" } } },
+      "then": {
+        "properties": {
+          "peleadores": {
+            "properties": {
+              "A": { "$ref": "#/$defs/peleador_03" },
+              "B": { "$ref": "#/$defs/peleador_03" }
             }
           }
         }
@@ -144,6 +157,45 @@
       "required": ["descartados"],
       "properties": {
         "golpes": { "type": "array", "items": { "type": "object", "required": ["descartado"] } }
+      }
+    },
+    "peleador_03": {
+      "type": "object",
+      "required": ["combinaciones"],
+      "properties": {
+        "combinaciones": { "$ref": "#/$defs/combinaciones" }
+      }
+    },
+    "combinaciones": {
+      "type": "object",
+      "required": ["patron", "separacion", "max_s", "lista", "total", "por_round"],
+      "properties": {
+        "patron": { "const": "izq-der-izq" },
+        "separacion": { "enum": ["inicio_a_inicio", "fin_a_inicio"] },
+        "max_s": { "type": "number", "exclusiveMinimum": 0 },
+        "lista": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["golpes", "t_inicio", "t_fin", "tipos", "round"],
+            "properties": {
+              "golpes": { "type": "array", "items": { "type": "string" }, "minItems": 3, "maxItems": 3 },
+              "t_inicio": { "type": "number", "minimum": 0 },
+              "t_fin": { "type": "number", "minimum": 0 },
+              "tipos": { "type": "array", "items": { "type": ["string", "null"] }, "minItems": 3, "maxItems": 3 },
+              "round": { "type": ["integer", "null"], "minimum": 1 }
+            }
+          }
+        },
+        "total": { "type": "integer", "minimum": 0 },
+        "por_round": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["round", "total"],
+            "properties": { "round": { "type": "integer", "minimum": 1 }, "total": { "type": "integer", "minimum": 0 } }
+          }
+        }
       }
     }
   }

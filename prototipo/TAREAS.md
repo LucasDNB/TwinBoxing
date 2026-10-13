@@ -42,3 +42,23 @@ Estado: `hecha` (pruebas en verde), `parcial` (lo que falta está dicho), `pendi
 | Hook y uppercut en inglés; pausa 0,5 s | Sin cambios de código: ya era así | `specs/07` §3 |
 | Oportunidades y amenazas "En construcción" | Estado nuevo `en_construccion` en `lib/banderas.ts` y `EstadoBloque`; las reglas siguen escritas y probadas en `lib/rival.ts` para cuando se validen los textos | `rival.test.tsx`, `banderas-textos.test.ts` |
 | Conflictos del spec resueltos en la sesión anterior | Aceptados: el bloque de contacto sin la palabra "conectados"; re-sembrar borra las asignaciones manuales | — |
+
+## Ampliación del 13-10 (`specs/ampliacion-13-10/`)
+
+Decisiones DA-1 a DA-8 tomadas el 13-10 por delegación de Lucas (`specs/ampliacion-13-10/00-README.md`).
+
+| Id | Tarea | Spec | Estado | Evidencia / notas |
+|---|---|---|---|---|
+| B10 | Combinaciones izq-der-izq: función, Fight-Card 0.3, perfil | ampliacion `01` §3 | hecha | `boxtwin-annotator/tests/test_mvp_combinaciones.py` (16, las seis pruebas del spec; la 6 da 28/29/34/36 como la tabla de §2 sobre `tests/datos/golpes_anotados.json`, que fija `scripts/fijar_golpes_anotados.py`) y `boxtwin-api/tests/test_ampliacion_b10.py` (7). Módulo `boxtwin/mvp/combinaciones.py`; el perfil importa la función del anotador y la recalcula sobre los golpes, así una 0.2 cuenta igual que una 0.3. Schema renombrado a `fightcard-0.3.schema.json` (con `git mv`) y `CHANGELOG.md` del contrato. Decisiones menores: una terna que empieza en el descanso cuenta en el round que terminó (las ventanas excluyen el descanso, y si no la suma por round no daría el total); `BOXTWIN_PAUSA_COMBINACION` deja de existir; sin el anotador instalado la API devuelve `combinaciones: null` en vez de copiar la regla; se borró `lado_del_brazo` del perfil, que quedó sin uso |
+| W13 | Combinaciones en análisis, Fight-Card y perfil | ampliacion `01` §4 | pendiente | |
+| B8b | Una persona: casos, tramos con un rol, margen por contexto | ampliacion `02` §2 | pendiente | |
+| W19 | Identificación para una persona | ampliacion `02` §3 | pendiente | |
+| B11 | Etapa `enriquecer`, altura del golpe, medición C8 | ampliacion `03` | pendiente | DA-5 tomada el 13-10 |
+| W14 | Cabeza/cuerpo en la web | ampliacion `03` §6 | pendiente | solo si C8 pasa |
+| B12 | Exposición en el perfil, medición C9 | ampliacion `04` | pendiente | depende de B11 |
+| W15 | Mapa de exposición | ampliacion `04` §4 | pendiente | |
+| B13 | Cruces y reglas del Rival en Python | ampliacion `05` §2 | pendiente | depende de B12 |
+| W16 | Cruce de zonas en el Rival Fantasma | ampliacion `05` §3 | pendiente | |
+| B14 | `elevar_3d` y postura promedio, medición C10 | ampliacion `06` | pendiente | arranca según la regla de corte de `08` §1 |
+| W17 | Avatar 3D en el perfil | ampliacion `06` §5 | pendiente | |
+| W18 | Avatar 3D en el Rival Fantasma | ampliacion `07` | pendiente | |

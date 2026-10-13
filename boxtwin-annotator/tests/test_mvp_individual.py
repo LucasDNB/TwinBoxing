@@ -25,7 +25,7 @@ from tests.test_mvp_tramos import AZUL, MITAD, ROJO, T, detector, sesion  # noqa
 
 import jsonschema  # noqa: E402
 
-SCHEMA = json.loads((Path(__file__).resolve().parents[2] / "prototipo/contrato/fightcard-0.2.schema.json").read_text())
+SCHEMA = json.loads((Path(__file__).resolve().parents[2] / "prototipo/contrato/fightcard-0.3.schema.json").read_text())
 
 
 def _ev(t, primero, ultimo, color, n_colores=None):

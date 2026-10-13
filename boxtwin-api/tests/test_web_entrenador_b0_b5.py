@@ -102,7 +102,10 @@ def test_producto_sin_autenticacion_con_lo_que_la_web_necesita(cliente):
     assert d["max_bytes"] > 0 and d["max_minutos"] == 30
     f = d["factor_procesamiento"]
     assert (f["min"], f["mediana"], f["max"]) == (1.134, 1.447, 2.624)
-    assert d["dominio"] == {"pausa_combinacion_s": 0.5, "perfil_preliminar_sesiones": 5}
+    assert d["dominio"] == {
+        "combinacion": {"patron": "izq-der-izq", "separacion": "inicio_a_inicio", "max_s": 0.5},
+        "perfil_preliminar_sesiones": 5,
+    }
 
 
 def test_sin_medir_los_criterios_estan_pendientes_y_las_banderas_apagadas(cliente):

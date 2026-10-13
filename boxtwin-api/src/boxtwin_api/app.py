@@ -53,6 +53,7 @@ from boxtwin_api.esquemas import (
 )
 from boxtwin_api.exportar import a_csv, a_html
 from boxtwin_api.modelos import AsignacionManual, Boxeador, Correccion, Sesion, Trabajo, Usuario
+from boxtwin_api.perfil import regla_de_combinacion
 from boxtwin_api.seguridad import (
     emitir_ticket,
     emitir_token,
@@ -1022,8 +1023,7 @@ def perfil_de_boxeador(
     if contexto != "todas" and contexto not in CONTEXTOS:
         raise HTTPException(422, f"contexto tiene que ser todas o uno de {', '.join(CONTEXTOS)}")
     banderas = {"comparacion_rounds": cfg.c2 == "aprobado", "guardia": cfg.c3 == "aprobado"}
-    return construir_perfil(b, sesiones, cfg.dir_sesion, contexto=contexto, banderas=banderas,
-                            pausa=cfg.pausa_combinacion_s)
+    return construir_perfil(b, sesiones, cfg.dir_sesion, contexto=contexto, banderas=banderas)
 
 
 @app.get("/producto")
@@ -1057,7 +1057,8 @@ def producto() -> dict:
             "postura_2d": False,
         },
         "dominio": {
-            "pausa_combinacion_s": cfg.pausa_combinacion_s,
+            # La regla vive en el anotador (B10): la API la publica, no la define.
+            "combinacion": regla_de_combinacion(),
             "perfil_preliminar_sesiones": cfg.perfil_preliminar_sesiones,
         },
     }
