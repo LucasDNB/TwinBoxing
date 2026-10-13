@@ -1,0 +1,73 @@
+# Integracion continua de la web entrenador (prototipo/specs/06-pruebas-y-aceptacion.md §6).
+# El despliegue no es parte del CI: sigue siendo manual en la estacion, con GET /salud
+# mostrando el commit.
+name: web-entrenador
+
+on:
+  push:
+    paths:
+      - "prototipo/boxtwin-web-entrenador/**"
+      - "prototipo/contrato/**"
+      - "boxtwin-api/**"
+      - "boxtwin-annotator/src/boxtwin/mvp/**"
+      - ".github/workflows/web-entrenador.yml"
+  pull_request:
+    paths:
+      - "prototipo/boxtwin-web-entrenador/**"
+      - "prototipo/contrato/**"
+      - "boxtwin-api/**"
+      - "boxtwin-annotator/src/boxtwin/mvp/**"
+
+defaults:
+  run:
+    working-directory: prototipo/boxtwin-web-entrenador
+
+jobs:
+  web:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: prototipo/boxtwin-web-entrenador/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 1. Dependencias, lint y tipos
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      # 2. Unitarias e integracion (vitest + msw), incluido el contrato 0.2
+      - run: npm test
+      - run: npm run contraste
+      # 3. Build y ningun dato de demostracion del diseno en out/
+      - run: npm run build
+      - run: npm run sin-demo
+      # Presupuesto de JS inicial por ruta (03 §9). Informativo hasta que Lucas decida: con
+      # React DOM, el runtime de Next y Motion (que pide Animate UI) el piso medido ya es de
+      # ~192 KB y las pantallas van de 281 a 360 KB. Ver prototipo/TAREAS.md.
+      - run: npm run presupuesto
+        continue-on-error: true
+
+      # 4. La API, sin GPU (las rutas que necesitan el anotador completo ya se saltean)
+      - name: pytest de boxtwin-api
+        working-directory: .
+        run: |
+          python -m pip install -e "boxtwin-annotator" -e "boxtwin-api[dev]" jsonschema opencv-python-headless
+          cd boxtwin-api && python -m pytest -q
+
+      # 5. Playwright y axe contra la API de prueba, con el anotador falso
+      - run: npx playwright install --with-deps chromium webkit
+      - name: punta a punta
+        env:
+          BOXTWIN_PY: python
+        run: npm run e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright
+          path: prototipo/boxtwin-web-entrenador/test-results

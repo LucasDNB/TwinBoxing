@@ -11,7 +11,8 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "contraste": "node scripts/contraste.mjs",
-    "sin-demo": "node scripts/sin-demo.mjs"
+    "sin-demo": "node scripts/sin-demo.mjs",
+    "presupuesto": "node scripts/presupuesto.mjs"
   },
   "engines": {
     "node": ">=20.9"
