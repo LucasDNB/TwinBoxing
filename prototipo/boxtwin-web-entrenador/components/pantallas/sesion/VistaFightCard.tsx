@@ -173,12 +173,16 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
     <div className="flex flex-col gap-4">
       {/* 1. Margen arriba de todo */}
       <div>
-        <Margen precision={detector.precision_medida} recall={detector.recall_medido} />
+        <Margen precision={detector.precision_medida} recall={detector.recall_medido} medidoEn={detector.medido_en} contexto={fc.sesion?.contexto} />
         <Accordion type="single" collapsible className="mt-1">
           <AccordionItem value="leer" className="border-0">
             <AccordionTrigger className="min-h-11 py-2 text-sm text-texto-2">Cómo leer esta tarjeta</AccordionTrigger>
             <AccordionContent className="space-y-2 text-sm text-texto-2">
-              <p>Los números son golpes que el sistema detectó, no todos los que se tiraron. El detector se midió sobre material que no había visto: de cada 10 golpes que marca, acierta {Math.round(detector.precision_medida * 10)}; de cada 10 golpes que hubo, encuentra {Math.round(detector.recall_medido * 10)}.</p>
+              {detector.medido_en && fc.sesion?.contexto && detector.medido_en !== fc.sesion.contexto ? (
+                <p>Los números son golpes que el sistema detectó, no todos los que se tiraron. Cuántos se le escapan se midió en {detector.medido_en}, no en este contexto.</p>
+              ) : (
+                <p>Los números son golpes que el sistema detectó, no todos los que se tiraron. El detector se midió sobre material que no había visto: de cada 10 golpes que marca, acierta {Math.round(detector.precision_medida * 10)}; de cada 10 golpes que hubo, encuentra {Math.round(detector.recall_medido * 10)}.</p>
+              )}
               <p>Por eso lo que más vale es comparar adentro de la sesión: un peleador contra el otro, un round contra otro.</p>
               <p>El tipo de golpe es una estimación del modelo y se muestra con ≈ y borde punteado. No hay puntaje de rounds ni resultado del combate.</p>
             </AccordionContent>

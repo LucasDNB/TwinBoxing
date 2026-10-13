@@ -185,6 +185,7 @@ def procesar(
         ev, prop.diagnostico.get("nucleo_tracks", []),
         min_coexistencia=cfg_identidad.min_coexistencia,
         fps=doc.video.fps,
+        separacion_minima=cfg_identidad.separacion_minima,
     )
     recortar(video_en_sesion, cache, candidatos, salida / CANDIDATOS)
 

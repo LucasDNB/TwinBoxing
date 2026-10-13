@@ -84,6 +84,8 @@ export const Candidato = z.object({
   t_hasta: numN.optional(),
   alto_relativo: numN.optional(),
   sugerido: z.boolean().optional(),
+  // W19: candidatos en cuadro a la vez con guantes parecidos (el reflejo de un espejo).
+  mismo_color_a_la_vez: z.array(num).optional(),
 });
 export type Candidato = z.infer<typeof Candidato>;
 
@@ -240,6 +242,8 @@ export const FightCard = z.object({
     precision_medida: num,
     recall_medido: num,
     medido_sobre: z.string().optional(),
+    // B8b: en que contexto se midio el margen. Una sesion de otro contexto no lo hereda.
+    medido_en: Contexto.optional(),
     umbral: numN.optional(),
     // C11 (ampliacion 01 §5): el recall de ternas, cuando se mida.
     combinaciones: z.object({ recall_medido: numN.optional() }).optional(),
@@ -353,7 +357,8 @@ export type Panel = z.infer<typeof Panel>;
 export const MOTIVOS_TRAMO = ["color_insuficiente", "sin_coexistencia", "corto", "abstencion"] as const;
 
 export const Tramos = z.object({
-  cobertura: z.object({ A: num, B: num, sin_asignar: num }),
+  // B8b: en bolsa y sombra no hay B.
+  cobertura: z.object({ A: num, B: num.optional(), sin_asignar: num }),
   separacion_color: numN,
   tramos: z.array(z.object({
     track: num,

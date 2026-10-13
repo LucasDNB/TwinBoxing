@@ -30,6 +30,17 @@ export const textos = {
   combinacionesVacio: "El sistema no encontró combinaciones completas en esta sesión.",
   combinacionesVersionVieja:
     "Esta sesión se procesó antes de contar combinaciones; al reprocesarla aparecen.",
+  /* B8b (ampliacion 02 §2): el margen medido en sparring no se traslada a otro contexto. */
+  margenOtroContexto(medidoEn: string, contexto: string) {
+    const en = (NOMBRE_CONTEXTO[medidoEn] ?? medidoEn).toLowerCase();
+    const ctx = (NOMBRE_CONTEXTO[contexto] ?? contexto).toLowerCase();
+    return `El margen del detector se midió en ${en}; en ${ctx} todavía no se midió. Los golpes que se ven son los que el sistema detectó.`;
+  },
+  individual: {
+    titulo: "¿Cuál es el boxeador?",
+    indicacion: "Tocá una vez al que está trabajando. El resto del video se sigue por el color de sus guantes.",
+    espejo: "Hay otra figura con los mismos guantes al mismo tiempo. Si estás frente a un espejo, elegí al de verdad, no al reflejo.",
+  },
   margenPanel(recall: number) {
     return `El sistema encuentra cerca de ${deCada10(recall)} de cada 10 golpes: el total real es mayor.`;
   },

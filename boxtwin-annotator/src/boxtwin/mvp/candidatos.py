@@ -24,6 +24,12 @@ QUE HACE
   altura relativa. El nombre del color es una aproximacion por tono para la pantalla y no
   entra en ningun calculo: la asignacion sigue usando el perfil HSV.
 
+  W19 (ampliacion del 13-10) suma `mismo_color_a_la_vez`: los otros candidatos que estan en
+  cuadro al mismo tiempo que este con guantes parecidos (separacion de color por debajo del
+  piso de la identidad). Es el caso del espejo en sombra, y la pantalla de una persona avisa
+  con eso antes de confirmar. La cuenta queda aca, con la misma distancia y el mismo piso que
+  la asignacion, y no en la web.
+
 USO
   from boxtwin.mvp.candidatos import elegir, recortar
   pareja, cands = elegir(evidencia, nucleo, cfg)
@@ -65,6 +71,8 @@ class Candidato:
     t_hasta: float | None = None
     alto_relativo: float | None = None
     sugerido: bool = False
+    # W19: candidatos en cuadro a la vez y con guantes parecidos (el reflejo en un espejo).
+    mismo_color_a_la_vez: list[int] = field(default_factory=list)
 
     def a_dict(self) -> dict:
         return asdict(self)
@@ -109,6 +117,7 @@ def elegir(
     min_coexistencia: int = 3,
     maximo: int = MAXIMO,
     fps: float | None = None,
+    separacion_minima: float = 0.55,
 ) -> tuple[tuple[int, int] | None, list[Candidato]]:
     """
     El par que mas coexiste, y hasta `maximo` candidatos ordenados por evidencia.
@@ -167,6 +176,8 @@ def elegir(
             c.t_hasta = round(evidencia[t].ultimo_frame / fps, 2)
         salida.append(c)
 
+    _mismo_color_a_la_vez(salida, evidencia, frames, min_coexistencia, separacion_minima)
+
     # Alto sobre la mediana de los candidatos: "mas alto" o "mas bajo" que el resto se lee
     # sin saber a que distancia estaba la camara.
     altos = sorted(c.alto for c in salida if c.alto > 0)
@@ -176,6 +187,22 @@ def elegir(
         for c in salida:
             c.alto_relativo = round(c.alto / mediana, 3) if mediana > 0 else None
     return mejor, salida
+
+
+def _mismo_color_a_la_vez(cands: list[Candidato], evidencia: dict, frames: dict,
+                          min_coexistencia: int, separacion_minima: float) -> None:
+    from boxtwin.core.deteccion_guantes import distancia_color, perfil_de
+
+    perfiles = {c.track: perfil_de([col for _, col in evidencia[c.track].colores])
+                for c in cands if evidencia[c.track].colores}
+    for c in cands:
+        for o in cands:
+            if o.track == c.track or c.track not in perfiles or o.track not in perfiles:
+                continue
+            if len(frames[c.track] & frames[o.track]) < min_coexistencia:
+                continue
+            if distancia_color(perfiles[c.track], perfiles[o.track]) < separacion_minima:
+                c.mismo_color_a_la_vez.append(o.track)
 
 
 def _cuadro_comun(frames: dict[int, set[int]], par: tuple[int, int]) -> int | None:

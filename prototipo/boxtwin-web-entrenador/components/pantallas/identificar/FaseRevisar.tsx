@@ -85,6 +85,8 @@ function Revision({ s, datos }: { s: Sesion; datos: Tramos }) {
   const [decisiones, setDecisiones] = useState<Record<number, Rol | "">>(inicial);
   const [viendo, setViendo] = useState<Tramo | null>(null);
   const cambios = datos.tramos.filter((t) => decisiones[t.track] && decisiones[t.track] !== (t.asignado ?? ""));
+  // W19: en bolsa y sombra hay una sola persona; el tramo es ella o se ignora.
+  const individual = s.contexto === "bolsa" || s.contexto === "sombra";
 
   async function enviar() {
     try {
@@ -118,7 +120,7 @@ function Revision({ s, datos }: { s: Sesion; datos: Tramos }) {
                 </button>
                 <p className="text-sm text-texto-2">{textos.motivoTramo[t.motivo]}</p>
                 <p className="text-xs text-texto-3">{decimal(t.t_hasta - t.t_desde, 1)} s</p>
-                {t.asignado && <Rotulo className="text-ok">asignado a mano: {t.asignado === "ninguno" ? "ignorado" : t.asignado}</Rotulo>}
+                {t.asignado && <Rotulo className="text-ok">asignado a mano: {t.asignado === "ninguno" ? "ignorado" : individual ? "es él" : t.asignado}</Rotulo>}
               </div>
             </div>
             {escritorio && (
@@ -133,10 +135,16 @@ function Revision({ s, datos }: { s: Sesion; datos: Tramos }) {
               value={decisiones[t.track] ?? ""}
               onValueChange={(v) => setDecisiones((d) => ({ ...d, [t.track]: v as Rol | "" }))}
               aria-label={`Quién es en el tramo de ${mmss(t.t_desde)}`}
-              className="mt-3 grid w-full grid-cols-3 gap-1"
+              className={`mt-3 grid w-full gap-1 ${individual ? "grid-cols-2" : "grid-cols-3"}`}
             >
-              <ToggleGroupItem value="A" className="min-h-11 border border-borde">A</ToggleGroupItem>
-              <ToggleGroupItem value="B" className="min-h-11 border border-borde">B</ToggleGroupItem>
+              {individual ? (
+                <ToggleGroupItem value="A" className="min-h-11 border border-borde">Es él</ToggleGroupItem>
+              ) : (
+                <>
+                  <ToggleGroupItem value="A" className="min-h-11 border border-borde">A</ToggleGroupItem>
+                  <ToggleGroupItem value="B" className="min-h-11 border border-borde">B</ToggleGroupItem>
+                </>
+              )}
               <ToggleGroupItem value="ninguno" className="min-h-11 border border-borde">Ignorar</ToggleGroupItem>
             </ToggleGroup>
           </li>
