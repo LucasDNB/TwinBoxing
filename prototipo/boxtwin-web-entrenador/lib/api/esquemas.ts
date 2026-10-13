@@ -40,12 +40,20 @@ export const Producto = z.object({
   criterios: z.object({
     C2: z.object({ estado: z.enum(["pendiente", "aprobado", "rechazado"]), fecha: strN }),
     C3: z.object({ estado: z.enum(["pendiente", "aprobado", "rechazado"]), fecha: strN }),
+    // Ampliacion del 13-10 (08 §2)
+    C8: z.object({ estado: z.enum(["pendiente", "aprobado", "rechazado"]), fecha: strN }).optional(),
+    C9: z.object({ estado: z.enum(["pendiente", "aprobado", "rechazado"]), fecha: strN }).optional(),
+    C10: z.object({ estado: z.enum(["pendiente", "aprobado", "rechazado"]), fecha: strN }).optional(),
   }),
   banderas: z.object({
     comparacion_rounds: z.boolean(),
     guardia: z.boolean(),
     sesiones_individuales: z.boolean(),
     postura_2d: z.boolean(),
+    // 08 §3. Opcionales: una API anterior a la ampliacion no las manda y quedan apagadas.
+    objetivo: z.boolean().optional(),
+    exposicion: z.boolean().optional(),
+    avatar_3d: z.boolean().optional(),
   }),
   dominio: z.object({
     // B10: la regla vive en el anotador; null si la instancia no lo tiene instalado.
@@ -165,6 +173,11 @@ export const Golpe = z.object({
     })
     .nullable(),
   descartado: z.boolean().optional(),
+  // 0.3 (B11): la altura. Viaja aunque C8 no haya pasado; la pantalla la muestra solo con la
+  // bandera `objetivo` (CA-14.2).
+  objetivo: z.enum(["cabeza", "cuerpo"]).nullable().optional(),
+  objetivo_confianza: numN.optional(),
+  objetivo_motivo: strN.optional(),
 });
 export type Golpe = z.infer<typeof Golpe>;
 

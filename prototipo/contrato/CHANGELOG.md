@@ -13,6 +13,15 @@ no conoce los campos nuevos los ignora. Lo que se rompe se dice acá.
   margen de sparring como si fuera suyo.
 - En una sesión de bolsa o sombra, `GET /jobs/{id}/tramos` trae `cobertura` sin `B` y
   `PUT /jobs/{id}/tramos` rechaza `rol: "B"` con 422.
+- Altura del golpe (B11, `03` §5), escrita por la etapa `enriquecer` y no por `construir`:
+  por golpe `objetivo` (`cabeza` | `cuerpo` | null), `objetivo_confianza`, `objetivo_motivo`
+  (`sin_rival`, `individual` o, además de lo que fija el spec, `sin_pose`: el que pega no tiene
+  ningún cuadro válido en el golpe) y `objetivo_corregido`; por peleador, en `total` y en cada
+  `por_round`, `cabeza + cuerpo + objetivo_sin_dato = total`; en la raíz
+  `metodos.objetivo` con la regla, τ y lo medido en C8. C8 no pasó (0,726): los campos viajan
+  y ninguna pantalla los muestra mientras la bandera `objetivo` esté apagada.
+- `PATCH /fightcards/{id}/golpes/{golpe}` acepta `{"objetivo": "cabeza" | "cuerpo"}` además de
+  `{"tipo": …}` (uno de los dos). La tabla `correcciones` suma la columna `campo`.
 - **Rompe** en `GET /boxeadores/{id}/perfil`: `combinaciones` deja de ser la lista de las cinco
   secuencias más frecuentes por tipo y pasa a ser un objeto (`patron`, `total`, `por_minuto`,
   `por_contexto`, `tipos_frecuentes`, `sesiones_con_combinaciones`). La única cliente es la web

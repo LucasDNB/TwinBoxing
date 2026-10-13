@@ -17,6 +17,7 @@ QUE HACE
   probe       muestra los metadatos reales del video sin procesar nada.
   procesar    etapa 1 del producto: pose, identidad y candidatos para la siembra.
   completar   etapa 2 del producto: identidad sembrada, detector y Fight-Card.
+  enriquecer  lleva una Fight-Card hecha a 0.3 (altura del golpe, combinaciones) sin GPU.
 
 USO
   boxtwin-annotator preprocess videos/spar.mp4 --project ./proyecto
@@ -346,6 +347,21 @@ def build_parser() -> argparse.ArgumentParser:
     cp.add_argument("--manual", action="store_true",
                     help="aplica las asignaciones de tramos hechas a mano en la web "
                          "(identidad.asignaciones_manuales de sesion.json)")
+
+    en = sub.add_parser(
+        "enriquecer",
+        help="suma a una Fight-Card hecha la altura del golpe y las combinaciones (0.3)",
+        description=(
+            "Lee poses.npz y fightcard.json. No corre pose, detector ni clasificador: sirve "
+            "para llevar sesiones viejas a 0.3. Reanudable: saltea las que ya estan."
+        ),
+    )
+    en.add_argument("sesion", type=Path,
+                    help="directorio de la sesion, o con --todas el que contiene las sesiones")
+    en.add_argument("--todas", action="store_true",
+                    help="recorre todas las sesiones que hay adentro de SESION")
+    en.add_argument("--forzar", action="store_true",
+                    help="reenriquece aunque ya este en 0.3 con la misma regla")
 
     tp = sub.add_parser(
         "tipos",
@@ -680,6 +696,21 @@ def _cmd_completar(args: argparse.Namespace) -> int:
           f"({ses.factor_tiempo_real}x la duracion del video)")
     print(f"\n  -> {Path(args.sesion) / 'fightcard.json'}")
     print("  el tipo de golpe lo agrega la etapa de clasificacion, en boxtwin_mmaction")
+    return 0
+
+
+def _cmd_enriquecer(args: argparse.Namespace) -> int:
+    from boxtwin.mvp.orquesta import enriquecer, enriquecer_todas
+
+    if args.todas:
+        r = enriquecer_todas(args.sesion)
+        for nombre, estado in r.items():
+            print(f"  {nombre}  {estado}")
+        errores = sum(1 for e in r.values() if e.startswith("error"))
+        print(f"{len(r)} sesiones, {errores} con error")
+        return 1 if errores else 0
+    fc = enriquecer(args.sesion, forzar=args.forzar)
+    print("ya estaba en 0.3 con la misma regla" if fc is None else f"-> {Path(args.sesion) / 'fightcard.json'} (0.3)")
     return 0
 
 
@@ -1095,6 +1126,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_completar(args)
         if args.comando == "tipos":
             return _cmd_tipos(args)
+        if args.comando == "enriquecer":
+            return _cmd_enriquecer(args)
         if args.comando == "corregir":
             return _cmd_corregir(args)
         if args.comando == "medir":

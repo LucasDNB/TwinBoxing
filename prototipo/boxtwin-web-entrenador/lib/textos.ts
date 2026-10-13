@@ -55,7 +55,8 @@ export const textos = {
     "La guardia se muestra cuando el indicador pase la validación contra marcado a mano.",
   nodispContacto:
     "Una cámara sola no ve si el golpe tocó. Para estimarlo hace falta una pieza que todavía no está.",
-  nodispAltura: "Esta versión del modelo dice el tipo de golpe, no si fue a la cabeza o al cuerpo.",
+  // W14 (ampliacion 03 §6): con la bandera `objetivo` apagada.
+  nodispAltura: "La altura del golpe se muestra cuando la regla pase la validación contra lo marcado a mano.",
   nodisp3d:
     "El giro de un golpe alrededor del cuerpo no se ve con una cámara de frente. El avatar necesita más de una cámara.",
   nodispExposicion:

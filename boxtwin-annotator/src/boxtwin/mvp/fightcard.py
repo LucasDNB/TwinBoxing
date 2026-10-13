@@ -41,14 +41,17 @@ __all__ = [
     "aplicar_tipos",
     "construir",
     "correccion",
+    "correccion_objetivo",
     "id_de_golpe",
 ]
 
 # 0.2 (web entrenador, B3 y B4): suma `descartado` por golpe, `descartados` por peleador y
 # los campos de tramos en `identidad`. Es compatible hacia atras: nada de 0.1 se movio.
 # 0.3 (ampliacion del 13-10): suma `combinaciones` izq-der-izq por peleador (B10). Tambien
-# compatible: nada de 0.2 se movio.
+# compatible: nada de 0.2 se movio. La altura de cada golpe (B11) la agrega la etapa
+# `enriquecer`, que lee poses.npz: construir no la conoce.
 VERSION_FIGHTCARD = "0.3"
+OBJETIVOS = ("cabeza", "cuerpo")
 
 # "No fue un golpe" (B4). No es un tipo: es la etiqueta de falso positivo del detector, que
 # hasta ahora no recibia ninguna senal del producto.
@@ -323,12 +326,28 @@ def aplicar_correcciones(fc: dict, correcciones: list[dict]) -> dict:
     le falta: material que no vio, juzgado por alguien que sabe.
     """
     por_id: dict[str, dict] = {}
+    objetivos: dict[str, dict] = {}
     for c in correcciones:
         # La ultima correccion de un mismo golpe gana, y las anteriores siguen en el
-        # registro. Cambiar de opinion es legitimo; perder el rastro no.
-        por_id[c["golpe"]] = c
+        # registro. Cambiar de opinion es legitimo; perder el rastro no. Tipo y altura (B11)
+        # son correcciones independientes: corregir una no deshace la otra.
+        if c.get("campo", "tipo") == "objetivo":
+            objetivos[c["golpe"]] = c
+        else:
+            por_id[c["golpe"]] = c
     for datos in fc["peleadores"].values():
         for g in datos["golpes"]:
+            o = objetivos.get(g["id"])
+            if o:
+                g["objetivo_corregido"] = {
+                    "objetivo": o["objetivo"],
+                    "objetivo_original": o.get("objetivo_original"),
+                    "cuando": o.get("cuando"),
+                    "por": o.get("por"),
+                }
+                g["objetivo"] = o["objetivo"]
+                g["objetivo_confianza"] = None
+                g["objetivo_motivo"] = None
             c = por_id.get(g["id"])
             if not c:
                 g.setdefault("descartado", False)
@@ -350,6 +369,9 @@ def aplicar_correcciones(fc: dict, correcciones: list[dict]) -> dict:
                 g["descartado"] = False
                 g["tipo"] = c["tipo"]
         datos["descartados"] = sum(1 for g in datos["golpes"] if g.get("descartado"))
+    from boxtwin.mvp.objetivo import contar
+
+    contar(fc)
     return _combinaciones(fc)
 
 
@@ -378,6 +400,7 @@ def correccion(
         )
     return {
         "golpe": golpe,
+        "campo": "tipo",
         "tipo": tipo,
         "tipo_original": original.get("tipo"),
         "tipo_clasificador": original.get("tipo_clasificador"),
@@ -388,6 +411,36 @@ def correccion(
         "t_fin": original.get("t_fin"),
         "cuadro_inicio": original.get("cuadro_inicio"),
         "cuadro_fin": original.get("cuadro_fin"),
+        "por": por,
+        "cuando": cuando or datetime.now().astimezone().isoformat(),
+    }
+
+
+def correccion_objetivo(
+    golpe: str, objetivo: str, fc: dict, por: str | None = None, cuando: str | None = None
+) -> dict:
+    """
+    La correccion de altura (B11, 03 §5): cabeza o cuerpo. Como las de tipo, es una etiqueta
+    para recalibrar tau, y por eso lleva la altura que habia calculado la regla.
+    """
+    from datetime import datetime
+
+    if objetivo not in OBJETIVOS:
+        raise ValueError(f"objetivo desconocido: {objetivo!r}, se esperaba {list(OBJETIVOS)}")
+    original = next((g for d in fc["peleadores"].values() for g in d["golpes"] if g["id"] == golpe), None)
+    if original is None:
+        raise ValueError(f"la Fight-Card no tiene un golpe {golpe!r}")
+    previo = original.get("objetivo_corregido") or {}
+    return {
+        "golpe": golpe,
+        "campo": "objetivo",
+        "objetivo": objetivo,
+        "objetivo_original": previo.get("objetivo_original", original.get("objetivo")),
+        "objetivo_h": original.get("objetivo_h"),
+        "regla": ((fc.get("metodos") or {}).get("objetivo") or {}).get("regla"),
+        "tau": ((fc.get("metodos") or {}).get("objetivo") or {}).get("tau"),
+        "video": fc.get("video", {}).get("nombre"),
+        "t_inicio": original.get("t_inicio"),
         "por": por,
         "cuando": cuando or datetime.now().astimezone().isoformat(),
     }

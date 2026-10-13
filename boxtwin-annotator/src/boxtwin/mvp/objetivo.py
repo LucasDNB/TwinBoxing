@@ -27,6 +27,14 @@ QUE HACE (la regla de 03 §2, escrita antes de medir)
 
   Un keypoint cuenta si su score es >= MIN_SCORE (el umbral del anotador).
 
+  marcar_fightcard  pone objetivo, confianza y motivo en cada golpe de la Fight-Card y cuenta
+                    cabeza / cuerpo / sin dato por peleador y por round (contrato 0.3)
+  contar            recuenta, para despues de una correccion
+
+  C8 se midio el 13-10 y NO paso (docs/experiments/2026-10-13-cabeza-cuerpo.md): exactitud
+  balanceada 0,726 contra 0,75. Los campos se escriben igual, con el resultado medido adentro
+  del documento, y la bandera `objetivo` queda apagada: ninguna pantalla los muestra.
+
 USO
   from boxtwin.mvp.objetivo import objetivo_de
   r = objetivo_de(kp, sc, valid, peleador=0, brazo="izq", inicio=120, fin=128, tau=0.2)
@@ -40,10 +48,16 @@ from dataclasses import dataclass
 
 import numpy as np
 
-__all__ = ["GRILLA_TAU", "MIN_SCORE", "PENDIENTE", "REGLA", "Resultado", "objetivo_de"]
+__all__ = ["GRILLA_TAU", "MEDIDO", "MIN_SCORE", "PENDIENTE", "REGLA", "TAU", "Resultado", "contar",
+           "marcar_fightcard", "objetivo_de"]
 
 REGLA = "altura_relativa_v1"
 GRILLA_TAU = (-0.10, 0.00, 0.10, 0.20, 0.30, 0.40)
+# Elegido en la calibracion sobre 01 y 02 (balanceada 0,698), antes de medir.
+TAU = 0.20
+# C8, nivel 1, una sola corrida sobre 806 golpes de cuatro fuentes no usadas para calibrar.
+MEDIDO = {"exactitud_balanceada": 0.726, "recall_cuerpo": 0.818, "golpes": 806, "pasa": False,
+          "fecha": "2026-10-13", "detalle": "docs/experiments/2026-10-13-cabeza-cuerpo.md"}
 MIN_SCORE = 0.3
 PENDIENTE = 10.0
 VECINOS = 2
@@ -122,3 +136,48 @@ def objetivo_de(kp: np.ndarray, sc: np.ndarray, valid: np.ndarray, peleador: int
     y_hombros, torso = rival
     h = (float(mano[1]) - y_hombros) / torso
     return Resultado("cabeza" if h < tau else "cuerpo", round(h, 4), confianza(h, tau), None, f)
+
+
+def marcar_fightcard(fc: dict, kp, sc, valid, tau: float = TAU) -> dict:
+    """
+    Escribe la altura de cada golpe. Sin rival (bolsa, sombra) no se calcula (DA-5): motivo
+    `individual`. Una correccion de altura que ya exista se vuelve a aplicar despues, en
+    `aplicar_correcciones`; aca se pisa el valor del modelo, no el de la persona.
+    """
+    individual = "B" not in fc["peleadores"]
+    for lado, datos in fc["peleadores"].items():
+        p = 0 if lado == "A" else 1
+        for g in datos["golpes"]:
+            if individual:
+                r = Resultado(None, None, None, "individual")
+            else:
+                r = objetivo_de(kp, sc, valid, p, g["brazo"], g["cuadro_inicio"], g["cuadro_fin"], tau)
+            g["objetivo"] = r.objetivo
+            g["objetivo_confianza"] = r.confianza
+            g["objetivo_motivo"] = r.motivo
+            g["objetivo_h"] = r.h
+            g.setdefault("objetivo_corregido", None)
+    fc.setdefault("metodos", {})["objetivo"] = {"regla": REGLA, "tau": tau, "medido": dict(MEDIDO)}
+    return contar(fc)
+
+
+def contar(fc: dict) -> dict:
+    """
+    cabeza + cuerpo + objetivo_sin_dato = total, por peleador y por round (CA-14.1). Una
+    Fight-Card que no paso por `enriquecer` no se toca: no trae altura y no se inventa.
+    """
+    if not (fc.get("metodos") or {}).get("objetivo"):
+        return fc
+    for datos in fc["peleadores"].values():
+        golpes = datos["golpes"]
+        datos["total"].update(_tres(golpes))
+        for r in datos["por_round"]:
+            dentro = [g for g in golpes if r["inicio_s"] <= g["t_inicio"] < r["fin_s"]]
+            r.update(_tres(dentro))
+    return fc
+
+
+def _tres(golpes: list[dict]) -> dict:
+    cab = sum(1 for g in golpes if g.get("objetivo") == "cabeza")
+    cue = sum(1 for g in golpes if g.get("objetivo") == "cuerpo")
+    return {"cabeza": cab, "cuerpo": cue, "objetivo_sin_dato": len(golpes) - cab - cue}

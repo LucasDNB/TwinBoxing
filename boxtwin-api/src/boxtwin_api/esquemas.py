@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 __all__ = [
     "Credenciales",
@@ -105,7 +105,15 @@ class EntradaTramos(BaseModel):
 class EntradaCorreccion(BaseModel):
     # "no_golpe" es la etiqueta de falso positivo (B4): el golpe sigue contando como
     # detectado y se suma a los descartados por el entrenador.
-    tipo: Literal["jab", "cross", "hook", "uppercut", "no_golpe"]
+    tipo: Literal["jab", "cross", "hook", "uppercut", "no_golpe"] | None = None
+    # B11 (ampliacion 03 §5): la altura. Una correccion es de tipo o de altura, no de las dos.
+    objetivo: Literal["cabeza", "cuerpo"] | None = None
+
+    @model_validator(mode="after")
+    def _uno_solo(self):
+        if (self.tipo is None) == (self.objetivo is None):
+            raise ValueError("una correccion lleva tipo u objetivo, uno solo")
+        return self
 
 
 def _boxeador_corto(b) -> dict | None:

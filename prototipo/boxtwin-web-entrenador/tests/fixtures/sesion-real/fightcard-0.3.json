@@ -37,7 +37,8 @@
    2,
    3,
    4
-  ]
+  ],
+  "medido_en": "sparring"
  },
  "clasificador": {
   "checkpoint": "prueba-fixture-no-es-un-modelo",
@@ -59,7 +60,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.986,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.2952,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-245",
@@ -79,7 +85,12 @@
       "cuando": "2026-10-13T10:00:00-03:00",
       "por": "lucas@usal.edu.ar"
      },
-     "descartado": true
+     "descartado": true,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.41,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.2872,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-351",
@@ -93,7 +104,12 @@
      "confianza_tipo": 0.5,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.968,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.2104,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-369",
@@ -107,7 +123,12 @@
      "confianza_tipo": 0.6,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.75,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.0056,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-418",
@@ -121,7 +142,12 @@
      "confianza_tipo": 0.7,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.999,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.5975,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-471",
@@ -135,7 +161,12 @@
      "confianza_tipo": 0.8,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.483,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.0945,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-477",
@@ -149,7 +180,12 @@
      "confianza_tipo": 0.9,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.932,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.1343,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-514",
@@ -163,7 +199,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.409,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.1132,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-529",
@@ -177,7 +218,12 @@
      "confianza_tipo": 0.4,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.999,
+     "objetivo_motivo": null,
+     "objetivo_h": 1.003,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-537",
@@ -191,7 +237,12 @@
      "confianza_tipo": 0.5,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.483,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.3053,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-551",
@@ -205,7 +256,12 @@
      "confianza_tipo": 0.6,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.993,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.7686,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-617",
@@ -219,7 +275,12 @@
      "confianza_tipo": 0.7,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.934,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.1371,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-630",
@@ -233,7 +294,12 @@
      "confianza_tipo": 0.8,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.747,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.0066,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-643",
@@ -247,7 +313,12 @@
      "confianza_tipo": 0.9,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.485,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.3058,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-651",
@@ -261,7 +332,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.038,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.2077,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-659",
@@ -275,7 +351,12 @@
      "confianza_tipo": 0.4,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.68,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.3657,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-666",
@@ -289,7 +370,12 @@
      "confianza_tipo": 0.5,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.737,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.3886,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-842",
@@ -303,7 +389,12 @@
      "confianza_tipo": 0.6,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.966,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.2071,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-1398",
@@ -317,7 +408,12 @@
      "confianza_tipo": 0.7,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.868,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.0651,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-1427",
@@ -331,7 +427,12 @@
      "confianza_tipo": 0.8,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.955,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.1766,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-1452",
@@ -345,7 +446,12 @@
      "confianza_tipo": 0.9,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.551,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.0759,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-1808",
@@ -359,7 +465,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.883,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.478,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-2262",
@@ -373,7 +484,12 @@
      "confianza_tipo": 0.4,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.986,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.2977,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-2878",
@@ -387,7 +503,12 @@
      "confianza_tipo": 0.5,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.966,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.2062,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-3083",
@@ -401,7 +522,12 @@
      "confianza_tipo": 0.6,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.618,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.0558,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-3102",
@@ -415,7 +541,12 @@
      "confianza_tipo": 0.7,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.978,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.6483,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-3139",
@@ -429,7 +560,12 @@
      "confianza_tipo": 0.8,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.212,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.243,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-3298",
@@ -443,7 +579,12 @@
      "confianza_tipo": 0.9,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.978,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.2512,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-3311",
@@ -457,7 +598,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.645,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.3534,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-3549",
@@ -471,7 +617,12 @@
      "confianza_tipo": 0.4,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 1.0,
+     "objetivo_motivo": null,
+     "objetivo_h": 1.4478,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-3584",
@@ -485,7 +636,12 @@
      "confianza_tipo": 0.5,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.487,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.3065,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-3605",
@@ -499,7 +655,12 @@
      "confianza_tipo": 0.6,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 1.0,
+     "objetivo_motivo": null,
+     "objetivo_h": 1.1876,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-3634",
@@ -513,7 +674,12 @@
      "confianza_tipo": 0.7,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-3975",
@@ -527,7 +693,12 @@
      "confianza_tipo": 0.8,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.366,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.2768,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-3996",
@@ -541,7 +712,12 @@
      "confianza_tipo": 0.9,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.735,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.388,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-4004",
@@ -555,7 +731,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.996,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.8127,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-4025",
@@ -569,7 +750,12 @@
      "confianza_tipo": 0.4,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.927,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.1275,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-4056",
@@ -583,7 +769,12 @@
      "confianza_tipo": 0.5,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.613,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.0573,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-4240",
@@ -597,7 +788,12 @@
      "confianza_tipo": 0.6,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.512,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.0869,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-4346",
@@ -611,7 +807,12 @@
      "confianza_tipo": 0.7,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-4351",
@@ -625,7 +826,12 @@
      "confianza_tipo": 0.8,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-4356",
@@ -639,7 +845,12 @@
      "confianza_tipo": 0.9,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-4596",
@@ -653,7 +864,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.836,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.0413,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-4612",
@@ -667,7 +883,12 @@
      "confianza_tipo": 0.4,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.655,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.0432,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-4633",
@@ -681,7 +902,12 @@
      "confianza_tipo": 0.5,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-4674",
@@ -695,7 +921,12 @@
      "confianza_tipo": 0.6,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.794,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.0167,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-4681",
@@ -709,7 +940,12 @@
      "confianza_tipo": 0.7,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.325,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.1326,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-4687",
@@ -723,7 +959,12 @@
      "confianza_tipo": 0.8,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.8,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.0197,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-4695",
@@ -737,7 +978,12 @@
      "confianza_tipo": 0.9,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.898,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.0922,
+     "objetivo_corregido": null
     },
     {
      "id": "A-izq-4719",
@@ -751,7 +997,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.938,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.1445,
+     "objetivo_corregido": null
     },
     {
      "id": "A-der-4818",
@@ -765,7 +1016,12 @@
      "confianza_tipo": 0.4,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.886,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.0808,
+     "objetivo_corregido": null
     }
    ],
    "por_round": [
@@ -776,13 +1032,19 @@
      "total": 51,
      "izq": 35,
      "der": 16,
-     "por_minuto": 17.49
+     "por_minuto": 17.49,
+     "cabeza": 28,
+     "cuerpo": 18,
+     "objetivo_sin_dato": 5
     }
    ],
    "total": {
     "total": 51,
     "izq": 35,
-    "der": 16
+    "der": 16,
+    "cabeza": 28,
+    "cuerpo": 18,
+    "objetivo_sin_dato": 5
    },
    "guardia": [
     {
@@ -1473,7 +1735,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.899,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.4936,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-723",
@@ -1487,7 +1754,12 @@
      "confianza_tipo": 0.4,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.926,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.5257,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-866",
@@ -1501,7 +1773,12 @@
      "confianza_tipo": 0.5,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.596,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.0627,
+     "objetivo_corregido": null
     },
     {
      "id": "B-der-1011",
@@ -1515,7 +1792,12 @@
      "confianza_tipo": 0.6,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.999,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.5797,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-1024",
@@ -1529,7 +1811,12 @@
      "confianza_tipo": 0.7,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-1195",
@@ -1543,7 +1830,12 @@
      "confianza_tipo": 0.8,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.311,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.2644,
+     "objetivo_corregido": null
     },
     {
      "id": "B-der-1203",
@@ -1557,7 +1849,12 @@
      "confianza_tipo": 0.9,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.649,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.3549,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-1698",
@@ -1571,7 +1868,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.969,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.2162,
+     "objetivo_corregido": null
     },
     {
      "id": "B-der-2039",
@@ -1585,7 +1887,12 @@
      "confianza_tipo": 0.4,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-2237",
@@ -1599,7 +1906,12 @@
      "confianza_tipo": 0.5,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.908,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.1036,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-2254",
@@ -1613,7 +1925,12 @@
      "confianza_tipo": 0.6,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.834,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.0401,
+     "objetivo_corregido": null
     },
     {
      "id": "B-der-2261",
@@ -1627,7 +1944,12 @@
      "confianza_tipo": 0.7,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.647,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.0459,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-2265",
@@ -1641,7 +1963,12 @@
      "confianza_tipo": 0.8,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 1.0,
+     "objetivo_motivo": null,
+     "objetivo_h": 1.1108,
+     "objetivo_corregido": null
     },
     {
      "id": "B-der-2273",
@@ -1655,7 +1982,12 @@
      "confianza_tipo": 0.9,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.997,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.459,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-2289",
@@ -1669,7 +2001,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 1.0,
+     "objetivo_motivo": null,
+     "objetivo_h": 1.8741,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-2324",
@@ -1683,7 +2020,12 @@
      "confianza_tipo": 0.4,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-2419",
@@ -1697,7 +2039,12 @@
      "confianza_tipo": 0.5,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "B-der-2452",
@@ -1711,7 +2058,12 @@
      "confianza_tipo": 0.6,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-2466",
@@ -1725,7 +2077,12 @@
      "confianza_tipo": 0.7,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "B-der-2473",
@@ -1739,7 +2096,12 @@
      "confianza_tipo": 0.8,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "B-der-2502",
@@ -1753,7 +2115,12 @@
      "confianza_tipo": 0.9,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-2530",
@@ -1767,7 +2134,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "B-der-2840",
@@ -1781,7 +2153,12 @@
      "confianza_tipo": 0.4,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.996,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.415,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-2992",
@@ -1795,7 +2172,12 @@
      "confianza_tipo": 0.5,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 1.0,
+     "objetivo_motivo": null,
+     "objetivo_h": 1.3246,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-3334",
@@ -1809,7 +2191,12 @@
      "confianza_tipo": 0.6,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.881,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.076,
+     "objetivo_corregido": null
     },
     {
      "id": "B-der-3339",
@@ -1823,7 +2210,12 @@
      "confianza_tipo": 0.7,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.913,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.1086,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-3359",
@@ -1837,7 +2229,12 @@
      "confianza_tipo": 0.8,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-3509",
@@ -1851,7 +2248,12 @@
      "confianza_tipo": 0.9,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.999,
+     "objetivo_motivo": null,
+     "objetivo_h": -0.548,
+     "objetivo_corregido": null
     },
     {
      "id": "B-der-3769",
@@ -1865,7 +2267,12 @@
      "confianza_tipo": 0.3,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.376,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.1208,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-3999",
@@ -1879,7 +2286,12 @@
      "confianza_tipo": 0.4,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cabeza",
+     "objetivo_confianza": 0.567,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.0714,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-4410",
@@ -1893,7 +2305,12 @@
      "confianza_tipo": 0.5,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": "cuerpo",
+     "objetivo_confianza": 0.943,
+     "objetivo_motivo": null,
+     "objetivo_h": 0.553,
+     "objetivo_corregido": null
     },
     {
      "id": "B-izq-5018",
@@ -1907,7 +2324,12 @@
      "confianza_tipo": 0.6,
      "tipo_clasificador": null,
      "corregido": null,
-     "descartado": false
+     "descartado": false,
+     "objetivo": null,
+     "objetivo_confianza": null,
+     "objetivo_motivo": "sin_rival",
+     "objetivo_h": null,
+     "objetivo_corregido": null
     }
    ],
    "por_round": [
@@ -1918,13 +2340,19 @@
      "total": 32,
      "izq": 21,
      "der": 11,
-     "por_minuto": 10.98
+     "por_minuto": 10.98,
+     "cabeza": 13,
+     "cuerpo": 8,
+     "objetivo_sin_dato": 11
     }
    ],
    "total": {
     "total": 32,
     "izq": 21,
-    "der": 11
+    "der": 11,
+    "cabeza": 13,
+    "cuerpo": 8,
+    "objetivo_sin_dato": 11
    },
    "guardia": [
     {
@@ -2366,5 +2794,19 @@
   },
   "caida_entre_rounds": {},
   "advertencia": "el conteo es de golpes DETECTADOS y esta por debajo del real: el recall medido del detector es 0.484. Lo que la medicion sostiene es la comparacion adentro de la sesion, no el numero absoluto"
+ },
+ "metodos": {
+  "objetivo": {
+   "regla": "altura_relativa_v1",
+   "tau": 0.2,
+   "medido": {
+    "exactitud_balanceada": 0.726,
+    "recall_cuerpo": 0.818,
+    "golpes": 806,
+    "pasa": false,
+    "fecha": "2026-10-13",
+    "detalle": "docs/experiments/2026-10-13-cabeza-cuerpo.md"
+   }
+  }
  }
 }

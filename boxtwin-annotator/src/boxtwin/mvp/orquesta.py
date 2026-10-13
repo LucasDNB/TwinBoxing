@@ -386,11 +386,63 @@ def completar(
     fc = construir(ses, golpes, eventos, cobertura, detector=info_detector,
                    lados=("A",) if individual else ("A", "B"))
     (directorio / FIGHTCARD).write_text(json.dumps(fc, indent=2, ensure_ascii=False) + "\n")
+    ses.guardar()
+
+    # -- enriquecer (ampliacion del 13-10): altura del golpe, sin repetir nada -----
+    fc = enriquecer(directorio, forzar=True, ses=ses) or fc
 
     ses.estado = "listo"
     ses.error = None
     ses.guardar()
     return fc
+
+
+def enriquecer(directorio: Path, forzar: bool = False, ses: Sesion | None = None) -> dict | None:
+    """
+    Lo que la ampliacion del 13-10 suma a una Fight-Card ya hecha, sin correr pose, detector
+    ni clasificador (03 §3): la altura de cada golpe (B11), las combinaciones (B10) y el
+    contexto en que se midio el detector (B8b). Lee poses.npz y fightcard.json; corre sin GPU.
+
+    Reanudable: devuelve None y no toca nada si la Fight-Card ya es 0.3 con la misma regla y
+    el mismo tau, salvo `forzar`. Las correcciones del entrenador se vuelven a aplicar encima,
+    asi que una altura corregida a mano no se pierde al reenriquecer. El tiempo queda en
+    sesion.json, porque cuenta para C5.
+    """
+    from boxtwin.mvp.fightcard import VERSION_FIGHTCARD, _combinaciones, aplicar_correcciones
+    from boxtwin.mvp.objetivo import REGLA, TAU, marcar_fightcard
+
+    directorio = Path(directorio)
+    fc = leer_fightcard(directorio)
+    previo = (fc.get("metodos") or {}).get("objetivo") or {}
+    if (not forzar and fc.get("version") == VERSION_FIGHTCARD
+            and previo.get("regla") == REGLA and previo.get("tau") == TAU):
+        return None
+    ses = ses or Sesion.cargar(directorio)
+    t0 = time.perf_counter()
+    z = np.load(directorio / POSES)
+    marcar_fightcard(fc, z["keypoints"], z["kp_score"], z["valid"], TAU)
+    fc["version"] = VERSION_FIGHTCARD
+    fc.setdefault("detector", {}).setdefault("medido_en", "sparring")
+    _combinaciones(fc)
+    fc = aplicar_correcciones(fc, leer_correcciones(directorio))
+    escribir_fightcard(directorio, fc)
+    ses.anotar_etapa("enriquecer", time.perf_counter() - t0, regla=REGLA, tau=TAU)
+    ses.guardar()
+    return fc
+
+
+def enriquecer_todas(raiz: Path) -> dict[str, str]:
+    """`enriquecer` sobre cada sesion lista de un directorio. Una que falla no frena a las demas."""
+    resultado: dict[str, str] = {}
+    for d in sorted(p for p in Path(raiz).iterdir() if (p / FIGHTCARD).is_file()):
+        if not (d / POSES).is_file():
+            resultado[d.name] = "sin poses.npz"
+            continue
+        try:
+            resultado[d.name] = "enriquecida" if enriquecer(d) is not None else "ya estaba"
+        except Exception as e:  # noqa: BLE001 - una sesion rota no puede frenar a las otras
+            resultado[d.name] = f"error: {e}"
+    return resultado
 
 
 def _recortar_tramos(video: Path, ses: Sesion, directorio: Path, cache, tramos: list[dict]) -> None:
@@ -540,7 +592,8 @@ def aplicar_tipos_a_sesion(directorio: Path, exactitud: float | None = None) -> 
 
 
 def registrar_correccion(
-    directorio: Path, golpe: str, tipo: str, por: str | None = None
+    directorio: Path, golpe: str, tipo: str | None = None, por: str | None = None,
+    objetivo: str | None = None,
 ) -> dict:
     """
     Guarda la correccion del entrenador y la refleja en la Fight-Card. F14 y RF10.
@@ -549,11 +602,14 @@ def registrar_correccion(
     material que el modelo no vio, que es exactamente lo que le falta para generalizar. Un
     registro que se sobrescribe deja de ser un dataset.
     """
-    from boxtwin.mvp.fightcard import aplicar_correcciones, correccion
+    from boxtwin.mvp.fightcard import aplicar_correcciones, correccion, correccion_objetivo
 
     directorio = Path(directorio)
     fc = leer_fightcard(directorio)
-    c = correccion(golpe, tipo, fc, por=por)
+    if (tipo is None) == (objetivo is None):
+        raise ValueError("una correccion es de tipo o de altura (objetivo), no de las dos ni de ninguna")
+    c = (correccion(golpe, tipo, fc, por=por) if tipo is not None
+         else correccion_objetivo(golpe, objetivo, fc, por=por))
     with (directorio / CORRECCIONES).open("a") as f:
         f.write(json.dumps(c, ensure_ascii=False) + "\n")
     fc = aplicar_correcciones(fc, leer_correcciones(directorio))

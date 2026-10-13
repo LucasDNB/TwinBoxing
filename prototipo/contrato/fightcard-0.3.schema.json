@@ -69,7 +69,29 @@
       "additionalProperties": false
     },
     "nomenclatura": { "type": "object", "additionalProperties": { "type": "string" } },
-    "no_incluye": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+    "no_incluye": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "metodos": {
+      "description": "0.3: lo escribe la etapa enriquecer (B11) junto con los campos de objetivo de cada golpe; construir no los conoce",
+      "type": "object",
+      "properties": {
+        "objetivo": {
+          "type": "object",
+          "required": ["regla", "tau", "medido"],
+          "properties": {
+            "regla": { "type": "string" },
+            "tau": { "type": "number" },
+            "medido": {
+              "type": ["object", "null"],
+              "properties": {
+                "exactitud_balanceada": { "type": "number" },
+                "recall_cuerpo": { "type": "number" },
+                "pasa": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      }
+    }
   },
   "not": {
     "anyOf": [
@@ -115,7 +137,10 @@
       "properties": {
         "total": { "type": "integer", "minimum": 0 },
         "izq": { "type": "integer", "minimum": 0 },
-        "der": { "type": "integer", "minimum": 0 }
+        "der": { "type": "integer", "minimum": 0 },
+        "cabeza": { "type": "integer", "minimum": 0 },
+        "cuerpo": { "type": "integer", "minimum": 0 },
+        "objetivo_sin_dato": { "type": "integer", "minimum": 0 }
       }
     },
     "golpe": {
@@ -133,7 +158,10 @@
           "required": ["tipo"],
           "properties": { "tipo": { "enum": ["jab", "cross", "hook", "uppercut", "no_golpe"] } }
         },
-        "descartado": { "type": "boolean" }
+        "descartado": { "type": "boolean" },
+        "objetivo": { "enum": ["cabeza", "cuerpo", null] },
+        "objetivo_confianza": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "objetivo_motivo": { "enum": ["sin_rival", "sin_pose", "individual", null] }
       }
     },
     "peleador": {
