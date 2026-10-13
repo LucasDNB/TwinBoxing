@@ -25,6 +25,15 @@ QUE HACE
   con straight, y ese eje esta medido cinco veces por caminos independientes sin mejorar.
   Se devuelve con su exactitud y con cuantos golpes quedaron sin clasificar.
 
+  B7 (web entrenador) suma la lectura por contexto -bolsa, sombra, sparring y combate miden
+  cosas distintas y se comparan consigo mismos, no contra una linea de base comun-, las
+  combinaciones frecuentes y el volumen por round. Lo que depende de un criterio
+  pre-registrado sin aprobar (C2 para rounds, C3 para guardia) se devuelve en nulo aunque
+  haya datos: asi ningun cliente lo puede mostrar por error.
+
+  Los golpes que el entrenador marco "no fue un golpe" (B4) no entran en la mezcla ni en
+  las combinaciones; los corregidos entran con su tipo corregido.
+
 USO
   from boxtwin_api.perfil import construir_perfil
   perfil = construir_perfil(boxeador, sesiones_con_lado, dir_de_sesion)
@@ -35,7 +44,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-__all__ = ["construir_perfil", "resumen_de_sesion"]
+__all__ = ["CONTEXTOS", "combinaciones", "construir_perfil", "lado_del_brazo", "resumen_de_sesion"]
+
+CONTEXTOS = ("bolsa", "sombra", "sparring", "combate")
+FAMILIAS = ("jab", "cross", "hook", "uppercut")
 
 
 def _leer_fightcard(directorio: Path) -> dict | None:
@@ -67,7 +79,12 @@ def resumen_de_sesion(fc: dict, lado: str) -> dict | None:
     tipos: dict[str, int] = {}
     sin_tipo = 0
     confianzas = []
+    # Lo descartado por el entrenador sigue contando como detectado, pero no es un golpe y
+    # no entra en la mezcla.
+    descartados = sum(1 for g in golpes if g.get("descartado"))
     for g in golpes:
+        if g.get("descartado"):
+            continue
         t = g.get("tipo")
         if t:
             tipos[t] = tipos.get(t, 0) + 1
@@ -83,8 +100,11 @@ def resumen_de_sesion(fc: dict, lado: str) -> dict | None:
             brazos[b] = brazos.get(b, 0) + 1
 
     clf = fc.get("clasificador") or {}
+    rondas = (fc.get("video") or {}).get("rounds") or []
     return {
         "golpes": len(golpes),
+        "descartados": descartados,
+        "rounds": len(rondas) or 1,
         "minutos": round(minutos, 2) if minutos else None,
         "golpes_por_minuto": round(len(golpes) / minutos, 2) if minutos else None,
         "por_round": pel.get("por_round") or [],
@@ -103,14 +123,127 @@ def resumen_de_sesion(fc: dict, lado: str) -> dict | None:
     }
 
 
-def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion) -> dict:
+def lado_del_brazo(brazo: str, guardia: str | None) -> str | None:
+    """Adelante o atras, desde la guardia y el brazo. Ortodoxo: izquierdo adelante."""
+    if guardia not in ("ortodoxa", "zurda"):
+        return None
+    izq = brazo in ("izq", "left")
+    return "adelante" if izq == (guardia == "ortodoxa") else "atras"
+
+
+def combinaciones(golpes_por_sesion: list[list[dict]], pausa: float, guardia: str | None,
+                  cuantas: int = 5) -> list[dict]:
+    """
+    Golpes consecutivos del mismo peleador separados por no mas de `pausa` segundos; las
+    `cuantas` secuencias de 2 o 3 golpes mas frecuentes (05 B7).
+
+    Una cadena no cruza sesiones. Un golpe sin tipo la corta: no se nombra una combinacion
+    con un hueco. Viajan como estimacion porque cada eslabon es un tipo estimado.
+    """
+    conteo: dict[tuple, int] = {}
+    for golpes in golpes_por_sesion:
+        validos = sorted((g for g in golpes if not g.get("descartado")), key=lambda g: g["t_inicio"])
+        cadenas: list[list[dict]] = []
+        actual: list[dict] = []
+        for g in validos:
+            if not g.get("tipo"):
+                if actual:
+                    cadenas.append(actual)
+                actual = []
+                continue
+            if actual and g["t_inicio"] - actual[-1]["t_fin"] <= pausa:
+                actual.append(g)
+            else:
+                if actual:
+                    cadenas.append(actual)
+                actual = [g]
+        if actual:
+            cadenas.append(actual)
+        for c in cadenas:
+            for largo in (2, 3):
+                for i in range(len(c) - largo + 1):
+                    clave = tuple((g["tipo"], lado_del_brazo(g.get("brazo", ""), guardia))
+                                  for g in c[i:i + largo])
+                    conteo[clave] = conteo.get(clave, 0) + 1
+    orden = sorted(conteo.items(), key=lambda kv: (-kv[1], -len(kv[0]), kv[0]))
+    return [
+        {"secuencia": [{"familia": f, "lado": lado} for f, lado in clave], "n": n, "estimado": True}
+        for clave, n in orden[:cuantas]
+    ]
+
+
+def _guardia_arriba(entradas: list[dict]) -> float | None:
+    ev = [e for x in entradas for e in x["guardia"]
+          if e.get("medible") is not False and e.get("mano_opuesta_caida") is not None]
+    if not ev:
+        return None
+    return round(sum(1 for e in ev if e["mano_opuesta_caida"] is False) / len(ev), 3)
+
+
+def _caida_ultimo_round(entradas: list[dict]) -> float | None:
+    """Variacion relativa del ritmo del ultimo round contra el anterior, promedio entre las
+    sesiones con tres rounds o mas."""
+    variaciones = []
+    for x in entradas:
+        r = x["por_round"]
+        if len(r) >= 3 and r[-2].get("por_minuto"):
+            variaciones.append((r[-1]["por_minuto"] - r[-2]["por_minuto"]) / r[-2]["por_minuto"])
+    return round(sum(variaciones) / len(variaciones), 3) if variaciones else None
+
+
+def _por_contexto(entradas: list[dict], banderas: dict) -> list[dict]:
+    salida = []
+    for ctx in CONTEXTOS:
+        suyas = [x for x in entradas if x["contexto"] == ctx]
+        if not suyas:
+            continue
+        golpes = sum(x["golpes"] for x in suyas)
+        minutos = sum(x["minutos"] or 0 for x in suyas)
+        mezcla: dict[str, int] = {}
+        for x in suyas:
+            for t, n in x["mezcla"].items():
+                mezcla[t] = mezcla.get(t, 0) + n
+        clasificados = sum(mezcla.get(f, 0) for f in FAMILIAS)
+        salida.append({
+            "contexto": ctx,
+            "sesiones": len(suyas),
+            "golpes_por_minuto": round(golpes / minutos, 2) if minutos else None,
+            "jab_fraccion": round(mezcla.get("jab", 0) / clasificados, 3) if clasificados else None,
+            "guardia_opuesta_arriba": _guardia_arriba(suyas) if banderas.get("guardia") else None,
+            "caida_ultimo_round": (_caida_ultimo_round(suyas)
+                                   if banderas.get("comparacion_rounds") else None),
+        })
+    return salida
+
+
+def _rounds_promedio(entradas: list[dict]) -> list[dict] | None:
+    por_indice: dict[int, list[float]] = {}
+    for x in entradas:
+        for i, r in enumerate(x["por_round"], start=1):
+            if r.get("por_minuto") is not None:
+                por_indice.setdefault(i, []).append(float(r["por_minuto"]))
+    if not por_indice:
+        return None
+    return [{"round": i, "golpes_por_minuto": round(sum(v) / len(v), 2)}
+            for i, v in sorted(por_indice.items())]
+
+
+def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: str = "todas",
+                     banderas: dict | None = None, pausa: float = 0.5) -> dict:
     """
     El perfil completo. `sesiones` son pares (sesion, lado) ya filtrados por boxeador.
 
     Las sesiones vienen de la mas vieja a la mas nueva: la evolucion se lee en ese orden y
     darla al reves invita a leer una mejora como un empeoramiento.
+
+    `contexto` filtra las sesiones, la evolucion, los totales y las combinaciones; la tabla
+    por contexto y la cantidad de sesiones por contexto se calculan siempre sobre todas, que
+    es lo que la pantalla necesita para poner los filtros y comparar.
     """
-    entradas = []
+    banderas = banderas or {}
+    todas = []
+    golpes_de: dict[str, list[dict]] = {}
+    nomenclatura: dict[str, str] = {}
     for ses, lado in sorted(sesiones, key=lambda x: x[0].creada):
         fc = _leer_fightcard(Path(dir_de_sesion(ses.id)))
         if not fc:
@@ -118,13 +251,19 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion) -> dict:
         r = resumen_de_sesion(fc, lado)
         if r is None:
             continue
-        entradas.append({
+        golpes_de[ses.id] = ((fc.get("peleadores") or {}).get(lado) or {}).get("golpes") or []
+        # La de la Fight-Card mas reciente: los nombres de golpe en pantalla los decide el
+        # contrato (RF11, D7), no la web.
+        nomenclatura = fc.get("nomenclatura") or nomenclatura
+        todas.append({
             "sesion_id": ses.id,
             "nombre": ses.nombre,
             "fecha": ses.creada.isoformat(),
             "lado": lado,
+            "contexto": getattr(ses, "contexto", None) or "sparring",
             **r,
         })
+    entradas = todas if contexto == "todas" else [x for x in todas if x["contexto"] == contexto]
 
     total_golpes = sum(e["golpes"] for e in entradas)
     mezcla: dict[str, int] = {}
@@ -166,12 +305,30 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion) -> dict:
             "conteo."
         )
 
+    sesiones_por_contexto = {c: sum(1 for x in todas if x["contexto"] == c) for c in CONTEXTOS}
+    extendido = {
+        "nomenclatura": nomenclatura,
+        "contexto": contexto,
+        "sesiones_por_contexto": sesiones_por_contexto,
+        "rounds_total": sum(x["rounds"] for x in entradas),
+        "por_contexto": _por_contexto(todas, banderas),
+        # Sin C2 aprobado, nulo aunque haya datos: el recall puede variar entre rounds y una
+        # caida del ultimo round podria ser del detector y no del boxeador (D3).
+        "rounds_promedio": _rounds_promedio(entradas) if banderas.get("comparacion_rounds") else None,
+        "combinaciones": combinaciones([golpes_de[x["sesion_id"]] for x in entradas], pausa,
+                                       boxeador.guardia),
+    }
+
     return {
+        **extendido,
         "boxeador": {
             "id": boxeador.id,
             "nombre": boxeador.nombre,
             "guardia": boxeador.guardia,
             "notas": boxeador.notas,
+            "categoria": getattr(boxeador, "categoria", None),
+            "altura_m": getattr(boxeador, "altura_m", None),
+            "envergadura_m": getattr(boxeador, "envergadura_m", None),
         },
         "sesiones": entradas,
         "totales": {
@@ -186,7 +343,9 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion) -> dict:
         # herramienta de entrenamiento y no en un informe suelto.
         "evolucion": [
             {"fecha": e["fecha"], "sesion_id": e["sesion_id"],
-             "golpes": e["golpes"], "golpes_por_minuto": e["golpes_por_minuto"]}
+             "golpes": e["golpes"], "golpes_por_minuto": e["golpes_por_minuto"],
+             # Con que detector: si cambia entre dos puntos, la linea se corta en la web.
+             "detector": e["detector"], "contexto": e["contexto"]}
             for e in entradas
         ],
         "avisos": avisos,

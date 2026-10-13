@@ -110,3 +110,55 @@ def test_los_candidatos_salen_del_mismo_nucleo_que_usa_la_identidad():
     assert 9 not in nucleo
     _, cands = elegir(ev, nucleo)
     assert 9 not in [c.track for c in cands]
+
+
+# -- B2 de la web entrenador: color, tramo y altura relativa ---------------------------
+
+
+def test_cada_candidato_trae_color_tramo_y_altura_relativa():
+    from boxtwin.mvp.candidatos import elegir
+
+    ev = {1: _track(1, ROJO, range(30, 300, 5), alto=0.9),
+          2: _track(2, AZUL, range(30, 300, 5), alto=0.81, x=500.0),
+          3: _track(3, ROJO, range(400, 430, 5), alto=0.99, x=120.0)}
+    _, cands = elegir(ev, [1, 2, 3], fps=30.0)
+    por = {c.track: c for c in cands}
+    assert por[1].color_guante["nombre"] == "rojos"
+    assert por[2].color_guante["nombre"] == "azules"
+    assert por[1].color_guante["hex"].startswith("#") and len(por[1].color_guante["hex"]) == 7
+    assert (por[1].t_desde, por[1].t_hasta) == (1.0, 9.83)
+    assert por[1].alto_relativo == 1.0, "la mediana de 0,81 0,9 0,99 es 0,9"
+    assert por[2].alto_relativo == 0.9
+    assert por[1].sugerido and por[2].sugerido and not por[3].sugerido
+
+
+def test_un_track_sin_cuadros_con_color_no_inventa_un_color():
+    from boxtwin.mvp.candidatos import elegir
+
+    ev = {1: _track(1, ROJO, range(0, 300, 5)),
+          2: _track(2, AZUL, range(0, 300, 5), x=500.0),
+          3: _track(3, ROJO, [])}
+    ev[3].primer_frame, ev[3].ultimo_frame = 10, 50
+    _, cands = elegir(ev, [1, 2, 3])
+    sin = next(c for c in cands if c.track == 3)
+    assert sin.cuadros_con_color == 0
+    assert sin.color_guante is None
+    assert sin.t_desde is None, "sin fps no se inventan segundos"
+
+
+def test_se_proponen_hasta_ocho():
+    from boxtwin.mvp.candidatos import elegir
+
+    ev = {t: _track(t, ROJO if t % 2 else AZUL, range(t * 10, t * 10 + 50, 5)) for t in range(1, 12)}
+    _, cands = elegir(ev, list(ev))
+    assert len(cands) == 8
+
+
+def test_nombre_del_color_por_tono():
+    from boxtwin.mvp.candidatos import color_para_pantalla
+
+    assert color_para_pantalla((0.0, 200.0, 150.0))["nombre"] == "rojos"
+    assert color_para_pantalla((105.0, 200.0, 150.0))["nombre"] == "azules"
+    assert color_para_pantalla((60.0, 200.0, 150.0))["nombre"] == "verdes"
+    assert color_para_pantalla((-1.0, 0.0, 30.0))["nombre"] == "negros"
+    assert color_para_pantalla((-1.0, 10.0, 230.0))["nombre"] == "blancos"

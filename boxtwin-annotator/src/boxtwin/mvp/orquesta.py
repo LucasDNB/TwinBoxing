@@ -48,6 +48,8 @@ from boxtwin.mvp.candidatos import elegir, recortar
 from boxtwin.mvp.fightcard import construir
 from boxtwin.mvp.guardia import ConfigGuardia, medir
 from boxtwin.mvp.sesion import Progreso, Sesion
+from boxtwin.mvp.tramos import aplicar_manuales, listar_tramos
+from boxtwin.core.types import TrackRole
 
 __all__ = [
     "CORRECCIONES",
@@ -69,6 +71,7 @@ POSES = "poses.npz"
 SEGMENTOS = "segmentos.json"
 FIGHTCARD = "fightcard.json"
 CANDIDATOS = "candidatos"
+TRAMOS = "tramos"
 
 
 class SesionEnEstadoEquivocado(RuntimeError):
@@ -181,6 +184,7 @@ def procesar(
     pareja, candidatos = elegir(
         ev, prop.diagnostico.get("nucleo_tracks", []),
         min_coexistencia=cfg_identidad.min_coexistencia,
+        fps=doc.video.fps,
     )
     recortar(video_en_sesion, cache, candidatos, salida / CANDIDATOS)
 
@@ -236,19 +240,24 @@ def _ubicar_video(video: Path, salida: Path) -> Path:
 def completar(
     directorio: Path,
     semilla_a: int,
-    semilla_b: int,
+    semilla_b: int | None,
     detector: Path,
     umbral: float = 0.80,
     cfg_identidad: ConfigIdentidadAuto | None = None,
     cfg_guardia: ConfigGuardia | None = None,
     device: str | None = None,
     progreso=None,
+    manual: bool = False,
 ) -> dict:
     """
     Identidad por color desde las semillas, detector, guardia y Fight-Card.
 
     Devuelve la Fight-Card ya escrita en disco. El tipo de golpe NO se resuelve aca: lo pone
     la etapa de clasificacion, que corre en el otro entorno conda y lee `segmentos.json`.
+
+    Con `manual` aplica ademas las asignaciones de tramos que hizo una persona en la web
+    (`identidad.asignaciones_manuales` de sesion.json), encima de la asignacion por color
+    (B3 de la web entrenador). No repite la pose: esta etapa nunca la corre, lee la cache.
     """
     import torch
 
@@ -269,16 +278,25 @@ def completar(
     doc, _ = cargar_o_crear(paths, cache.meta)
     ev = cargar_evidencia(directorio / EVIDENCIA)
 
+    individual = semilla_b is None
     ses.estado = "completando"
-    ses.siembra = {"track_a": int(semilla_a), "track_b": int(semilla_b)}
+    ses.siembra = {"track_a": int(semilla_a), "track_b": None if individual else int(semilla_b)}
     ses.guardar()
 
     # -- identidad con la siembra -------------------------------------------
     t0 = time.perf_counter()
-    prop = proponer(
-        ev, cfg_identidad, doc.video.total_frames, doc.video.fps,
-        semillas=(int(semilla_a), int(semilla_b)),
-    )
+    if individual:
+        # Bolsa o sombra (B8): una sola persona, una sola semilla. Sin medir todavia: la
+        # bandera sesiones_individuales esta apagada hasta pasar el criterio del spec.
+        from boxtwin.mvp.individual import proponer_individual
+
+        prop = proponer_individual(ev, cfg_identidad, doc.video.total_frames, doc.video.fps,
+                                   semilla=int(semilla_a))
+    else:
+        prop = proponer(
+            ev, cfg_identidad, doc.video.total_frames, doc.video.fps,
+            semillas=(int(semilla_a), int(semilla_b)),
+        )
     if prop.diagnostico.get("semillas_en_conflicto"):
         ses.estado = "espera_siembra"
         ses.error = prop.avisos[-1] if prop.avisos else "semillas en conflicto"
@@ -287,11 +305,25 @@ def completar(
             "las dos semillas caen del mismo lado de la coexistencia: "
             "o son la misma persona, o hay una coexistencia espuria. Elegi otro par"
         )
+    # -- tramos: lo que quedo sin asignar y lo que asigno una persona (B3) -----
+    auto = sum(1 for r in prop.roles.values() if r in (TrackRole.A, TrackRole.B))
+    sin_asignar_auto = list(prop.sin_asignar)
+    manuales: dict[int, str] = {}
+    if manual:
+        manuales = {int(k): v for k, v in
+                    (ses.identidad.get("asignaciones_manuales") or {}).items()}
+    asignados_manual = aplicar_manuales(prop, manuales) if manuales else 0
+
     AsignarIdentidadAuto(prop, annotator="boxtwin-completar", forzar=True).do(doc)
     save_doc(doc, paths.annot)
     ses.anotar_etapa("identidad", time.perf_counter() - t0,
                      asignados=prop.diagnostico.get("asignados_A", 0)
-                     + prop.diagnostico.get("asignados_B", 0))
+                     + prop.diagnostico.get("asignados_B", 0),
+                     manual=bool(manual), asignados_manual=asignados_manual)
+    tramos = listar_tramos(ev, prop, cfg_identidad, doc.video.fps,
+                           sin_asignar=sin_asignar_auto, manuales=manuales)
+    _recortar_tramos(paths.video, ses, directorio, cache, tramos)
+    ses.identidad["tramos"] = tramos
 
     # -- series por peleador -------------------------------------------------
     t0 = time.perf_counter()
@@ -335,19 +367,48 @@ def completar(
     cobertura["separacion_de_perfiles"] = prop.diagnostico.get("separacion_de_perfiles")
     cobertura["piso_de_separacion"] = cfg_identidad.separacion_minima
     cobertura["tracks_sin_asignar"] = len(prop.sin_asignar)
+    # 0.2: cuantos tramos eran de peleador, cuantos asigno el sistema y cuantos una persona.
+    cobertura["tramos_total"] = auto + len(sin_asignar_auto)
+    cobertura["tramos_asignados_auto"] = auto
+    cobertura["tramos_asignados_manual"] = asignados_manual
+    cobertura["separacion_color"] = prop.diagnostico.get("separacion_de_perfiles")
     ses.identidad.update({"diagnostico_con_siembra": _jsonable(prop.diagnostico),
                           "avisos_con_siembra": list(prop.avisos)})
     for a in prop.avisos:
         if a not in ses.avisos:
             ses.avisos.append(a)
 
-    fc = construir(ses, golpes, eventos, cobertura, detector=info_detector)
+    fc = construir(ses, golpes, eventos, cobertura, detector=info_detector,
+                   lados=("A",) if individual else ("A", "B"))
     (directorio / FIGHTCARD).write_text(json.dumps(fc, indent=2, ensure_ascii=False) + "\n")
 
     ses.estado = "listo"
     ses.error = None
     ses.guardar()
     return fc
+
+
+def _recortar_tramos(video: Path, ses: Sesion, directorio: Path, cache, tramos: list[dict]) -> None:
+    """
+    Un recorte del cuadro central de cada tramo, con el mismo recortador de la siembra.
+
+    Si el video no se puede abrir el tramo queda sin recorte y se puede asignar igual desde
+    el reproductor: un recorte que falta no puede frenar la revision.
+    """
+    if not tramos:
+        return
+    from boxtwin.mvp.candidatos import Candidato
+
+    cands = [Candidato(track=t["track"], cuadro=t["cuadro"], alto=0.0, fraccion_guante=0.0,
+                       cuadros_con_color=0) for t in tramos]
+    try:
+        recortar(video, cache, cands, directorio / TRAMOS)
+    except Exception as e:  # noqa: BLE001 - cv2 y un video roto fallan de muchas formas
+        ses.avisos.append(f"no se pudieron recortar los tramos para revisar: {e}")
+        return
+    por_track = {c.track: c.recorte for c in cands}
+    for t in tramos:
+        t["recorte"] = por_track.get(t["track"])
 
 
 def _paths_de(ses: Sesion, directorio: Path) -> ProjectPaths:

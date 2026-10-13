@@ -137,7 +137,9 @@ def test_de_la_siembra_a_la_fightcard(sesion, detector):
     assert (sesion / "segmentos.json").is_file()
     assert (sesion / "poses.npz").is_file(), "el clasificador corre en el otro entorno"
     assert Sesion.cargar(sesion).estado == "listo"
-    assert fc["version"] == "0.1"
+    from boxtwin.mvp.fightcard import VERSION_FIGHTCARD
+
+    assert fc["version"] == VERSION_FIGHTCARD
     assert set(fc["peleadores"]) == {"A", "B"}
 
 

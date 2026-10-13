@@ -40,7 +40,10 @@ from boxtwin_api.cola import encolar
 from boxtwin_api.config import cfg
 from boxtwin_api.db import crear_tablas, obtener_sesion
 from boxtwin_api.esquemas import (
+    CONTEXTOS,
+    PRACTICAS,
     AsignarBoxeadores,
+    EntradaTramos,
     Credenciales,
     EntradaBoxeador,
     EntradaCorreccion,
@@ -49,7 +52,7 @@ from boxtwin_api.esquemas import (
     sesion_a_dict,
 )
 from boxtwin_api.exportar import a_csv, a_html
-from boxtwin_api.modelos import Boxeador, Correccion, Sesion, Trabajo, Usuario
+from boxtwin_api.modelos import AsignacionManual, Boxeador, Correccion, Sesion, Trabajo, Usuario
 from boxtwin_api.seguridad import (
     emitir_ticket,
     emitir_token,
@@ -233,6 +236,10 @@ def subir(
     nombre: str = Form(default=""),
     round_s: float | None = Form(default=None),
     descanso_s: float = Form(default=60.0),
+    contexto: str = Form(default="sparring"),
+    practica: str = Form(default=""),
+    rounds: str = Form(default=""),
+    consentimiento: str = Form(default=""),
     usuario: Usuario = Depends(usuario_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
@@ -241,7 +248,29 @@ def subir(
 
     El archivo se escribe en disco a medida que llega y no en memoria: 30 minutos de 1080p
     desde un celular son varios gigabytes y un servidor de un nodo no los aguanta en RAM.
+
+    Los campos de contexto y el consentimiento son de B1 (web entrenador). El
+    consentimiento se valida ANTES de leer el archivo: no tiene sentido recibir un gigabyte
+    para rechazarlo despues.
     """
+    if consentimiento.strip().lower() != "true":
+        raise HTTPException(422, "falta el consentimiento de las personas filmadas")
+    if contexto not in CONTEXTOS:
+        raise HTTPException(422, f"contexto tiene que ser uno de {', '.join(CONTEXTOS)}")
+    practica = practica.strip() or None
+    if practica is not None and contexto != "sombra":
+        raise HTTPException(422, "lo que se practico solo se declara en una sesion de sombra")
+    if practica is not None and practica not in PRACTICAS:
+        raise HTTPException(422, f"practica tiene que ser una de {', '.join(PRACTICAS)}")
+    cantidad = None
+    if rounds.strip():
+        try:
+            cantidad = int(rounds)
+        except ValueError:
+            raise HTTPException(422, "rounds tiene que ser un entero") from None
+        if cantidad < 1:
+            raise HTTPException(422, "rounds tiene que ser 1 o mas, o vacio para sin rounds")
+
     ext = Path(archivo.filename or "").suffix.lower()
     if ext not in cfg.formatos:
         raise HTTPException(
@@ -258,6 +287,11 @@ def subir(
         round_s=round_s,
         descanso_s=descanso_s,
         estado="en_cola",
+        contexto=contexto,
+        practica=practica,
+        rounds=cantidad,
+        consentimiento_en=datetime.now(timezone.utc),
+        consentimiento_por=usuario.email,
     )
     db.add(ses)
     db.flush()
@@ -305,6 +339,18 @@ def estado(
     """
     s = sesion_del_usuario(sesion_id, usuario, db)
     d = _sesion_en_disco(s.id)
+    trabajos = db.scalars(
+        select(Trabajo).where(Trabajo.sesion_id == s.id).order_by(Trabajo.creado)
+    ).all()
+    # Con un `completar` esperando en la cola, el archivo todavia describe el ciclo ANTERIOR
+    # (espera_siembra, o listo si se re-sembro o se asignaron tramos): el worker no lo tomo.
+    # Hacerle caso hacia retroceder una sesion recien sembrada a espera_siembra, y la web,
+    # que deja de sondear ahi, se quedaba clavada. Encontrado en el e2e de la web entrenador.
+    # Vale tambien con el trabajo ya tomado: entre que el worker lo reclama y la etapa escribe
+    # su primer estado hay una ventana en la que el disco sigue diciendo espera_siembra. El CI,
+    # con un worker mas rapido que la estacion, cayo ahi.
+    completar_pendiente = any(t.estado in ("en_cola", "tomado") and t.etapa == "completar"
+                              for t in trabajos)
     extra: dict = {
         "candidatos": [], "avisos": [], "etapas": [],
         # Lo escribe la etapa que esta corriendo, en su propio archivo, porque sesion.json
@@ -321,12 +367,10 @@ def estado(
         extra["avisos"] = d.get("avisos", [])
         extra["etapas"] = d.get("etapas", [])
         extra["pareja_sugerida"] = (d.get("identidad") or {}).get("pareja_sugerida")
-        if d.get("estado") and d["estado"] != s.estado and s.estado != "fallo":
+        viejo = completar_pendiente and d.get("estado") in ("espera_siembra", "listo")
+        if d.get("estado") and d["estado"] != s.estado and s.estado != "fallo" and not viejo:
             s.estado = d["estado"]
             db.commit()
-    trabajos = db.scalars(
-        select(Trabajo).where(Trabajo.sesion_id == s.id).order_by(Trabajo.creado)
-    ).all()
     extra["trabajos"] = [
         {"etapa": t.etapa, "estado": t.estado, "intento": t.intento, "error": t.error}
         for t in trabajos
@@ -342,7 +386,24 @@ def listar(
     filas = db.scalars(
         select(Sesion).where(Sesion.usuario_id == usuario.id).order_by(Sesion.creada.desc())
     ).all()
-    return [sesion_a_dict(s) for s in filas]
+    # B5: el progreso de las que estan en curso, para que la lista muestre "pose · 64%"
+    # sin un pedido por sesion. Solo esas: leer disco para las listas no aporta nada.
+    from boxtwin_api.panel import EN_CURSO
+
+    return [
+        sesion_a_dict(s, {"progreso": _progreso_en_disco(s.id)} if s.estado in EN_CURSO else None)
+        for s in filas
+    ]
+
+
+@app.get("/panel")
+def panel(
+    usuario: Usuario = Depends(usuario_actual), db: Session = Depends(obtener_sesion)
+) -> dict:
+    """Los indicadores y lo pendiente de la pantalla 01 (B5). Solo del usuario."""
+    from boxtwin_api.panel import construir_panel
+
+    return construir_panel(usuario, db, cfg.dir_sesion, cfg.perfil_preliminar_sesiones)
 
 
 @app.get("/jobs/{sesion_id}/candidatos/{track}")
@@ -387,21 +448,146 @@ def siembra(
         raise HTTPException(
             409, f"la sesion esta en '{s.estado}' y todavia no hay candidatos que elegir"
         )
+    individual = (s.contexto or "sparring") in ("bolsa", "sombra")
+    if s_in.track_b is None and not individual:
+        raise HTTPException(422, "en sparring y combate hay que marcar a los dos peleadores")
+    if s_in.track_b is not None and individual:
+        raise HTTPException(422, "en bolsa y sombra se marca a una sola persona")
     disco = _sesion_en_disco(s.id) or {}
     tracks = {c["track"] for c in disco.get("candidatos", [])}
+    elegidos = {s_in.track_a} | ({s_in.track_b} if s_in.track_b is not None else set())
     # Se permite un track que no este entre los propuestos -el usuario puede haber visto al
     # peleador en un track que los filtros descartaron- pero no uno que no existe.
-    if tracks and not {s_in.track_a, s_in.track_b} <= tracks:
-        ajenos = sorted({s_in.track_a, s_in.track_b} - tracks)
+    if tracks and not elegidos <= tracks:
+        ajenos = sorted(elegidos - tracks)
         if any(t < 0 for t in ajenos):
             raise HTTPException(422, f"track invalido: {ajenos}")
 
     s.semilla_a, s.semilla_b = s_in.track_a, s_in.track_b
     s.estado = "en_cola"
     s.error = None
+    # Una semilla nueva redefine que es A y que es B: las asignaciones de tramos hechas con la
+    # anterior dejan de significar lo mismo. Quedan en la base, para auditoria; se sacan de
+    # sesion.json para que el proximo completar manual no las aplique al reves.
+    if disco.get("identidad", {}).get("asignaciones_manuales"):
+        disco["identidad"].pop("asignaciones_manuales")
+        _escribir_sesion_en_disco(s.id, disco)
     encolar(db, s.id, "completar", track_a=s_in.track_a, track_b=s_in.track_b)
     db.commit()
     return {"job_id": s.id, "estado": s.estado}
+
+
+# ---------------------------------------------------------------------------
+# Tramos sin asignar (B3 de la web entrenador)
+# ---------------------------------------------------------------------------
+
+
+def _tramos_en_disco(s: Sesion) -> tuple[dict, list[dict]]:
+    if s.estado != "listo":
+        raise HTTPException(
+            409, f"la sesion esta en '{s.estado}': los tramos se revisan sobre una sesion lista"
+        )
+    disco = _sesion_en_disco(s.id) or {}
+    tramos = (disco.get("identidad") or {}).get("tramos")
+    if tramos is None:
+        raise HTTPException(
+            409, "esta sesion se proceso antes de la revision de tramos; reprocesala para "
+                 "revisarlos"
+        )
+    return disco, tramos
+
+
+@app.get("/jobs/{sesion_id}/tramos")
+def tramos(
+    sesion_id: str,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(obtener_sesion),
+) -> dict:
+    """
+    Lo que la identidad no pudo asignar, para que una persona lo termine (plan B de C1).
+
+    Cada tramo viaja con su motivo y, si ya lo asigno alguien, con esa asignacion: la
+    lista no se achica al asignar, para que una decision se pueda cambiar.
+    """
+    s = sesion_del_usuario(sesion_id, usuario, db)
+    disco, lista = _tramos_en_disco(s)
+    manuales = (disco.get("identidad") or {}).get("asignaciones_manuales") or {}
+    ident = _fightcard(s.id).get("identidad") or {}
+    return {
+        "cobertura": {
+            "A": ident.get("cobertura_A", 0.0),
+            "B": ident.get("cobertura_B", 0.0),
+            "sin_asignar": ident.get("sin_asignar", 0.0),
+        },
+        "separacion_color": ident.get("separacion_color", ident.get("separacion_de_perfiles")),
+        "tramos": [
+            {
+                "track": t["track"],
+                "t_desde": t["t_desde"],
+                "t_hasta": t["t_hasta"],
+                "motivo": t["motivo"],
+                "recorte_url": (f"/jobs/{s.id}/tramos/{t['track']}/recorte"
+                                if t.get("recorte") else None),
+                "asignado": manuales.get(str(t["track"]), t.get("asignado")),
+            }
+            for t in lista
+        ],
+    }
+
+
+@app.get("/jobs/{sesion_id}/tramos/{track}/recorte")
+def recorte_de_tramo(
+    track: int,
+    sesion_id: str,
+    t: str = "",
+    authorization: str = Header(default=""),
+    db: Session = Depends(obtener_sesion),
+) -> FileResponse:
+    """El cuadro central de un tramo. Entra con ticket, igual que los recortes de siembra."""
+    usuario = usuario_por_ticket_o_header(sesion_id, t, authorization, db)
+    s = sesion_del_usuario(sesion_id, usuario, db)
+    ruta = cfg.dir_sesion(s.id) / "tramos" / f"track_{int(track)}.jpg"
+    if not ruta.is_file():
+        raise HTTPException(404, "no hay recorte para ese tramo")
+    return FileResponse(ruta, media_type="image/jpeg")
+
+
+@app.put("/jobs/{sesion_id}/tramos", status_code=202)
+def asignar_tramos(
+    sesion_id: str,
+    entrada: EntradaTramos,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(obtener_sesion),
+) -> dict:
+    """
+    Guarda las asignaciones de la persona y vuelve a correr la segunda etapa con ellas.
+
+    La segunda etapa reutiliza la cache de pose y tracking: aplica la asignacion por color,
+    fuerza las manuales encima y vuelve a correr detector, guardia y clasificacion. Cuesta
+    segundos, no los minutos de la pose.
+    """
+    s = sesion_del_usuario(sesion_id, usuario, db)
+    disco, lista = _tramos_en_disco(s)
+    validos = {int(t["track"]) for t in lista}
+    ajenos = sorted({a.track for a in entrada.asignaciones} - validos)
+    if ajenos:
+        raise HTTPException(422, f"esos tracks no son tramos de esta sesion: {ajenos}")
+    if s.semilla_a is None:
+        raise HTTPException(409, "la sesion no tiene siembra: primero hay que marcar a A y B")
+
+    ident = disco.setdefault("identidad", {})
+    manuales = dict(ident.get("asignaciones_manuales") or {})
+    for a in entrada.asignaciones:
+        manuales[str(a.track)] = a.rol
+        db.add(AsignacionManual(sesion_id=s.id, track=a.track, rol=a.rol, usuario_id=usuario.id))
+    ident["asignaciones_manuales"] = manuales
+    _escribir_sesion_en_disco(s.id, disco)
+
+    s.estado = "en_cola"
+    s.error = None
+    encolar(db, s.id, "completar", track_a=s.semilla_a, track_b=s.semilla_b, manual=True)
+    db.commit()
+    return {"job_id": s.id, "estado": s.estado, "asignaciones": len(manuales)}
 
 
 # ---------------------------------------------------------------------------
@@ -417,6 +603,14 @@ def _sesion_en_disco(sesion_id: str) -> dict | None:
         return json.loads(ruta.read_text())
     except json.JSONDecodeError:  # pragma: no cover - el worker escribe atomico
         return None
+
+
+def _escribir_sesion_en_disco(sesion_id: str, datos: dict) -> None:
+    """Escritura atomica de sesion.json, para que el worker nunca lea uno a medias."""
+    ruta = cfg.dir_sesion(sesion_id) / "sesion.json"
+    tmp = ruta.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(datos, indent=2, ensure_ascii=False) + "\n")
+    tmp.replace(ruta)
 
 
 def _progreso_en_disco(sesion_id: str) -> dict | None:
@@ -443,7 +637,21 @@ def fightcard(
     db: Session = Depends(obtener_sesion),
 ) -> JSONResponse:
     s = sesion_del_usuario(sesion_id, usuario, db)
-    return JSONResponse(_fightcard(s.id))
+    fc = _fightcard(s.id)
+    # 05 §4: lo que sale de la base y puede cambiar despues del procesamiento va al
+    # responder y no se guarda en el archivo. Asignar un peleador no reescribe la Fight-Card.
+    fc["sesion"] = {
+        "contexto": s.contexto or "sparring",
+        "practica": s.practica,
+        "boxeadores": {"A": _boxeador_de_sesion(s.boxeador_a), "B": _boxeador_de_sesion(s.boxeador_b)},
+    }
+    return JSONResponse(fc)
+
+
+def _boxeador_de_sesion(b) -> dict | None:
+    if b is None:
+        return None
+    return {"id": b.id, "nombre": b.nombre, "guardia": b.guardia, "categoria": b.categoria}
 
 
 @app.get("/fightcards/{sesion_id}/export")
@@ -671,9 +879,40 @@ def _boxeador_del_usuario(bid: str, usuario, db) -> "Boxeador":
     return b
 
 
-def _boxeador_a_dict(b) -> dict:
-    return {"id": b.id, "nombre": b.nombre, "guardia": b.guardia, "notas": b.notas,
-            "creado": b.creado.isoformat()}
+def _boxeador_a_dict(b, uso: dict | None = None) -> dict:
+    d = {"id": b.id, "nombre": b.nombre, "guardia": b.guardia, "notas": b.notas,
+         "creado": b.creado.isoformat(),
+         # B6
+         "categoria": b.categoria,
+         "altura_m": b.altura_m,
+         "envergadura_m": b.envergadura_m}
+    if uso is not None:
+        n, ultima = uso.get(b.id, (0, None))
+        d["sesiones"] = n
+        d["ultima_sesion"] = ultima.isoformat() if ultima else None
+    return d
+
+
+def _uso_de_boxeadores(usuario, db) -> dict:
+    """
+    Cuantas sesiones tiene cada boxeador, como A o como B, y la ultima (B5b, B6).
+
+    Dos consultas agrupadas sobre `sesiones`, sin leer Fight-Cards: es lo que la lista y el
+    panel muestran debajo de cada nombre, y no puede costar un archivo por sesion.
+    """
+    from sqlalchemy import func
+
+    uso: dict[str, tuple[int, object]] = {}
+    for col in (Sesion.boxeador_a_id, Sesion.boxeador_b_id):
+        filas = db.execute(
+            select(col, func.count(Sesion.id), func.max(Sesion.creada))
+            .where(Sesion.usuario_id == usuario.id, col.is_not(None))
+            .group_by(col)
+        ).all()
+        for bid, n, ultima in filas:
+            n0, u0 = uso.get(bid, (0, None))
+            uso[bid] = (n0 + n, max(x for x in (u0, ultima) if x is not None))
+    return uso
 
 
 @app.post("/boxeadores", status_code=201)
@@ -692,10 +931,11 @@ def crear_boxeador(
     if ya is not None:
         raise HTTPException(409, f"ya tenes un boxeador que se llama {nombre}")
     b = Boxeador(usuario_id=usuario.id, nombre=nombre, guardia=entrada.guardia,
-                 notas=entrada.notas)
+                 notas=entrada.notas, categoria=entrada.categoria,
+                 altura_m=entrada.altura_m, envergadura_m=entrada.envergadura_m)
     db.add(b)
     db.commit()
-    return _boxeador_a_dict(b)
+    return _boxeador_a_dict(b, {})
 
 
 @app.get("/boxeadores")
@@ -709,7 +949,8 @@ def listar_boxeadores(
         .order_by(Boxeador.nombre)
         .all()
     )
-    return [_boxeador_a_dict(b) for b in bs]
+    uso = _uso_de_boxeadores(usuario, db)
+    return [_boxeador_a_dict(b, uso) for b in bs]
 
 
 @app.patch("/boxeadores/{boxeador_id}")
@@ -723,8 +964,11 @@ def editar_boxeador(
     b.nombre = entrada.nombre.strip()
     b.guardia = entrada.guardia
     b.notas = entrada.notas
+    b.categoria = entrada.categoria
+    b.altura_m = entrada.altura_m
+    b.envergadura_m = entrada.envergadura_m
     db.commit()
-    return _boxeador_a_dict(b)
+    return _boxeador_a_dict(b, _uso_de_boxeadores(usuario, db))
 
 
 @app.put("/sesiones/{sesion_id}/boxeadores")
@@ -755,6 +999,7 @@ def asignar_boxeadores(
 @app.get("/boxeadores/{boxeador_id}/perfil")
 def perfil_de_boxeador(
     boxeador_id: str,
+    contexto: str = "todas",
     usuario: Usuario = Depends(usuario_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
@@ -774,7 +1019,48 @@ def perfil_de_boxeador(
             sesiones.append((s, "A"))
         if s.boxeador_b_id == b.id:
             sesiones.append((s, "B"))
-    return construir_perfil(b, sesiones, cfg.dir_sesion)
+    if contexto != "todas" and contexto not in CONTEXTOS:
+        raise HTTPException(422, f"contexto tiene que ser todas o uno de {', '.join(CONTEXTOS)}")
+    banderas = {"comparacion_rounds": cfg.c2 == "aprobado", "guardia": cfg.c3 == "aprobado"}
+    return construir_perfil(b, sesiones, cfg.dir_sesion, contexto=contexto, banderas=banderas,
+                            pausa=cfg.pausa_combinacion_s)
+
+
+@app.get("/producto")
+def producto() -> dict:
+    """
+    Lo que la web necesita saber de esta instancia antes de dibujar nada (05 B5).
+
+    Sin autenticacion: no expone datos de nadie. La web nunca decide sola si un bloque
+    condicionado se muestra: las banderas salen de aca, y aca salen del estado de los
+    criterios pre-registrados que Lucas carga por entorno cuando mide.
+    """
+    return {
+        "registro": cfg.modo_registro,
+        "max_bytes": cfg.max_bytes,
+        "max_minutos": cfg.max_minutos,
+        "formatos": list(cfg.formatos),
+        "factor_procesamiento": {
+            "min": cfg.factor_min,
+            "mediana": cfg.factor_mediana,
+            "max": cfg.factor_max,
+            "medido_sobre": "campaña de costo del Cap 5, estación de desarrollo",
+        },
+        "criterios": {
+            "C2": {"estado": cfg.c2, "fecha": cfg.c2_fecha},
+            "C3": {"estado": cfg.c3, "fecha": cfg.c3_fecha},
+        },
+        "banderas": {
+            "comparacion_rounds": cfg.c2 == "aprobado",
+            "guardia": cfg.c3 == "aprobado",
+            "sesiones_individuales": cfg.sesiones_individuales,
+            "postura_2d": False,
+        },
+        "dominio": {
+            "pausa_combinacion_s": cfg.pausa_combinacion_s,
+            "perfil_preliminar_sesiones": cfg.perfil_preliminar_sesiones,
+        },
+    }
 
 
 @app.get("/salud")
@@ -803,7 +1089,34 @@ def salud() -> dict:
 # Va ULTIMO en el archivo y no es cosmetico: Starlette prueba las rutas en orden de
 # registro y este mount matchea todo, asi que cualquier ruta declarada despues quedaria
 # tapada por el index.html.
+#
+# Las cabeceras (05 B0): CSP para todo lo estatico, cache larga e inmutable para lo que Next
+# nombra con hash (/_next/static/) y no-cache para los .html, que son los que cambian de un
+# despliegue a otro sin cambiar de nombre. 'unsafe-inline' en estilos porque Motion escribe
+# estilos en linea; las fuentes las sirve el build, asi que font-src queda en 'self'.
+CSP_WEB = (
+    "default-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; "
+    "style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'unsafe-inline'; "
+    "connect-src 'self'; frame-ancestors 'none'; base-uri 'self'"
+)
+
+
+def _cabeceras_web(ruta: str, respuesta) -> None:
+    respuesta.headers["Content-Security-Policy"] = CSP_WEB
+    respuesta.headers["X-Content-Type-Options"] = "nosniff"
+    if ruta.startswith("_next/static/"):
+        respuesta.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    elif respuesta.headers.get("content-type", "").startswith("text/html"):
+        respuesta.headers["Cache-Control"] = "no-cache"
+
+
 if cfg.web and (cfg.web / "index.html").is_file():
     from fastapi.staticfiles import StaticFiles
 
-    app.mount("/", StaticFiles(directory=str(cfg.web), html=True), name="web")
+    class _Web(StaticFiles):
+        async def get_response(self, path, scope):
+            r = await super().get_response(path, scope)
+            _cabeceras_web(path, r)
+            return r
+
+    app.mount("/", _Web(directory=str(cfg.web), html=True), name="web")

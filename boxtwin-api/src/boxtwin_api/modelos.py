@@ -40,6 +40,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 __all__ = [
+    "AsignacionManual",
     "Base",
     "Correccion",
     "ESTADOS_SESION",
@@ -118,12 +119,29 @@ class Sesion(Base):
         ForeignKey("boxeadores.id"), nullable=True, index=True
     )
 
+    # B1 de la web entrenador. Nullable para que el ADD COLUMN de db.py pueda agregarlas a
+    # una tabla con filas; una sesion vieja sin contexto se lee como sparring, que es lo
+    # unico que el producto procesaba antes de que existiera el campo.
+    contexto: Mapped[str | None] = mapped_column(
+        String(16), nullable=True, default="sparring", index=True
+    )
+    practica: Mapped[str | None] = mapped_column(String(24), nullable=True)
+    rounds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Quien declaro el consentimiento de las personas filmadas y cuando (R-09, Ley 25.326).
+    # Es lo que se puede mostrar si alguien pregunta; sin esto no se sube nada nuevo.
+    consentimiento_en: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    consentimiento_por: Mapped[str | None] = mapped_column(String(320), nullable=True)
+
     creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
     actualizada: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=ahora, onupdate=ahora
     )
 
     usuario: Mapped[Usuario] = relationship(back_populates="sesiones")
+    boxeador_a: Mapped["Boxeador | None"] = relationship(foreign_keys=[boxeador_a_id])
+    boxeador_b: Mapped["Boxeador | None"] = relationship(foreign_keys=[boxeador_b_id])
     trabajos: Mapped[list[Trabajo]] = relationship(
         back_populates="sesion", cascade="all, delete-orphan"
     )
@@ -151,6 +169,11 @@ class Boxeador(Base):
     nombre: Mapped[str] = mapped_column(String(120))
     guardia: Mapped[str | None] = mapped_column(String(16), nullable=True)
     notas: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # B6 de la web entrenador. Cargados a mano y opcionales: el Rival Fantasma dibuja las
+    # siluetas a escala con esto y, si falta, dice que falta en vez de inventarlo.
+    categoria: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    altura_m: Mapped[float | None] = mapped_column(Float, nullable=True)
+    envergadura_m: Mapped[float | None] = mapped_column(Float, nullable=True)
     creado: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
 
 
@@ -205,4 +228,23 @@ class Correccion(Base):
     tipo_original: Mapped[str | None] = mapped_column(String(32), nullable=True)
     checkpoint: Mapped[str | None] = mapped_column(String(255), nullable=True)
     datos: Mapped[dict] = mapped_column(JSON, default=dict)
+    creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
+
+
+class AsignacionManual(Base):
+    """
+    Un tramo que asigno una persona en la web (B3 de la web entrenador).
+
+    Existe en la base ademas de en sesion.json por la misma razon que la siembra: es una
+    decision humana y tiene que quedar auditable. Y es evidencia: cuantos tramos tuvo que
+    asignar alguien a mano mide cuanto le falta a la identidad automatica (C1) en uso real.
+    """
+
+    __tablename__ = "asignaciones_manuales"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=nuevo_id)
+    sesion_id: Mapped[str] = mapped_column(ForeignKey("sesiones.id"), index=True)
+    track: Mapped[int] = mapped_column(Integer)
+    rol: Mapped[str] = mapped_column(String(8))
+    usuario_id: Mapped[str] = mapped_column(ForeignKey("usuarios.id"))
     creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)

@@ -79,9 +79,13 @@ def comando_de(trabajo: Trabajo, sesion: Sesion) -> list[list[str]]:
         return [[
             *cfg.cmd_boxtwin, "completar", str(directorio),
             "--semilla-a", str(p["track_a"]),
-            "--semilla-b", str(p["track_b"]),
+            # B8: sin semilla B, sesion de un solo peleador.
+            *(["--semilla-b", str(p["track_b"])] if p.get("track_b") is not None else []),
             "--detector", str(cfg.modelo_detector),
             "--umbral", str(cfg.umbral_detector),
+            # B3: aplica las asignaciones de tramos hechas en la web. Reutiliza la cache de
+            # pose y tracking: esta etapa nunca corre la pose.
+            *(["--manual"] if p.get("manual") else []),
         ]]
 
     if trabajo.etapa == "clasificar":

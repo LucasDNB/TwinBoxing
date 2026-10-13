@@ -32,6 +32,7 @@ from __future__ import annotations
 from typing import Any
 
 __all__ = [
+    "NO_GOLPE",
     "VERSION_FIGHTCARD",
     "PRECISION_DETECTOR",
     "RECALL_DETECTOR",
@@ -43,7 +44,13 @@ __all__ = [
     "id_de_golpe",
 ]
 
-VERSION_FIGHTCARD = "0.1"
+# 0.2 (web entrenador, B3 y B4): suma `descartado` por golpe, `descartados` por peleador y
+# los campos de tramos en `identidad`. Es compatible hacia atras: nada de 0.1 se movio.
+VERSION_FIGHTCARD = "0.2"
+
+# "No fue un golpe" (B4). No es un tipo: es la etiqueta de falso positivo del detector, que
+# hasta ahora no recibia ninguna senal del producto.
+NO_GOLPE = "no_golpe"
 
 # Lo medido del detector sobre fuente no vista, del reporte de folds y del sistema completo
 # sobre sparring-3. Viaja adentro del documento porque RF6 pide que este a la vista del
@@ -89,6 +96,7 @@ def construir(
     detector: dict | None = None,
     clasificador: dict | None = None,
     tipos: dict[str, dict] | None = None,
+    lados: tuple[str, ...] = ("A", "B"),
 ) -> dict:
     """
     El documento completo. `tipos` es opcional: mapea id de golpe -> {tipo, confianza}.
@@ -103,8 +111,10 @@ def construir(
     guardia = guardia or []
     tipos = tipos or {}
 
+    # Una sesion de un solo peleador (bolsa, sombra; B8) trae solo A: un B en cero se leeria
+    # como "no tiro golpes" y no como "no habia nadie".
     por_peleador: dict[str, dict] = {}
-    for p in ("A", "B"):
+    for p in lados:
         suyos = [g for g in golpes if g.peleador == p]
         eventos = []
         for g in suyos:
@@ -125,6 +135,7 @@ def construir(
                     "confianza_tipo": t.get("confianza"),
                     "tipo_clasificador": t.get("crudo"),
                     "corregido": None,
+                    "descartado": False,
                 }
             )
         por_peleador[p] = {
@@ -132,6 +143,7 @@ def construir(
             "por_round": _por_round(suyos, ventanas),
             "total": _conteo(suyos),
             "guardia": [e.a_dict() for e in guardia if e.peleador == p],
+            "descartados": 0,
         }
 
     det = {
@@ -149,6 +161,14 @@ def construir(
         **(clasificador or {}),
     }
 
+    ident = dict(identidad or {})
+    # 0.2: los campos de tramos los completa la etapa que los mide (B3); mientras tanto
+    # viajan en nulo, que no es lo mismo que cero. La separacion de color es la misma que
+    # el diagnostico con siembra ya escribia con otro nombre.
+    for campo in ("tramos_total", "tramos_asignados_auto", "tramos_asignados_manual"):
+        ident.setdefault(campo, None)
+    ident.setdefault("separacion_color", ident.get("separacion_de_perfiles"))
+
     fc: dict[str, Any] = {
         "version": VERSION_FIGHTCARD,
         "video": {
@@ -157,7 +177,7 @@ def construir(
             "fps": fps,
             "rounds": ventanas,
         },
-        "identidad": identidad or {},
+        "identidad": ident,
         "detector": det,
         "clasificador": cla,
         "peleadores": por_peleador,
@@ -213,9 +233,9 @@ def _lectura(fc: dict) -> dict:
     propone, y dejarlas para la pantalla invita a que cada vista invente la suya.
     """
     a = fc["peleadores"]["A"]["total"]["total"]
-    b = fc["peleadores"]["B"]["total"]["total"]
+    b = fc["peleadores"]["B"]["total"]["total"] if "B" in fc["peleadores"] else None
     caidas = {}
-    for p in ("A", "B"):
+    for p in fc["peleadores"]:
         rondas = fc["peleadores"][p]["por_round"]
         if len(rondas) >= 2:
             primero, ultimo = rondas[0]["por_minuto"], rondas[-1]["por_minuto"]
@@ -290,6 +310,7 @@ def aplicar_correcciones(fc: dict, correcciones: list[dict]) -> dict:
         for g in datos["golpes"]:
             c = por_id.get(g["id"])
             if not c:
+                g.setdefault("descartado", False)
                 continue
             g["corregido"] = {
                 "tipo": c["tipo"],
@@ -298,8 +319,16 @@ def aplicar_correcciones(fc: dict, correcciones: list[dict]) -> dict:
                 "cuando": c.get("cuando"),
                 "por": c.get("por"),
             }
-            g["tipo"] = c["tipo"]
             g["confianza_tipo"] = None   # ya no es una estimacion del modelo
+            if c["tipo"] == NO_GOLPE:
+                # El golpe sigue en la lista y en el total: es lo que el sistema DETECTO, y
+                # el conteo de detectados no cambia por una correccion (B4). Se marca y se
+                # cuenta aparte. El tipo queda el del modelo, que no es una familia nueva.
+                g["descartado"] = True
+            else:
+                g["descartado"] = False
+                g["tipo"] = c["tipo"]
+        datos["descartados"] = sum(1 for g in datos["golpes"] if g.get("descartado"))
     return fc
 
 
@@ -322,8 +351,10 @@ def correccion(
                 break
     if original is None:
         raise ValueError(f"la Fight-Card no tiene un golpe {golpe!r}")
-    if tipo not in NOMBRE_EN_PANTALLA:
-        raise ValueError(f"tipo desconocido: {tipo!r}, se esperaba {sorted(NOMBRE_EN_PANTALLA)}")
+    if tipo not in NOMBRE_EN_PANTALLA and tipo != NO_GOLPE:
+        raise ValueError(
+            f"tipo desconocido: {tipo!r}, se esperaba {sorted(NOMBRE_EN_PANTALLA)} o {NO_GOLPE!r}"
+        )
     return {
         "golpe": golpe,
         "tipo": tipo,

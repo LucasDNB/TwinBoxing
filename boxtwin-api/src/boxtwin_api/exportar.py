@@ -31,7 +31,8 @@ def a_csv(fc: dict) -> str:
     w = csv.writer(salida)
     w.writerow([
         "peleador", "brazo", "t_inicio_s", "t_fin_s", "cuadro_inicio", "cuadro_fin",
-        "score_deteccion", "tipo_estimado", "confianza_tipo", "corregido_a", "round",
+        "score_deteccion", "tipo_estimado", "confianza_tipo", "corregido_a", "descartado",
+        "round",
     ])
     rondas = fc.get("video", {}).get("rounds", [])
     for p, datos in sorted(fc["peleadores"].items()):
@@ -44,7 +45,11 @@ def a_csv(fc: dict) -> str:
                 p, g["brazo"], g["t_inicio"], g["t_fin"], g["cuadro_inicio"],
                 g["cuadro_fin"], g["score"], g.get("tipo") or "",
                 g.get("confianza_tipo") if g.get("confianza_tipo") is not None else "",
-                (g.get("corregido") or {}).get("tipo", ""), r,
+                (g.get("corregido") or {}).get("tipo", ""),
+                # B4: una 0.1 no trae el campo, y un golpe sin marcar no esta descartado. Va
+                # antes de round para que round siga siendo la ultima columna.
+                "si" if g.get("descartado") else "no",
+                r,
             ])
     return salida.getvalue()
 

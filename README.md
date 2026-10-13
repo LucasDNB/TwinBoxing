@@ -652,3 +652,18 @@ PENDIENTE Y PROXIMO PASO
 
   Detalle en docs/PROXIMOS_PASOS.md y en
   docs/experiments/2026-09-22-mvp-sobre-video-real.md.
+
+13-10 Web entrenador: el prototipo final por SDD, en prototipo/
+
+1. Specs del 12-10 en prototipo/specs; registro de cada tarea con su evidencia en
+   prototipo/TAREAS.md
+2. Next 16 exportado y servido por la API: las nueve pantallas sobre datos reales, sin
+   datos de demostracion en el build
+3. API: B0 a B8. Consentimiento obligatorio al subir, panel, tramos asignados a mano,
+   "no fue un golpe", perfil extendido. Sesiones de un peleador escritas pero apagadas
+4. Fight-Card 0.2 con JSON Schema que validan el worker y la web
+5. 149 pruebas de la web, 166 de la API; e2e 6 de 6 en Chromium con axe limpio
+6. El e2e encontro un bug de la API: con un completar en cola, GET /jobs/{id} hacia
+   retroceder la sesion a espera_siembra y la pantalla quedaba clavada
+7. El presupuesto de 200 KB de JS por ruta no se cumple con Animate UI: 281 a 360 KB
+   medidos. Decision abierta

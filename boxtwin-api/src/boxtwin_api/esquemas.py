@@ -25,6 +25,8 @@ __all__ = [
 ]
 
 TIPOS = ("jab", "cross", "hook", "uppercut")
+CONTEXTOS = ("bolsa", "sombra", "sparring", "combate")
+PRACTICAS = ("tecnica_libre", "combinaciones", "defensa")
 
 
 class Credenciales(BaseModel):
@@ -45,12 +47,14 @@ class Siembra(BaseModel):
     """La respuesta del paso 4: cual de los dos es cual."""
 
     track_a: int
-    track_b: int
+    # B8: nulo en sesiones de un solo peleador (bolsa y sombra). Para sparring y combate lo
+    # exige la ruta, que es la que sabe el contexto de la sesion.
+    track_b: int | None = None
 
     @field_validator("track_b")
     @classmethod
-    def distintos(cls, v: int, info):
-        if info.data.get("track_a") == v:
+    def distintos(cls, v: int | None, info):
+        if v is not None and info.data.get("track_a") == v:
             raise ValueError("las dos semillas son el mismo track")
         return v
 
@@ -61,6 +65,10 @@ class EntradaBoxeador(BaseModel):
     nombre: str = Field(min_length=1, max_length=120)
     guardia: Literal["ortodoxa", "zurda"] | None = None
     notas: str | None = None
+    # B6: todo opcional. Los rangos dejan afuera el error de unidad (175 en vez de 1,75).
+    categoria: str | None = Field(default=None, max_length=40)
+    altura_m: float | None = Field(default=None, ge=1.20, le=2.20)
+    envergadura_m: float | None = Field(default=None, ge=1.20, le=2.40)
 
 
 class AsignarBoxeadores(BaseModel):
@@ -83,8 +91,25 @@ class AsignarBoxeadores(BaseModel):
         return v
 
 
+class AsignacionTramo(BaseModel):
+    track: int
+    rol: Literal["A", "B", "ninguno"]
+
+
+class EntradaTramos(BaseModel):
+    """Las decisiones de la revision de tramos (B3). Al menos una."""
+
+    asignaciones: list[AsignacionTramo] = Field(min_length=1, max_length=500)
+
+
 class EntradaCorreccion(BaseModel):
-    tipo: Literal["jab", "cross", "hook", "uppercut"]
+    # "no_golpe" es la etiqueta de falso positivo (B4): el golpe sigue contando como
+    # detectado y se suma a los descartados por el entrenador.
+    tipo: Literal["jab", "cross", "hook", "uppercut", "no_golpe"]
+
+
+def _boxeador_corto(b) -> dict | None:
+    return {"id": b.id, "nombre": b.nombre} if b is not None else None
 
 
 def sesion_a_dict(s, extra: dict | None = None) -> dict:
@@ -97,7 +122,15 @@ def sesion_a_dict(s, extra: dict | None = None) -> dict:
         "video": s.video_nombre,
         "duracion_s": s.duracion_s,
         "fps": s.fps,
-        "rounds": {"round_s": s.round_s, "descanso_s": s.descanso_s},
+        "rounds": {"round_s": s.round_s, "descanso_s": s.descanso_s, "cantidad": s.rounds},
+        "contexto": s.contexto or "sparring",
+        "practica": s.practica,
+        "consentimiento": s.consentimiento_en is not None,
+        # Los nombres van en la lista para que la web no pida los peleadores uno por uno.
+        "boxeadores": {
+            "A": _boxeador_corto(s.boxeador_a),
+            "B": _boxeador_corto(s.boxeador_b),
+        },
         "siembra": (
             {"track_a": s.semilla_a, "track_b": s.semilla_b}
             if s.semilla_a is not None else None
