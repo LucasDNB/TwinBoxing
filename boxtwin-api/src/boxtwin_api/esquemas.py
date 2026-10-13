@@ -86,7 +86,9 @@ class AsignarBoxeadores(BaseModel):
 
 
 class EntradaCorreccion(BaseModel):
-    tipo: Literal["jab", "cross", "hook", "uppercut"]
+    # "no_golpe" es la etiqueta de falso positivo (B4): el golpe sigue contando como
+    # detectado y se suma a los descartados por el entrenador.
+    tipo: Literal["jab", "cross", "hook", "uppercut", "no_golpe"]
 
 
 def _boxeador_corto(b) -> dict | None:

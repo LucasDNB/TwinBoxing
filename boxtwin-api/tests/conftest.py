@@ -18,6 +18,13 @@ RAIZ = Path(__file__).resolve().parents[1] / "src"
 if str(RAIZ) not in sys.path:
     sys.path.insert(0, str(RAIZ))
 
+# El anotador de ESTE repo, no el que este instalado en el entorno: la API importa de ahi el
+# contrato de la Fight-Card, y probarla contra otro checkout verifica otra cosa. Costo un
+# rato descubrirlo: el entorno tenia instalado un checkout distinto del que se estaba tocando.
+ANOTADOR = Path(__file__).resolve().parents[2] / "boxtwin-annotator" / "src"
+if ANOTADOR.is_dir() and str(ANOTADOR) not in sys.path:
+    sys.path.insert(0, str(ANOTADOR))
+
 
 @pytest.fixture
 def entorno(tmp_path, monkeypatch):

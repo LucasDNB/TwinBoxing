@@ -493,7 +493,22 @@ def fightcard(
     db: Session = Depends(obtener_sesion),
 ) -> JSONResponse:
     s = sesion_del_usuario(sesion_id, usuario, db)
-    return JSONResponse(_fightcard(s.id))
+    fc = _fightcard(s.id)
+    # 05 §4: lo que sale de la base y puede cambiar despues del procesamiento va al
+    # responder y no se guarda en el archivo. Asignar un peleador no reescribe la Fight-Card.
+    fc["sesion"] = {
+        "contexto": s.contexto or "sparring",
+        "practica": s.practica,
+        "boxeadores": {"A": _boxeador_de_sesion(s.boxeador_a), "B": _boxeador_de_sesion(s.boxeador_b)},
+    }
+    return JSONResponse(fc)
+
+
+def _boxeador_de_sesion(b) -> dict | None:
+    if b is None:
+        return None
+    return {"id": b.id, "nombre": b.nombre, "guardia": b.guardia,
+            "categoria": getattr(b, "categoria", None)}
 
 
 @app.get("/fightcards/{sesion_id}/export")
