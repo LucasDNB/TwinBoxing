@@ -4,6 +4,7 @@ import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { crearClienteDeConsultas } from "@/components/boxtwin/Proveedores";
+import { Toaster } from "@/components/ui/sonner";
 import { reiniciarMundo, servidor } from "./api-simulada";
 import { alVencerseLaSesion } from "@/lib/api/cliente";
 import { navegacion } from "./navegacion-simulada";
@@ -35,5 +36,5 @@ export function conSesion(token = "token-bueno") {
 
 export function montar(ui: ReactElement) {
   const qc = crearClienteDeConsultas();
-  return { qc, ...render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>) };
+  return { qc, ...render(<QueryClientProvider client={qc}>{ui}<Toaster /></QueryClientProvider>) };
 }

@@ -51,6 +51,8 @@ export const textos = {
     const ck = checkpoint && checkpoint.trim() ? checkpoint : "sin versión registrada";
     return `El tipo de golpe es una estimación del modelo ${ck} y mejora con cada versión. Tu corrección se guarda para entrenar y no cambia el conteo de golpes detectados.`;
   },
+  tramosVersionVieja:
+    "Esta sesión se procesó antes de la revisión de tramos; reprocesala para revisarlos.",
   rivalAviso:
     "Lectura cualitativa entre perfiles ya construidos. No es un pronóstico ni una probabilidad de victoria.",
   separacion(sep: number, piso: number) {

@@ -116,7 +116,22 @@ export const servidor = setupServer(
     registrar(request, c);
     if (!autorizado(request)) return no401();
     if (mundo.corregir === "422") return HttpResponse.json({ detail: "tipo desconocido" }, { status: 422 });
-    return HttpResponse.json({ id: params.golpe, tipo: c.tipo });
+    // Como el servidor: la correccion queda en el documento (sobrevive a recargar).
+    type G = { id: string; tipo: string | null; corregido: unknown; descartado?: boolean; confianza_tipo: number | null };
+    const fc = mundo.fightcard as { peleadores: Record<string, { golpes: G[]; descartados?: number }> } | null;
+    let ev: G | undefined;
+    for (const p of Object.values(fc?.peleadores ?? {})) {
+      for (const g of p.golpes) {
+        if (g.id !== params.golpe) continue;
+        g.corregido = { tipo: c.tipo, tipo_original: g.tipo };
+        g.confianza_tipo = null;
+        g.descartado = c.tipo === "no_golpe";
+        if (c.tipo !== "no_golpe") g.tipo = c.tipo;
+        ev = g;
+      }
+      p.descartados = p.golpes.filter((g) => g.descartado).length;
+    }
+    return HttpResponse.json(ev ?? { id: params.golpe, tipo: c.tipo });
   }),
   http.get("*/videos/:id/ticket", ({ request }) => {
     registrar(request);
