@@ -82,7 +82,8 @@ test("I1: subir, esperar, identificar y llegar a la Fight-Card", async ({ page, 
   // Los recortes cargan con ticket (CA-03.3).
   const img = tarjetas.first().getByRole("img", { name: /Recorte/ });
   await expect(img).toBeVisible();
-  expect(await img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
+  // Se espera la carga: en WebKit, con loading="lazy", el img aparece antes de bajar.
+  await expect.poll(() => img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0), { timeout: 10_000 }).toBe(true);
   await sinViolacionesSerias(page, "identificación");
   await tarjetas.nth(0).getByRole("radio", { name: "Es A" }).click();
   await tarjetas.nth(1).getByRole("radio", { name: "Es B" }).click();

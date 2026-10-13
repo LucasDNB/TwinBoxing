@@ -163,3 +163,26 @@ def test_con_un_trabajo_en_cola_el_disco_no_hace_retroceder_el_estado(cliente, r
     cliente.post(f"/jobs/{sid}/siembra", json={"track_a": 3, "track_b": 7})
     assert cliente.get(f"/jobs/{sid}").json()["estado"] == "en_cola"
     assert cliente.get(f"/jobs/{sid}").json()["estado"] == "en_cola", "y no cambia al pedir de nuevo"
+
+
+def test_con_el_completar_ya_tomado_tampoco_retrocede(cliente, registrado, entorno):
+    # La ventana que encontro el CI: el worker reclamo el trabajo y la etapa todavia no
+    # escribio su estado en disco.
+    sid = subir_video(cliente).json()["job_id"]
+    d = entorno["cfg"].dir_sesion(sid)
+    (d / "sesion.json").write_text(json.dumps({"estado": "espera_siembra", "candidatos": [
+        {"track": 3, "recorte": None}, {"track": 7, "recorte": None}]}))
+    from boxtwin_api.modelos import Sesion, Trabajo
+
+    with entorno["db"].hacer_sesion() as db:
+        db.get(Sesion, sid).estado = "espera_siembra"
+        for t in db.query(Trabajo).filter(Trabajo.sesion_id == sid):
+            t.estado = "listo"
+        db.commit()
+    cliente.post(f"/jobs/{sid}/siembra", json={"track_a": 3, "track_b": 7})
+    with entorno["db"].hacer_sesion() as db:
+        t = db.query(Trabajo).filter(Trabajo.sesion_id == sid, Trabajo.etapa == "completar").one()
+        t.estado = "tomado"
+        db.get(Sesion, sid).estado = "completando"
+        db.commit()
+    assert cliente.get(f"/jobs/{sid}").json()["estado"] == "completando"

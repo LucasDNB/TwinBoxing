@@ -346,7 +346,11 @@ def estado(
     # (espera_siembra, o listo si se re-sembro o se asignaron tramos): el worker no lo tomo.
     # Hacerle caso hacia retroceder una sesion recien sembrada a espera_siembra, y la web,
     # que deja de sondear ahi, se quedaba clavada. Encontrado en el e2e de la web entrenador.
-    completar_pendiente = any(t.estado == "en_cola" and t.etapa == "completar" for t in trabajos)
+    # Vale tambien con el trabajo ya tomado: entre que el worker lo reclama y la etapa escribe
+    # su primer estado hay una ventana en la que el disco sigue diciendo espera_siembra. El CI,
+    # con un worker mas rapido que la estacion, cayo ahi.
+    completar_pendiente = any(t.estado in ("en_cola", "tomado") and t.etapa == "completar"
+                              for t in trabajos)
     extra: dict = {
         "candidatos": [], "avisos": [], "etapas": [],
         # Lo escribe la etapa que esta corriendo, en su propio archivo, porque sesion.json
