@@ -47,12 +47,14 @@ class Siembra(BaseModel):
     """La respuesta del paso 4: cual de los dos es cual."""
 
     track_a: int
-    track_b: int
+    # B8: nulo en sesiones de un solo peleador (bolsa y sombra). Para sparring y combate lo
+    # exige la ruta, que es la que sabe el contexto de la sesion.
+    track_b: int | None = None
 
     @field_validator("track_b")
     @classmethod
-    def distintos(cls, v: int, info):
-        if info.data.get("track_a") == v:
+    def distintos(cls, v: int | None, info):
+        if v is not None and info.data.get("track_a") == v:
             raise ValueError("las dos semillas son el mismo track")
         return v
 

@@ -331,7 +331,9 @@ def build_parser() -> argparse.ArgumentParser:
     cp.add_argument("sesion", type=Path)
     cp.add_argument("--semilla-a", type=int, required=True, dest="semilla_a",
                     help="track del peleador A, elegido mirando los recortes")
-    cp.add_argument("--semilla-b", type=int, required=True, dest="semilla_b")
+    cp.add_argument("--semilla-b", type=int, default=None, dest="semilla_b",
+                    help="track del peleador B. Sin ella, sesion de un solo peleador "
+                         "(bolsa o sombra), todavia sin medir")
     cp.add_argument("--detector", type=Path, required=True,
                     help="ensamble congelado del detector de golpes")
     cp.add_argument("--umbral", type=float, default=0.80,
@@ -663,13 +665,12 @@ def _cmd_completar(args: argparse.Namespace) -> int:
     ident = fc["identidad"]
     print(f"identidad: A {ident['cobertura_A']:.1%} del video, "
           f"B {ident['cobertura_B']:.1%}, sin asignar {ident['sin_asignar']:.1%}")
-    a = fc["peleadores"]["A"]["total"]
-    b = fc["peleadores"]["B"]["total"]
     print(f"\ngolpes DETECTADOS (precision {fc['detector']['precision_medida']}, "
           f"recall {fc['detector']['recall_medido']})")
-    print(f"  A  {a['total']:4d}   izq {a['izq']:4d}  der {a['der']:4d}")
-    print(f"  B  {b['total']:4d}   izq {b['izq']:4d}  der {b['der']:4d}")
-    for p in ("A", "B"):
+    for p in fc["peleadores"]:
+        t = fc["peleadores"][p]["total"]
+        print(f"  {p}  {t['total']:4d}   izq {t['izq']:4d}  der {t['der']:4d}")
+    for p in fc["peleadores"]:
         for r in fc["peleadores"][p]["por_round"]:
             print(f"  {p} round {r['round']}: {r['total']:4d}  "
                   f"({r['por_minuto']:.1f} por minuto)")

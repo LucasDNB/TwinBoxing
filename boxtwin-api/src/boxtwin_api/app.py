@@ -438,12 +438,18 @@ def siembra(
         raise HTTPException(
             409, f"la sesion esta en '{s.estado}' y todavia no hay candidatos que elegir"
         )
+    individual = (s.contexto or "sparring") in ("bolsa", "sombra")
+    if s_in.track_b is None and not individual:
+        raise HTTPException(422, "en sparring y combate hay que marcar a los dos peleadores")
+    if s_in.track_b is not None and individual:
+        raise HTTPException(422, "en bolsa y sombra se marca a una sola persona")
     disco = _sesion_en_disco(s.id) or {}
     tracks = {c["track"] for c in disco.get("candidatos", [])}
+    elegidos = {s_in.track_a} | ({s_in.track_b} if s_in.track_b is not None else set())
     # Se permite un track que no este entre los propuestos -el usuario puede haber visto al
     # peleador en un track que los filtros descartaron- pero no uno que no existe.
-    if tracks and not {s_in.track_a, s_in.track_b} <= tracks:
-        ajenos = sorted({s_in.track_a, s_in.track_b} - tracks)
+    if tracks and not elegidos <= tracks:
+        ajenos = sorted(elegidos - tracks)
         if any(t < 0 for t in ajenos):
             raise HTTPException(422, f"track invalido: {ajenos}")
 

@@ -96,6 +96,7 @@ def construir(
     detector: dict | None = None,
     clasificador: dict | None = None,
     tipos: dict[str, dict] | None = None,
+    lados: tuple[str, ...] = ("A", "B"),
 ) -> dict:
     """
     El documento completo. `tipos` es opcional: mapea id de golpe -> {tipo, confianza}.
@@ -110,8 +111,10 @@ def construir(
     guardia = guardia or []
     tipos = tipos or {}
 
+    # Una sesion de un solo peleador (bolsa, sombra; B8) trae solo A: un B en cero se leeria
+    # como "no tiro golpes" y no como "no habia nadie".
     por_peleador: dict[str, dict] = {}
-    for p in ("A", "B"):
+    for p in lados:
         suyos = [g for g in golpes if g.peleador == p]
         eventos = []
         for g in suyos:
@@ -230,9 +233,9 @@ def _lectura(fc: dict) -> dict:
     propone, y dejarlas para la pantalla invita a que cada vista invente la suya.
     """
     a = fc["peleadores"]["A"]["total"]["total"]
-    b = fc["peleadores"]["B"]["total"]["total"]
+    b = fc["peleadores"]["B"]["total"]["total"] if "B" in fc["peleadores"] else None
     caidas = {}
-    for p in ("A", "B"):
+    for p in fc["peleadores"]:
         rondas = fc["peleadores"][p]["por_round"]
         if len(rondas) >= 2:
             primero, ultimo = rondas[0]["por_minuto"], rondas[-1]["por_minuto"]

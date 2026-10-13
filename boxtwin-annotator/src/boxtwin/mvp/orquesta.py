@@ -240,7 +240,7 @@ def _ubicar_video(video: Path, salida: Path) -> Path:
 def completar(
     directorio: Path,
     semilla_a: int,
-    semilla_b: int,
+    semilla_b: int | None,
     detector: Path,
     umbral: float = 0.80,
     cfg_identidad: ConfigIdentidadAuto | None = None,
@@ -278,16 +278,25 @@ def completar(
     doc, _ = cargar_o_crear(paths, cache.meta)
     ev = cargar_evidencia(directorio / EVIDENCIA)
 
+    individual = semilla_b is None
     ses.estado = "completando"
-    ses.siembra = {"track_a": int(semilla_a), "track_b": int(semilla_b)}
+    ses.siembra = {"track_a": int(semilla_a), "track_b": None if individual else int(semilla_b)}
     ses.guardar()
 
     # -- identidad con la siembra -------------------------------------------
     t0 = time.perf_counter()
-    prop = proponer(
-        ev, cfg_identidad, doc.video.total_frames, doc.video.fps,
-        semillas=(int(semilla_a), int(semilla_b)),
-    )
+    if individual:
+        # Bolsa o sombra (B8): una sola persona, una sola semilla. Sin medir todavia: la
+        # bandera sesiones_individuales esta apagada hasta pasar el criterio del spec.
+        from boxtwin.mvp.individual import proponer_individual
+
+        prop = proponer_individual(ev, cfg_identidad, doc.video.total_frames, doc.video.fps,
+                                   semilla=int(semilla_a))
+    else:
+        prop = proponer(
+            ev, cfg_identidad, doc.video.total_frames, doc.video.fps,
+            semillas=(int(semilla_a), int(semilla_b)),
+        )
     if prop.diagnostico.get("semillas_en_conflicto"):
         ses.estado = "espera_siembra"
         ses.error = prop.avisos[-1] if prop.avisos else "semillas en conflicto"
@@ -369,7 +378,8 @@ def completar(
         if a not in ses.avisos:
             ses.avisos.append(a)
 
-    fc = construir(ses, golpes, eventos, cobertura, detector=info_detector)
+    fc = construir(ses, golpes, eventos, cobertura, detector=info_detector,
+                   lados=("A",) if individual else ("A", "B"))
     (directorio / FIGHTCARD).write_text(json.dumps(fc, indent=2, ensure_ascii=False) + "\n")
 
     ses.estado = "listo"
