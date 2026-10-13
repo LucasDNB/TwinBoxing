@@ -63,6 +63,10 @@ class EntradaBoxeador(BaseModel):
     nombre: str = Field(min_length=1, max_length=120)
     guardia: Literal["ortodoxa", "zurda"] | None = None
     notas: str | None = None
+    # B6: todo opcional. Los rangos dejan afuera el error de unidad (175 en vez de 1,75).
+    categoria: str | None = Field(default=None, max_length=40)
+    altura_m: float | None = Field(default=None, ge=1.20, le=2.20)
+    envergadura_m: float | None = Field(default=None, ge=1.20, le=2.40)
 
 
 class AsignarBoxeadores(BaseModel):

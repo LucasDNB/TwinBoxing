@@ -169,6 +169,11 @@ class Boxeador(Base):
     nombre: Mapped[str] = mapped_column(String(120))
     guardia: Mapped[str | None] = mapped_column(String(16), nullable=True)
     notas: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # B6 de la web entrenador. Cargados a mano y opcionales: el Rival Fantasma dibuja las
+    # siluetas a escala con esto y, si falta, dice que falta en vez de inventarlo.
+    categoria: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    altura_m: Mapped[float | None] = mapped_column(Float, nullable=True)
+    envergadura_m: Mapped[float | None] = mapped_column(Float, nullable=True)
     creado: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
 
 

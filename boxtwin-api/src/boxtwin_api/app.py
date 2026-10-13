@@ -635,8 +635,7 @@ def fightcard(
 def _boxeador_de_sesion(b) -> dict | None:
     if b is None:
         return None
-    return {"id": b.id, "nombre": b.nombre, "guardia": b.guardia,
-            "categoria": getattr(b, "categoria", None)}
+    return {"id": b.id, "nombre": b.nombre, "guardia": b.guardia, "categoria": b.categoria}
 
 
 @app.get("/fightcards/{sesion_id}/export")
@@ -868,9 +867,9 @@ def _boxeador_a_dict(b, uso: dict | None = None) -> dict:
     d = {"id": b.id, "nombre": b.nombre, "guardia": b.guardia, "notas": b.notas,
          "creado": b.creado.isoformat(),
          # B6
-         "categoria": getattr(b, "categoria", None),
-         "altura_m": getattr(b, "altura_m", None),
-         "envergadura_m": getattr(b, "envergadura_m", None)}
+         "categoria": b.categoria,
+         "altura_m": b.altura_m,
+         "envergadura_m": b.envergadura_m}
     if uso is not None:
         n, ultima = uso.get(b.id, (0, None))
         d["sesiones"] = n
@@ -916,10 +915,11 @@ def crear_boxeador(
     if ya is not None:
         raise HTTPException(409, f"ya tenes un boxeador que se llama {nombre}")
     b = Boxeador(usuario_id=usuario.id, nombre=nombre, guardia=entrada.guardia,
-                 notas=entrada.notas)
+                 notas=entrada.notas, categoria=entrada.categoria,
+                 altura_m=entrada.altura_m, envergadura_m=entrada.envergadura_m)
     db.add(b)
     db.commit()
-    return _boxeador_a_dict(b)
+    return _boxeador_a_dict(b, {})
 
 
 @app.get("/boxeadores")
@@ -948,8 +948,11 @@ def editar_boxeador(
     b.nombre = entrada.nombre.strip()
     b.guardia = entrada.guardia
     b.notas = entrada.notas
+    b.categoria = entrada.categoria
+    b.altura_m = entrada.altura_m
+    b.envergadura_m = entrada.envergadura_m
     db.commit()
-    return _boxeador_a_dict(b)
+    return _boxeador_a_dict(b, _uso_de_boxeadores(usuario, db))
 
 
 @app.put("/sesiones/{sesion_id}/boxeadores")

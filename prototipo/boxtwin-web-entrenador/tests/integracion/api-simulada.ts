@@ -157,6 +157,21 @@ export const servidor = setupServer(
     if (!autorizado(request)) return no401();
     return HttpResponse.json(mundo.boxeadores);
   }),
+  http.post("*/boxeadores", async ({ request }) => {
+    const c = (await request.json()) as Record<string, unknown>;
+    registrar(request, c);
+    if (!autorizado(request)) return no401();
+    const b = { id: `b${mundo.boxeadores.length + 1}`, notas: null, creado: "2026-10-13T10:00:00", sesiones: 0, ultima_sesion: null, categoria: null, altura_m: null, envergadura_m: null, guardia: null, ...c };
+    mundo.boxeadores.push(b);
+    return HttpResponse.json(b, { status: 201 });
+  }),
+  http.patch("*/boxeadores/:id", async ({ request, params }) => {
+    const c = (await request.json()) as Record<string, unknown>;
+    registrar(request, c);
+    const i = mundo.boxeadores.findIndex((b) => b.id === params.id);
+    mundo.boxeadores[i] = { ...mundo.boxeadores[i], ...c };
+    return HttpResponse.json(mundo.boxeadores[i]);
+  }),
   http.get("*/panel", ({ request }) => {
     registrar(request);
     if (!autorizado(request)) return no401();
