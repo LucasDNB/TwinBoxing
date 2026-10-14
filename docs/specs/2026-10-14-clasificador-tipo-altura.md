@@ -6,8 +6,8 @@ al cuerpo, con el etiquetado y el entrenamiento a cargo de Claude Code en modo a
 Orquestación: `/etiquetado-reentreno` (`.claude/skills/etiquetado-reentreno/SKILL.md`).
 Scripts: `scripts/clasificador/`. Directorio de trabajo: `~/boxtwin/clasificador-2026-10/`.
 
-**Estado: borrador.** Pasa a pre-registrado cuando los campos marcados [LUCAS] están
-completos y el archivo está commiteado. Ninguna medición de este spec corre antes de ese
+**Estado: pre-registrado el 14-10-2026.** Pasó a pre-registrado cuando los campos de Lucas (anexo) estaban
+completos y el archivo quedó commiteado. Ninguna medición de este spec corre antes de ese
 commit, y su hash va en cada documento de resultados.
 
 ---
@@ -40,24 +40,45 @@ La expectativa declarada de antemano es que su recall no se mueva en ninguna con
 - El etiquetado de Claude sirve para material sin anotar (el amateur, las sesiones del
   piloto), no para el reentrenamiento de este spec. Por eso primero se mide (E0).
 
-## 3. Hallazgo a verificar antes de medir (H-F)
+## 3. Hallazgo verificado antes de medir (H-F)
 
-El config de producción (`modelos/poseC3D_7fuentes.py`) entrena con `Flip`, `flip_ratio=0.5`
-y los índices izquierda/derecha intercambiados. Si la transformación no toca la etiqueta,
-la mitad de los ejemplos entrena con el brazo cambiado: un jab espejado se ve como un cross
-con la etiqueta de jab. Sería compatible con la distancia entre top-1 (0,534) y familia
-(0,746) del modelo actual.
+Planteo original: el config de producción (`modelos/poseC3D_7fuentes.py`) entrena con `Flip`,
+`flip_ratio=0.5` y los índices izquierda/derecha intercambiados; si la transformación no toca
+la etiqueta, un jab espejado se vería como un cross con la etiqueta de jab, y eso sería
+compatible con la distancia entre top-1 (0,534) y familia (0,746) del modelo actual.
 
-Se verifica leyendo código, sin correr nada:
+Se verificó leyendo código, sin correr nada (detalle en `<trabajo>/hf.md`):
 
-1. La transformación `Flip` de poses en `test-poseConvBoxing/mmaction2/mmaction/datasets/transforms/`:
-   ¿modifica `label`?
-2. `boxtwin-detector/tools/clasificar_sesion.py` y el armado de la Fight-Card: ¿jab y cross
-   salen del rol que predice el clasificador o del carril del detector más la guardia?
+1. `Flip` no toca la etiqueta. `test-poseConvBoxing/mmaction2/mmaction/datasets/transforms/processing.py:783-784`
+   es la clase que resuelve `type='Flip'`; la etiqueta solo cambia si hay `flip_label_map`
+   (`processing.py:890-892`), y el config no lo pasa (`modelos/poseC3D_7fuentes.py:217-238`
+   y `271-292`). En prueba también se mezcla cada golpe con su espejo: `GeneratePoseTarget`
+   con `double=True` (`modelos/poseC3D_7fuentes.py:116` y `:164`) y `average_clips='prob'`
+   (`:68`).
+2. Pero el espejo es anatómicamente consistente: `_flip_kps` (`processing.py:838-850`)
+   invierte x y además permuta los índices izquierda/derecha. Un ortodoxo tirando jab queda
+   como un zurdo tirando jab: el brazo adelantado sigue adelantado.
 
-El resultado se escribe en el documento de E1 como hallazgo, con las líneas de código. No
-cambia E1: E1 replica producción tal cual, justamente para medir lo que corre hoy. E2 y E3
-no tienen lado en la etiqueta, así que el Flip deja de contradecirla en cualquier caso.
+Conclusión: H-F no se sostiene para E1. En el espacio lead-rear la etiqueta sobrevive al
+espejo, así que el mecanismo del planteo original no se sigue del código. En el espacio
+izquierda/derecha sí la contradiría, pero E2 y E3 colapsan el lado, así que tampoco les pega.
+
+Lo que queda abierto: la distancia entre 0,534 y 0,746 necesita otra explicación. La única
+vía por la que el espejo podría pesar igual es que el modelo decida lead o rear con una pista
+absoluta de pantalla (de qué lado queda el rival, hacia dónde mira el atacante), que el
+espejo invierte. Es conjetura y el código no la decide. La contesta la exactitud de eje de
+E1 (§6.3).
+
+Observación aparte, sobre producción: jab y cross de la Fight-Card salen del argmax del
+clasificador sobre sus 6 clases (`boxtwin-detector/tools/clasificar_sesion.py:126-127`, con
+el mapa de `:43-51` y el argmax en `:69-87`). No se cruzan con el carril del detector ni con
+la guardia del peleador: el brazo del detector solo forma el id del golpe, y la Fight-Card
+copia `tipo` tal cual (`boxtwin-annotator/src/boxtwin/mvp/fightcard.py:136-141` y
+`:346-348`). Un golpe puede salir con brazo derecho y tipo jab en un ortodoxo sin que nada lo
+marque.
+
+El hallazgo va al documento de E1 con estas líneas. No cambia E1: E1 replica producción tal
+cual, justamente para medir lo que corre hoy.
 
 ## 4. E0. Piloto del etiquetador
 
@@ -77,8 +98,8 @@ Cegado:
    `tiras/` y `lote.jsonl` y toda escritura fuera de `respuestas/`. No tiene Bash.
 2. El subagente no ve las anotaciones, el código ni este spec. Ve su guía de criterios, que
    está en su propio archivo (`.claude/agents/etiquetador-golpes.md`).
-3. La guía la revisa Lucas antes del pre-registro [LUCAS]: tiene que decir lo mismo que
-   aplicó él al anotar.
+3. La guía la revisó Lucas antes del pre-registro y la dio por conforme el 14-10-2026, sin
+   cambios: dice lo mismo que aplicó él al anotar.
 
 Lectura, fijada ahora:
 
@@ -87,9 +108,9 @@ Lectura, fijada ahora:
 2. Primarias: exactitud de familia y exactitud balanceada de altura, sobre los 150.
 3. Al lado, sin umbral: balanceada de familia, kappa, recall de cuerpo con Wilson, todo por
    fuente, matrices de confusión.
-4. Umbral para usarlo como preetiquetador [LUCAS confirma o cambia antes del commit]:
-   familia ≥ 0,85 y altura balanceada ≥ 0,80. Propuesto porque la mitad de la anotación sería
-   corregir: por debajo de esos valores corregir cuesta casi lo mismo que anotar.
+4. Umbral para usarlo como preetiquetador, confirmado por Lucas el 14-10-2026: familia ≥ 0,85
+   y altura balanceada ≥ 0,80. La mitad de la anotación sería corregir: por debajo de esos
+   valores corregir cuesta casi lo mismo que anotar.
 5. Si pasa, se habilita E5. Si no, es un resultado negativo que va al Cap 7 como tal y no hay
    preetiquetado.
 
@@ -132,6 +153,13 @@ concatenados (`evaluar.py`). La dispersión entre semillas se reporta al lado.
 2. Altura (E2, E3): probabilidades sumadas por altura. Balanceada y recall de cuerpo con
    Wilson, en total y sobre las cuatro fuentes de C8. Línea de base: 0,50.
 3. Eje (E1): exactitud de lead contra rear. Es el número que muestra si H-F pesa.
+4. Ocho clases (E2, E3): tipo por altura del ensamble, con el recto partido en jab y cross
+   según el rol de la etiqueta de E1 del mismo golpe (mismo `frame_dir`). Exactitud,
+   balanceada y recall por clase con Wilson, en total y sobre las cuatro fuentes de C8. El
+   rol no lo predice el modelo, que no tiene lado: jab contra cross solo falla cuando falla
+   el tipo por altura. Es lo que daría E2 o E3 si el rol llegara correcto de otro lado. No
+   entra en la lectura de P3 ni de P4; su exactitud es el número de la sub-hipótesis 1
+   (lectura en el punto 5 de abajo).
 
 Lectura, fijada ahora:
 
@@ -145,9 +173,34 @@ Lectura, fijada ahora:
    cuerpo). Las
    dos cosas se dicen al lado del número.
 4. P4: E3 mejora a E2 en altura con la misma regla que el punto 2 (≥ 0,03 y 5 de 7 folds).
-5. Sub-hipótesis 1. [LUCAS: copiar acá la definición textual del Cap 2 y decir qué número de
-   esta campana la contesta.] Sin ese campo, el agente informa números y no escribe que la
-   sub-hipótesis queda confirmada o refutada. La fecha de corte sigue siendo el 31/10.
+5. Sub-hipótesis 1. Definición textual (Cap 1, apartado 5, Entrega 6):
+
+   "Un clasificador entrenado sobre secuencias de keypoints obtenidos con
+   estimadores de pose puede reconocer las técnicas del esquema de trece clases
+   (ocho golpes distinguidos a cabeza y cuerpo, tres defensas, finta y fondo)
+   con una concordancia superior al 80% respecto de la anotación manual, en
+   condiciones de cámara estable y peleadores visibles."
+
+   Qué la contesta en esta campaña, y qué no. El número es la exactitud sobre
+   ocho clases (jab, cross, hook y uppercut, cada uno a cabeza o cuerpo) del
+   ensamble de E2 y de E3, por separado. Tipo y altura salen del clasificador;
+   jab y cross se separan con el rol de la anotación (mismo frame_dir que en E1),
+   que en el producto daría el carril del detector con la guardia. Se reporta
+   también la de E1 sobre seis clases, sin altura, como referencia.
+
+   Lectura, fijada ahora:
+   a. Si la exactitud de ocho clases queda por debajo de 0,80 en las dos
+      configuraciones, la parte de golpes de la sub-hipótesis no alcanza el
+      umbral, y el documento lo dice así.
+   b. Si alguna queda en 0,80 o más, eso no la confirma. Faltan las tres
+      defensas (no están anotadas), la finta y el fondo, y la campaña clasifica
+      segmentos ya anotados, no eventos detectados en una secuencia continua.
+      El número de punta a punta sería más bajo.
+   c. El separar jab y cross con el rol anotado supone un detector que acierta
+      el brazo siempre (kappa 1 del lado en la anotación). En el producto no es
+      así, y se dice al lado del número.
+
+   La fecha de corte sigue siendo el 31/10.
 
 ## 7. Lo que no se hace
 
@@ -194,8 +247,8 @@ Lectura, fijada ahora:
 3. Declaración de uso de IA: Claude Code corrió la campana en modo agente; si se usa E5, Claude
    propuso etiquetas que Lucas revisó.
 
-## Anexo. Campos [LUCAS] a completar antes del commit
+## Anexo. Campos de Lucas, completos al 14-10
 
-1. §4, guía de criterios del etiquetador: revisada y conforme, o con los cambios.
-2. §4, umbrales de E0: 0,85 y 0,80, o los que fije.
-3. §6.5, sub-hipótesis 1: definición textual y número que la contesta.
+1. §4, guía de criterios del etiquetador: conforme sin cambios (14-10).
+2. §4, umbrales de E0: 0,85 y 0,80, confirmados (14-10).
+3. §6.5, sub-hipótesis 1: definición textual, número y lectura escritos por Lucas (14-10).
