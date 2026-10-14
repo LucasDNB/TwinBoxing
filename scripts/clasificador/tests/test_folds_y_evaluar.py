@@ -142,3 +142,80 @@ def test_generar_configs_toca_solo_lo_previsto(tmp_path):
     assert out.test_dataloader.dataset.split == "test"
     assert out.optim_wrapper == "igual"
     assert out.train_dataloader.dataset.times == 10
+
+
+CLASES6_LR = [f"{t}-{e}" for t in comun.TIPOS for e in ("lead", "rear")]
+
+
+def test_clase_ocho_parte_el_recto_por_rol():
+    assert comun.clase_ocho("straight-head", "lead") == "jab-head"
+    assert comun.clase_ocho("straight-body", "rear") == "cross-body"
+    assert comun.clase_ocho("hook-body", "lead") == "hook-body"
+    with pytest.raises(ValueError):
+        comun.clase_ocho("straight-head", None)
+    with pytest.raises(ValueError):
+        comun.clase_ocho("straight-left-head", "lead")
+
+
+def test_evaluar_ocho_clases_usa_el_rol_de_e1(trabajo):
+    import armar_folds
+    import evaluar
+    _exports(trabajo, "v12s_at", CLASES12)
+    _exports(trabajo, "v6lr_at", CLASES6_LR, seed=1)
+    armar_folds.armar("E1", trabajo / "exports", trabajo / "folds" / "E1")
+    armar_folds.armar("E2", trabajo / "exports", trabajo / "folds" / "E2")
+    _dumps(trabajo, "E2")
+    t = evaluar.evaluar("E2")["ensamble_total"]
+    assert t["ocho_clases"]["exactitud"] == 1.0
+    # el rol de cada recto real es el de la etiqueta de E1 del mismo frame_dir
+    roles = evaluar.roles_e1()
+    n_jab = n_cross = 0
+    for f in comun.FUENTES:
+        nombres, y = evaluar.esperado(trabajo / "folds" / "E2" / f"fold_{f}.pkl")
+        for n, i in zip(nombres, y):
+            c = comun.clase_ocho(comun.CLASES_TIPO_ALTURA[i], roles[n])
+            n_jab += c.startswith("jab")
+            n_cross += c.startswith("cross")
+    rec = t["ocho_clases"]["recall"]
+    assert sum(rec[c]["n"] for c in ("jab-head", "jab-body")) == n_jab
+    assert sum(rec[c]["n"] for c in ("cross-head", "cross-body")) == n_cross
+    assert "ocho_clases" in t and "eje" not in t
+
+
+def test_evaluar_ocho_clases_recto_predicho_toma_el_rol_real(trabajo):
+    import armar_folds
+    import evaluar
+    _exports(trabajo, "v12s_at", CLASES12)
+    _exports(trabajo, "v6lr_at", CLASES6_LR, seed=1)
+    armar_folds.armar("E1", trabajo / "exports", trabajo / "folds" / "E1")
+    armar_folds.armar("E2", trabajo / "exports", trabajo / "folds" / "E2")
+    # el modelo dice siempre straight-head: acierta las 8 clases justo en los rectos a la cabeza
+    sh = comun.CLASES_TIPO_ALTURA.index("straight-head")
+    total = aciertos = 0
+    for f in comun.FUENTES:
+        _, y = evaluar.esperado(trabajo / "folds" / "E2" / f"fold_{f}.pkl")
+        total += len(y)
+        aciertos += int((y == sh).sum())
+        for s in comun.SEMILLAS:
+            P = np.full((len(y), 6), 0.01)
+            P[:, sh] = 0.9
+            wd = trabajo / "corridas" / "E2" / f / f"s{s}"
+            wd.mkdir(parents=True)
+            with (wd / "pred.pkl").open("wb") as fh:
+                pickle.dump([{"pred_score": P[i], "gt_label": np.array([y[i]])} for i in range(len(y))], fh)
+    t = evaluar.evaluar("E2")["ensamble_total"]
+    assert t["ocho_clases"]["exactitud"] == round(aciertos / total, 4)
+
+
+def test_evaluar_ocho_clases_sin_e1_lo_avisa_y_con_hueco_frena(trabajo):
+    import armar_folds
+    import evaluar
+    _exports(trabajo, "v12s_at", CLASES12)
+    armar_folds.armar("E2", trabajo / "exports", trabajo / "folds" / "E2")
+    _dumps(trabajo, "E2")
+    r = evaluar.evaluar("E2")
+    assert "ocho_clases" not in r["ensamble_total"] and r["avisos"]
+    _exports(trabajo, "v6lr_at", CLASES6_LR, por_fuente=5)  # un golpe por fuente sin etiqueta de E1
+    armar_folds.armar("E1", trabajo / "exports", trabajo / "folds" / "E1")
+    with pytest.raises(SystemExit):
+        evaluar.evaluar("E2")

@@ -23,6 +23,7 @@ def test_deja_solo_tiras_lote_y_respuestas(monkeypatch, tmp_path):
     assert ok("Read", {"file_path": str(L / "lote.jsonl")})
     assert ok("Glob", {"path": str(L / "tiras"), "pattern": "*.png"})
     assert ok("Write", {"file_path": str(L / "respuestas" / "lote_01.jsonl")})
+    assert ok("SubagentHandback", {"result": "25 respuestas en respuestas/lote_01.jsonl"})
     # lo que tiene que quedar cerrado
     assert not ok("Read", {"file_path": str(L / "clave" / "clave.csv")})
     assert not ok("Read", {"file_path": str(L / "tiras" / ".." / "clave" / "clave.csv")})
@@ -54,4 +55,6 @@ def test_codigo_de_salida(tmp_path):
     r = pedir({"tool_name": "Read", "tool_input": {"file_path": str(tmp_path / "lotes/p/clave/clave.csv")}})
     assert r.returncode == 2 and "cegado" in r.stderr
     r = pedir({"tool_name": "Read", "tool_input": {"file_path": str(tmp_path / "lotes/p/tiras/T0001.png")}})
+    assert r.returncode == 0
+    r = pedir({"tool_name": "SubagentHandback", "tool_input": {"result": "listo"}})
     assert r.returncode == 0

@@ -101,6 +101,26 @@ def clase_tipo_altura(nombre: str) -> str:
 
 CLASES_TIPO_ALTURA = [f"{t}-{a}" for t in TIPOS for a in ALTURAS]
 
+# Lectura de 8 clases de E2 y E3 (spec, seccion 6, metricas, punto 4): el recto partido en
+# jab y cross.
+CLASES_OCHO = [f"{t}-{a}" for t in ("jab", "cross", "hook", "uppercut") for a in ALTURAS]
+
+
+def clase_ocho(nombre: str, rol: str) -> str:
+    """
+    'straight-head' con rol 'lead' -> 'jab-head'. El rol no sale del modelo de E2 o E3, que no
+    tiene lado: sale de la etiqueta de E1 del mismo golpe. Hook y uppercut no lo usan.
+    """
+    p = partes_de_clase(nombre)
+    if p["altura"] is None or p["eje"] is not None:
+        raise ValueError(f"la clase {nombre} no es tipo x altura sin lado")
+    tipo = p["tipo"]
+    if tipo == "straight":
+        if rol not in ("lead", "rear"):
+            raise ValueError(f"rol invalido para partir el recto: {rol}")
+        tipo = "jab" if rol == "lead" else "cross"
+    return f"{tipo}-{p['altura']}"
+
 
 # ---------------------------------------------------------------------------
 # Metricas

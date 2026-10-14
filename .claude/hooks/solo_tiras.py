@@ -14,6 +14,8 @@ QUE HACE
     Read  de <trabajo>/lotes/<lote>/tiras/*.png y de <trabajo>/lotes/<lote>/lote.jsonl
     Glob  dentro de <trabajo>/lotes/<lote>/tiras/
     Write de <trabajo>/lotes/<lote>/respuestas/*.jsonl
+    SubagentHandback, que devuelve el reporte al que lo lanzo y no abre archivos. Sin
+    ella el etiquetador no puede reportar y gasta turnos reintentando (canario, 14-10).
   Todo lo demas sale con codigo 2, que Claude Code trata como bloqueo y le muestra el motivo.
 
 USO
@@ -45,6 +47,8 @@ def _partes(p: Path):
 
 
 def permitido(herramienta: str, entrada: dict) -> tuple[bool, str]:
+    if herramienta == "SubagentHandback":
+        return True, ""
     if herramienta == "Read":
         partes = _partes(_real(entrada.get("file_path", "")))
         if partes and len(partes) == 3 and partes[1] == "tiras" and partes[2].endswith(".png"):

@@ -80,7 +80,8 @@ Requiere `<trabajo>/preregistro.txt` y el canario en verde.
    tocar la lectura y volvé a auditar; si la falla es de la lectura, frená y avisá.
 6. Documento: `docs/experiments/<fecha>-piloto-etiquetador.md` con el formato de
    `docs/experiments/2026-10-13-cabeza-cuerpo.md` (qué se mide, qué se fijó antes, resultado,
-   lectura, consecuencias), el hash del pre-registro y la tabla de la auditoría. Copiá
+   lectura, consecuencias), el hash del pre-registro, la tabla de la auditoría y una sección de
+   cegado copiada tal cual de `<trabajo>/lotes/canario/veredicto.md`. Copiá
    `resultado.json` a `docs/experiments/datos/<fecha>-piloto-etiquetador.json`. Entrada corta en
    el README raíz con el formato de `CLAUDE.md` §7.
 7. Commit de documento y datos. Mensaje a Lucas: pasa o no pasa, los dos números primarios con su

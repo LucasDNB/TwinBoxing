@@ -57,8 +57,6 @@ Formato de cada línea, sin nada más en el archivo:
 
 ## Criterios
 
-[LUCAS: revisar que coincida con el criterio que usaste al anotar y corregir lo que no.]
-
 - Recto (`straight`, jab o cross): el puño sale de la guardia en línea casi recta hacia el
   rival; el codo se extiende detrás del puño sin abrirse hacia afuera; el hombro rota hacia
   adelante. La muñeca se aleja del hombro siguiendo una recta.

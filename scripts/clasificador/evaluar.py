@@ -15,8 +15,11 @@ POR QUE EXISTE
 
 QUE HACE
   Para cada experimento: metricas por fold, por semilla y del ensamble; total y sobre las
-  cuatro fuentes de C8; lineas de base (siempre straight, siempre cabeza). Escribe
-  <trabajo>/resultados/<exp>.json y <trabajo>/resultados/resumen.md.
+  cuatro fuentes de C8; lineas de base (siempre straight, siempre cabeza). Para E2 y E3,
+  ademas, la lectura de 8 clases (spec, seccion 6, metricas, punto 4): tipo x altura del
+  ensamble con el recto partido en jab y cross por el rol de la etiqueta de E1 del mismo
+  frame_dir. Ese rol no lo predice el modelo, asi que jab contra cross solo falla si falla
+  el tipo x altura. Escribe <trabajo>/resultados/<exp>.json y <trabajo>/resultados/resumen.md.
 
 USO (en boxtwin_mmaction: los pickles traen tensores de torch)
   ~/miniforge3/envs/boxtwin_mmaction/bin/python scripts/clasificador/evaluar.py --exp E1 E2 E3
@@ -34,8 +37,9 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from comun import (ALTURAS, EXPERIMENTOS, FUENTES, FUENTES_C8, SEMILLAS, TIPOS, TRABAJO,  # noqa: E402
-                   balanceada, exactitud, partes_de_clase, recall_por_clase, redondear, wilson)
+from comun import (ALTURAS, CLASES_OCHO, EXPERIMENTOS, FUENTES, FUENTES_C8, SEMILLAS, TIPOS,  # noqa: E402
+                   TRABAJO, balanceada, clase_ocho, exactitud, partes_de_clase, recall_por_clase,
+                   redondear, wilson)
 
 
 def _arr(v) -> np.ndarray:
@@ -85,7 +89,28 @@ def agrupar(P: np.ndarray, clases: list[str], campo: str) -> tuple[np.ndarray, l
     return P @ M, grupos
 
 
-def metricas(P: np.ndarray, y: np.ndarray, clases: list[str]) -> dict:
+def roles_e1() -> dict[str, str] | None:
+    """Rol (lead/rear) de la etiqueta de E1 por frame_dir. None si los folds de E1 no estan."""
+    base = TRABAJO / "folds" / "E1"
+    if not (base / "manifest.json").exists():
+        return None
+    clases = json.loads((base / "manifest.json").read_text())["clases"]
+    roles = {}
+    for fuente in FUENTES:
+        nombres, y = esperado(base / f"fold_{fuente}.pkl")
+        roles.update({n: partes_de_clase(clases[i])["eje"] for n, i in zip(nombres, y)})
+    return roles
+
+
+def ocho_clases(P: np.ndarray, y: np.ndarray, clases: list[str], roles: list[str]) -> dict:
+    real = [clase_ocho(clases[i], r) for i, r in zip(y, roles)]
+    pred = [clase_ocho(clases[i], r) for i, r in zip(P.argmax(1), roles)]
+    aciertos = sum(1 for a, b in zip(real, pred) if a == b)
+    return {"exactitud": exactitud(real, pred), "balanceada": balanceada(real, pred, CLASES_OCHO),
+            "recall": recall_por_clase(real, pred, CLASES_OCHO), "wilson95": wilson(aciertos, len(real))}
+
+
+def metricas(P: np.ndarray, y: np.ndarray, clases: list[str], roles: list[str] | None = None) -> dict:
     n = len(y)
     pred = P.argmax(1)
     out = {"golpes": int(n), "top1": exactitud(list(y), list(pred))}
@@ -105,6 +130,8 @@ def metricas(P: np.ndarray, y: np.ndarray, clases: list[str]) -> dict:
         aciertos = sum(1 for a, b in zip(r, p) if a == b)
         bloque["wilson95"] = wilson(aciertos, n)
         out["familia" if campo == "tipo" else campo] = bloque
+    if roles is not None:
+        out["ocho_clases"] = ocho_clases(P, y, clases, roles)
     return out
 
 
@@ -120,11 +147,23 @@ def lineas_de_base(y: np.ndarray, clases: list[str]) -> dict:
 def evaluar(exp: str, verificar_orden: bool = True) -> dict:
     manifest = json.loads((TRABAJO / "folds" / exp / "manifest.json").read_text())
     clases = manifest["clases"]
-    por_semilla = {s: {"P": [], "y": [], "fuente": []} for s in SEMILLAS}
-    ens = {"P": [], "y": [], "fuente": []}
+    avisos = []
+    roles = None
+    if all(partes_de_clase(c)["eje"] is None and partes_de_clase(c)["altura"] for c in clases):
+        roles = roles_e1()
+        if roles is None:
+            avisos.append("sin lectura de 8 clases: faltan los folds de E1")
+    por_semilla = {s: {"P": [], "y": [], "fuente": [], "rol": []} for s in SEMILLAS}
+    ens = {"P": [], "y": [], "fuente": [], "rol": []}
     faltan, folds = [], {}
     for fuente in FUENTES:
-        _, y = esperado(TRABAJO / "folds" / exp / f"fold_{fuente}.pkl")
+        nombres, y = esperado(TRABAJO / "folds" / exp / f"fold_{fuente}.pkl")
+        rol = None
+        if roles is not None:
+            sin_rol = [n for n in nombres if n not in roles]
+            if sin_rol:
+                raise SystemExit(f"{exp}/{fuente}: {len(sin_rol)} golpes sin etiqueta en E1 (p. ej. {sin_rol[0]})")
+            rol = [roles[n] for n in nombres]
         probs = []
         for s in SEMILLAS:
             pkl = TRABAJO / "corridas" / exp / fuente / f"s{s}" / "pred.pkl"
@@ -140,37 +179,41 @@ def evaluar(exp: str, verificar_orden: bool = True) -> dict:
                 if not np.array_equal(gt, y):
                     raise SystemExit(f"{pkl}: las etiquetas del dump no siguen el orden del fold")
             probs.append(P)
-            for k, v in (("P", P), ("y", y), ("fuente", [fuente] * len(y))):
+            for k, v in (("P", P), ("y", y), ("fuente", [fuente] * len(y)), ("rol", rol or [])):
                 por_semilla[s][k].append(v)
         if probs:
             Pm = np.mean(probs, axis=0)
-            folds[fuente] = {"semillas": len(probs), **metricas(Pm, y, clases)}
+            folds[fuente] = {"semillas": len(probs), **metricas(Pm, y, clases, rol)}
             ens["P"].append(Pm); ens["y"].append(y); ens["fuente"].append([fuente] * len(y))
+            ens["rol"].append(rol or [])
 
     def juntar(b):
-        return np.vstack(b["P"]), np.concatenate(b["y"]), [f for fs in b["fuente"] for f in fs]
+        rol = [r for rs in b["rol"] for r in rs] if roles is not None else None
+        return np.vstack(b["P"]), np.concatenate(b["y"]), [f for fs in b["fuente"] for f in fs], rol
 
     salida = {"exp": exp, "que": manifest["que"], "clases": clases, "faltan": faltan,
-              "completo": not faltan, "por_fold": folds}
+              "completo": not faltan, "avisos": avisos, "por_fold": folds}
     if ens["P"]:
-        P, y, fu = juntar(ens)
-        salida["ensamble_total"] = metricas(P, y, clases)
+        P, y, fu, rol = juntar(ens)
+        salida["ensamble_total"] = metricas(P, y, clases, rol)
         sel = np.array([f in FUENTES_C8 for f in fu])
         if sel.any():
-            salida["ensamble_fuentes_c8"] = metricas(P[sel], y[sel], clases)
+            rol_c8 = [r for r, k in zip(rol, sel) if k] if rol is not None else None
+            salida["ensamble_fuentes_c8"] = metricas(P[sel], y[sel], clases, rol_c8)
         salida["lineas_de_base"] = lineas_de_base(y, clases)
     semillas = {}
     for s, b in por_semilla.items():
         if len(b["P"]) == len(FUENTES):
-            P, y, _ = juntar(b)
-            semillas[f"s{s}"] = metricas(P, y, clases)
+            P, y, _, rol = juntar(b)
+            semillas[f"s{s}"] = metricas(P, y, clases, rol)
     salida["por_semilla_total"] = semillas
     if len(semillas) >= 2:
         disp = {}
         for clave in ("top1",):
             vals = [m[clave] for m in semillas.values()]
             disp[clave] = {"media": statistics.mean(vals), "desvio": statistics.stdev(vals)}
-        for bloque, clave in (("familia", "exactitud"), ("altura", "balanceada"), ("eje", "exactitud")):
+        for bloque, clave in (("familia", "exactitud"), ("altura", "balanceada"), ("eje", "exactitud"),
+                              ("ocho_clases", "balanceada")):
             vals = [m[bloque][clave] for m in semillas.values() if bloque in m]
             if len(vals) >= 2:
                 disp[f"{bloque}_{clave}"] = {"media": statistics.mean(vals), "desvio": statistics.stdev(vals)}
@@ -179,8 +222,8 @@ def evaluar(exp: str, verificar_orden: bool = True) -> dict:
 
 
 def resumen_md(resultados: list[dict]) -> str:
-    filas = ["| Exp | Completo | Familia (ensamble) | Familia balanceada | Altura balanceada | Recall cuerpo | Altura balanceada en fuentes C8 | Eje |",
-             "|---|---|---|---|---|---|---|---|"]
+    filas = ["| Exp | Completo | Familia (ensamble) | Familia balanceada | Altura balanceada | Recall cuerpo | Altura balanceada en fuentes C8 | Eje | 8 clases balanceada |",
+             "|---|---|---|---|---|---|---|---|---|"]
     for r in resultados:
         t = r.get("ensamble_total", {})
         c8 = r.get("ensamble_fuentes_c8", {})
@@ -188,7 +231,8 @@ def resumen_md(resultados: list[dict]) -> str:
         filas.append(f"| {r['exp']} | {'sí' if r['completo'] else 'no, faltan ' + str(len(r['faltan']))} | "
                      f"{f(t, 'familia', 'exactitud')} | {f(t, 'familia', 'balanceada')} | "
                      f"{f(t, 'altura', 'balanceada')} | {f(t, 'altura', 'recall_cuerpo')} | "
-                     f"{f(c8, 'altura', 'balanceada')} | {f(t, 'eje', 'exactitud')} |")
+                     f"{f(c8, 'altura', 'balanceada')} | {f(t, 'eje', 'exactitud')} | "
+                     f"{f(t, 'ocho_clases', 'balanceada')} |")
     return "\n".join(filas) + "\n"
 
 
