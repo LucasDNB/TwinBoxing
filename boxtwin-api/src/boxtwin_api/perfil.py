@@ -251,17 +251,25 @@ def ataque(entradas: list[dict], golpes_de: dict[str, list[dict]], con_altura: b
     return b
 
 
-def exposicion(entradas: list[dict], rival_de: dict[str, tuple]) -> dict | None:
+def exposicion(entradas: list[dict], rival_de: dict[str, tuple],
+               excluir_rival: str | None = None) -> dict | None:
     """
     Hacia donde le tiran: los golpes de sus rivales, por la mano con que vinieron y la altura
     (DC-2, DC-3). Solo sparring y combate: en bolsa y sombra no hay rival. Nulo si no hay
     ninguna sesion de pelea en el filtro.
+
+    `excluir_rival` saca las sesiones contra ese boxeador (DC-10). Lo usa el Rival Fantasma:
+    para cruzar A contra B, lo que le tiran a B no puede incluir lo que le tira A, o la regla
+    compara a A consigo mismo. `excluidas` dice cuantas sesiones se sacaron.
     """
     from boxtwin_api.zonas import bloque
 
     suyas = [x for x in entradas if x["contexto"] in DE_PELEA]
     if not suyas:
         return None
+    total_pelea = len(suyas)
+    if excluir_rival:
+        suyas = [x for x in suyas if rival_de.get(x["sesion_id"], ([], None, ""))[1] != excluir_rival]
     golpes: list[dict] = []
     por_rival: dict[str, dict] = {}
     for x in suyas:
@@ -273,6 +281,7 @@ def exposicion(entradas: list[dict], rival_de: dict[str, tuple]) -> dict | None:
     b = bloque(golpes)
     b["tipo"] = "dirigidos"
     b["sesiones"] = len(suyas)
+    b["excluidas"] = total_pelea - len(suyas)
     b["por_rival"] = sorted(por_rival.values(), key=lambda r: -r["total"])
     return b
 
@@ -348,7 +357,8 @@ def _rounds_promedio(entradas: list[dict]) -> list[dict] | None:
 
 
 def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: str = "todas",
-                     banderas: dict | None = None, solo_pelea: bool = False) -> dict:
+                     banderas: dict | None = None, solo_pelea: bool = False,
+                     excluir_rival: str | None = None) -> dict:
     """
     El perfil completo. `sesiones` son pares (sesion, lado) ya filtrados por boxeador.
 
@@ -448,7 +458,7 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: s
         "rounds_promedio": _rounds_promedio(entradas) if banderas.get("comparacion_rounds") else None,
         "combinaciones": combinaciones(entradas, golpes_de, recall),
         "ataque": ataque(entradas, golpes_de, banderas.get("objetivo", False)),
-        "exposicion": (exposicion(entradas, rival_de) if banderas.get("objetivo") else None),
+        "exposicion": (exposicion(entradas, rival_de, excluir_rival) if banderas.get("objetivo") else None),
     }
 
     return {

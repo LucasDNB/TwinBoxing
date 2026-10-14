@@ -1036,7 +1036,8 @@ def perfil_de_boxeador(
     return _perfil(_boxeador_del_usuario(boxeador_id, usuario, db), usuario, db, contexto)
 
 
-def _perfil(b, usuario, db, contexto: str = "todas", solo_pelea: bool = False) -> dict:
+def _perfil(b, usuario, db, contexto: str = "todas", solo_pelea: bool = False,
+            excluir_rival: str | None = None) -> dict:
     from boxtwin_api.perfil import construir_perfil
 
     sesiones = []
@@ -1048,7 +1049,7 @@ def _perfil(b, usuario, db, contexto: str = "todas", solo_pelea: bool = False) -
     banderas = {"comparacion_rounds": _comparacion_rounds(), "guardia": cfg.c3 == "aprobado",
                 "objetivo": _altura_visible()}
     return construir_perfil(b, sesiones, cfg.dir_sesion, contexto=contexto, banderas=banderas,
-                            solo_pelea=solo_pelea)
+                            solo_pelea=solo_pelea, excluir_rival=excluir_rival)
 
 
 @app.get("/rival")
@@ -1066,8 +1067,9 @@ def rival(
 
     if a == b:
         raise HTTPException(422, "elegi dos peleadores distintos")
-    pa = _perfil(_boxeador_del_usuario(a, usuario, db), usuario, db, solo_pelea=True)
-    pb = _perfil(_boxeador_del_usuario(b, usuario, db), usuario, db, solo_pelea=True)
+    # DC-10: la exposicion de cada uno, sin las sesiones contra el otro.
+    pa = _perfil(_boxeador_del_usuario(a, usuario, db), usuario, db, solo_pelea=True, excluir_rival=b)
+    pb = _perfil(_boxeador_del_usuario(b, usuario, db), usuario, db, solo_pelea=True, excluir_rival=a)
     return cruzar(pa, pb)
 
 

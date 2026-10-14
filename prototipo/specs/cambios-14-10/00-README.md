@@ -79,6 +79,17 @@ brazo (adelantado y atrasado), con el alcance en metros escrito al lado. No se a
 intercambio: la pantalla no simula una pelea (`ampliacion-13-10/07` §2). La distancia entre los
 dos es de presentación, no medida, y lo dice.
 
+DC-10 · Sin circularidad en el cruce (14-10, Lucas, después de medir sobre producción). La
+exposición del receptor se calcula sin las sesiones contra el atacante. Detalle en `02-rival.md` §1.
+
+DC-11 · Umbral de la regla de zona coincidente: 35% (14-10, Lucas). Con 25% se disparaba con 26%
+y 27%, apenas sobre el reparto parejo.
+
+Abierto, sin decidir: la exposición y el ataque pueden tener el cuerpo inflado. La regla de altura
+manda golpes a la cabeza al cuerpo (nivel 2: 108 de 345) y la corrección de DC-4 multiplica el
+cuerpo por 1,47; la corrección compensa lo que el detector no ve, no lo que la regla clasifica mal.
+En producción Lucas da 47% al cuerpo contra 17% en lo anotado. No se toca sin medir.
+
 ## Orden de trabajo
 
 1. B15 rounds de 3 minutos (anotador y API) y W21.

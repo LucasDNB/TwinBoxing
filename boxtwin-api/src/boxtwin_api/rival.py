@@ -20,11 +20,17 @@ QUE HACE
   cruzar(perfil_a, perfil_b)  cruces en los dos sentidos, lecturas por peleador y faltantes
 
   Reglas (ampliacion-13-10/05 §2), para cada sentido atacante -> receptor:
-    zona_coincidente  el atacante va a la zona >= 25% y al receptor le van ahi >= 25%
+    zona_coincidente  el atacante va a la zona >= 35% y al receptor le van ahi >= 35%
     zona_trabajada    el atacante va a la zona 10 puntos o mas por encima de lo que el receptor ve
     cuerpo            el atacante va al cuerpo >= 25% y al receptor le van al cuerpo < 15%
   Cada una es oportunidad para el atacante y amenaza para el receptor. Con menos de 50 golpes
   con altura en cualquiera de las cuatro mitades no se dispara ninguna.
+
+  DC-10 (14-10): los perfiles que llegan aca traen la exposicion SIN las sesiones contra el
+  otro (lo arma GET /rival). Medido sobre produccion: con dos peleadores que solo se
+  enfrentaron entre ellos, ataque y exposicion daban el mismo numero en las ocho filas y las
+  lecturas comparaban a cada uno consigo mismo. DC-11: la zona coincidente pide 35%, no 25%,
+  que es el reparto parejo entre cuatro zonas.
 
 USO
   from boxtwin_api.rival import cruzar
@@ -39,7 +45,7 @@ __all__ = ["MINIMO_GOLPES", "UMBRAL_COINCIDENTE", "UMBRAL_CUERPO_ATAQUE", "UMBRA
            "UMBRAL_TRABAJADA", "cruzar", "nombre_de_zona"]
 
 MINIMO_GOLPES = 50
-UMBRAL_COINCIDENTE = 0.25
+UMBRAL_COINCIDENTE = 0.35
 UMBRAL_TRABAJADA = 0.10
 UMBRAL_CUERPO_ATAQUE = 0.25
 UMBRAL_CUERPO_VISTO = 0.15
@@ -95,19 +101,25 @@ def _lecturas(atacante: str, receptor: str, nombres: dict, at: dict, ex: dict) -
 
 def cruzar(pa: dict, pb: dict) -> dict:
     """
-    Cruza los bloques `ataque` y `exposicion` de dos perfiles ya filtrados a sparring y combate.
-    Sin altura (bandera apagada o perfiles sin datos), cruces y lecturas vacios.
+    Cruza los bloques `ataque` y `exposicion` de dos perfiles ya filtrados a sparring y combate,
+    con la exposicion de cada uno sin las sesiones contra el otro (DC-10). Sin altura (bandera
+    apagada), cruces y lecturas vacios. Con datos de menos en alguna mitad, `faltan` y sin
+    lecturas; los cruces que se puedan calcular se devuelven igual.
     """
     nombres = {"A": pa["boxeador"]["nombre"], "B": pb["boxeador"]["nombre"]}
     bloques = {"A": (pa.get("ataque"), pa.get("exposicion")),
                "B": (pb.get("ataque"), pb.get("exposicion"))}
-    base = {l: {"ataque": (at or {}).get("con_dato") or 0, "exposicion": (ex or {}).get("con_dato") or 0}
+    base = {l: {"ataque": (at or {}).get("con_dato") or 0,
+                "exposicion": (ex or {}).get("con_dato") or 0,
+                "excluidas": (ex or {}).get("excluidas") or 0}
             for l, (at, ex) in bloques.items()}
     vacio = {"cruces": [], "lecturas": [], "base": base, "faltan": None,
              "sesgo_detector": sesgo_detector()}
+    # Sin altura no hay nada que cruzar: ni siquiera se sabe cuantos faltan.
+    if any(not (at or {}).get("zonas") for at, _ in bloques.values()):
+        return vacio
 
     cruces = []
-    lecturas = []
     for atacante, receptor in (("A", "B"), ("B", "A")):
         at_b, ex_b = bloques[atacante][0], bloques[receptor][1]
         at, ex = _fracciones(at_b), _fracciones(ex_b)
@@ -117,16 +129,13 @@ def cruzar(pa: dict, pb: dict) -> dict:
             cruces.append({"atacante": atacante, "zona": z,
                            "ataque_fraccion": at[z], "exposicion_fraccion": ex[z],
                            "n_ataque": at_b["zonas"][z]["n"], "n_exposicion": ex_b["zonas"][z]["n"]})
-    if not cruces:
-        return vacio
 
-    pocos = {l: v for l, v in base.items() if v["ataque"] < MINIMO_GOLPES or v["exposicion"] < MINIMO_GOLPES}
+    pocos = any(v["ataque"] < MINIMO_GOLPES or v["exposicion"] < MINIMO_GOLPES for v in base.values())
     if pocos:
         return {**vacio, "cruces": cruces, "faltan": {"minimo": MINIMO_GOLPES, "base": base}}
 
+    lecturas = []
     for atacante, receptor in (("A", "B"), ("B", "A")):
-        at = _fracciones(bloques[atacante][0])
-        ex = _fracciones(bloques[receptor][1])
-        if at is not None and ex is not None:
-            lecturas += _lecturas(atacante, receptor, nombres, at, ex)
+        lecturas += _lecturas(atacante, receptor, nombres, _fracciones(bloques[atacante][0]),
+                              _fracciones(bloques[receptor][1]))
     return {**vacio, "cruces": cruces, "lecturas": lecturas}

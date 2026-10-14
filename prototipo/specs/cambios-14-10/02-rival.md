@@ -28,8 +28,10 @@ diferencia entre peleadores.
 
 Las tres reglas de zona de `ampliacion-13-10/05` §2, evaluadas en los dos sentidos:
 
-1. Zona coincidente: el atacante dirige a la zona al menos 25% y al receptor le dirigen ahí al
-   menos 25% → "{atacante} suele ir donde a {receptor} suelen buscarlo: {zona}."
+1. Zona coincidente: el atacante dirige a la zona al menos 35% y al receptor le dirigen ahí al
+   menos 35% → "{atacante} suele ir donde a {receptor} suelen buscarlo: {zona}." (Umbral subido
+   de 25% a 35% el 14-10, DC-11: con cuatro zonas, 25% es el reparto parejo y alguna zona
+   siempre llega.)
 2. Zona que el atacante trabaja más de lo que el receptor suele ver: la fracción del atacante
    supera en 10 puntos o más a la que el receptor ve → "{atacante} trabaja {zona} más de lo que
    {receptor} suele ver."
@@ -40,9 +42,18 @@ Cada lectura lleva `para` y `tipo`: si el atacante es A, es una oportunidad para
 para B, y al revés. La pantalla las muestra del lado de cada peleador. Cada lectura cita su zona y
 sus dos fracciones.
 
+Sin el otro en la exposición (DC-10, 14-10). Para cruzar A contra B, la exposición de B se calcula
+sin las sesiones de B contra A, y la de A sin las de A contra B: si no, "a B le tiran a tal zona"
+es lo que tira A, y la regla compara a A consigo mismo. Medido el 14-10 sobre producción: con dos
+perfiles que solo pelearon entre ellos, las ocho filas daban ataque igual a exposición y las
+cuatro lecturas eran de ese tipo. `base.{lado}.excluidas` dice cuántas sesiones se sacaron.
+
 Mínimo de datos: con menos de 50 golpes con altura en cualquiera de las cuatro mitades (ataque y
-exposición de cada uno), no se dispara ninguna regla y `faltan` dice cuántos hay:
-"Faltan sesiones para cruzar zonas: {n} y {m} golpes, hacen falta 50 de cada lado."
+exposición de cada uno, la exposición ya sin el otro), no se dispara ninguna regla y `faltan`
+dice cuántos hay: "Faltan sesiones para cruzar zonas: {n} y {m} golpes, hacen falta 50 de cada
+lado." Si a una exposición no le queda nada porque todas sus sesiones eran contra el otro, se
+dice eso: "Lo que le tiran a {B} sale de sesiones contra {A}: hacen falta sesiones de {B} con
+otros rivales."
 
 Las lecturas no dicen "va a conectar", "es vulnerable" ni dan probabilidades.
 
@@ -66,6 +77,9 @@ Con la bandera de altura apagada, `cruces` y `lecturas` vacíos. El mismo pelead
 
 1. Bandera apagada: vacíos.
 2. 49 golpes en una mitad: sin lecturas y `faltan` con los cuatro números.
+2b. (DC-10) Dos peleadores que solo pelearon entre ellos: exposición vacía en los dos, sin
+    lecturas, `excluidas` igual a sus sesiones. Con un tercero, la exposición de B sale solo de
+    las sesiones contra el tercero.
 3. Cada lectura cita una zona cuyos dos valores están en `cruces`.
 4. Una regla con A atacante es oportunidad para A y amenaza para B (las dos filas).
 5. Las tres reglas, cada una con un caso que la dispara y uno que no, en los umbrales justos
@@ -114,3 +128,4 @@ Con la bandera de altura apagada, `cruces` y `lecturas` vacíos. El mismo pelead
 - CA-26.2. Ninguna lectura aparece con menos de 50 golpes por mitad.
 - CA-26.3. Ninguna lectura usa "conectar", "vulnerable" ni da una probabilidad.
 - CA-26.4. Elegir el mismo peleador en A y B sigue sin estar permitido (CA-07.2).
+- CA-26.5. (DC-10) Ninguna fila del cruce mezcla en la exposición de uno golpes del otro.
