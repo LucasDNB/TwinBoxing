@@ -70,3 +70,21 @@ Decisiones DA-1 a DA-8 tomadas el 13-10 por delegación de Lucas (`specs/ampliac
 | B10b | Combinaciones: cualquier secuencia de 2+ golpes con < 0,5 s | pedido 14-10, reemplaza el patrón de `01` §2 | hecha | `boxtwin/mvp/combinaciones.py`: `cadenas()` reemplaza a `ternas()`. Regla `{"patron": "cualquiera", "separacion": "inicio_a_inicio", "max_s": 0.5, "min_golpes": 2}`. Se mantiene DA-1 (inicio a inicio) y el corte por descartado; DA-2 pasa a "una serie larga es una sola combinación" (cadena máxima); DA-3 deja de aplicar. Sobre lo anotado: **179** combinaciones (112 de 2, 41 de 3, 26 de 4 o más) contra las 28 izq-der-izq; fin a inicio daría 209. `test_mvp_combinaciones.py` (16) fija las dos cifras. Cada combinación suma `brazos`; el bloque, `min_golpes`. `enriquecer` recuenta las sesiones contadas con la regla vieja. Perfil: suma `secuencias_frecuentes` (medido) y `por_largo`. Contrato 0.3 acepta las dos reglas (CHANGELOG) |
 | W13b | Combinaciones en la web con la regla nueva | idem | hecha | Título "Combinaciones", insignia con la secuencia real de manos, corchete sobre N golpes, margen reescrito ("al menos dos golpes seguidos"). Fixture 0.3 regenerado con `armar_fixtures.py` sobre la sesión real: A 7 y B 5 (antes 3 y 1). `combinaciones.test.tsx` (7) y `fightcard.test.ts` |
 | W14 | Cabeza/cuerpo en la web | ampliacion `03` §6 | hecha, por decisión de producto | C8 **sigue rechazado** (0,726): no se tocó. La bandera `objetivo` se enciende con `BOXTWIN_OBJETIVO_ESTIMADO` (por defecto 1), igual que el clasificador de familia entró al MVP rotulado como estimación. La exposición sigue atada a C8 de verdad. Fight-Card: fila A contra B con barra partida, estilo estimación, nota con "Exactitud medida: 73% sobre 806 golpes … Todavía no alcanza el 75%" y el sin dato. Análisis: "≈ cabeza / ≈ cuerpo" por golpe; la hoja de corrección suma el par (PATCH `{objetivo}`, optimista). `altura.test.tsx` (7: CA-14.1 a 14.3 y CA-14.2 con la bandera apagada), `test_ampliacion_b11.py` (5). Queda sin hacer la división por familia en el perfil (06): la API del perfil no suma altura todavía |
+
+## Cambios del 14-10 al perfil y al Rival Fantasma (`specs/cambios-14-10/`)
+
+DC-1 y DC-2 tomadas por Lucas el 14-10; DC-3 a DC-9 en `specs/cambios-14-10/00-README.md`.
+
+| Id | Tarea | Spec | Estado | Evidencia / notas |
+|---|---|---|---|---|
+| B15 | Rounds de 3 minutos y bandera de producto | `cambios-14-10/01` §1 | pendiente | |
+| B16 | Distribución por mano y altura, exposición dirigida | `cambios-14-10/01` §2 | pendiente | |
+| B17 | Distancia de trabajo y estilo | `cambios-14-10/01` §3 | pendiente | |
+| W20 | Distribución mano por altura | `cambios-14-10/01` §4 | pendiente | |
+| W21 | Volumen por round con segmentos | `cambios-14-10/01` §4 | pendiente | |
+| W22 | Mapa de exposición | `cambios-14-10/01` §4 | pendiente | |
+| W23 | Avatar 3D estático | `cambios-14-10/01` §4 | pendiente | |
+| W24 | Distancia y estilo en la web | `cambios-14-10/01` §4 | pendiente | |
+| B18 | Ataque contra exposición en Python | `cambios-14-10/02` §1 | pendiente | |
+| W26 | Bloque unificado del Rival | `cambios-14-10/02` §2 | pendiente | |
+| W25 | Avatares 3D del Rival | `cambios-14-10/02` §3 | pendiente | |

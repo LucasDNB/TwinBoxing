@@ -174,6 +174,10 @@ class Boxeador(Base):
     categoria: Mapped[str | None] = mapped_column(String(40), nullable=True)
     altura_m: Mapped[float | None] = mapped_column(Float, nullable=True)
     envergadura_m: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # Cambios del 14-10 (B17, DC-7): cargados a mano, no medidos. La distancia medida (B9)
+    # sigue sin existir; esto es lo que el entrenador sabe de su peleador.
+    distancia: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    estilo: Mapped[str | None] = mapped_column(String(16), nullable=True)
     creado: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
 
 

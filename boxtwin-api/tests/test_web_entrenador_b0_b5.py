@@ -113,10 +113,22 @@ def test_sin_medir_los_criterios_estan_pendientes_y_las_banderas_apagadas(client
     d = cliente.get("/producto").json()
     assert d["criterios"]["C2"] == {"estado": "pendiente", "fecha": None}
     assert d["criterios"]["C3"] == {"estado": "pendiente", "fecha": None}
-    assert d["banderas"] == {"comparacion_rounds": False, "guardia": False,
+    # Rounds y altura son la excepcion: van por decision de producto (14-10), con C2 y C8 sin tocar
+    assert d["banderas"] == {"comparacion_rounds": True, "guardia": False,
                              "sesiones_individuales": False, "postura_2d": False,
                              # la altura es la excepcion: va por decision de producto (14-10)
-                             "objetivo": True, "exposicion": False, "avatar_3d": False}
+                             "objetivo": True, "exposicion": True, "avatar_3d": False}
+
+
+def test_B15_7_rounds_por_decision_de_producto_sin_tocar_c2(entorno, monkeypatch):
+    c = _recargar(monkeypatch, BOXTWIN_ROUNDS_ESTIMADO="0", BOXTWIN_INVITACION="abierto")
+    d = c.get("/producto").json()
+    assert d["banderas"]["comparacion_rounds"] is False
+    monkeypatch.delenv("BOXTWIN_ROUNDS_ESTIMADO")  # el valor por defecto
+    c = _recargar(monkeypatch, BOXTWIN_INVITACION="abierto")
+    d = c.get("/producto").json()
+    assert d["banderas"]["comparacion_rounds"] is True
+    assert d["criterios"]["C2"]["estado"] == "pendiente"
 
 
 def test_las_banderas_salen_del_estado_de_cada_criterio(entorno, monkeypatch):

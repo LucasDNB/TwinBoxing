@@ -410,7 +410,9 @@ def enriquecer(directorio: Path, forzar: bool = False, ses: Sesion | None = None
     asi que una altura corregida a mano no se pierde al reenriquecer. El tiempo queda en
     sesion.json, porque cuenta para C5.
     """
-    from boxtwin.mvp.fightcard import VERSION_FIGHTCARD, _combinaciones, aplicar_correcciones
+    from boxtwin.mvp.fightcard import (
+        VERSION_FIGHTCARD, _combinaciones, aplicar_correcciones, completar_rounds,
+    )
     from boxtwin.mvp.combinaciones import REGLA as REGLA_COMBINACION
     from boxtwin.mvp.objetivo import REGLA, TAU, marcar_fightcard
 
@@ -420,12 +422,15 @@ def enriquecer(directorio: Path, forzar: bool = False, ses: Sesion | None = None
     combinaciones_al_dia = all(
         (p.get("combinaciones") or {}).get("patron") == REGLA_COMBINACION["patron"]
         for p in (fc.get("peleadores") or {}).values())
+    # Cambios del 14-10 (DC-5): una sesion sin rounds recibe segmentos de 3 minutos.
+    rounds_al_dia = bool((fc.get("video") or {}).get("rounds")) or not (fc.get("video") or {}).get("duracion_s")
     if (not forzar and fc.get("version") == VERSION_FIGHTCARD
             and previo.get("regla") == REGLA and previo.get("tau") == TAU
-            and combinaciones_al_dia):
+            and combinaciones_al_dia and rounds_al_dia):
         return None
     ses = ses or Sesion.cargar(directorio)
     t0 = time.perf_counter()
+    completar_rounds(fc)
     z = np.load(directorio / POSES)
     marcar_fightcard(fc, z["keypoints"], z["kp_score"], z["valid"], TAU)
     fc["version"] = VERSION_FIGHTCARD

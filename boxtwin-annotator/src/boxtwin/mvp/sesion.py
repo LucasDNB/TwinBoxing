@@ -37,8 +37,8 @@ from pathlib import Path
 from typing import Any
 
 __all__ = [
-    "ESTADOS", "NOMBRE_ARCHIVO", "NOMBRE_PROGRESO", "Progreso", "Sesion",
-    "ventanas_de_round",
+    "ESTADOS", "MINIMO_ULTIMO_S", "NOMBRE_ARCHIVO", "NOMBRE_PROGRESO", "Progreso",
+    "SEGMENTO_S", "Sesion", "segmentos", "ventanas_de_round",
 ]
 
 NOMBRE_ARCHIVO = "sesion.json"
@@ -80,6 +80,34 @@ def ventanas_de_round(
         t = fin + max(descanso_s, 0.0)
         n += 1
     return ventanas
+
+
+# Cambios del 14-10 (prototipo/specs/cambios-14-10/01 §1, DC-5): sin rounds declarados el
+# video se corta en segmentos de un round de 3 minutos, para que el volumen por round exista
+# igual. Un ultimo segmento de menos de un minuto se suma al anterior: un "round" de 10 s da
+# un ritmo por minuto que no dice nada.
+SEGMENTO_S = 180.0
+MINIMO_ULTIMO_S = 60.0
+
+
+def segmentos(
+    duracion_s: float, round_s: float | None, descanso_s: float
+) -> tuple[list[dict], str | None]:
+    """
+    Las ventanas de la sesion y de donde salen: ("declarados") los rounds que dijo el usuario,
+    o ("segmentos_180s") cortes de 3 minutos sin descanso cuando no dijo nada. Sin duracion no
+    hay ventanas ni origen.
+    """
+    if round_s and round_s > 0:
+        v = ventanas_de_round(duracion_s, round_s, descanso_s)
+        return v, ("declarados" if v else None)
+    if duracion_s <= 0:
+        return [], None
+    v = ventanas_de_round(duracion_s, SEGMENTO_S, 0.0)
+    if len(v) > 1 and v[-1]["fin_s"] - v[-1]["inicio_s"] < MINIMO_ULTIMO_S:
+        ultimo = v.pop()
+        v[-1]["fin_s"] = ultimo["fin_s"]
+    return v, "segmentos_180s"
 
 
 class Progreso:
@@ -182,15 +210,15 @@ class Sesion:
         cls, directorio: Path, video: dict, round_s: float | None, descanso_s: float
     ) -> Sesion:
         ahora = datetime.now().astimezone().isoformat()
+        ventanas, origen = segmentos(float(video.get("duracion_s", 0.0)), round_s, descanso_s)
         return cls(
             directorio=Path(directorio),
             video=video,
             rounds={
                 "round_s": round_s,
                 "descanso_s": descanso_s,
-                "ventanas": ventanas_de_round(
-                    float(video.get("duracion_s", 0.0)), round_s, descanso_s
-                ),
+                "ventanas": ventanas,
+                "origen": origen,
             },
             creada=ahora,
             actualizada=ahora,

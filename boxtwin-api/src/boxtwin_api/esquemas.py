@@ -69,6 +69,9 @@ class EntradaBoxeador(BaseModel):
     categoria: str | None = Field(default=None, max_length=40)
     altura_m: float | None = Field(default=None, ge=1.20, le=2.20)
     envergadura_m: float | None = Field(default=None, ge=1.20, le=2.40)
+    # B17 (cambios-14-10): cargados a mano.
+    distancia: Literal["larga", "media", "corta"] | None = None
+    estilo: Literal["fajador", "estilista"] | None = None
 
 
 class AsignarBoxeadores(BaseModel):

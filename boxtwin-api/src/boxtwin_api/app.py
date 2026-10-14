@@ -900,7 +900,10 @@ def _boxeador_a_dict(b, uso: dict | None = None) -> dict:
          # B6
          "categoria": b.categoria,
          "altura_m": b.altura_m,
-         "envergadura_m": b.envergadura_m}
+         "envergadura_m": b.envergadura_m,
+         # B17
+         "distancia": b.distancia,
+         "estilo": b.estilo}
     if uso is not None:
         n, ultima = uso.get(b.id, (0, None))
         d["sesiones"] = n
@@ -947,7 +950,8 @@ def crear_boxeador(
         raise HTTPException(409, f"ya tenes un boxeador que se llama {nombre}")
     b = Boxeador(usuario_id=usuario.id, nombre=nombre, guardia=entrada.guardia,
                  notas=entrada.notas, categoria=entrada.categoria,
-                 altura_m=entrada.altura_m, envergadura_m=entrada.envergadura_m)
+                 altura_m=entrada.altura_m, envergadura_m=entrada.envergadura_m,
+                 distancia=entrada.distancia, estilo=entrada.estilo)
     db.add(b)
     db.commit()
     return _boxeador_a_dict(b, {})
@@ -982,6 +986,8 @@ def editar_boxeador(
     b.categoria = entrada.categoria
     b.altura_m = entrada.altura_m
     b.envergadura_m = entrada.envergadura_m
+    b.distancia = entrada.distancia
+    b.estilo = entrada.estilo
     db.commit()
     return _boxeador_a_dict(b, _uso_de_boxeadores(usuario, db))
 
@@ -1025,19 +1031,44 @@ def perfil_de_boxeador(
     boxeador y el entrenador corrige tipos: un perfil cacheado mostraria la version anterior
     a su correccion, que es justo cuando mira.
     """
+    if contexto != "todas" and contexto not in CONTEXTOS:
+        raise HTTPException(422, f"contexto tiene que ser todas o uno de {', '.join(CONTEXTOS)}")
+    return _perfil(_boxeador_del_usuario(boxeador_id, usuario, db), usuario, db, contexto)
+
+
+def _perfil(b, usuario, db, contexto: str = "todas", solo_pelea: bool = False) -> dict:
     from boxtwin_api.perfil import construir_perfil
 
-    b = _boxeador_del_usuario(boxeador_id, usuario, db)
     sesiones = []
     for s in db.query(Sesion).filter(Sesion.usuario_id == usuario.id).all():
         if s.boxeador_a_id == b.id:
             sesiones.append((s, "A"))
         if s.boxeador_b_id == b.id:
             sesiones.append((s, "B"))
-    if contexto != "todas" and contexto not in CONTEXTOS:
-        raise HTTPException(422, f"contexto tiene que ser todas o uno de {', '.join(CONTEXTOS)}")
-    banderas = {"comparacion_rounds": cfg.c2 == "aprobado", "guardia": cfg.c3 == "aprobado"}
-    return construir_perfil(b, sesiones, cfg.dir_sesion, contexto=contexto, banderas=banderas)
+    banderas = {"comparacion_rounds": _comparacion_rounds(), "guardia": cfg.c3 == "aprobado",
+                "objetivo": _altura_visible()}
+    return construir_perfil(b, sesiones, cfg.dir_sesion, contexto=contexto, banderas=banderas,
+                            solo_pelea=solo_pelea)
+
+
+@app.get("/rival")
+def rival(
+    a: str,
+    b: str,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(obtener_sesion),
+) -> dict:
+    """
+    Ataque contra exposicion entre dos perfiles (cambios-14-10, B18). Solo sparring y combate
+    de cada uno. La regla vive en boxtwin_api.rival; la web no la copia.
+    """
+    from boxtwin_api.rival import cruzar
+
+    if a == b:
+        raise HTTPException(422, "elegi dos peleadores distintos")
+    pa = _perfil(_boxeador_del_usuario(a, usuario, db), usuario, db, solo_pelea=True)
+    pb = _perfil(_boxeador_del_usuario(b, usuario, db), usuario, db, solo_pelea=True)
+    return cruzar(pa, pb)
 
 
 @app.get("/producto")
@@ -1069,15 +1100,18 @@ def producto() -> dict:
             "C10": {"estado": cfg.c10, "fecha": cfg.c10_fecha},
         },
         "banderas": {
-            "comparacion_rounds": cfg.c2 == "aprobado",
+            # C2 aprobado, o decision de producto rotulada (cambios-14-10, DC-1).
+            "comparacion_rounds": _comparacion_rounds(),
             "guardia": cfg.c3 == "aprobado",
             "sesiones_individuales": cfg.sesiones_individuales,
             "postura_2d": False,
             # La altura se muestra con C8 aprobado o por decision de producto (14-10), siempre
-            # como estimacion. La exposicion pide C8 aprobado de verdad y C9 medido (08 §3; si
-            # C9 no pasa, el mapa se muestra corregido, por eso alcanza con que no este pendiente).
-            "objetivo": cfg.c8 == "aprobado" or cfg.objetivo_estimado,
-            "exposicion": cfg.c8 == "aprobado" and cfg.c9 != "pendiente",
+            # como estimacion. La exposicion, con C8 aprobado y C9 medido (08 §3) o con la
+            # misma decision de producto.
+            "objetivo": _altura_visible(),
+            # B16 (cambios-14-10): el mapa sale de la misma altura, asi que va con ella. La
+            # correccion por sesgo del detector (C9) se aplica con el recall medido el 14-10.
+            "exposicion": (cfg.c8 == "aprobado" and cfg.c9 != "pendiente") or cfg.objetivo_estimado,
             "avatar_3d": cfg.c10 == "aprobado",
         },
         "dominio": {
@@ -1086,6 +1120,14 @@ def producto() -> dict:
             "perfil_preliminar_sesiones": cfg.perfil_preliminar_sesiones,
         },
     }
+
+
+def _altura_visible() -> bool:
+    return cfg.c8 == "aprobado" or cfg.objetivo_estimado
+
+
+def _comparacion_rounds() -> bool:
+    return cfg.c2 == "aprobado" or cfg.rounds_estimado
 
 
 @app.get("/salud")

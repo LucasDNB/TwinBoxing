@@ -173,6 +173,11 @@ class Config:
     objetivo_estimado: bool = field(
         default_factory=lambda: os.environ.get("BOXTWIN_OBJETIVO_ESTIMADO", "1") in ("1", "si")
     )
+    # Comparacion entre rounds por decision de producto (cambios-14-10, DC-1): se muestra
+    # rotulada como sin validar aunque C2 este pendiente. C2 no se toca. Con 0, depende de C2.
+    rounds_estimado: bool = field(
+        default_factory=lambda: os.environ.get("BOXTWIN_ROUNDS_ESTIMADO", "1") in ("1", "si")
+    )
     # B8: se enciende solo despues de la medicion con criterio fijado en el spec.
     sesiones_individuales: bool = field(
         default_factory=lambda: os.environ.get("BOXTWIN_SESIONES_INDIVIDUALES", "") in ("1", "si")
