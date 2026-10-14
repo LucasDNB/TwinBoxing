@@ -53,6 +53,7 @@ from boxtwin_api.esquemas import (
 )
 from boxtwin_api.exportar import a_csv, a_html
 from boxtwin_api.modelos import AsignacionManual, Boxeador, Correccion, Sesion, Trabajo, Usuario
+from boxtwin_api.perfil import regla_de_combinacion
 from boxtwin_api.seguridad import (
     emitir_ticket,
     emitir_token,
@@ -448,7 +449,7 @@ def siembra(
         raise HTTPException(
             409, f"la sesion esta en '{s.estado}' y todavia no hay candidatos que elegir"
         )
-    individual = (s.contexto or "sparring") in ("bolsa", "sombra")
+    individual = _es_individual(s)
     if s_in.track_b is None and not individual:
         raise HTTPException(422, "en sparring y combate hay que marcar a los dos peleadores")
     if s_in.track_b is not None and individual:
@@ -482,6 +483,10 @@ def siembra(
 # ---------------------------------------------------------------------------
 
 
+def _es_individual(s: Sesion) -> bool:
+    return (s.contexto or "sparring") in ("bolsa", "sombra")
+
+
 def _tramos_en_disco(s: Sesion) -> tuple[dict, list[dict]]:
     if s.estado != "listo":
         raise HTTPException(
@@ -513,12 +518,13 @@ def tramos(
     disco, lista = _tramos_en_disco(s)
     manuales = (disco.get("identidad") or {}).get("asignaciones_manuales") or {}
     ident = _fightcard(s.id).get("identidad") or {}
+    cobertura = {"A": ident.get("cobertura_A", 0.0)}
+    # B8b: en bolsa y sombra hay una sola persona; un B en cero se leeria como "no lo vio".
+    if not _es_individual(s):
+        cobertura["B"] = ident.get("cobertura_B", 0.0)
+    cobertura["sin_asignar"] = ident.get("sin_asignar", 0.0)
     return {
-        "cobertura": {
-            "A": ident.get("cobertura_A", 0.0),
-            "B": ident.get("cobertura_B", 0.0),
-            "sin_asignar": ident.get("sin_asignar", 0.0),
-        },
+        "cobertura": cobertura,
         "separacion_color": ident.get("separacion_color", ident.get("separacion_de_perfiles")),
         "tramos": [
             {
@@ -568,6 +574,8 @@ def asignar_tramos(
     """
     s = sesion_del_usuario(sesion_id, usuario, db)
     disco, lista = _tramos_en_disco(s)
+    if _es_individual(s) and any(a.rol == "B" for a in entrada.asignaciones):
+        raise HTTPException(422, "en bolsa y sombra hay una sola persona: un tramo es A o ninguno")
     validos = {int(t["track"]) for t in lista}
     ajenos = sorted({a.track for a in entrada.asignaciones} - validos)
     if ajenos:
@@ -685,7 +693,8 @@ def corregir(
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """
-    F14 y RF10: el entrenador corrige el tipo y la correccion se guarda como etiqueta.
+    F14 y RF10: el entrenador corrige el tipo y la correccion se guarda como etiqueta. B11
+    suma la altura: `{"objetivo": "cabeza" | "cuerpo"}`, que queda con `campo = objetivo`.
 
     La ruta esta anidada bajo la sesion y no es `/golpes/{id}` como propone el spec, porque
     el id de un golpe sale de su carril y su cuadro y solo es unico adentro de su sesion.
@@ -701,7 +710,8 @@ def corregir(
         ) from e
 
     try:
-        fc = registrar_correccion(cfg.dir_sesion(s.id), golpe, entrada.tipo, por=usuario.email)
+        fc = registrar_correccion(cfg.dir_sesion(s.id), golpe, entrada.tipo, por=usuario.email,
+                                  objetivo=entrada.objetivo)
     except FileNotFoundError as e:
         raise HTTPException(409, str(e)) from e
     except ValueError as e:
@@ -710,11 +720,16 @@ def corregir(
     ev = next(
         (g for p in fc["peleadores"].values() for g in p["golpes"] if g["id"] == golpe), None
     )
-    c = (ev or {}).get("corregido") or {}
+    if entrada.objetivo is not None:
+        campo, valor = "objetivo", entrada.objetivo
+        original = ((ev or {}).get("objetivo_corregido") or {}).get("objetivo_original")
+    else:
+        campo, valor = "tipo", entrada.tipo
+        original = ((ev or {}).get("corregido") or {}).get("tipo_original")
     db.add(
         Correccion(
-            sesion_id=s.id, golpe=golpe, tipo=entrada.tipo,
-            tipo_original=c.get("tipo_original"),
+            sesion_id=s.id, golpe=golpe, tipo=valor, campo=campo,
+            tipo_original=original,
             checkpoint=fc.get("clasificador", {}).get("checkpoint"),
             datos={"t_inicio": (ev or {}).get("t_inicio"), "por": usuario.email},
         )
@@ -1022,8 +1037,7 @@ def perfil_de_boxeador(
     if contexto != "todas" and contexto not in CONTEXTOS:
         raise HTTPException(422, f"contexto tiene que ser todas o uno de {', '.join(CONTEXTOS)}")
     banderas = {"comparacion_rounds": cfg.c2 == "aprobado", "guardia": cfg.c3 == "aprobado"}
-    return construir_perfil(b, sesiones, cfg.dir_sesion, contexto=contexto, banderas=banderas,
-                            pausa=cfg.pausa_combinacion_s)
+    return construir_perfil(b, sesiones, cfg.dir_sesion, contexto=contexto, banderas=banderas)
 
 
 @app.get("/producto")
@@ -1049,15 +1063,25 @@ def producto() -> dict:
         "criterios": {
             "C2": {"estado": cfg.c2, "fecha": cfg.c2_fecha},
             "C3": {"estado": cfg.c3, "fecha": cfg.c3_fecha},
+            # Ampliacion del 13-10 (08 §2 y §3)
+            "C8": {"estado": cfg.c8, "fecha": cfg.c8_fecha},
+            "C9": {"estado": cfg.c9, "fecha": cfg.c9_fecha},
+            "C10": {"estado": cfg.c10, "fecha": cfg.c10_fecha},
         },
         "banderas": {
             "comparacion_rounds": cfg.c2 == "aprobado",
             "guardia": cfg.c3 == "aprobado",
             "sesiones_individuales": cfg.sesiones_individuales,
             "postura_2d": False,
+            # 08 §3. La exposicion pide C8 aprobado y C9 medido (si C9 no pasa, el mapa se
+            # muestra corregido, pero se muestra: por eso alcanza con que no este pendiente).
+            "objetivo": cfg.c8 == "aprobado",
+            "exposicion": cfg.c8 == "aprobado" and cfg.c9 != "pendiente",
+            "avatar_3d": cfg.c10 == "aprobado",
         },
         "dominio": {
-            "pausa_combinacion_s": cfg.pausa_combinacion_s,
+            # La regla vive en el anotador (B10): la API la publica, no la define.
+            "combinacion": regla_de_combinacion(),
             "perfil_preliminar_sesiones": cfg.perfil_preliminar_sesiones,
         },
     }

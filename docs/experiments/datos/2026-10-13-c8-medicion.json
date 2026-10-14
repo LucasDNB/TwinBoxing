@@ -1,0 +1,227 @@
+{
+  "regla": "altura_relativa_v1",
+  "tau": 0.2,
+  "fuentes": [
+    "03-sparring",
+    "04-sparring",
+    "sparring-3",
+    "pacquiao_margarito"
+  ],
+  "total": {
+    "estricta": {
+      "golpes": 806,
+      "cabeza": 674,
+      "cuerpo": 132,
+      "recall_cabeza": 0.6335,
+      "recall_cuerpo": 0.8182,
+      "exactitud_balanceada": 0.7259,
+      "recall_cuerpo_wilson95": [
+        0.7437,
+        0.8747
+      ],
+      "exactitud_simple": 0.6638
+    },
+    "con_dato": {
+      "golpes": 753,
+      "cabeza": 631,
+      "cuerpo": 122,
+      "recall_cabeza": 0.6767,
+      "recall_cuerpo": 0.8852,
+      "exactitud_balanceada": 0.781,
+      "recall_cuerpo_wilson95": [
+        0.8166,
+        0.9304
+      ],
+      "exactitud_simple": 0.7105
+    },
+    "sin_dato": 53,
+    "confusion": {
+      "cabeza": {
+        "cabeza": 427,
+        "cuerpo": 204,
+        "None": 43
+      },
+      "cuerpo": {
+        "cabeza": 14,
+        "cuerpo": 108,
+        "None": 10
+      }
+    },
+    "linea_de_base_todo_cabeza": 0.5
+  },
+  "por_fuente": {
+    "03-sparring": {
+      "estricta": {
+        "golpes": 131,
+        "cabeza": 114,
+        "cuerpo": 17,
+        "recall_cabeza": 0.5614,
+        "recall_cuerpo": 0.8235,
+        "exactitud_balanceada": 0.6925,
+        "recall_cuerpo_wilson95": [
+          0.5897,
+          0.9381
+        ],
+        "exactitud_simple": 0.5954
+      },
+      "con_dato": {
+        "golpes": 110,
+        "cabeza": 96,
+        "cuerpo": 14,
+        "recall_cabeza": 0.6667,
+        "recall_cuerpo": 1.0,
+        "exactitud_balanceada": 0.8333,
+        "recall_cuerpo_wilson95": [
+          0.7847,
+          1.0
+        ],
+        "exactitud_simple": 0.7091
+      },
+      "sin_dato": 21,
+      "confusion": {
+        "cabeza": {
+          "cabeza": 64,
+          "cuerpo": 32,
+          "None": 18
+        },
+        "cuerpo": {
+          "cabeza": 0,
+          "cuerpo": 14,
+          "None": 3
+        }
+      },
+      "linea_de_base_todo_cabeza": 0.5
+    },
+    "04-sparring": {
+      "estricta": {
+        "golpes": 124,
+        "cabeza": 101,
+        "cuerpo": 23,
+        "recall_cabeza": 0.6832,
+        "recall_cuerpo": 0.8696,
+        "exactitud_balanceada": 0.7764,
+        "recall_cuerpo_wilson95": [
+          0.6787,
+          0.9546
+        ],
+        "exactitud_simple": 0.7177
+      },
+      "con_dato": {
+        "golpes": 118,
+        "cabeza": 96,
+        "cuerpo": 22,
+        "recall_cabeza": 0.7188,
+        "recall_cuerpo": 0.9091,
+        "exactitud_balanceada": 0.8139,
+        "recall_cuerpo_wilson95": [
+          0.7218,
+          0.9747
+        ],
+        "exactitud_simple": 0.7542
+      },
+      "sin_dato": 6,
+      "confusion": {
+        "cabeza": {
+          "cabeza": 69,
+          "cuerpo": 27,
+          "None": 5
+        },
+        "cuerpo": {
+          "cabeza": 2,
+          "cuerpo": 20,
+          "None": 1
+        }
+      },
+      "linea_de_base_todo_cabeza": 0.5
+    },
+    "sparring-3": {
+      "estricta": {
+        "golpes": 400,
+        "cabeza": 326,
+        "cuerpo": 74,
+        "recall_cabeza": 0.6196,
+        "recall_cuerpo": 0.8243,
+        "exactitud_balanceada": 0.722,
+        "recall_cuerpo_wilson95": [
+          0.7223,
+          0.8944
+        ],
+        "exactitud_simple": 0.6575
+      },
+      "con_dato": {
+        "golpes": 387,
+        "cabeza": 316,
+        "cuerpo": 71,
+        "recall_cabeza": 0.6392,
+        "recall_cuerpo": 0.8592,
+        "exactitud_balanceada": 0.7492,
+        "recall_cuerpo_wilson95": [
+          0.7598,
+          0.9217
+        ],
+        "exactitud_simple": 0.6796
+      },
+      "sin_dato": 13,
+      "confusion": {
+        "cabeza": {
+          "cabeza": 202,
+          "cuerpo": 114,
+          "None": 10
+        },
+        "cuerpo": {
+          "cabeza": 10,
+          "cuerpo": 61,
+          "None": 3
+        }
+      },
+      "linea_de_base_todo_cabeza": 0.5
+    },
+    "pacquiao_margarito": {
+      "estricta": {
+        "golpes": 151,
+        "cabeza": 133,
+        "cuerpo": 18,
+        "recall_cabeza": 0.6917,
+        "recall_cuerpo": 0.7222,
+        "exactitud_balanceada": 0.707,
+        "recall_cuerpo_wilson95": [
+          0.4913,
+          0.875
+        ],
+        "exactitud_simple": 0.6954
+      },
+      "con_dato": {
+        "golpes": 138,
+        "cabeza": 123,
+        "cuerpo": 15,
+        "recall_cabeza": 0.748,
+        "recall_cuerpo": 0.8667,
+        "exactitud_balanceada": 0.8073,
+        "recall_cuerpo_wilson95": [
+          0.6212,
+          0.9626
+        ],
+        "exactitud_simple": 0.7609
+      },
+      "sin_dato": 13,
+      "confusion": {
+        "cabeza": {
+          "cabeza": 92,
+          "cuerpo": 31,
+          "None": 10
+        },
+        "cuerpo": {
+          "cabeza": 2,
+          "cuerpo": 13,
+          "None": 3
+        }
+      },
+      "linea_de_base_todo_cabeza": 0.5
+    }
+  },
+  "C8_pasa": false,
+  "umbral": {
+    "exactitud_balanceada": 0.75,
+    "recall_cuerpo": 0.6
+  }
+}

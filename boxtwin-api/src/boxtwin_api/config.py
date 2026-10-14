@@ -158,6 +158,14 @@ class Config:
     c2_fecha: str | None = field(default_factory=lambda: os.environ.get("BOXTWIN_C2_FECHA") or None)
     c3: str = field(default_factory=lambda: _criterio("BOXTWIN_C3"))
     c3_fecha: str | None = field(default_factory=lambda: os.environ.get("BOXTWIN_C3_FECHA") or None)
+    # Ampliacion del 13-10 (08 §3): altura del golpe, sesgo del detector por zona, avatar.
+    # C8 se midio el 13-10 y no paso (0,726): queda "rechazado" cuando Lucas lo cargue.
+    c8: str = field(default_factory=lambda: _criterio("BOXTWIN_C8"))
+    c8_fecha: str | None = field(default_factory=lambda: os.environ.get("BOXTWIN_C8_FECHA") or None)
+    c9: str = field(default_factory=lambda: _criterio("BOXTWIN_C9"))
+    c9_fecha: str | None = field(default_factory=lambda: os.environ.get("BOXTWIN_C9_FECHA") or None)
+    c10: str = field(default_factory=lambda: _criterio("BOXTWIN_C10"))
+    c10_fecha: str | None = field(default_factory=lambda: os.environ.get("BOXTWIN_C10_FECHA") or None)
     # B8: se enciende solo despues de la medicion con criterio fijado en el spec.
     sesiones_individuales: bool = field(
         default_factory=lambda: os.environ.get("BOXTWIN_SESIONES_INDIVIDUALES", "") in ("1", "si")
@@ -175,9 +183,6 @@ class Config:
     )
     # Decisiones de dominio de Lucas. Valores iniciales del spec, a confirmar antes de la
     # prueba con usuarios (07 §3).
-    pausa_combinacion_s: float = field(
-        default_factory=lambda: float(os.environ.get("BOXTWIN_PAUSA_COMBINACION", "0.5"))
-    )
     perfil_preliminar_sesiones: int = field(
         default_factory=lambda: int(os.environ.get("BOXTWIN_PERFIL_PRELIMINAR", "5"))
     )

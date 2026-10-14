@@ -6,6 +6,7 @@ import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import fc01 from "../fixtures/sesion-real/fightcard-0.1.json";
 import fc02 from "../fixtures/sesion-real/fightcard-0.2.json";
+import fc03 from "../fixtures/sesion-real/fightcard-0.3.json";
 import jobEnCola from "../fixtures/sesion-real/job-en_cola.json";
 import jobProcesando from "../fixtures/sesion-real/job-procesando.json";
 import jobEspera from "../fixtures/sesion-real/job-espera_siembra.json";
@@ -18,7 +19,7 @@ export const JOBS = {
   en_cola: jobEnCola, procesando: jobProcesando, espera_siembra: jobEspera,
   completando: jobCompletando, listo: jobListo, fallo: jobFallo,
 } as const;
-export const FIGHTCARDS = { "0.1": fc01, "0.2": fc02 };
+export const FIGHTCARDS = { "0.1": fc01, "0.2": fc02, "0.3": fc03 };
 
 export function productoBase(banderas: Partial<Record<string, boolean>> = {}) {
   return {
@@ -29,7 +30,7 @@ export function productoBase(banderas: Partial<Record<string, boolean>> = {}) {
     factor_procesamiento: { min: 1.134, mediana: 1.447, max: 2.624, medido_sobre: "campaña de costo del Cap 5" },
     criterios: { C2: { estado: "pendiente", fecha: null }, C3: { estado: "pendiente", fecha: null } },
     banderas: { comparacion_rounds: false, guardia: false, sesiones_individuales: false, postura_2d: false, ...banderas },
-    dominio: { pausa_combinacion_s: 0.5, perfil_preliminar_sesiones: 5 },
+    dominio: { combinacion: { patron: "izq-der-izq", separacion: "inicio_a_inicio", max_s: 0.5 }, perfil_preliminar_sesiones: 5 },
   };
 }
 
@@ -49,7 +50,7 @@ export function mundoNuevo(): Mundo {
   return {
     producto: productoBase(),
     job: structuredClone(jobListo),
-    fightcard: structuredClone(fc02),
+    fightcard: structuredClone(fc03),
     boxeadores: [],
     pedidos: [],
     corregir: "ok",

@@ -212,11 +212,15 @@ class Trabajo(Base):
 
 class Correccion(Base):
     """
-    Una correccion de tipo hecha por el entrenador. F14 y RF10.
+    Una correccion hecha por el entrenador. F14 y RF10.
 
     No pisa nada: la etiqueta original queda en `tipo_original` junto con el checkpoint que
     la produjo, porque una etiqueta sin saber contra que modelo se midio no entra a un
     dataset.
+
+    `campo` (B11) dice que se corrigio: `tipo` o `objetivo` (cabeza / cuerpo). Para no mover
+    columnas, el valor va en `tipo` y el original en `tipo_original` en los dos casos. Nulo
+    es `tipo`: las filas anteriores a la columna son todas de tipo.
     """
 
     __tablename__ = "correcciones"
@@ -225,6 +229,7 @@ class Correccion(Base):
     sesion_id: Mapped[str] = mapped_column(ForeignKey("sesiones.id"), index=True)
     golpe: Mapped[str] = mapped_column(String(64))
     tipo: Mapped[str] = mapped_column(String(32))
+    campo: Mapped[str | None] = mapped_column(String(16), nullable=True, default="tipo")
     tipo_original: Mapped[str | None] = mapped_column(String(32), nullable=True)
     checkpoint: Mapped[str | None] = mapped_column(String(255), nullable=True)
     datos: Mapped[dict] = mapped_column(JSON, default=dict)

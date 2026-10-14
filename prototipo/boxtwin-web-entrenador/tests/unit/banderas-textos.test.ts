@@ -8,7 +8,7 @@ const producto = (b: Partial<Producto["banderas"]> = {}): Producto => ({
   factor_procesamiento: { min: 1.134, mediana: 1.447, max: 2.624, medido_sobre: "x" },
   criterios: { C2: { estado: "pendiente", fecha: null }, C3: { estado: "pendiente", fecha: null } },
   banderas: { comparacion_rounds: false, guardia: false, sesiones_individuales: false, postura_2d: false, ...b },
-  dominio: { pausa_combinacion_s: 0.5, perfil_preliminar_sesiones: 5 },
+  dominio: { combinacion: { patron: "izq-der-izq", separacion: "inicio_a_inicio", max_s: 0.5 }, perfil_preliminar_sesiones: 5 },
 });
 
 describe("estadoDe: cada fila de 01 §4", () => {
@@ -25,7 +25,8 @@ describe("estadoDe: cada fila de 01 §4", () => {
     "07.frente_r3": ["apagado", "medido"],
     "04.tipo": ["estimacion", "estimacion"],
     "05.distribucion": ["estimacion", "estimacion"],
-    "06.combinaciones": ["estimacion", "estimacion"],
+    "06.combinaciones": ["medido", "medido"],
+    "05.combinaciones": ["medido", "medido"],
     "05.contacto": ["no_disponible", "no_disponible"],
     "05.altura": ["no_disponible", "no_disponible"],
     "06.avatar": ["no_disponible", "no_disponible"],

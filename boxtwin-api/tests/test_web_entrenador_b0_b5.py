@@ -102,7 +102,10 @@ def test_producto_sin_autenticacion_con_lo_que_la_web_necesita(cliente):
     assert d["max_bytes"] > 0 and d["max_minutos"] == 30
     f = d["factor_procesamiento"]
     assert (f["min"], f["mediana"], f["max"]) == (1.134, 1.447, 2.624)
-    assert d["dominio"] == {"pausa_combinacion_s": 0.5, "perfil_preliminar_sesiones": 5}
+    assert d["dominio"] == {
+        "combinacion": {"patron": "izq-der-izq", "separacion": "inicio_a_inicio", "max_s": 0.5},
+        "perfil_preliminar_sesiones": 5,
+    }
 
 
 def test_sin_medir_los_criterios_estan_pendientes_y_las_banderas_apagadas(cliente):
@@ -110,7 +113,8 @@ def test_sin_medir_los_criterios_estan_pendientes_y_las_banderas_apagadas(client
     assert d["criterios"]["C2"] == {"estado": "pendiente", "fecha": None}
     assert d["criterios"]["C3"] == {"estado": "pendiente", "fecha": None}
     assert d["banderas"] == {"comparacion_rounds": False, "guardia": False,
-                             "sesiones_individuales": False, "postura_2d": False}
+                             "sesiones_individuales": False, "postura_2d": False,
+                             "objetivo": False, "exposicion": False, "avatar_3d": False}
 
 
 def test_las_banderas_salen_del_estado_de_cada_criterio(entorno, monkeypatch):

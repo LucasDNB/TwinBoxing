@@ -162,3 +162,22 @@ def test_nombre_del_color_por_tono():
     assert color_para_pantalla((60.0, 200.0, 150.0))["nombre"] == "verdes"
     assert color_para_pantalla((-1.0, 0.0, 30.0))["nombre"] == "negros"
     assert color_para_pantalla((-1.0, 10.0, 230.0))["nombre"] == "blancos"
+
+
+def test_W19_el_reflejo_coexiste_con_los_mismos_guantes_y_queda_marcado():
+    # Sombra frente al espejo: 1 y 2 en cuadro a la vez con guantes rojos; 3 es azul y
+    # coexiste igual, pero no se confunde.
+    ev = {1: _track(1, ROJO, range(0, 300, 5)),
+          2: _track(2, ROJO, range(0, 300, 5), x=500.0),
+          3: _track(3, AZUL, range(0, 300, 5), x=900.0)}
+    _, cands = elegir(ev, [1, 2, 3])
+    por_track = {c.track: c for c in cands}
+    assert por_track[1].mismo_color_a_la_vez == [2]
+    assert por_track[2].mismo_color_a_la_vez == [1]
+    assert por_track[3].mismo_color_a_la_vez == []
+
+
+def test_W19_el_mismo_color_en_otro_momento_no_es_un_reflejo():
+    ev = {1: _track(1, ROJO, range(0, 100, 5)), 2: _track(2, ROJO, range(200, 300, 5))}
+    _, cands = elegir(ev, [1, 2])
+    assert all(c.mismo_color_a_la_vez == [] for c in cands)

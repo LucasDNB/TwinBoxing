@@ -99,11 +99,11 @@ describe("05 / 09 · Fight-Card", () => {
     expect(screen.getByText(/se procesó antes de la revisión de tramos/)).toBeInTheDocument();
   });
 
-  it("I5: una version 0.3 muestra el error de version y no una tarjeta a medias", async () => {
-    mundo.fightcard = { ...structuredClone(FIGHTCARDS["0.2"]), version: "0.3" };
+  it("I5: una version 0.4 muestra el error de version y no una tarjeta a medias", async () => {
+    mundo.fightcard = { ...structuredClone(FIGHTCARDS["0.3"]), version: "0.4" };
     montar(<PantallaSesion />);
     expect(await screen.findByText("No se pudo leer la Fight-Card")).toBeInTheDocument();
-    expect(screen.getByRole("alert")).toHaveTextContent(/versión 0.3/);
+    expect(screen.getByRole("alert")).toHaveTextContent(/versión 0.4/);
     expect(screen.queryByText("Golpes detectados")).toBeNull();
   });
 

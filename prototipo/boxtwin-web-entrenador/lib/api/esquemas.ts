@@ -5,9 +5,11 @@
  *   Para que un componente nunca reciba un documento que no entiende. Si la Fight-Card no
  *   valida, la pantalla muestra el error con la version recibida y no dibuja a medias.
  *
- *   La Fight-Card acepta 0.1 y 0.2 (05 §4). Los campos que agrega la 0.2 son opcionales en
- *   el esquema y `normalizarFightCard` (lib/fightcard.ts) los completa con su valor neutro.
- *   Una version que no es ninguna de las dos se rechaza: no se adivina un contrato nuevo.
+ *   La Fight-Card acepta 0.1, 0.2 y 0.3 (05 §4, ampliacion-13-10). Los campos que agregan
+ *   la 0.2 y la 0.3 son opcionales en el esquema y `normalizarFightCard` (lib/fightcard.ts)
+ *   completa los de 0.2 con su valor neutro; los de 0.3 se calculan solo en el worker, asi que
+ *   en una version vieja quedan ausentes y la pantalla lo dice. Una version que no es ninguna
+ *   de las tres se rechaza: no se adivina un contrato nuevo.
  */
 import { z } from "zod";
 
@@ -38,14 +40,28 @@ export const Producto = z.object({
   criterios: z.object({
     C2: z.object({ estado: z.enum(["pendiente", "aprobado", "rechazado"]), fecha: strN }),
     C3: z.object({ estado: z.enum(["pendiente", "aprobado", "rechazado"]), fecha: strN }),
+    // Ampliacion del 13-10 (08 §2)
+    C8: z.object({ estado: z.enum(["pendiente", "aprobado", "rechazado"]), fecha: strN }).optional(),
+    C9: z.object({ estado: z.enum(["pendiente", "aprobado", "rechazado"]), fecha: strN }).optional(),
+    C10: z.object({ estado: z.enum(["pendiente", "aprobado", "rechazado"]), fecha: strN }).optional(),
   }),
   banderas: z.object({
     comparacion_rounds: z.boolean(),
     guardia: z.boolean(),
     sesiones_individuales: z.boolean(),
     postura_2d: z.boolean(),
+    // 08 §3. Opcionales: una API anterior a la ampliacion no las manda y quedan apagadas.
+    objetivo: z.boolean().optional(),
+    exposicion: z.boolean().optional(),
+    avatar_3d: z.boolean().optional(),
   }),
-  dominio: z.object({ pausa_combinacion_s: num, perfil_preliminar_sesiones: num }),
+  dominio: z.object({
+    // B10: la regla vive en el anotador; null si la instancia no lo tiene instalado. Opcional:
+    // una API anterior a la ampliacion manda `pausa_combinacion_s` y la web tiene que seguir
+    // andando hasta que se reinicie (la web y la API se despliegan por separado).
+    combinacion: z.object({ patron: z.string(), separacion: z.string(), max_s: num }).nullable().optional(),
+    perfil_preliminar_sesiones: num,
+  }),
 });
 export type Producto = z.infer<typeof Producto>;
 
@@ -78,6 +94,8 @@ export const Candidato = z.object({
   t_hasta: numN.optional(),
   alto_relativo: numN.optional(),
   sugerido: z.boolean().optional(),
+  // W19: candidatos en cuadro a la vez con guantes parecidos (el reflejo de un espejo).
+  mismo_color_a_la_vez: z.array(num).optional(),
 });
 export type Candidato = z.infer<typeof Candidato>;
 
@@ -157,6 +175,11 @@ export const Golpe = z.object({
     })
     .nullable(),
   descartado: z.boolean().optional(),
+  // 0.3 (B11): la altura. Viaja aunque C8 no haya pasado; la pantalla la muestra solo con la
+  // bandera `objetivo` (CA-14.2).
+  objetivo: z.enum(["cabeza", "cuerpo"]).nullable().optional(),
+  objetivo_confianza: numN.optional(),
+  objetivo_motivo: strN.optional(),
 });
 export type Golpe = z.infer<typeof Golpe>;
 
@@ -180,17 +203,35 @@ export const EventoGuardia = z.object({
   motivo: strN.optional(),
 });
 
+// 0.3 (B10): las ternas izq-der-izq. El patron es por brazo (medido); los tipos, estimacion.
+export const Combinaciones = z.object({
+  patron: z.literal("izq-der-izq"),
+  separacion: z.string(),
+  max_s: num,
+  lista: z.array(z.object({
+    golpes: z.array(z.string()).length(3),
+    t_inicio: num,
+    t_fin: num,
+    tipos: z.array(strN).length(3),
+    round: numN,
+  })),
+  total: num,
+  por_round: z.array(z.object({ round: num, total: num })),
+});
+export type Combinaciones = z.infer<typeof Combinaciones>;
+
 export const Peleador = z.object({
   golpes: z.array(Golpe),
   por_round: z.array(Round),
   total: Conteo,
   guardia: z.array(EventoGuardia).optional(),
   descartados: num.optional(),
+  combinaciones: Combinaciones.optional(),
 });
 export type Peleador = z.infer<typeof Peleador>;
 
 export const FightCard = z.object({
-  version: z.enum(["0.1", "0.2"]),
+  version: z.enum(["0.1", "0.2", "0.3"]),
   video: z.object({
     nombre: strN.optional(),
     duracion_s: num,
@@ -216,7 +257,11 @@ export const FightCard = z.object({
     precision_medida: num,
     recall_medido: num,
     medido_sobre: z.string().optional(),
+    // B8b: en que contexto se midio el margen. Una sesion de otro contexto no lo hereda.
+    medido_en: Contexto.optional(),
     umbral: numN.optional(),
+    // C11 (ampliacion 01 §5): el recall de ternas, cuando se mida.
+    combinaciones: z.object({ recall_medido: numN.optional() }).optional(),
   }),
   clasificador: z.object({
     checkpoint: z.string().nullable(),
@@ -238,6 +283,12 @@ export const FightCard = z.object({
       }),
     })
     .optional(),
+}).superRefine((fc, ctx) => {
+  // Igual que el schema compartido: una 0.3 trae las combinaciones de cada peleador.
+  if (fc.version !== "0.3") return;
+  for (const [lado, p] of Object.entries(fc.peleadores)) {
+    if (p && !p.combinaciones) ctx.addIssue({ code: "custom", path: ["peleadores", lado, "combinaciones"], message: "una 0.3 trae combinaciones" });
+  }
 });
 export type FightCardCruda = z.infer<typeof FightCard>;
 
@@ -258,8 +309,6 @@ export const EntradaPerfil = z.object({
   exactitud_familia: numN.optional(),
   contexto: z.string().nullable().optional(),
 });
-
-export const PasoCombinacion = z.object({ familia: z.string(), lado: z.enum(["adelante", "atras"]).nullable() });
 
 export const Perfil = z.object({
   boxeador: z.object({
@@ -290,9 +339,17 @@ export const Perfil = z.object({
     caida_ultimo_round: numN,
   })).optional(),
   rounds_promedio: z.array(z.object({ round: num, golpes_por_minuto: num })).nullable().optional(),
-  combinaciones: z.array(z.object({
-    secuencia: z.array(PasoCombinacion), n: num, estimado: z.boolean(),
-  })).optional(),
+  // B10: las izq-der-izq. null si la instancia no tiene el anotador (no se inventa la regla).
+  // Una API anterior manda la lista por tipo de B7: se lee como null, no como error.
+  combinaciones: z.preprocess((v) => (Array.isArray(v) ? null : v), z.object({
+    patron: z.string(),
+    total: num,
+    por_minuto: numN,
+    por_contexto: z.record(z.string(), num),
+    tipos_frecuentes: z.array(z.object({ tipos: z.array(z.string()), n: num, estimado: z.boolean() })),
+    sesiones_con_combinaciones: num,
+    recall_medido: numN.optional(),
+  }).nullable().optional()),
 });
 export type Perfil = z.infer<typeof Perfil>;
 
@@ -316,7 +373,8 @@ export type Panel = z.infer<typeof Panel>;
 export const MOTIVOS_TRAMO = ["color_insuficiente", "sin_coexistencia", "corto", "abstencion"] as const;
 
 export const Tramos = z.object({
-  cobertura: z.object({ A: num, B: num, sin_asignar: num }),
+  // B8b: en bolsa y sombra no hay B.
+  cobertura: z.object({ A: num, B: num.optional(), sin_asignar: num }),
   separacion_color: numN,
   tramos: z.array(z.object({
     track: num,

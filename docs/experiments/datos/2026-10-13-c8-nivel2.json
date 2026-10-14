@@ -1,0 +1,276 @@
+{
+  "regla": "altura_relativa_v1",
+  "nivel": 2,
+  "total": {
+    "estricta": {
+      "golpes": 391,
+      "cabeza": 345,
+      "cuerpo": 46,
+      "recall_cabeza": 0.629,
+      "recall_cuerpo": 0.587,
+      "exactitud_balanceada": 0.608,
+      "recall_cuerpo_wilson95": [
+        0.4434,
+        0.7171
+      ],
+      "exactitud_simple": 0.624
+    },
+    "con_dato": {
+      "golpes": 363,
+      "cabeza": 325,
+      "cuerpo": 38,
+      "recall_cabeza": 0.6677,
+      "recall_cuerpo": 0.7105,
+      "exactitud_balanceada": 0.6891,
+      "recall_cuerpo_wilson95": [
+        0.5524,
+        0.83
+      ],
+      "exactitud_simple": 0.6722
+    },
+    "sin_dato": 28,
+    "confusion": {
+      "cabeza": {
+        "cabeza": 217,
+        "cuerpo": 108,
+        "None": 20
+      },
+      "cuerpo": {
+        "cabeza": 11,
+        "cuerpo": 27,
+        "None": 8
+      }
+    },
+    "linea_de_base_todo_cabeza": 0.5
+  },
+  "por_fuente": {
+    "03-sparring": {
+      "estricta": {
+        "golpes": 61,
+        "cabeza": 57,
+        "cuerpo": 4,
+        "recall_cabeza": 0.5439,
+        "recall_cuerpo": 0.75,
+        "exactitud_balanceada": 0.6469,
+        "recall_cuerpo_wilson95": [
+          0.3006,
+          0.9544
+        ],
+        "exactitud_simple": 0.5574
+      },
+      "con_dato": {
+        "golpes": 54,
+        "cabeza": 51,
+        "cuerpo": 3,
+        "recall_cabeza": 0.6078,
+        "recall_cuerpo": 1.0,
+        "exactitud_balanceada": 0.8039,
+        "recall_cuerpo_wilson95": [
+          0.4385,
+          1.0
+        ],
+        "exactitud_simple": 0.6296
+      },
+      "sin_dato": 7,
+      "confusion": {
+        "cabeza": {
+          "cabeza": 31,
+          "cuerpo": 20,
+          "None": 6
+        },
+        "cuerpo": {
+          "cabeza": 0,
+          "cuerpo": 3,
+          "None": 1
+        }
+      },
+      "linea_de_base_todo_cabeza": 0.5,
+      "roles_invertidos": false,
+      "recall_detector_por_altura": {
+        "cabeza": {
+          "anotados": 114,
+          "encontrados": 57,
+          "recall": 0.5
+        },
+        "cuerpo": {
+          "anotados": 17,
+          "encontrados": 4,
+          "recall": 0.2353
+        }
+      },
+      "tau": 0.2,
+      "detector": "detector_7fuentes.ens.pt"
+    },
+    "04-sparring": {
+      "estricta": {
+        "golpes": 56,
+        "cabeza": 46,
+        "cuerpo": 10,
+        "recall_cabeza": 0.587,
+        "recall_cuerpo": 0.4,
+        "exactitud_balanceada": 0.4935,
+        "recall_cuerpo_wilson95": [
+          0.1682,
+          0.6873
+        ],
+        "exactitud_simple": 0.5536
+      },
+      "con_dato": {
+        "golpes": 47,
+        "cabeza": 42,
+        "cuerpo": 5,
+        "recall_cabeza": 0.6429,
+        "recall_cuerpo": 0.8,
+        "exactitud_balanceada": 0.7214,
+        "recall_cuerpo_wilson95": [
+          0.3755,
+          0.9638
+        ],
+        "exactitud_simple": 0.6596
+      },
+      "sin_dato": 9,
+      "confusion": {
+        "cabeza": {
+          "cabeza": 27,
+          "cuerpo": 15,
+          "None": 4
+        },
+        "cuerpo": {
+          "cabeza": 1,
+          "cuerpo": 4,
+          "None": 5
+        }
+      },
+      "linea_de_base_todo_cabeza": 0.5,
+      "roles_invertidos": false,
+      "recall_detector_por_altura": {
+        "cabeza": {
+          "anotados": 101,
+          "encontrados": 46,
+          "recall": 0.4554
+        },
+        "cuerpo": {
+          "anotados": 23,
+          "encontrados": 10,
+          "recall": 0.4348
+        }
+      },
+      "tau": 0.2,
+      "detector": "detector_7fuentes.ens.pt"
+    },
+    "sparring-3": {
+      "estricta": {
+        "golpes": 202,
+        "cabeza": 177,
+        "cuerpo": 25,
+        "recall_cabeza": 0.5989,
+        "recall_cuerpo": 0.64,
+        "exactitud_balanceada": 0.6194,
+        "recall_cuerpo_wilson95": [
+          0.4452,
+          0.7975
+        ],
+        "exactitud_simple": 0.604
+      },
+      "con_dato": {
+        "golpes": 194,
+        "cabeza": 169,
+        "cuerpo": 25,
+        "recall_cabeza": 0.6272,
+        "recall_cuerpo": 0.64,
+        "exactitud_balanceada": 0.6336,
+        "recall_cuerpo_wilson95": [
+          0.4452,
+          0.7975
+        ],
+        "exactitud_simple": 0.6289
+      },
+      "sin_dato": 8,
+      "confusion": {
+        "cabeza": {
+          "cabeza": 106,
+          "cuerpo": 63,
+          "None": 8
+        },
+        "cuerpo": {
+          "cabeza": 9,
+          "cuerpo": 16,
+          "None": 0
+        }
+      },
+      "linea_de_base_todo_cabeza": 0.5,
+      "roles_invertidos": false,
+      "recall_detector_por_altura": {
+        "cabeza": {
+          "anotados": 326,
+          "encontrados": 177,
+          "recall": 0.5429
+        },
+        "cuerpo": {
+          "anotados": 74,
+          "encontrados": 25,
+          "recall": 0.3378
+        }
+      },
+      "tau": 0.2,
+      "detector": "detector_7fuentes.ens.pt"
+    },
+    "pacquiao_margarito": {
+      "estricta": {
+        "golpes": 72,
+        "cabeza": 65,
+        "cuerpo": 7,
+        "recall_cabeza": 0.8154,
+        "recall_cuerpo": 0.5714,
+        "exactitud_balanceada": 0.6934,
+        "recall_cuerpo_wilson95": [
+          0.2505,
+          0.8418
+        ],
+        "exactitud_simple": 0.7917
+      },
+      "con_dato": {
+        "golpes": 68,
+        "cabeza": 63,
+        "cuerpo": 5,
+        "recall_cabeza": 0.8413,
+        "recall_cuerpo": 0.8,
+        "exactitud_balanceada": 0.8206,
+        "recall_cuerpo_wilson95": [
+          0.3755,
+          0.9638
+        ],
+        "exactitud_simple": 0.8382
+      },
+      "sin_dato": 4,
+      "confusion": {
+        "cabeza": {
+          "cabeza": 53,
+          "cuerpo": 10,
+          "None": 2
+        },
+        "cuerpo": {
+          "cabeza": 1,
+          "cuerpo": 4,
+          "None": 2
+        }
+      },
+      "linea_de_base_todo_cabeza": 0.5,
+      "roles_invertidos": true,
+      "recall_detector_por_altura": {
+        "cabeza": {
+          "anotados": 133,
+          "encontrados": 65,
+          "recall": 0.4887
+        },
+        "cuerpo": {
+          "anotados": 18,
+          "encontrados": 7,
+          "recall": 0.3889
+        }
+      },
+      "tau": 0.2,
+      "detector": "detector_7fuentes.ens.pt"
+    }
+  }
+}

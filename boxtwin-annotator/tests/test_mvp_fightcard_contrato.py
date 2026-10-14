@@ -6,7 +6,7 @@ falso positivo. Lo que no puede hacer es cambiar el conteo de detectados, porque
 es lo que el sistema detecto y su recall medido lo califica a el, no a la correccion.
 
 El contrato se valida contra el mismo JSON Schema que valida la web
-(prototipo/contrato/fightcard-0.2.schema.json): si uno de los dos lados cambia el documento
+(prototipo/contrato/fightcard-0.3.schema.json): si uno de los dos lados cambia el documento
 sin tocar el schema, falla.
 """
 
@@ -27,7 +27,7 @@ from boxtwin.mvp.fightcard import (
 from boxtwin.mvp.sesion import Sesion
 
 SCHEMA = json.loads(
-    (Path(__file__).resolve().parents[2] / "prototipo/contrato/fightcard-0.2.schema.json").read_text()
+    (Path(__file__).resolve().parents[2] / "prototipo/contrato/fightcard-0.3.schema.json").read_text()
 )
 VIDEO = {"nombre": "spar.mp4", "fps": 30.0, "duracion_s": 400.0, "total_frames": 12000}
 
@@ -58,7 +58,7 @@ def _corregir(fc, gid, tipo):
 
 def test_lo_que_produce_construir_cumple_el_contrato(fc):
     jsonschema.validate(fc, SCHEMA)
-    assert fc["version"] == "0.2"
+    assert fc["version"] == "0.3"
 
 
 def test_construir_trae_los_campos_nuevos_en_su_valor_neutro(fc):

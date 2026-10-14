@@ -667,3 +667,19 @@ PENDIENTE Y PROXIMO PASO
    retroceder la sesion a espera_siembra y la pantalla quedaba clavada
 7. El presupuesto de 200 KB de JS por ruta no se cumple con Animate UI: 281 a 360 KB
    medidos. Decision abierta
+
+13-10 Ampliacion de la web entrenador por SDD: tanda 1, y C8 no pasa
+
+1. Specs de los siete pedidos en prototipo/specs/ampliacion-13-10; registro en
+   prototipo/TAREAS.md
+2. Combinaciones: solo izq-der-izq con menos de 0,5 s de inicio a inicio, por brazo.
+   La regla vive en el anotador y da 28 sobre lo anotado, como la tabla del spec
+3. Fight-Card 0.3: combinaciones, detector.medido_en y altura del golpe. Etapa nueva
+   enriquecer que lleva sesiones viejas a 0.3 sin correr pose
+4. Una persona en bolsa y sombra: identificacion con "Es el", aviso de espejo calculado
+   en Python, tramos sin B. La bandera sigue apagada: falta la medicion con dos videos
+5. C8 medido sobre 806 golpes con la regla de altura: balanceada 0,726 contra 0,75,
+   recall de cuerpo 0,818. No pasa: la tanda 2 (mapa de exposicion y cruces) no se
+   construye. Detalle en docs/experiments/2026-10-13-cabeza-cuerpo.md
+6. El avatar 3D queda bloqueado por la regla de corte: C1 y C5 sin medir
+7. 689 pruebas del anotador, 180 de la API, 173 de la web; e2e 6 de 6 en Chromium

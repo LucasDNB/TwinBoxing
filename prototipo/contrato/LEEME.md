@@ -1,6 +1,6 @@
 # Contrato de la Fight-Card
 
-`fightcard-0.2.schema.json` es el JSON Schema que validan los dos lados (`06` §3):
+`fightcard-0.3.schema.json` es el JSON Schema que validan los dos lados (`06` §3):
 
 - el worker: `boxtwin-annotator/tests/test_mvp_fightcard_contrato.py` valida lo que produce
   `boxtwin.mvp.fightcard.construir`, con y sin correcciones;

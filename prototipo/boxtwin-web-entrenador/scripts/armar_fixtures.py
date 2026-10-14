@@ -7,14 +7,21 @@ POR QUE EXISTE
 QUE HACE
   Lee una sesion procesada de BOXTWIN_DATOS y escribe en tests/fixtures/sesion-real/:
   la Fight-Card 0.1 tal cual, una 0.2 derivada (con tipos de prueba, descartados y tramos,
-  marcados como tales), y un GET /jobs/{id} por estado. No toca la sesion original.
+  marcados como tales), una 0.3 (la 0.2 con lo que agrega la ampliacion del 13-10:
+  combinaciones y altura de cada golpe, calculadas con el codigo del anotador de ESTE repo
+  sobre las poses reales de la sesion, no copiadas) y un GET /jobs/{id} por estado. No toca la
+  sesion original.
 
 USO
   python -I scripts/armar_fixtures.py ~/boxtwin/datos/sesiones/4ad5553ab817425e8e80bd23c5c931dd
 """
 import argparse
 import json
+import sys
 from pathlib import Path
+
+# El anotador de este repo, no el instalado en el entorno (puede ser otro checkout).
+ANOTADOR = Path(__file__).resolve().parents[3] / "boxtwin-annotator" / "src"
 
 TIPOS = ["jab", "cross", "hook", "uppercut"]
 
@@ -51,6 +58,22 @@ def main():
     fc2["identidad"].update({"tramos_total": 20, "tramos_asignados_auto": 13,
                              "tramos_asignados_manual": 0, "separacion_color": 1.375})
     (a.out / "fightcard-0.2.json").write_text(json.dumps(fc2, indent=1, ensure_ascii=False))
+
+    # 0.3 (ampliacion del 13-10): las combinaciones izq-der-izq, con la funcion del anotador.
+    sys.path.insert(0, str(ANOTADOR))
+    from boxtwin.mvp.fightcard import _combinaciones
+
+    import numpy as np
+    from boxtwin.mvp.objetivo import marcar_fightcard
+
+    fc3 = json.loads(json.dumps(fc2))
+    fc3["version"] = "0.3"
+    fc3["detector"]["medido_en"] = "sparring"
+    _combinaciones(fc3)
+    # La altura de cada golpe con la regla de B11 y las poses reales de la sesion.
+    z = np.load(a.sesion / "poses.npz")
+    marcar_fightcard(fc3, z["keypoints"], z["kp_score"], z["valid"])
+    (a.out / "fightcard-0.3.json").write_text(json.dumps(fc3, indent=1, ensure_ascii=False))
 
     base = {
         "id": sid, "nombre": "sparring del martes", "estado": "listo", "error": None,

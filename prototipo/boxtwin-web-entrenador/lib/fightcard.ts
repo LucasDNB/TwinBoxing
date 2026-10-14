@@ -5,8 +5,8 @@
  *   Todo lo que la pantalla calcula sale de aca y de ningun componente, por dos motivos. El
  *   primero es CA-05.2: cambiar de round no le pide nada a la API, todo sale del documento
  *   cargado. El segundo es que cada numero tiene una regla del spec atras -los descartados
- *   no cambian los detectados (B4), las combinaciones respetan la pausa de /producto (B7)- y
- *   esas reglas tienen que tener prueba.
+ *   no cambian los detectados (B4), las combinaciones salen del documento y no se recalculan
+ *   aca (B10)- y esas reglas tienen que tener prueba.
  */
 import type { FightCardCruda, Golpe, Peleador, Round, TipoGolpe } from "@/lib/api/esquemas";
 import { TIPOS_GOLPE } from "@/lib/api/esquemas";
@@ -149,25 +149,26 @@ export function guardiaPorGolpe(p: Peleador): Map<string, NonNullable<Peleador["
   return m;
 }
 
-// -- Combinaciones (04 §06, punto 5) ----------------------------------------------
+// -- Combinaciones izq-der-izq (ampliacion 01, B10 y W13) -------------------------------
 //
-// Las calcula la API (B7, boxtwin_api/perfil.py): aca solo se nombran. Tener la regla de
-// la pausa en los dos lados seria tenerla mal en uno.
+// Las cuenta el worker con la regla del anotador y vienen en el documento (0.3). Aca solo se
+// leen: tener la regla en los dos lados seria tenerla mal en uno. Una 0.1 o 0.2 no las trae y
+// la pantalla lo dice, en vez de calcularlas.
 
-/* Numeracion de gimnasio: 1 jab, 2 recto de atras, 3 y 4 hook, 5 y 6 uppercut. */
-export function numeroDeGimnasio(familia: string, lado: "adelante" | "atras" | null): number | null {
-  if (!lado) return null;
-  const base: Record<string, number> = { jab: 1, cross: 1, hook: 3, uppercut: 5 };
-  if (!(familia in base)) return null;
-  if (familia === "jab" || familia === "cross") return lado === "adelante" ? 1 : 2;
-  return base[familia] + (lado === "adelante" ? 0 : 1);
+/* Cuantas ternas tiene un peleador en la sesion o en un round; null si el documento no las trae. */
+export function combinacionesDe(fc: FightCard, lado: Lado, round: number | null = null): number | null {
+  const c = fc.peleadores[lado]?.combinaciones;
+  if (!c) return null;
+  if (round == null) return c.total;
+  return c.por_round.find((r) => r.round === round)?.total ?? 0;
 }
 
-export function nombreDeCombinacion(
-  c: { secuencia: { familia: string; lado: "adelante" | "atras" | null }[] },
-  nomenclatura: Record<string, string>,
-): string {
-  const numeros = c.secuencia.map((s) => numeroDeGimnasio(s.familia, s.lado));
-  if (numeros.every((n) => n != null)) return numeros.join("-");
-  return c.secuencia.map((s) => nomenclatura[s.familia] ?? s.familia).join(" + ");
+/* Los golpes que forman parte de una terna, para la insignia de la lista. */
+export function golpesEnCombinacion(fc: FightCard, lado: Lado): Set<string> {
+  return new Set((fc.peleadores[lado]?.combinaciones?.lista ?? []).flatMap((c) => c.golpes));
+}
+
+/* El recall con que se califica el numero: el de ternas si C11 se midio, si no el de golpes. */
+export function recallDeCombinaciones(fc: FightCard): number {
+  return fc.detector.combinaciones?.recall_medido ?? fc.detector.recall_medido;
 }

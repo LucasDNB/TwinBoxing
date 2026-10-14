@@ -10,7 +10,12 @@ export function perfilDePrueba(id: string, nombre: string, extra: Record<string,
       { contexto: "combate", sesiones: 1, golpes_por_minuto: 15.1, jab_fraccion: 0.41, guardia_opuesta_arriba: null, caida_ultimo_round: null },
     ],
     rounds_promedio: null,
-    combinaciones: [{ secuencia: [{ familia: "jab", lado: "adelante" }, { familia: "cross", lado: "atras" }], n: 64, estimado: true }],
+    combinaciones: {
+      patron: "izq-der-izq", total: 23, por_minuto: 0.41, por_contexto: { sparring: 15, combate: 8 },
+      tipos_frecuentes: [{ tipos: ["jab", "cross", "hook"], n: 9, estimado: true }],
+      sesiones_con_combinaciones: 3,
+      recall_medido: 0.484,
+    },
     boxeador: { id, nombre, guardia: "ortodoxa", notas: null, categoria: "Welter", altura_m: 1.75, envergadura_m: 1.8 },
     sesiones: [
       { sesion_id: "s1", nombre: "a", fecha: "2026-09-21T10:00:00", lado: "A", golpes: 40, minutos: 3, golpes_por_minuto: 13.3, mezcla: { jab: 10, cross: 8 }, sin_clasificar: 2, detector: "det-v1", clasificador: "clf-v1", exactitud_familia: null, contexto: "sparring" },

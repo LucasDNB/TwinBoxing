@@ -9,6 +9,10 @@
  *
  * Funciona sin B2: si el candidato no trae color, tramo o altura, la tarjeta muestra el
  * recorte y los botones, que es lo que la siembra necesita (01 §7, riesgo 2).
+ *
+ * En bolsa y sombra (W19, ampliacion 02 §3) la pantalla elige el modo por el contexto: se
+ * marca a una sola persona, con "Es él" y sin A, B ni rincones, y antes de confirmar avisa si
+ * el elegido coexiste con otra figura de guantes parecidos (el espejo).
  */
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -29,7 +33,7 @@ import { FaseRevisar } from "@/components/pantallas/identificar/FaseRevisar";
 import { useFightCard, useSembrar, useSesion, useTicket } from "@/lib/api/consultas";
 import type { Candidato, Sesion } from "@/lib/api/esquemas";
 import { decimal, fechaCorta, mmss, nombreCorto } from "@/lib/formato";
-import { NOMBRE_CONTEXTO } from "@/lib/textos";
+import { NOMBRE_CONTEXTO, textos } from "@/lib/textos";
 
 type Rol = "A" | "B" | "ninguno";
 
@@ -50,17 +54,24 @@ export function titularDeSesion(s: Sesion): string {
   return [ctx, fechaCorta(s.creada), quienes].filter(Boolean).join(" · ");
 }
 
+export function esIndividual(s: Sesion): boolean {
+  return s.contexto === "bolsa" || s.contexto === "sombra";
+}
+
 function Identificar({ s }: { s: Sesion }) {
+  const individual = esIndividual(s);
   const encabezado = (
-    <Encabezado titulo="¿Quién es quién?" rotulo={titularDeSesion(s)} atras={`/sesion/?id=${s.id}`}>
+    <Encabezado titulo={individual ? textos.individual.titulo : "¿Quién es quién?"} rotulo={titularDeSesion(s)} atras={`/sesion/?id=${s.id}`}>
       {s.estado === "espera_siembra" && (
         <p className="text-texto-2">
-          Marcá una vez a cada peleador. El resto del video se sigue por altura y color de guante.
+          {individual
+            ? textos.individual.indicacion
+            : "Marcá una vez a cada peleador. El resto del video se sigue por altura y color de guante."}
         </p>
       )}
     </Encabezado>
   );
-  if (s.estado === "espera_siembra") return <>{encabezado}<FaseMarcar s={s} /></>;
+  if (s.estado === "espera_siembra") return <>{encabezado}{individual ? <FaseMarcarUna s={s} /> : <FaseMarcar s={s} />}</>;
   if (s.estado === "listo") return <>{encabezado}<FaseRevisarSiHace s={s} /></>;
   return <>{encabezado}<EsperaSesion s={s} /></>;
 }
@@ -104,7 +115,6 @@ function FaseMarcar({ s }: { s: Sesion }) {
   const ticket = useTicket(s.id);
   const [marcas, setMarcas] = useState<Record<number, Rol>>({});
   const [confirmar, setConfirmar] = useState(false);
-  const requiereB = s.contexto !== "bolsa" && s.contexto !== "sombra";
 
   const candidatos = useMemo(() => {
     const cs = s.candidatos ?? [];
@@ -116,7 +126,7 @@ function FaseMarcar({ s }: { s: Sesion }) {
 
   const trackA = Number(Object.entries(marcas).find(([, r]) => r === "A")?.[0] ?? NaN);
   const trackB = Number(Object.entries(marcas).find(([, r]) => r === "B")?.[0] ?? NaN);
-  const listo = !Number.isNaN(trackA) && (!requiereB || !Number.isNaN(trackB));
+  const listo = !Number.isNaN(trackA) && !Number.isNaN(trackB);
 
   function cambiar(track: number, rol: string) {
     const { nuevo, quitado } = marcar(marcas, track, rol as Rol | "");
@@ -126,7 +136,7 @@ function FaseMarcar({ s }: { s: Sesion }) {
 
   async function enviar() {
     try {
-      await sembrar.mutateAsync({ track_a: trackA, track_b: requiereB ? trackB : null });
+      await sembrar.mutateAsync({ track_a: trackA, track_b: trackB });
       toast.success("Listo. El análisis sigue con esos dos.");
     } catch (e) {
       toast.error(mensajeDeError(e));
@@ -139,9 +149,7 @@ function FaseMarcar({ s }: { s: Sesion }) {
   const nombreB = s.boxeadores?.B?.nombre ?? "B";
   const pregunta = candA?.color_guante && candB?.color_guante && candA.color_guante.nombre !== candB.color_guante.nombre
     ? `¿Guantes ${candA.color_guante.nombre} es ${nombreA} y guantes ${candB.color_guante.nombre} es ${nombreB}?`
-    : requiereB
-      ? `¿Persona ${persona(trackA)} es ${nombreA} y persona ${persona(trackB)} es ${nombreB}?`
-      : `¿Persona ${persona(trackA)} es ${nombreA}?`;
+    : `¿Persona ${persona(trackA)} es ${nombreA} y persona ${persona(trackB)} es ${nombreB}?`;
 
   if (candidatos.length === 0) {
     return <ErrorConReintento titulo="No hay personas para marcar" error={new Error("El sistema no encontró candidatos en este video. Revisá que se vean los dos de cuerpo entero.")} />;
@@ -149,7 +157,7 @@ function FaseMarcar({ s }: { s: Sesion }) {
 
   return (
     <>
-      {requiereB && !s.pareja_sugerida && (
+      {!s.pareja_sugerida && (
         <p role="note" className="mb-4 rounded-md border border-estimado-borde bg-estimado-fondo px-3 py-2 text-sm">
           No encontramos un momento con los dos en cuadro a la vez. Fijate bien que no sea la misma persona dos veces.
         </p>
@@ -165,7 +173,6 @@ function FaseMarcar({ s }: { s: Sesion }) {
             rol={marcas[c.track] ?? ""}
             onRol={(r) => cambiar(c.track, r)}
             ticket={ticket.data?.ticket}
-            requiereB={requiereB}
           />
         ))}
       </Fade>
@@ -177,7 +184,7 @@ function FaseMarcar({ s }: { s: Sesion }) {
         <Button className="min-h-12 w-full text-base lg:w-auto lg:px-10" disabled={!listo || sembrar.isPending} onClick={() => setConfirmar(true)}>
           Completar análisis
         </Button>
-        {!listo && <p className="mt-1 text-xs text-texto-3">{requiereB ? "Marcá a A y a B para seguir." : "Marcá a A para seguir."}</p>}
+        {!listo && <p className="mt-1 text-xs text-texto-3">Marcá a A y a B para seguir.</p>}
       </div>
       <div aria-hidden="true" className="h-28 lg:hidden" />
 
@@ -190,7 +197,7 @@ function FaseMarcar({ s }: { s: Sesion }) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid grid-cols-2 gap-3">
-            {[candA, requiereB ? candB : undefined].map((c, i) => c && (
+            {[candA, candB].map((c, i) => c && (
               <figure key={c.track} className="flex flex-col items-center gap-2">
                 <Recorte c={c} ticket={ticket.data?.ticket} grande />
                 <figcaption className="flex items-center gap-2 text-sm">
@@ -199,6 +206,113 @@ function FaseMarcar({ s }: { s: Sesion }) {
               </figure>
             ))}
           </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="min-h-11">Revisar</AlertDialogCancel>
+            <AlertDialogAction className="min-h-11" onClick={enviar}>Sí, completar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
+/*
+ * W19: una sola persona. El de mas tiempo en cuadro va primero y sugerido; no hay pareja
+ * sugerida. Una sola eleccion en toda la pantalla, aunque cada tarjeta tenga su boton.
+ */
+export function ordenIndividual(cs: Candidato[]): Candidato[] {
+  const dur = (c: Candidato) => (c.t_hasta ?? 0) - (c.t_desde ?? 0);
+  return [...cs].sort((a, b) => dur(b) - dur(a) || a.track - b.track);
+}
+
+function FaseMarcarUna({ s }: { s: Sesion }) {
+  const sembrar = useSembrar(s.id);
+  const ticket = useTicket(s.id);
+  const [elegido, setElegido] = useState<number | null>(null);
+  const [confirmar, setConfirmar] = useState(false);
+  const candidatos = useMemo(() => ordenIndividual(s.candidatos ?? []), [s.candidatos]);
+  const cand = candidatos.find((c) => c.track === elegido);
+  const reflejos = (cand?.mismo_color_a_la_vez ?? [])
+    .map((t) => candidatos.find((c) => c.track === t))
+    .filter((c): c is Candidato => !!c);
+  const nombre = s.boxeadores?.A?.nombre;
+
+  async function enviar() {
+    if (elegido == null) return;
+    try {
+      await sembrar.mutateAsync({ track_a: elegido, track_b: null });
+      toast.success("Listo. El análisis sigue con esa persona.");
+    } catch (e) {
+      toast.error(mensajeDeError(e));
+    }
+  }
+
+  if (candidatos.length === 0) {
+    return <ErrorConReintento titulo="No hay personas para marcar" error={new Error("El sistema no encontró a nadie en este video. Revisá que se vea de cuerpo entero.")} />;
+  }
+
+  return (
+    <>
+      <h2 className="mb-3 font-display text-xl font-semibold lg:text-2xl">Personas encontradas</h2>
+      <Fade className="grid gap-3 lg:grid-cols-3">
+        {candidatos.map((c, i) => (
+          <article key={c.track} aria-label={`Persona ${i + 1}`} className={`rounded-md border bg-superficie p-3 ${elegido === c.track ? "border-a-trazo" : "border-borde"}`}>
+            <div className="flex gap-3 lg:flex-col lg:items-center">
+              <Recorte c={c} ticket={ticket.data?.ticket} />
+              <div className="min-w-0 flex-1 lg:w-full">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-display text-lg font-semibold">Persona {i + 1}</h3>
+                  {i === 0 && <Rotulo className="text-estimado">sugerido</Rotulo>}
+                </div>
+                <DatosCandidato c={c} />
+              </div>
+            </div>
+            <ToggleGroup
+              type="single"
+              value={elegido === c.track ? "el" : ""}
+              onValueChange={(v) => setElegido(v ? c.track : null)}
+              aria-label={`¿La persona ${i + 1} es el boxeador?`}
+              className="mt-3 grid w-full grid-cols-1"
+            >
+              <ToggleGroupItem value="el" className="min-h-11 border border-borde">Es él</ToggleGroupItem>
+            </ToggleGroup>
+          </article>
+        ))}
+      </Fade>
+
+      <div
+        className="fixed inset-x-0 z-30 border-t border-borde-suave bg-fondo/95 px-4 py-3 backdrop-blur lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:p-0"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + 64px)" }}
+      >
+        <Button className="min-h-12 w-full text-base lg:w-auto lg:px-10" disabled={elegido == null || sembrar.isPending} onClick={() => setConfirmar(true)}>
+          Completar análisis
+        </Button>
+        {elegido == null && <p className="mt-1 text-xs text-texto-3">Elegí a la persona que está trabajando para seguir.</p>}
+      </div>
+      <div aria-hidden="true" className="h-28 lg:hidden" />
+
+      <AlertDialog open={confirmar} onOpenChange={setConfirmar}>
+        <AlertDialogContent className="bg-superficie">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{nombre ? `¿Este es ${nombre}?` : "¿Este es el boxeador?"}</AlertDialogTitle>
+            <AlertDialogDescription className="text-texto-2">
+              {reflejos.length > 0 ? textos.individual.espejo : "El resto del video se sigue con esta persona. Si después ves que no era, se puede volver a marcar."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {cand && (
+            <div className={`grid gap-3 ${reflejos.length ? "grid-cols-2" : "grid-cols-1 justify-items-center"}`}>
+              <figure className="flex flex-col items-center gap-2">
+                <Recorte c={cand} ticket={ticket.data?.ticket} grande />
+                <figcaption className="text-sm">{reflejos.length ? "elegido" : nombre ?? "el boxeador"}</figcaption>
+              </figure>
+              {reflejos.map((r) => (
+                <figure key={r.track} className="flex flex-col items-center gap-2">
+                  <Recorte c={r} ticket={ticket.data?.ticket} grande />
+                  <figcaption className="text-sm">a la vez, mismos guantes</figcaption>
+                </figure>
+              ))}
+            </div>
+          )}
           <AlertDialogFooter>
             <AlertDialogCancel className="min-h-11">Revisar</AlertDialogCancel>
             <AlertDialogAction className="min-h-11" onClick={enviar}>Sí, completar</AlertDialogAction>
@@ -239,9 +353,9 @@ export function Recorte({ c, ticket, grande = false }: { c: { recorte_url?: stri
 }
 
 function TarjetaCandidato({
-  c, n, sugerido, rol, onRol, ticket, requiereB,
+  c, n, sugerido, rol, onRol, ticket,
 }: {
-  c: Candidato; n: number; sugerido: boolean; rol: string; onRol: (r: string) => void; ticket?: string; requiereB: boolean;
+  c: Candidato; n: number; sugerido: boolean; rol: string; onRol: (r: string) => void; ticket?: string;
 }) {
   return (
     <article aria-label={`Persona ${n}`} className={`rounded-md border bg-superficie p-3 ${rol === "A" ? "border-a-trazo" : rol === "B" ? "border-b-trazo" : "border-borde"}`}>
@@ -252,29 +366,35 @@ function TarjetaCandidato({
             <h3 className="font-display text-lg font-semibold">Persona {n}</h3>
             {sugerido && <Rotulo className="text-estimado">sugerido</Rotulo>}
           </div>
-          <dl className="mt-1 space-y-0.5 text-sm text-texto-2">
-            {c.color_guante && (
-              <div className="flex items-center gap-2">
-                <dt className="sr-only">Guantes</dt>
-                <span aria-hidden="true" className="inline-block size-3 rounded-full border border-borde-fuerte" style={{ background: c.color_guante.hex }} />
-                <dd>guantes {c.color_guante.nombre}</dd>
-              </div>
-            )}
-            {c.t_desde != null && c.t_hasta != null && (
-              <div><dt className="sr-only">En cuadro</dt><dd className="dato">{mmss(c.t_desde)} a {mmss(c.t_hasta)}</dd></div>
-            )}
-            {c.alto_relativo != null && (
-              <div><dt className="sr-only">Altura</dt><dd>altura {decimal(c.alto_relativo, 2)} de la mediana</dd></div>
-            )}
-          </dl>
+          <DatosCandidato c={c} />
         </div>
       </div>
       <ToggleGroup type="single" value={rol} onValueChange={onRol} aria-label={`Quién es la persona ${n}`} className="mt-3 grid w-full grid-cols-3 gap-1">
         <ToggleGroupItem value="A" className="min-h-11 border border-borde">Es A</ToggleGroupItem>
-        <ToggleGroupItem value="B" disabled={!requiereB} className="min-h-11 border border-borde">Es B</ToggleGroupItem>
+        <ToggleGroupItem value="B" className="min-h-11 border border-borde">Es B</ToggleGroupItem>
         <ToggleGroupItem value="ninguno" className="min-h-11 border border-borde">Ninguno</ToggleGroupItem>
       </ToggleGroup>
     </article>
+  );
+}
+
+function DatosCandidato({ c }: { c: Candidato }) {
+  return (
+    <dl className="mt-1 space-y-0.5 text-sm text-texto-2">
+      {c.color_guante && (
+        <div className="flex items-center gap-2">
+          <dt className="sr-only">Guantes</dt>
+          <span aria-hidden="true" className="inline-block size-3 rounded-full border border-borde-fuerte" style={{ background: c.color_guante.hex }} />
+          <dd>guantes {c.color_guante.nombre}</dd>
+        </div>
+      )}
+      {c.t_desde != null && c.t_hasta != null && (
+        <div><dt className="sr-only">En cuadro</dt><dd className="dato">{mmss(c.t_desde)} a {mmss(c.t_hasta)}</dd></div>
+      )}
+      {c.alto_relativo != null && (
+        <div><dt className="sr-only">Altura</dt><dd>altura {decimal(c.alto_relativo, 2)} de la mediana</dd></div>
+      )}
+    </dl>
   );
 }
 

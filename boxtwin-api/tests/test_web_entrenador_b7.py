@@ -2,8 +2,9 @@
 B7 de la web entrenador: el perfil extendido (prototipo/specs/05-api-y-datos.md).
 
 Lo que se fija: que lo condicionado vuelva en nulo con la bandera apagada aunque haya datos,
-que sin guardia cargada no se invente un lado, que las combinaciones respeten la pausa y
-dejen afuera lo descartado, y que un peleador sume sus sesiones como A y como B.
+que la mezcla deje afuera lo descartado y que un peleador sume sus sesiones como A y como B.
+Las combinaciones por tipo de B7 se reemplazaron por las izq-der-izq de la ampliacion del
+13-10: sus pruebas estan en test_ampliacion_b10.py.
 """
 
 from __future__ import annotations
@@ -71,28 +72,6 @@ def test_con_las_banderas_encendidas_aparecen(entorno, monkeypatch):
     assert ctx["guardia_opuesta_arriba"] == 0.5
     assert ctx["caida_ultimo_round"] == pytest.approx(-0.3, abs=0.001), "de 18 a 12,6 por minuto"
     assert p["rounds_promedio"][2] == {"round": 3, "golpes_por_minuto": 12.6}
-
-
-def test_sin_guardia_cargada_el_lado_es_nulo(cliente, registrado, entorno):
-    sin = cliente.post("/boxeadores", json={"nombre": "Sin guardia"}).json()["id"]
-    _sesion(cliente, entorno, _fc([_g(1, "jab"), _g(1.4, "cross", "der")]), sin)
-    combo = cliente.get(f"/boxeadores/{sin}/perfil").json()["combinaciones"][0]
-    assert combo["secuencia"] == [{"familia": "jab", "lado": None}, {"familia": "cross", "lado": None}]
-    assert combo["estimado"] is True
-
-
-def test_combinaciones_con_pausa_lado_y_correcciones(cliente, entorno, ana):
-    golpes = [
-        _g(1, "jab"), _g(1.4, "cross", "der"),                            # 1-2
-        _g(5, "jab"), _g(5.5, "cross", "der", corregido={"tipo": "cross"}),  # 1-2 (corregido)
-        _g(9, "jab"), _g(9.9, "cross", "der"),                            # pausa de 0,7: no
-        _g(12, "jab"), _g(12.3, "hook", "der", descartado=True),          # descartado: no
-    ]
-    _sesion(cliente, entorno, _fc(golpes), ana)
-    combos = cliente.get(f"/boxeadores/{ana}/perfil").json()["combinaciones"]
-    assert combos[0] == {"secuencia": [{"familia": "jab", "lado": "adelante"}, {"familia": "cross", "lado": "atras"}],
-                         "n": 2, "estimado": True}
-    assert all(s["familia"] != "hook" for c in combos for s in c["secuencia"])
 
 
 def test_la_mezcla_deja_afuera_lo_descartado(cliente, entorno, ana):

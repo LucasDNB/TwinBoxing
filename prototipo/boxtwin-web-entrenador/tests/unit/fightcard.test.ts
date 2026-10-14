@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import fc01 from "../fixtures/sesion-real/fightcard-0.1.json";
 import fc02 from "../fixtures/sesion-real/fightcard-0.2.json";
+import fc03 from "../fixtures/sesion-real/fightcard-0.3.json";
 import { FightCard as Esquema } from "@/lib/api/esquemas";
 import {
-  guardiaPorGolpe, lecturaRounds, nombreDeCombinacion, normalizarFightCard, numeroDeGimnasio,
-  resumen, sumaDeRounds,
+  combinacionesDe, golpesEnCombinacion, guardiaPorGolpe, lecturaRounds, normalizarFightCard,
+  recallDeCombinaciones, resumen, sumaDeRounds,
 } from "@/lib/fightcard";
 
 const cargar = (d: unknown) => normalizarFightCard(Esquema.parse(d));
@@ -16,7 +17,7 @@ describe("contrato 0.1 y 0.2", () => {
   });
 
   it("una version desconocida no valida", () => {
-    expect(Esquema.safeParse({ ...fc01, version: "0.3" }).success).toBe(false);
+    expect(Esquema.safeParse({ ...fc01, version: "0.4" }).success).toBe(false);
   });
 
   it("a una 0.1 se le completan descartado, descartados y los campos de tramos", () => {
@@ -81,20 +82,25 @@ describe("guardia por golpe", () => {
   });
 });
 
-describe("nombre de las combinaciones", () => {
-  it("numeracion de gimnasio", () => {
-    expect(numeroDeGimnasio("jab", "adelante")).toBe(1);
-    expect(numeroDeGimnasio("cross", "atras")).toBe(2);
-    expect(numeroDeGimnasio("hook", "adelante")).toBe(3);
-    expect(numeroDeGimnasio("hook", "atras")).toBe(4);
-    expect(numeroDeGimnasio("uppercut", "atras")).toBe(6);
-    expect(numeroDeGimnasio("hook", null)).toBeNull();
+describe("combinaciones izq-der-izq (W13)", () => {
+  it("se leen del documento 0.3, por sesion y por round", () => {
+    const fc = cargar(fc03);
+    expect(combinacionesDe(fc, "A")).toBe(3);
+    expect(combinacionesDe(fc, "B")).toBe(1);
+    expect(combinacionesDe(fc, "A", 1)).toBe(3);
+    expect(golpesEnCombinacion(fc, "A").size).toBe(9);
   });
 
-  it("con lado se nombra con numeros; sin lado, con la familia de la nomenclatura", () => {
-    const con = { secuencia: [{ familia: "jab", lado: "adelante" as const }, { familia: "cross", lado: "atras" as const }] };
-    const sin = { secuencia: [{ familia: "jab", lado: null }, { familia: "cross", lado: null }] };
-    expect(nombreDeCombinacion(con, {})).toBe("1-2");
-    expect(nombreDeCombinacion(sin, { jab: "jab", cross: "gancho" })).toBe("jab + gancho");
+  it("una 0.2 no las trae y la web no las calcula", () => {
+    const fc = cargar(fc02);
+    expect(combinacionesDe(fc, "A")).toBeNull();
+    expect(golpesEnCombinacion(fc, "A").size).toBe(0);
+  });
+
+  it("el margen usa el recall de ternas cuando C11 esta medido", () => {
+    const fc = cargar(fc03);
+    expect(recallDeCombinaciones(fc)).toBe(fc.detector.recall_medido);
+    const conC11 = cargar({ ...fc03, detector: { ...fc03.detector, combinaciones: { recall_medido: 0.2 } } });
+    expect(recallDeCombinaciones(conC11)).toBe(0.2);
   });
 });
