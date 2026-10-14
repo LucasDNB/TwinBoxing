@@ -709,3 +709,13 @@ PENDIENTE Y PROXIMO PASO
    en la API (GET /rival)
 6. 696 pruebas del anotador, 206 de la API, 196 de la web; e2e 6 de 6 en Chromium
 
+
+14-10 Piloto del etiquetador a ciegas (E0): no pasa
+
+1. 150 golpes de las siete fuentes, tiras a ciegas en seis tandas de 25, spec
+   pre-registrado en d359247
+2. Familia 0,400 (Wilson 0,325-0,480) contra 0,85; altura balanceada 0,644 contra 0,80
+3. En familia no se separa del azar: balanceada 0,315, kappa 0,11. Hook leido como
+   recto 19 de 46, uppercut como hook 11 de 26
+4. Auditoria en verde, cegado sin intentos sobre la clave. No se habilita el
+   preetiquetado (E5)

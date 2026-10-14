@@ -1,0 +1,631 @@
+{
+  "lectura": "estricta: sin respuesta, no_se y no_golpe cuentan como error",
+  "umbrales": {
+    "familia_exactitud_min": 0.85,
+    "altura_balanceada_min": 0.8
+  },
+  "total": {
+    "golpes": 150,
+    "cobertura_tipo": 0.7733,
+    "cobertura_altura": 0.8867,
+    "familia": {
+      "exactitud": 0.4,
+      "wilson95": [
+        0.325,
+        0.48
+      ],
+      "balanceada": 0.3151,
+      "kappa": 0.1125,
+      "recall": {
+        "straight": {
+          "n": 78,
+          "aciertos": 44,
+          "recall": 0.5641,
+          "wilson95": [
+            0.4536,
+            0.6686
+          ]
+        },
+        "hook": {
+          "n": 46,
+          "aciertos": 14,
+          "recall": 0.3043,
+          "wilson95": [
+            0.1908,
+            0.4481
+          ]
+        },
+        "uppercut": {
+          "n": 26,
+          "aciertos": 2,
+          "recall": 0.0769,
+          "wilson95": [
+            0.0214,
+            0.2414
+          ]
+        }
+      },
+      "confusion": {
+        "hook": {
+          "no_se": 9,
+          "uppercut": 4,
+          "hook": 14,
+          "straight": 19
+        },
+        "straight": {
+          "straight": 44,
+          "hook": 17,
+          "no_se": 14,
+          "uppercut": 2,
+          "no_golpe": 1
+        },
+        "uppercut": {
+          "hook": 11,
+          "no_se": 10,
+          "straight": 3,
+          "uppercut": 2
+        }
+      }
+    },
+    "altura": {
+      "balanceada": 0.6437,
+      "recall_cabeza": 0.7757,
+      "recall_cuerpo": 0.5116,
+      "recall_cuerpo_wilson95": [
+        0.3675,
+        0.6538
+      ],
+      "kappa": 0.3577,
+      "confusion": {
+        "body": {
+          "head": 15,
+          "no_se": 6,
+          "body": 22
+        },
+        "head": {
+          "head": 83,
+          "no_se": 11,
+          "body": 13
+        }
+      }
+    }
+  },
+  "por_fuente": {
+    "01-sparring": {
+      "golpes": 17,
+      "cobertura_tipo": 0.7647,
+      "cobertura_altura": 0.8235,
+      "familia": {
+        "exactitud": 0.5294,
+        "wilson95": [
+          0.3096,
+          0.7383
+        ],
+        "balanceada": 0.5167,
+        "kappa": 0.0685,
+        "recall": {
+          "straight": {
+            "n": 15,
+            "aciertos": 8,
+            "recall": 0.5333,
+            "wilson95": [
+              0.3012,
+              0.7519
+            ]
+          },
+          "hook": {
+            "n": 2,
+            "aciertos": 1,
+            "recall": 0.5,
+            "wilson95": [
+              0.0945,
+              0.9055
+            ]
+          },
+          "uppercut": {
+            "n": 0,
+            "aciertos": 0,
+            "recall": null,
+            "wilson95": null
+          }
+        },
+        "confusion": {
+          "hook": {
+            "hook": 1,
+            "straight": 1
+          },
+          "straight": {
+            "hook": 3,
+            "no_se": 3,
+            "straight": 8,
+            "no_golpe": 1
+          }
+        }
+      },
+      "altura": {
+        "balanceada": 0.4167,
+        "recall_cabeza": 0.8333,
+        "recall_cuerpo": 0.0,
+        "recall_cuerpo_wilson95": [
+          0.0,
+          0.4345
+        ],
+        "kappa": 0.0165,
+        "confusion": {
+          "body": {
+            "no_se": 1,
+            "head": 4
+          },
+          "head": {
+            "head": 10,
+            "no_se": 2
+          }
+        }
+      }
+    },
+    "02-sparring": {
+      "golpes": 5,
+      "cobertura_tipo": 0.8,
+      "cobertura_altura": 1.0,
+      "familia": {
+        "exactitud": 0.4,
+        "wilson95": [
+          0.1176,
+          0.7693
+        ],
+        "balanceada": 0.25,
+        "kappa": -0.1538,
+        "recall": {
+          "straight": {
+            "n": 4,
+            "aciertos": 2,
+            "recall": 0.5,
+            "wilson95": [
+              0.15,
+              0.85
+            ]
+          },
+          "hook": {
+            "n": 1,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.7935
+            ]
+          },
+          "uppercut": {
+            "n": 0,
+            "aciertos": 0,
+            "recall": null,
+            "wilson95": null
+          }
+        },
+        "confusion": {
+          "hook": {
+            "straight": 1
+          },
+          "straight": {
+            "no_se": 1,
+            "straight": 2,
+            "uppercut": 1
+          }
+        }
+      },
+      "altura": {
+        "balanceada": 1.0,
+        "recall_cabeza": 1.0,
+        "recall_cuerpo": null,
+        "recall_cuerpo_wilson95": null,
+        "kappa": null,
+        "confusion": {
+          "head": {
+            "head": 5
+          }
+        }
+      }
+    },
+    "03-sparring": {
+      "golpes": 13,
+      "cobertura_tipo": 0.8462,
+      "cobertura_altura": 0.8462,
+      "familia": {
+        "exactitud": 0.3846,
+        "wilson95": [
+          0.1771,
+          0.6448
+        ],
+        "balanceada": 0.1852,
+        "kappa": -0.1556,
+        "recall": {
+          "straight": {
+            "n": 9,
+            "aciertos": 5,
+            "recall": 0.5556,
+            "wilson95": [
+              0.2667,
+              0.8112
+            ]
+          },
+          "hook": {
+            "n": 3,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.5615
+            ]
+          },
+          "uppercut": {
+            "n": 1,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.7935
+            ]
+          }
+        },
+        "confusion": {
+          "hook": {
+            "straight": 2,
+            "no_se": 1
+          },
+          "straight": {
+            "straight": 5,
+            "hook": 2,
+            "no_se": 1,
+            "uppercut": 1
+          },
+          "uppercut": {
+            "straight": 1
+          }
+        }
+      },
+      "altura": {
+        "balanceada": 0.4583,
+        "recall_cabeza": 0.9167,
+        "recall_cuerpo": 0.0,
+        "recall_cuerpo_wilson95": [
+          0.0,
+          0.7935
+        ],
+        "kappa": 0.2973,
+        "confusion": {
+          "body": {
+            "no_se": 1
+          },
+          "head": {
+            "head": 11,
+            "no_se": 1
+          }
+        }
+      }
+    },
+    "04-sparring": {
+      "golpes": 21,
+      "cobertura_tipo": 0.7619,
+      "cobertura_altura": 0.9048,
+      "familia": {
+        "exactitud": 0.2381,
+        "wilson95": [
+          0.1063,
+          0.4509
+        ],
+        "balanceada": 0.2583,
+        "kappa": 0.0289,
+        "recall": {
+          "straight": {
+            "n": 8,
+            "aciertos": 2,
+            "recall": 0.25,
+            "wilson95": [
+              0.0715,
+              0.5907
+            ]
+          },
+          "hook": {
+            "n": 5,
+            "aciertos": 2,
+            "recall": 0.4,
+            "wilson95": [
+              0.1176,
+              0.7693
+            ]
+          },
+          "uppercut": {
+            "n": 8,
+            "aciertos": 1,
+            "recall": 0.125,
+            "wilson95": [
+              0.0224,
+              0.4709
+            ]
+          }
+        },
+        "confusion": {
+          "hook": {
+            "straight": 1,
+            "hook": 2,
+            "uppercut": 1,
+            "no_se": 1
+          },
+          "straight": {
+            "straight": 2,
+            "no_se": 2,
+            "hook": 4
+          },
+          "uppercut": {
+            "hook": 5,
+            "uppercut": 1,
+            "no_se": 2
+          }
+        }
+      },
+      "altura": {
+        "balanceada": 0.5437,
+        "recall_cabeza": 0.6875,
+        "recall_cuerpo": 0.4,
+        "recall_cuerpo_wilson95": [
+          0.1176,
+          0.7693
+        ],
+        "kappa": 0.125,
+        "confusion": {
+          "body": {
+            "body": 2,
+            "head": 3
+          },
+          "head": {
+            "head": 11,
+            "no_se": 2,
+            "body": 3
+          }
+        }
+      }
+    },
+    "Sparring": {
+      "golpes": 16,
+      "cobertura_tipo": 0.5625,
+      "cobertura_altura": 0.8125,
+      "familia": {
+        "exactitud": 0.3125,
+        "wilson95": [
+          0.1416,
+          0.556
+        ],
+        "balanceada": 0.2083,
+        "kappa": 0.0435,
+        "recall": {
+          "straight": {
+            "n": 8,
+            "aciertos": 5,
+            "recall": 0.625,
+            "wilson95": [
+              0.3057,
+              0.8632
+            ]
+          },
+          "hook": {
+            "n": 6,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.3903
+            ]
+          },
+          "uppercut": {
+            "n": 2,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.6576
+            ]
+          }
+        },
+        "confusion": {
+          "hook": {
+            "straight": 4,
+            "no_se": 2
+          },
+          "straight": {
+            "no_se": 3,
+            "straight": 5
+          },
+          "uppercut": {
+            "no_se": 2
+          }
+        }
+      },
+      "altura": {
+        "balanceada": 0.5714,
+        "recall_cabeza": 0.6429,
+        "recall_cuerpo": 0.5,
+        "recall_cuerpo_wilson95": [
+          0.0945,
+          0.9055
+        ],
+        "kappa": 0.1273,
+        "confusion": {
+          "body": {
+            "head": 1,
+            "body": 1
+          },
+          "head": {
+            "no_se": 3,
+            "head": 9,
+            "body": 2
+          }
+        }
+      }
+    },
+    "pacquiao_margarito": {
+      "golpes": 16,
+      "cobertura_tipo": 0.9375,
+      "cobertura_altura": 1.0,
+      "familia": {
+        "exactitud": 0.5,
+        "wilson95": [
+          0.28,
+          0.72
+        ],
+        "balanceada": 0.3,
+        "kappa": 0.1111,
+        "recall": {
+          "straight": {
+            "n": 10,
+            "aciertos": 7,
+            "recall": 0.7,
+            "wilson95": [
+              0.3968,
+              0.8922
+            ]
+          },
+          "hook": {
+            "n": 5,
+            "aciertos": 1,
+            "recall": 0.2,
+            "wilson95": [
+              0.0362,
+              0.6245
+            ]
+          },
+          "uppercut": {
+            "n": 1,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.7935
+            ]
+          }
+        },
+        "confusion": {
+          "hook": {
+            "uppercut": 2,
+            "straight": 2,
+            "hook": 1
+          },
+          "straight": {
+            "hook": 2,
+            "no_se": 1,
+            "straight": 7
+          },
+          "uppercut": {
+            "hook": 1
+          }
+        }
+      },
+      "altura": {
+        "balanceada": 0.7917,
+        "recall_cabeza": 0.8333,
+        "recall_cuerpo": 0.75,
+        "recall_cuerpo_wilson95": [
+          0.3006,
+          0.9544
+        ],
+        "kappa": 0.5385,
+        "confusion": {
+          "body": {
+            "head": 1,
+            "body": 3
+          },
+          "head": {
+            "head": 10,
+            "body": 2
+          }
+        }
+      }
+    },
+    "sparring-3-rounds": {
+      "golpes": 62,
+      "cobertura_tipo": 0.7742,
+      "cobertura_altura": 0.8871,
+      "familia": {
+        "exactitud": 0.4194,
+        "wilson95": [
+          0.3048,
+          0.5433
+        ],
+        "balanceada": 0.371,
+        "kappa": 0.177,
+        "recall": {
+          "straight": {
+            "n": 24,
+            "aciertos": 15,
+            "recall": 0.625,
+            "wilson95": [
+              0.4271,
+              0.7884
+            ]
+          },
+          "hook": {
+            "n": 24,
+            "aciertos": 10,
+            "recall": 0.4167,
+            "wilson95": [
+              0.2447,
+              0.6117
+            ]
+          },
+          "uppercut": {
+            "n": 14,
+            "aciertos": 1,
+            "recall": 0.0714,
+            "wilson95": [
+              0.0127,
+              0.3147
+            ]
+          }
+        },
+        "confusion": {
+          "hook": {
+            "no_se": 5,
+            "hook": 10,
+            "straight": 8,
+            "uppercut": 1
+          },
+          "straight": {
+            "straight": 15,
+            "no_se": 3,
+            "hook": 6
+          },
+          "uppercut": {
+            "hook": 5,
+            "no_se": 6,
+            "straight": 2,
+            "uppercut": 1
+          }
+        }
+      },
+      "altura": {
+        "balanceada": 0.6827,
+        "recall_cabeza": 0.75,
+        "recall_cuerpo": 0.6154,
+        "recall_cuerpo_wilson95": [
+          0.4253,
+          0.7757
+        ],
+        "kappa": 0.4347,
+        "confusion": {
+          "body": {
+            "head": 6,
+            "no_se": 4,
+            "body": 16
+          },
+          "head": {
+            "head": 27,
+            "body": 6,
+            "no_se": 3
+          }
+        }
+      }
+    }
+  },
+  "pasa_familia": false,
+  "pasa_altura": false,
+  "pasa": false,
+  "avisos": []
+}
