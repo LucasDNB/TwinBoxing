@@ -4,6 +4,7 @@ import fc02 from "../fixtures/sesion-real/fightcard-0.2.json";
 import fc03 from "../fixtures/sesion-real/fightcard-0.3.json";
 import { FightCard as Esquema } from "@/lib/api/esquemas";
 import {
+  alturaDe, secuenciaPorGolpe,
   combinacionesDe, golpesEnCombinacion, guardiaPorGolpe, lecturaRounds, normalizarFightCard,
   recallDeCombinaciones, resumen, sumaDeRounds,
 } from "@/lib/fightcard";
@@ -82,13 +83,33 @@ describe("guardia por golpe", () => {
   });
 });
 
-describe("combinaciones izq-der-izq (W13)", () => {
+describe("combinaciones (W13, regla del 14-10)", () => {
   it("se leen del documento 0.3, por sesion y por round", () => {
     const fc = cargar(fc03);
-    expect(combinacionesDe(fc, "A")).toBe(3);
-    expect(combinacionesDe(fc, "B")).toBe(1);
-    expect(combinacionesDe(fc, "A", 1)).toBe(3);
-    expect(golpesEnCombinacion(fc, "A").size).toBe(9);
+    expect(combinacionesDe(fc, "A")).toBe(7);
+    expect(combinacionesDe(fc, "B")).toBe(5);
+    expect(combinacionesDe(fc, "A", 1)).toBe(7);
+    expect(golpesEnCombinacion(fc, "A").size).toBe(22);
+  });
+
+  it("la insignia lleva la secuencia de manos de su combinacion", () => {
+    const fc = cargar(fc03);
+    const sec = secuenciaPorGolpe(fc, "A");
+    expect(sec.size).toBe(22);
+    expect(new Set(sec.values())).toContain("izq-izq-der-izq-der-izq");
+    // Una Fight-Card contada con la regla del 13-10 no trae brazos: eran todas izq-der-izq.
+    const vieja = cargar(fc03);
+    for (const c of vieja.peleadores.A.combinaciones!.lista) delete c.brazos;
+    expect(new Set(secuenciaPorGolpe(vieja, "A").values())).toEqual(new Set(["izq-der-izq"]));
+  });
+
+  it("la altura se lee del documento: cabeza + cuerpo + sin dato = detectados (CA-14.1)", () => {
+    const fc = cargar(fc03);
+    for (const l of ["A", "B"] as const) {
+      const a = alturaDe(fc, l)!;
+      expect(a.cabeza + a.cuerpo + a.sinDato).toBe(fc.peleadores[l]!.total.total);
+    }
+    expect(alturaDe(cargar(fc02), "A")).toBeNull();
   });
 
   it("una 0.2 no las trae y la web no las calcula", () => {

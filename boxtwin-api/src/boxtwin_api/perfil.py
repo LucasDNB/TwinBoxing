@@ -27,8 +27,8 @@ QUE HACE
 
   B7 (web entrenador) suma la lectura por contexto -bolsa, sombra, sparring y combate miden
   cosas distintas y se comparan consigo mismos, no contra una linea de base comun- y el
-  volumen por round. Las combinaciones son las izq-der-izq de la ampliacion del 13-10 (B10),
-  contadas con la regla del anotador. Lo que depende de un criterio
+  volumen por round. Las combinaciones (B10, con la regla del 14-10: cualquier secuencia de 2+ golpes)
+  se cuentan con la regla del anotador. Lo que depende de un criterio
   pre-registrado sin aprobar (C2 para rounds, C3 para guardia) se devuelve en nulo aunque
   haya datos: asi ningun cliente lo puede mostrar por error.
 
@@ -131,7 +131,7 @@ def resumen_de_sesion(fc: dict, lado: str) -> dict | None:
 
 
 def regla_de_combinacion() -> dict | None:
-    """La regla izq-der-izq del anotador, o None si esta instancia no lo tiene instalado."""
+    """La regla de combinaciones del anotador, o None si esta instancia no lo tiene instalado."""
     try:
         from boxtwin.mvp.combinaciones import REGLA
     except ImportError:  # pragma: no cover - depende del entorno
@@ -142,7 +142,8 @@ def regla_de_combinacion() -> dict | None:
 def combinaciones(entradas: list[dict], golpes_de: dict[str, list[dict]],
                   recall: float | None = None) -> dict | None:
     """
-    Las combinaciones izq-der-izq del peleador en las sesiones filtradas (ampliacion 01 §3).
+    Las combinaciones del peleador en las sesiones filtradas (ampliacion 01 §3, con la regla
+    del 14-10: cualquier secuencia de dos o mas golpes con menos de 0,5 s entre cada uno).
 
     Usa la MISMA funcion que la Fight-Card, importada del anotador, y la recalcula sobre los
     golpes de cada sesion en vez de leer el bloque guardado: asi una Fight-Card 0.2, que no lo
@@ -151,16 +152,17 @@ def combinaciones(entradas: list[dict], golpes_de: dict[str, list[dict]],
 
     El ritmo se calcula sobre los minutos en que el sistema VIO al peleador (cobertura por
     duracion): si no lo vio, no puede decir que no combino. Una sesion sin cobertura medida no
-    entra en el ritmo, aunque sus ternas si entran en el total.
+    entra en el ritmo, aunque sus combinaciones si entran en el total.
 
-    El patron es por brazo, que es medido. Los tipos de cada terna van aparte, como
-    estimacion, y solo las ternas con los tres tipos estimados entran en ese conteo.
+    Las secuencias de brazos salen del detector y son medidas. Los tipos de cada combinacion
+    van aparte, como estimacion, y solo las que tienen todos sus tipos estimados entran en ese
+    conteo.
 
-    `recall` es el que califica el numero en pantalla (01 §4): el de ternas si C11 se midio,
+    `recall` es el que califica el numero en pantalla (01 §4): el de combinaciones si C11 se midio,
     si no el de golpes, de la Fight-Card mas reciente.
     """
     try:
-        from boxtwin.mvp.combinaciones import REGLA, ternas
+        from boxtwin.mvp.combinaciones import REGLA, brazos_de, cadenas
     except ImportError:  # pragma: no cover - depende del entorno
         return None
 
@@ -168,28 +170,40 @@ def combinaciones(entradas: list[dict], golpes_de: dict[str, list[dict]],
     con = 0
     por_contexto: dict[str, int] = {}
     tipos: dict[tuple, int] = {}
-    ternas_con_ritmo = 0
+    secuencias: dict[tuple, int] = {}
+    por_largo: dict[str, int] = {}
+    con_ritmo = 0
     minutos = 0.0
     for x in entradas:
-        suyas = ternas(golpes_de.get(x["sesion_id"], []), REGLA)
+        suyas = cadenas(golpes_de.get(x["sesion_id"], []), REGLA)
         total += len(suyas)
         con += 1 if suyas else 0
         por_contexto[x["contexto"]] = por_contexto.get(x["contexto"], 0) + len(suyas)
         if x.get("minutos_con_identidad"):
             minutos += x["minutos_con_identidad"]
-            ternas_con_ritmo += len(suyas)
-        for trio in suyas:
-            clave = tuple(_tipo_vigente(g) for g in trio)
+            con_ritmo += len(suyas)
+        for c in suyas:
+            # Cuatro golpes o mas van juntos: son pocas y separarlas no le dice nada al
+            # entrenador (en lo anotado, 26 de 179).
+            largo = str(len(c)) if len(c) < 4 else "4+"
+            por_largo[largo] = por_largo.get(largo, 0) + 1
+            brazos = tuple(brazos_de(c))
+            if all(brazos):
+                secuencias[brazos] = secuencias.get(brazos, 0) + 1
+            clave = tuple(_tipo_vigente(g) for g in c)
             if all(clave):
                 tipos[clave] = tipos.get(clave, 0) + 1
     orden = sorted(tipos.items(), key=lambda kv: (-kv[1], kv[0]))[:3]
+    orden_brazos = sorted(secuencias.items(), key=lambda kv: (-kv[1], kv[0]))[:3]
     return {
         "patron": REGLA["patron"],
         "separacion": REGLA["separacion"],
         "max_s": REGLA["max_s"],
         "total": total,
-        "por_minuto": round(ternas_con_ritmo / minutos, 3) if minutos else None,
+        "por_minuto": round(con_ritmo / minutos, 3) if minutos else None,
         "por_contexto": por_contexto,
+        "por_largo": por_largo,
+        "secuencias_frecuentes": [{"brazos": list(k), "n": n} for k, n in orden_brazos],
         "tipos_frecuentes": [{"tipos": list(k), "n": n, "estimado": True} for k, n in orden],
         "sesiones_con_combinaciones": con,
         "recall_medido": recall,

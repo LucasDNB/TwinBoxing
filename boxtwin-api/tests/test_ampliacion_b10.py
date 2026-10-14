@@ -1,11 +1,11 @@
 """
-B10 de la ampliacion del 13-10: combinaciones izq-der-izq en la API
-(prototipo/specs/ampliacion-13-10/01 §3).
+Combinaciones en la API (B10 de la ampliacion del 13-10, prototipo/specs/ampliacion-13-10/01
+§3), con la regla del 14-10: cualquier secuencia de dos o mas golpes con menos de 0,5 s.
 
 La regla se prueba entera en el anotador (test_mvp_combinaciones.py). Aca se fija lo que es
 de la API: que el perfil la use para sumar, por minuto con identidad y por contexto; que los
-tipos vayan aparte como estimacion; que un "no fue un golpe" por la API baje la terna en la
-Fight-Card; y que /producto publique la regla que usa el anotador.
+tipos vayan aparte como estimacion; que un "no fue un golpe" por la API parta la combinacion
+en la Fight-Card; y que /producto publique la regla que usa el anotador.
 """
 
 from __future__ import annotations
@@ -52,17 +52,21 @@ def ana(cliente, registrado):
     return cliente.post("/boxeadores", json={"nombre": "Ana", "guardia": "zurda"}).json()["id"]
 
 
-def test_el_perfil_suma_ternas_por_minuto_con_identidad_y_por_contexto(cliente, entorno, ana):
+def test_el_perfil_suma_combinaciones_por_minuto_con_identidad_y_por_contexto(cliente, entorno, ana):
     # 120 s de video con el peleador visto la mitad: 1 minuto con identidad por sesion.
     _sesion(cliente, entorno, _fc(_terna(1) + _terna(10)), ana)
     _sesion(cliente, entorno, _fc(_terna(5, ("jab", "cross", "hook"))), ana, contexto="bolsa")
-    _sesion(cliente, entorno, _fc([_g(1, "der"), _g(1.3, "izq"), _g(1.6, "der")]), ana)
+    _sesion(cliente, entorno, _fc([_g(1, "der"), _g(1.3, "izq")]), ana)
+    _sesion(cliente, entorno, _fc([_g(1, "der"), _g(3, "izq")]), ana)
     c = cliente.get(f"/boxeadores/{ana}/perfil").json()["combinaciones"]
-    assert c["patron"] == "izq-der-izq"
-    assert c["total"] == 3
-    assert c["por_minuto"] == 1.0, "3 ternas en 3 minutos con identidad, no en 6 de video"
-    assert c["por_contexto"] == {"sparring": 2, "bolsa": 1}
-    assert c["sesiones_con_combinaciones"] == 2
+    assert c["patron"] == "cualquiera"
+    assert c["total"] == 4
+    assert c["por_minuto"] == 1.0, "4 combinaciones en 4 minutos con identidad, no en 8 de video"
+    assert c["por_contexto"] == {"sparring": 3, "bolsa": 1}
+    assert c["sesiones_con_combinaciones"] == 3
+    assert c["por_largo"] == {"3": 3, "2": 1}
+    assert c["secuencias_frecuentes"] == [{"brazos": ["izq", "der", "izq"], "n": 3},
+                                          {"brazos": ["der", "izq"], "n": 1}]
     assert c["tipos_frecuentes"][0] == {"tipos": ["jab", "cross", "hook"], "n": 3, "estimado": True}
     assert c["recall_medido"] is None, "estas Fight-Cards no traen recall"
 
@@ -77,9 +81,10 @@ def test_el_recall_del_margen_sale_de_la_fightcard_mas_reciente(cliente, entorno
     assert cliente.get(f"/boxeadores/{ana}/perfil").json()["combinaciones"]["recall_medido"] == 0.2
 
 
-def test_DA_3_un_zurdo_cuenta_izq_der_izq_literal(cliente, entorno, ana):
+def test_un_zurdo_cuenta_cualquier_secuencia_igual(cliente, entorno, ana):
     _sesion(cliente, entorno, _fc(_terna(1)), ana)
-    assert cliente.get(f"/boxeadores/{ana}/perfil").json()["combinaciones"]["total"] == 1
+    _sesion(cliente, entorno, _fc([_g(1, "der"), _g(1.3, "izq"), _g(1.6, "der")]), ana)
+    assert cliente.get(f"/boxeadores/{ana}/perfil").json()["combinaciones"]["total"] == 2
 
 
 def test_el_filtro_de_contexto_se_aplica(cliente, entorno, ana):
@@ -91,7 +96,7 @@ def test_el_filtro_de_contexto_se_aplica(cliente, entorno, ana):
 
 def test_lo_descartado_corta_y_lo_corregido_cambia_el_tipo(cliente, entorno, ana):
     rota = _terna(1)
-    rota[1]["descartado"] = True
+    rota[1]["descartado"] = True  # quedan 0,6 s entre los otros dos: ya no es combinacion
     corregida = _terna(10)
     corregida[2]["corregido"] = {"tipo": "uppercut"}
     _sesion(cliente, entorno, _fc(rota + corregida), ana)
@@ -114,7 +119,7 @@ def test_sin_cobertura_medida_no_hay_ritmo(cliente, entorno, ana):
     assert c["total"] == 1 and c["por_minuto"] is None
 
 
-def test_4_no_golpe_por_la_api_baja_la_terna_de_la_fightcard(cliente, registrado, entorno):
+def test_4_no_golpe_por_la_api_parte_la_combinacion_de_la_fightcard(cliente, registrado, entorno):
     from boxtwin.mvp.fightcard import construir
     from boxtwin.mvp.sesion import Sesion
 

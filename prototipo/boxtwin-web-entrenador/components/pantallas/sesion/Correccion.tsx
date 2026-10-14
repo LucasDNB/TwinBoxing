@@ -1,7 +1,8 @@
 "use client";
 
 /*
- * Correccion del tipo de golpe (04 §04, punto 4; W7). Hoja desde abajo en el celular y
+ * Correccion del tipo de golpe (04 §04, punto 4; W7) y, con la bandera `objetivo`, de la
+ * altura (W14): el par cabeza / cuerpo debajo del tipo. Hoja desde abajo en el celular y
  * popover en escritorio (03 §4). Los nombres salen de fightcard.nomenclatura (D7) y se suma
  * "No fue un golpe". La correccion es optimista: la lista cambia al guardar y vuelve atras
  * si la API responde error, con un aviso (02 §5).
@@ -12,16 +13,27 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/animate-ui/components/radix/popover";
 import { Button } from "@/components/animate-ui/components/buttons/button";
 import { mensajeDeError } from "@/components/boxtwin/Estados";
-import { useCorregir } from "@/lib/api/consultas";
+import { useCorregir, useCorregirAltura } from "@/lib/api/consultas";
 import { TIPOS_GOLPE, type Golpe, type TipoCorreccion } from "@/lib/api/esquemas";
 import { tipoEfectivo } from "@/lib/fightcard";
 import { mmss, nombreDeTipo } from "@/lib/formato";
 import { useEsEscritorio } from "@/lib/medios";
 import { cn } from "@/lib/utils";
 
-function Opciones({ golpe, nomenclatura, onGuardar, guardando }: { golpe: Golpe; nomenclatura: Record<string, string>; onGuardar: (t: TipoCorreccion) => void; guardando: boolean }) {
+type Altura = "cabeza" | "cuerpo";
+
+function Opciones({ golpe, nomenclatura, conAltura, onGuardar, guardando }: {
+  golpe: Golpe; nomenclatura: Record<string, string>; conAltura: boolean;
+  onGuardar: (c: { tipo?: TipoCorreccion; objetivo?: Altura }) => void; guardando: boolean;
+}) {
   const actual = golpe.descartado ? "no_golpe" : tipoEfectivo(golpe) ?? "";
   const [elegido, setElegido] = useState<string>(actual);
+  const alturaActual = golpe.objetivo ?? "";
+  const [altura, setAltura] = useState<string>(alturaActual);
+  // Un golpe que no fue golpe no tiene altura: el par se esconde si se elige "No fue un golpe".
+  const muestraAltura = conAltura && elegido !== "no_golpe";
+  const cambiaTipo = !!elegido && elegido !== actual;
+  const cambiaAltura = muestraAltura && !!altura && altura !== alturaActual;
   const opciones: { valor: TipoCorreccion; nombre: string }[] = [
     ...TIPOS_GOLPE.map((t) => ({ valor: t, nombre: nombreDeTipo(t, nomenclatura)! })),
     { valor: "no_golpe", nombre: "No fue un golpe" },
@@ -46,27 +58,56 @@ function Opciones({ golpe, nomenclatura, onGuardar, guardando }: { golpe: Golpe;
           </button>
         ))}
       </div>
-      <Button className="min-h-11" disabled={!elegido || elegido === actual || guardando} onClick={() => onGuardar(elegido as TipoCorreccion)}>
+      {muestraAltura && (
+        <div role="radiogroup" aria-label="Altura del golpe" className="grid grid-cols-2 gap-2">
+          {(["cabeza", "cuerpo"] as const).map((a) => (
+            <button
+              key={a}
+              type="button"
+              role="radio"
+              aria-checked={altura === a}
+              onClick={() => setAltura(a)}
+              className={cn(
+                "min-h-11 rounded-md border px-3 text-left text-[15px]",
+                altura === a ? "border-texto bg-elevado" : "border-borde bg-superficie-2",
+              )}
+            >
+              {a === "cabeza" ? "A la cabeza" : "Al cuerpo"}
+            </button>
+          ))}
+        </div>
+      )}
+      <Button
+        className="min-h-11"
+        disabled={(!cambiaTipo && !cambiaAltura) || guardando}
+        onClick={() => onGuardar({
+          tipo: cambiaTipo ? (elegido as TipoCorreccion) : undefined,
+          objetivo: cambiaAltura ? (altura as Altura) : undefined,
+        })}
+      >
         Guardar
       </Button>
     </div>
   );
 }
 
-export function Correccion({ sesionId, golpe, nomenclatura }: { sesionId: string; golpe: Golpe; nomenclatura: Record<string, string> }) {
+export function Correccion({ sesionId, golpe, nomenclatura, conAltura = false }: {
+  sesionId: string; golpe: Golpe; nomenclatura: Record<string, string>; conAltura?: boolean;
+}) {
   const escritorio = useEsEscritorio();
   const [abierta, setAbierta] = useState(false);
   const corregir = useCorregir(sesionId);
+  const corregirAltura = useCorregirAltura(sesionId);
+  const avisos = {
+    onSuccess: () => toast.success("Corrección guardada."),
+    onError: (e: unknown) => toast.error(`No se pudo guardar la corrección: ${mensajeDeError(e)}`),
+  };
 
-  function guardar(tipo: TipoCorreccion) {
+  // La API toma una correccion por pedido (tipo u objetivo): si cambian los dos, van dos.
+  function guardar({ tipo, objetivo }: { tipo?: TipoCorreccion; objetivo?: Altura }) {
     setAbierta(false);
-    corregir.mutate(
-      { golpe: golpe.id, tipo },
-      {
-        onSuccess: () => toast.success("Corrección guardada."),
-        onError: (e) => toast.error(`No se pudo guardar la corrección: ${mensajeDeError(e)}`),
-      },
-    );
+    if (tipo) corregir.mutate({ golpe: golpe.id, tipo }, avisos);
+    if (objetivo) corregirAltura.mutate({ golpe: golpe.id, objetivo }, avisos);
   }
 
   const titulo = `Corregir el golpe de ${mmss(golpe.t_inicio)}`;
@@ -80,7 +121,16 @@ export function Correccion({ sesionId, golpe, nomenclatura }: { sesionId: string
       Corregir
     </button>
   );
-  const contenido = <Opciones golpe={golpe} nomenclatura={nomenclatura} onGuardar={guardar} guardando={corregir.isPending} />;
+  const contenido = (
+    <Opciones
+      golpe={golpe}
+      nomenclatura={nomenclatura}
+      // Una sesion enriquecida trae el campo aunque sea null (sin dato): ahi tambien se puede marcar.
+      conAltura={conAltura && golpe.objetivo !== undefined}
+      onGuardar={guardar}
+      guardando={corregir.isPending || corregirAltura.isPending}
+    />
+  );
 
   if (escritorio) {
     return (

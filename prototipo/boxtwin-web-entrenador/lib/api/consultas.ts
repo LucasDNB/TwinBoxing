@@ -231,6 +231,55 @@ export function aplicarCorreccionLocal(fc: FC, golpe: string, tipo: TipoCorrecci
   return copia;
 }
 
+/*
+ * La altura corregida a mano (W14). Igual que el tipo, optimista; ademas recuenta cabeza y
+ * cuerpo del peleador y de su round, que la API recuenta al guardar (CA-14.3).
+ */
+export function aplicarAlturaLocal(fc: FC, golpe: string, objetivo: "cabeza" | "cuerpo"): FC {
+  const copia: FC = structuredClone(fc);
+  for (const l of ["A", "B"] as const) {
+    const p = copia.peleadores[l];
+    if (!p || !p.golpes.some((g) => g.id === golpe)) continue;
+    for (const g of p.golpes) {
+      if (g.id !== golpe) continue;
+      g.objetivo_corregido = { objetivo, objetivo_original: g.objetivo_corregido?.objetivo_original ?? g.objetivo ?? null };
+      g.objetivo = objetivo;
+      g.objetivo_confianza = null;
+    }
+    const tres = (gs: typeof p.golpes) => {
+      const cabeza = gs.filter((g) => g.objetivo === "cabeza").length;
+      const cuerpo = gs.filter((g) => g.objetivo === "cuerpo").length;
+      return { cabeza, cuerpo, objetivo_sin_dato: gs.length - cabeza - cuerpo };
+    };
+    if (p.total.cabeza != null) Object.assign(p.total, tres(p.golpes));
+    for (const r of p.por_round) {
+      if (r.cabeza != null) Object.assign(r, tres(p.golpes.filter((g) => r.inicio_s <= g.t_inicio && g.t_inicio < r.fin_s)));
+    }
+  }
+  return copia;
+}
+
+export function useCorregirAltura(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ golpe, objetivo }: { golpe: string; objetivo: "cabeza" | "cuerpo" }) =>
+      pedir(`/fightcards/${id}/golpes/${encodeURIComponent(golpe)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ objetivo }),
+      }),
+    onMutate: async ({ golpe, objetivo }) => {
+      await qc.cancelQueries({ queryKey: claves.fightcard(id) });
+      const antes = qc.getQueryData<FC>(claves.fightcard(id));
+      if (antes) qc.setQueryData(claves.fightcard(id), aplicarAlturaLocal(antes, golpe, objetivo));
+      return { antes };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.antes) qc.setQueryData(claves.fightcard(id), ctx.antes);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: claves.fightcard(id) }),
+  });
+}
+
 export function useCorregir(id: string) {
   const qc = useQueryClient();
   return useMutation({

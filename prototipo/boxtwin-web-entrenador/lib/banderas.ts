@@ -17,6 +17,8 @@ export type Bandera = keyof Producto["banderas"];
 interface Fila {
   base: EstadoBase;
   bandera?: Bandera;
+  /* Como se ve con la bandera apagada; por omision "apagado" (en validacion). */
+  sinBandera?: "apagado" | "no_disponible";
 }
 
 export const BLOQUES = {
@@ -37,11 +39,15 @@ export const BLOQUES = {
   "04.linea": { base: "medido" },
   "04.tipo": { base: "estimacion" },
   "04.guardia": { base: "medido", bandera: "guardia" },
+  "04.altura": { base: "estimacion", bandera: "objetivo", sinBandera: "no_disponible" },
   "05.detectados": { base: "medido" },
   "05.distribucion": { base: "estimacion" },
   "05.rounds": { base: "medido", bandera: "comparacion_rounds" },
   "05.guardia": { base: "medido", bandera: "guardia" },
-  "05.altura": { base: "no_disponible" },
+  // 14-10: la altura se muestra como estimacion por decision de producto aunque C8 no paso;
+  // la API enciende `objetivo` y la Fight-Card lleva lo medido en el rotulo. Apagada, sigue
+  // como pieza no disponible y sin decir cabeza ni cuerpo (CA-14.2).
+  "05.altura": { base: "estimacion", bandera: "objetivo", sinBandera: "no_disponible" },
   "05.contacto": { base: "no_disponible" },
   "05.exportar": { base: "medido" },
   "05.combinaciones": { base: "medido" },
@@ -78,7 +84,7 @@ export function estadoDe(bloque: Bloque, producto: Producto | null | undefined):
   if (f.base === "fuera" || f.base === "no_disponible" || f.base === "en_construccion") return f.base;
   if (f.bandera) {
     const encendida = producto?.banderas?.[f.bandera] ?? false;
-    if (!encendida) return "apagado";
+    if (!encendida) return f.sinBandera ?? "apagado";
   }
   return f.base;
 }

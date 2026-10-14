@@ -59,7 +59,7 @@ def main():
                              "tramos_asignados_manual": 0, "separacion_color": 1.375})
     (a.out / "fightcard-0.2.json").write_text(json.dumps(fc2, indent=1, ensure_ascii=False))
 
-    # 0.3 (ampliacion del 13-10): las combinaciones izq-der-izq, con la funcion del anotador.
+    # 0.3 (ampliacion del 13-10): las combinaciones (regla vigente del anotador) y la altura.
     sys.path.insert(0, str(ANOTADOR))
     from boxtwin.mvp.fightcard import _combinaciones
 

@@ -65,11 +65,12 @@ def test_la_correccion_de_tipo_sigue_igual_y_queda_con_campo_tipo(cliente, enriq
 
 def test_banderas_nuevas_salen_de_los_criterios(entorno, monkeypatch):
     c = _recargar(monkeypatch, BOXTWIN_C8="rechazado", BOXTWIN_C8_FECHA="2026-10-13",
-                  BOXTWIN_INVITACION="abierto")
+                  BOXTWIN_OBJETIVO_ESTIMADO="0", BOXTWIN_INVITACION="abierto")
     d = c.get("/producto").json()
     assert d["criterios"]["C8"] == {"estado": "rechazado", "fecha": "2026-10-13"}
     assert (d["banderas"]["objetivo"], d["banderas"]["exposicion"]) == (False, False)
-    c = _recargar(monkeypatch, BOXTWIN_C8="aprobado", BOXTWIN_INVITACION="abierto")
+    c = _recargar(monkeypatch, BOXTWIN_C8="aprobado", BOXTWIN_OBJETIVO_ESTIMADO="0",
+                  BOXTWIN_INVITACION="abierto")
     d = c.get("/producto").json()
     assert d["banderas"]["objetivo"] is True
     assert d["banderas"]["exposicion"] is False, "falta medir C9"
@@ -78,3 +79,14 @@ def test_banderas_nuevas_salen_de_los_criterios(entorno, monkeypatch):
     d = c.get("/producto").json()
     assert d["banderas"]["exposicion"] is True, "C9 medido aunque no pase: el mapa va corregido"
     assert d["banderas"]["avatar_3d"] is True
+
+
+def test_la_altura_se_muestra_por_decision_de_producto_sin_tocar_c8(entorno, monkeypatch):
+    # 14-10: se muestra con la regla medida aunque C8 no paso. El criterio sigue diciendo
+    # lo que se midio y el mapa de exposicion, que depende de C8 de verdad, sigue apagado.
+    c = _recargar(monkeypatch, BOXTWIN_C8="rechazado", BOXTWIN_C9="rechazado",
+                  BOXTWIN_INVITACION="abierto")
+    d = c.get("/producto").json()
+    assert d["criterios"]["C8"]["estado"] == "rechazado"
+    assert d["banderas"]["objetivo"] is True
+    assert d["banderas"]["exposicion"] is False

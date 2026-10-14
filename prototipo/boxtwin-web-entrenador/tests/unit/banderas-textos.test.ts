@@ -8,7 +8,7 @@ const producto = (b: Partial<Producto["banderas"]> = {}): Producto => ({
   factor_procesamiento: { min: 1.134, mediana: 1.447, max: 2.624, medido_sobre: "x" },
   criterios: { C2: { estado: "pendiente", fecha: null }, C3: { estado: "pendiente", fecha: null } },
   banderas: { comparacion_rounds: false, guardia: false, sesiones_individuales: false, postura_2d: false, ...b },
-  dominio: { combinacion: { patron: "izq-der-izq", separacion: "inicio_a_inicio", max_s: 0.5 }, perfil_preliminar_sesiones: 5 },
+  dominio: { combinacion: { patron: "cualquiera", separacion: "inicio_a_inicio", max_s: 0.5, min_golpes: 2 }, perfil_preliminar_sesiones: 5 },
 });
 
 describe("estadoDe: cada fila de 01 §4", () => {

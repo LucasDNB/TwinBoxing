@@ -27,7 +27,7 @@ import { nombresDe } from "@/components/pantallas/sesion/PantallaSesion";
 import { useProcesado, useProducto, useRender, useTicket } from "@/lib/api/consultas";
 import type { Golpe, Sesion } from "@/lib/api/esquemas";
 import { visible } from "@/lib/banderas";
-import { golpesEnCombinacion, guardiaPorGolpe, lados as ladosDe, tipoEfectivo, type FightCard, type Lado } from "@/lib/fightcard";
+import { guardiaPorGolpe, secuenciaPorGolpe, lados as ladosDe, tipoEfectivo, type FightCard, type Lado } from "@/lib/fightcard";
 import { decimal, mmss, nombreDeTipo } from "@/lib/formato";
 import { useEsEscritorio } from "@/lib/medios";
 import { textos } from "@/lib/textos";
@@ -62,6 +62,7 @@ export function VistaVideo({ s, fc }: { s: Sesion; fc: FightCard }) {
   const nombreDe = { A: nombres.A ?? "Peleador A", B: nombres.B ?? "Peleador B" };
   const lados = ladosDe(fc);
   const conGuardia = visible("04.guardia", producto.data);
+  const conAltura = visible("04.altura", producto.data);
   const hayProcesado = procesado.data === true;
   const usarProcesado = hayProcesado && esqueleto;
   const src = ticket.data ? urlDeVideo(s.id, ticket.data.ticket, usarProcesado) : undefined;
@@ -195,7 +196,7 @@ export function VistaVideo({ s, fc }: { s: Sesion; fc: FightCard }) {
           <div>{reproductor}{nota}</div>
           <div className="flex flex-col gap-4">
             {lados.map((l) => (
-              <Consola key={l} s={s} fc={fc} lado={l} nombre={nombreDe[l]} tiempo={tiempo} seleccionado={seleccionado} onElegir={saltar} conGuardia={conGuardia} />
+              <Consola key={l} s={s} fc={fc} lado={l} nombre={nombreDe[l]} tiempo={tiempo} seleccionado={seleccionado} onElegir={saltar} conGuardia={conGuardia} conAltura={conAltura} />
             ))}
           </div>
         </div>
@@ -212,7 +213,7 @@ export function VistaVideo({ s, fc }: { s: Sesion; fc: FightCard }) {
             </ToggleGroup>
           )}
           <div className="mt-3">
-            <Consola s={s} fc={fc} lado={lado} nombre={nombreDe[lado]} tiempo={tiempo} seleccionado={seleccionado} onElegir={saltar} conGuardia={conGuardia} sinTitulo={lados.length > 1} />
+            <Consola s={s} fc={fc} lado={lado} nombre={nombreDe[lado]} tiempo={tiempo} seleccionado={seleccionado} onElegir={saltar} conGuardia={conGuardia} conAltura={conAltura} sinTitulo={lados.length > 1} />
           </div>
           {nota}
         </>
@@ -223,16 +224,16 @@ export function VistaVideo({ s, fc }: { s: Sesion; fc: FightCard }) {
 
 /* La lista de golpes de un peleador, que sigue al video mientras corre (04 §04, punto 3). */
 function Consola({
-  s, fc, lado, nombre, tiempo, seleccionado, onElegir, conGuardia, sinTitulo = false,
+  s, fc, lado, nombre, tiempo, seleccionado, onElegir, conGuardia, conAltura, sinTitulo = false,
 }: {
   s: Sesion; fc: FightCard; lado: Lado; nombre: string; tiempo: number;
   seleccionado: { lado: Lado; id: string } | null; onElegir: (l: Lado, g: Golpe) => void;
-  conGuardia: boolean; sinTitulo?: boolean;
+  conGuardia: boolean; conAltura: boolean; sinTitulo?: boolean;
 }) {
   const p = fc.peleadores[lado];
   const golpes = useMemo(() => [...(p?.golpes ?? [])].sort((a, b) => a.t_inicio - b.t_inicio), [p]);
   const guardia = useMemo(() => (p ? guardiaPorGolpe(p) : new Map()), [p]);
-  const enCombinacion = useMemo(() => golpesEnCombinacion(fc, lado), [fc, lado]);
+  const secuencia = useMemo(() => secuenciaPorGolpe(fc, lado), [fc, lado]);
   const lista = useRef<HTMLOListElement>(null);
   const actual = useMemo(() => {
     let k = -1;
@@ -284,15 +285,21 @@ function Consola({
                       <span className="text-texto-3">sin tipo</span>
                     )}
                     <span className="block text-xs text-texto-3">
-                      {enCombinacion.has(g.id) && (
-                        <span className="mr-2 inline-flex items-center rounded-sm border border-borde-fuerte px-1 font-mono text-[10px] uppercase tracking-[0.08em] text-texto-2">izq-der-izq</span>
+                      {secuencia.has(g.id) && (
+                        <span className="mr-2 inline-flex items-center rounded-sm border border-borde-fuerte px-1 font-mono text-[10px] uppercase tracking-[0.08em] text-texto-2">{secuencia.get(g.id)}</span>
                       )}
                       brazo {g.brazo}
+                      {/* W14: la altura es estimacion; corregida a mano va en verde, como el tipo. */}
+                      {conAltura && !g.descartado && g.objetivo && (
+                        g.objetivo_corregido
+                          ? <span className="text-ok"> · {g.objetivo} (corregido)</span>
+                          : <span className="text-estimado"> · ≈ {g.objetivo}</span>
+                      )}
                       {conGuardia && ev?.mano_opuesta_caida != null && ` · guardia ${ev.mano_opuesta_caida ? "caída" : "arriba"}`}
                     </span>
                   </span>
                 </button>
-                <Correccion sesionId={s.id} golpe={g} nomenclatura={fc.nomenclatura} />
+                <Correccion sesionId={s.id} golpe={g} nomenclatura={fc.nomenclatura} conAltura={conAltura} />
               </li>
             );
           })}

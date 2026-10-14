@@ -206,10 +206,10 @@ def construir(
 
 def _combinaciones(fc: dict) -> dict:
     """
-    Las ternas izq-der-izq de cada peleador, recalculadas sobre el estado actual del documento.
+    Las combinaciones de cada peleador, recalculadas sobre el estado actual del documento.
 
     Se llama al construir y despues de cada cambio que las puede mover: un "no fue un golpe"
-    rompe una terna y una correccion de tipo cambia lo que se muestra al lado (01 §3).
+    parte una combinacion y una correccion de tipo cambia lo que se muestra al lado (01 §3).
     """
     from boxtwin.mvp.combinaciones import resumen
 

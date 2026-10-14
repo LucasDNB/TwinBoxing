@@ -3,6 +3,17 @@
 Cada versión es compatible hacia atrás: una Fight-Card vieja se sigue leyendo, y un cliente que
 no conoce los campos nuevos los ignora. Lo que se rompe se dice acá.
 
+## 0.3 · regla de combinaciones del 14-10
+
+- `peleadores.X.combinaciones` cambia de regla sin cambiar de versión, porque la regla viaja
+  adentro del bloque: `patron: "cualquiera"` es toda secuencia de dos o más golpes con menos de
+  0,5 s de inicio a inicio entre cada uno, sin importar el brazo; una serie larga es una sola
+  combinación (la cadena máxima). Suma `min_golpes` (2) y, por combinación, `brazos`. `golpes` y
+  `tipos` pasan de exactamente 3 a 2 o más. Una Fight-Card con `patron: "izq-der-izq"` sigue
+  validando y `enriquecer` la recuenta con la regla nueva.
+- En `GET /boxeadores/{id}/perfil`, `combinaciones` suma `secuencias_frecuentes` (por brazo,
+  medido) y `por_largo`.
+
 ## 0.3 · ampliación del 13-10 (`prototipo/specs/ampliacion-13-10/`)
 
 - `peleadores.X.combinaciones` (B10, `01` §3): las ternas izq-der-izq con menos de 0,5 s de

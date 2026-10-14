@@ -1073,9 +1073,10 @@ def producto() -> dict:
             "guardia": cfg.c3 == "aprobado",
             "sesiones_individuales": cfg.sesiones_individuales,
             "postura_2d": False,
-            # 08 §3. La exposicion pide C8 aprobado y C9 medido (si C9 no pasa, el mapa se
-            # muestra corregido, pero se muestra: por eso alcanza con que no este pendiente).
-            "objetivo": cfg.c8 == "aprobado",
+            # La altura se muestra con C8 aprobado o por decision de producto (14-10), siempre
+            # como estimacion. La exposicion pide C8 aprobado de verdad y C9 medido (08 §3; si
+            # C9 no pasa, el mapa se muestra corregido, por eso alcanza con que no este pendiente).
+            "objetivo": cfg.c8 == "aprobado" or cfg.objetivo_estimado,
             "exposicion": cfg.c8 == "aprobado" and cfg.c9 != "pendiente",
             "avatar_3d": cfg.c10 == "aprobado",
         },

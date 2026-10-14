@@ -3,8 +3,8 @@ B7 de la web entrenador: el perfil extendido (prototipo/specs/05-api-y-datos.md)
 
 Lo que se fija: que lo condicionado vuelva en nulo con la bandera apagada aunque haya datos,
 que la mezcla deje afuera lo descartado y que un peleador sume sus sesiones como A y como B.
-Las combinaciones por tipo de B7 se reemplazaron por las izq-der-izq de la ampliacion del
-13-10: sus pruebas estan en test_ampliacion_b10.py.
+Las combinaciones por tipo de B7 se reemplazaron por las de la ampliacion del
+13-10 (regla del 14-10): sus pruebas estan en test_ampliacion_b10.py.
 """
 
 from __future__ import annotations

@@ -23,10 +23,11 @@ export const textos = {
   margenDetector(precision: number, recall: number) {
     return `Acierta ${deCada10(precision)} de cada 10 que marca y se le escapa ${seEscapa(recall)}. El volumen real es mayor.`;
   },
-  /* B10 (ampliacion 01 §4). {r} es el recall de golpes, o el de ternas cuando C11 se mida. */
+  /* B10 (ampliacion 01 §4, regla del 14-10). {r} es el recall de golpes, o el de combinaciones cuando C11 se mida. */
   margenCombinaciones(recall: number) {
-    return `Para contar una combinación el sistema tiene que encontrar los tres golpes. Encuentra cerca de ${deCada10(recall)} de cada 10 golpes, así que se le escapan la mayoría de las combinaciones: el número sirve para comparar sesiones, no como total real.`;
+    return `Para contar una combinación el sistema tiene que encontrar al menos dos golpes seguidos. Encuentra cerca de ${deCada10(recall)} de cada 10 golpes, así que se le escapan muchas combinaciones y otras aparecen más cortas de lo que fueron: el número sirve para comparar sesiones, no como total real.`;
   },
+  combinacionesRegla: "Dos golpes o más, con cualquier mano, con menos de medio segundo entre uno y otro",
   combinacionesVacio: "El sistema no encontró combinaciones completas en esta sesión.",
   combinacionesVersionVieja:
     "Esta sesión se procesó antes de contar combinaciones; al reprocesarla aparecen.",
@@ -57,6 +58,22 @@ export const textos = {
     "Una cámara sola no ve si el golpe tocó. Para estimarlo hace falta una pieza que todavía no está.",
   // W14 (ampliacion 03 §6): con la bandera `objetivo` apagada.
   nodispAltura: "La altura del golpe se muestra cuando la regla pase la validación contra lo marcado a mano.",
+  /*
+   * W14 con la bandera encendida (14-10, decision de producto). Se dice lo medido y, si no
+   * alcanzo el umbral pre-registrado de C8, se dice tambien: el numero no se esconde.
+   */
+  estimacionAltura(medido: { exactitud_balanceada: number; golpes?: number; pasa?: boolean } | null | undefined) {
+    const base = "Altura estimada por la posición de la mano respecto del rival.";
+    if (!medido) return `${base} Exactitud sin medir.`;
+    const sobre = medido.golpes ? ` sobre ${medido.golpes} golpes de fuentes no usadas para ajustarla` : "";
+    const falta = medido.pasa === false ? " Todavía no alcanza el 75% fijado para darla por validada." : "";
+    return `${base} Exactitud medida: ${porcentajeAR(medido.exactitud_balanceada)}${sobre}.${falta}`;
+  },
+  alturaVersionVieja: "Esta sesión se procesó antes de calcular la altura; al reprocesarla aparece.",
+  /* {detalle} es "5" con un peleador, o "Ana 5 · Beto 11" con dos. */
+  alturaSinDato(detalle: string) {
+    return `Sin dato: ${detalle}. En esos golpes el sistema no vio al rival o al que pega.`;
+  },
   nodisp3d:
     "El giro de un golpe alrededor del cuerpo no se ve con una cámara de frente. El avatar necesita más de una cámara.",
   nodispExposicion:

@@ -59,7 +59,7 @@ export const Producto = z.object({
     // B10: la regla vive en el anotador; null si la instancia no lo tiene instalado. Opcional:
     // una API anterior a la ampliacion manda `pausa_combinacion_s` y la web tiene que seguir
     // andando hasta que se reinicie (la web y la API se despliegan por separado).
-    combinacion: z.object({ patron: z.string(), separacion: z.string(), max_s: num }).nullable().optional(),
+    combinacion: z.object({ patron: z.string(), separacion: z.string(), max_s: num, min_golpes: num.optional() }).nullable().optional(),
     perfil_preliminar_sesiones: num,
   }),
 });
@@ -175,18 +175,22 @@ export const Golpe = z.object({
     })
     .nullable(),
   descartado: z.boolean().optional(),
-  // 0.3 (B11): la altura. Viaja aunque C8 no haya pasado; la pantalla la muestra solo con la
-  // bandera `objetivo` (CA-14.2).
+  // 0.3 (B11): la altura. C8 no paso (0,726); desde el 14-10 se muestra igual por decision de
+  // producto, como estimacion, siempre que la bandera `objetivo` este encendida (CA-14.2).
   objetivo: z.enum(["cabeza", "cuerpo"]).nullable().optional(),
   objetivo_confianza: numN.optional(),
   objetivo_motivo: strN.optional(),
+  objetivo_corregido: z.object({ objetivo: z.enum(["cabeza", "cuerpo"]), objetivo_original: strN.optional() }).passthrough().nullable().optional(),
 });
 export type Golpe = z.infer<typeof Golpe>;
 
-const Conteo = z.object({ total: num, izq: num, der: num });
+// 0.3 (B11): cabeza + cuerpo + objetivo_sin_dato = total, cuando la sesion paso por enriquecer.
+const Altura = { cabeza: num.optional(), cuerpo: num.optional(), objetivo_sin_dato: num.optional() };
+
+const Conteo = z.object({ total: num, izq: num, der: num, ...Altura });
 
 export const Round = z.object({
-  round: num, inicio_s: num, fin_s: num, total: num, izq: num, der: num, por_minuto: num,
+  round: num, inicio_s: num, fin_s: num, total: num, izq: num, der: num, por_minuto: num, ...Altura,
 });
 export type Round = z.infer<typeof Round>;
 
@@ -203,16 +207,20 @@ export const EventoGuardia = z.object({
   motivo: strN.optional(),
 });
 
-// 0.3 (B10): las ternas izq-der-izq. El patron es por brazo (medido); los tipos, estimacion.
+// 0.3 (B10, regla del 14-10): cualquier secuencia de 2 o mas golpes con menos de 0,5 s entre
+// cada uno. Tiempo y brazo son medidos; los tipos, estimacion. Una Fight-Card contada antes con
+// "izq-der-izq" se sigue leyendo (trae ternas y no trae `brazos`).
 export const Combinaciones = z.object({
-  patron: z.literal("izq-der-izq"),
+  patron: z.enum(["cualquiera", "izq-der-izq"]),
   separacion: z.string(),
   max_s: num,
+  min_golpes: num.optional(),
   lista: z.array(z.object({
-    golpes: z.array(z.string()).length(3),
+    golpes: z.array(z.string()).min(2),
     t_inicio: num,
     t_fin: num,
-    tipos: z.array(strN).length(3),
+    brazos: z.array(z.enum(["izq", "der"]).nullable()).optional(),
+    tipos: z.array(strN).min(2),
     round: numN,
   })),
   total: num,
@@ -269,6 +277,19 @@ export const FightCard = z.object({
     estimado: z.boolean().optional(),
   }),
   peleadores: z.object({ A: Peleador, B: Peleador.optional() }),
+  // 0.3 (B11): con que regla se calculo la altura y lo que dio C8.
+  metodos: z.object({
+    objetivo: z.object({
+      regla: z.string(),
+      tau: num,
+      medido: z.object({
+        exactitud_balanceada: num,
+        recall_cuerpo: num.optional(),
+        golpes: num.optional(),
+        pasa: z.boolean().optional(),
+      }).nullable().optional(),
+    }).optional(),
+  }).optional(),
   nomenclatura: z.record(z.string(), z.string()),
   no_incluye: z.array(z.string()),
   avisos: z.array(z.string()).optional(),
@@ -339,13 +360,16 @@ export const Perfil = z.object({
     caida_ultimo_round: numN,
   })).optional(),
   rounds_promedio: z.array(z.object({ round: num, golpes_por_minuto: num })).nullable().optional(),
-  // B10: las izq-der-izq. null si la instancia no tiene el anotador (no se inventa la regla).
+  // B10: las combinaciones. null si la instancia no tiene el anotador (no se inventa la regla).
   // Una API anterior manda la lista por tipo de B7: se lee como null, no como error.
   combinaciones: z.preprocess((v) => (Array.isArray(v) ? null : v), z.object({
     patron: z.string(),
     total: num,
     por_minuto: numN,
     por_contexto: z.record(z.string(), num),
+    // Regla del 14-10: como se reparten por largo y que secuencias de brazos se repiten.
+    por_largo: z.record(z.string(), num).optional(),
+    secuencias_frecuentes: z.array(z.object({ brazos: z.array(z.string()), n: num })).optional(),
     tipos_frecuentes: z.array(z.object({ tipos: z.array(z.string()), n: num, estimado: z.boolean() })),
     sesiones_con_combinaciones: num,
     recall_medido: numN.optional(),

@@ -30,7 +30,7 @@ describe("06 · Perfil táctico", () => {
     montar(<PantallaPeleador />);
     await screen.findByRole("heading", { name: "Ana Paz" });
     expect(screen.getByRole("region", { name: "Distribución de golpes" })).toHaveAttribute("data-estado", "estimacion");
-    expect(screen.getByRole("region", { name: "Combinaciones izq-der-izq" })).toHaveAttribute("data-estado", "medido");
+    expect(screen.getByRole("region", { name: "Combinaciones" })).toHaveAttribute("data-estado", "medido");
     expect(screen.getByRole("region", { name: "Evolución entre sesiones" })).toHaveAttribute("data-estado", "medido");
     await waitFor(() => expect(mundo.pedidos.some((p) => p.ruta === "/producto")).toBe(true));
     expect(screen.getByRole("region", { name: "Volumen por round promedio" })).toHaveAttribute("data-estado", "apagado");

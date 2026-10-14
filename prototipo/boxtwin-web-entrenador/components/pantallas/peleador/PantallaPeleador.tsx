@@ -5,7 +5,7 @@
  *
  * Se llama "perfil" y no "gemelo digital": no hay un modelo que simule al boxeador (04 §06).
  * Cada bloque lleva su estado (01 §4): la distribucion es estimacion, las combinaciones
- * izq-der-izq son medidas (por brazo; sus tipos van aparte como estimacion, W13),
+ * son medidas (por tiempo y brazo, regla del 14-10; sus tipos van aparte como estimacion, W13),
  * la evolucion y la tabla por contexto son medidas, lo de rounds espera a C2 y lo de guardia
  * a C3, y el mapa de exposicion, el avatar y la distancia no estan en esta version.
  *
@@ -219,9 +219,9 @@ function Combinaciones({ p, producto }: { p: Perfil; producto?: Producto }) {
   return (
     <EstadoBloque
       estado={estadoDe("06.combinaciones", producto)}
-      titulo="Combinaciones izq-der-izq"
+      titulo="Combinaciones"
       className="lg:col-span-3"
-      nota={`Mano izquierda, derecha, izquierda, con menos de ${decimal(regla?.max_s ?? 0.5, 1)} s del inicio de un golpe al del siguiente. Cuenta por brazo, también en zurdos.`}
+      nota={`Dos golpes o más, con cualquier mano, con menos de ${decimal(regla?.max_s ?? 0.5, 1)} s del inicio de un golpe al del siguiente. Una serie larga cuenta como una sola.`}
     >
       {!c ? (
         <p className="text-sm text-texto-3">Esta instancia no puede contar combinaciones.</p>
@@ -237,6 +237,25 @@ function Combinaciones({ p, producto }: { p: Perfil; producto?: Producto }) {
                 <div key={ctx}><dt className="rotulo">{NOMBRE_CONTEXTO[ctx] ?? ctx}</dt><dd className="font-display text-3xl font-semibold">{n}</dd></div>
               ))}
             </dl>
+          )}
+          {/* Medido: que secuencias de manos se repiten y de cuantos golpes son. */}
+          {(c.secuencias_frecuentes?.length ?? 0) > 0 && (
+            <div>
+              <p className="text-sm text-texto-2">Secuencias de manos más frecuentes:</p>
+              <ol className="mt-2 grid gap-2 md:grid-cols-3">
+                {c.secuencias_frecuentes!.map((x) => (
+                  <li key={x.brazos.join("-")} className="flex items-center justify-between">
+                    <span className="font-mono text-sm uppercase tracking-[0.06em]">{x.brazos.join("-")}</span>
+                    <span className="dato text-texto-2">{x.n}</span>
+                  </li>
+                ))}
+              </ol>
+              {c.por_largo && (
+                <p className="mt-2 text-xs text-texto-3">
+                  {Object.entries(c.por_largo).sort(([a], [b]) => a.localeCompare(b)).map(([k, n]) => `${n} de ${k} golpes`).join(" · ")}
+                </p>
+              )}
+            </div>
           )}
           {/* El recall sale de la Fight-Card mas reciente; sin ninguna leida no hay numero que calificar. */}
           {c.recall_medido != null && (

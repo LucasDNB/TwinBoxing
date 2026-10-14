@@ -683,3 +683,13 @@ PENDIENTE Y PROXIMO PASO
    construye. Detalle en docs/experiments/2026-10-13-cabeza-cuerpo.md
 6. El avatar 3D queda bloqueado por la regla de corte: C1 y C5 sin medir
 7. 689 pruebas del anotador, 180 de la API, 173 de la web; e2e 6 de 6 en Chromium
+
+14-10 Combinaciones abiertas y altura del golpe como estimacion
+
+1. Combinacion es cualquier secuencia de 2 o mas golpes con menos de 0,5 s de inicio
+   a inicio, sin importar la mano; una serie larga cuenta una. Sobre lo anotado da 179
+   contra las 28 izq-der-izq de la regla anterior
+2. Cabeza y cuerpo se muestran en la Fight-Card y en el analisis por decision de
+   producto, rotulados como estimacion con la exactitud medida (0,726). C8 sigue
+   rechazado; la bandera es BOXTWIN_OBJETIVO_ESTIMADO
+3. 689 pruebas del anotador, 181 de la API, 180 de la web
