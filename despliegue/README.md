@@ -24,8 +24,10 @@ cuando haga falta de verdad, que es el PoC de nube.
 ```bash
 cd ~/Proyectos/TwinBoxing
 
-# 1. el frontend construido, que la API va a servir
-cd boxtwin-web && npm install && npm run build && cd ..
+# 1. el frontend construido, que la API va a servir. Desde el 13-10 es la web entrenador del
+#    prototipo (BOXTWIN_WEB apunta a su out/); boxtwin-web quedo como la web vieja del MVP.
+#    npm ci y no npm install: instala exactamente lo del package-lock (three va fijado).
+cd prototipo/boxtwin-web-entrenador && npm ci && npm run build && npm run presupuesto && cd ../..
 
 # 2. el paquete de la API en el entorno
 #    Las dependencias (fastapi, sqlalchemy, uvicorn, python-multipart, email-validator)
@@ -50,8 +52,20 @@ sudo systemctl enable --now boxtwin-api boxtwin-worker
 
 #    Y DESPUES DE CADA MERGE, los dos. El paquete es editable, asi que el codigo nuevo
 #    esta en disco al instante, pero el proceso sigue con el que importo al arrancar.
-#    El frontend NO necesita restart -se sirve de disco- pero si npm run build.
+#    El frontend NO necesita restart -se sirve de disco- pero si npm ci y npm run build.
+#    Mirar antes que la cola este vacia: el worker espera hasta una hora a que termine
+#    el trabajo en curso (TimeoutStopSec), pero conviene no reiniciarlo a mitad.
 sudo systemctl restart boxtwin-api boxtwin-worker
+
+#    Si el merge cambio una regla que vive en la Fight-Card (combinaciones, altura, rounds),
+#    las sesiones viejas siguen con la anterior hasta recalcularlas. No corre pose ni GPU,
+#    reescribe fightcard.json y vuelve a aplicar las correcciones del entrenador encima.
+#    Antes, un respaldo: es la unica copia de las sesiones.
+cp -a ~/boxtwin/datos/sesiones ~/boxtwin/respaldos/sesiones-antes-de-$(date +%F)
+boxtwin-annotator enriquecer --todas ~/boxtwin/datos/sesiones
+
+#    Las columnas nuevas de la base las agrega la API sola al arrancar (SQLite). En
+#    PostgreSQL, las migraciones de despliegue/migraciones/ en orden de fecha.
 
 # 5. verificar ANTES de exponer nada
 curl -s localhost:8000/salud
@@ -104,6 +118,18 @@ URL `https://desarrollo-lucas.<tailnet>.ts.net` con HTTPS, sin abrir puertos en 
 sin depender de tener IP pública.
 
 Para bajarlo: `tailscale funnel --bg off`.
+
+## Lo que se hizo el 14-10 (para tenerlo de referencia)
+
+Deploy del PR #10 sobre la estacion: checkout de produccion de `claude/ampliacion-13-10` a
+`main`, `npm ci` y build de la web entrenador, respaldo de las sesiones, `enriquecer --todas`
+(6 sesiones, 0 errores; una sin Fight-Card no se toca), restart y verificacion por `/salud`
+(`commit` = el del merge) y `/producto` (banderas nuevas). Antes de reiniciar se miro que la
+cola estuviera vacia y que el worker que corria fuera el del servicio: en la estacion corren
+tambien workers de las pruebas e2e, con otra `BOXTWIN_DB`, y no hay que confundirlos.
+
+No hay respaldo automatico de `~/boxtwin/datos` ni copia de `/etc/boxtwin.env`: si se
+pierde el archivo, `BOXTWIN_SECRETO` y la invitacion se vuelven a cargar a mano.
 
 ## El problema real no es el túnel, es la subida
 
