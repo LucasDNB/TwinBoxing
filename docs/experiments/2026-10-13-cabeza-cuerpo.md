@@ -120,3 +120,41 @@ Sin umbral, como dice el spec. Lo que se fija antes de ver números:
    golpes anotados que quedaron emparejados, con la métrica estricta y la de con dato.
 5. Se reporta además el recall del detector sobre golpes anotados a la cabeza y al cuerpo.
    Es la cuenta de C9, pero C9 no aplica (C8 no pasó): queda como dato.
+
+## 7. Nivel 2: resultado (una corrida, 14-10)
+
+Salida en `datos/2026-10-13-c8-nivel2.json`; sesiones en `~/boxtwin/mediciones/c8-nivel2/`.
+Siembras con la pareja sugerida: 41/64, 60/64, 56/60 y 12760/12828; en Pacquiao los roles
+quedaron invertidos respecto de la anotación y se alinearon como fija §6. 03-sparring dio los
+mismos 51 y 32 golpes que la sesión real del 22-09.
+
+| Fuente | Encontrados | Cuerpo | Sin dato | Balanceada | Recall cabeza | Recall cuerpo | Balanceada con dato |
+|---|---|---|---|---|---|---|---|
+| 03-sparring | 61 | 4 | 7 | 0,647 | 0,544 | 0,750 | 0,804 |
+| 04-sparring | 56 | 10 | 9 | 0,494 | 0,587 | 0,400 | 0,721 |
+| sparring-3 | 202 | 25 | 8 | 0,619 | 0,599 | 0,640 | 0,634 |
+| pacquiao_margarito | 72 | 7 | 4 | 0,693 | 0,815 | 0,571 | 0,821 |
+| **Total** | **391** | **46** | **28** | **0,608** | **0,629** | **0,587 (Wilson 0,443–0,717)** | **0,689** |
+
+Matriz total: cabeza (345) → 217 cabeza, 108 cuerpo, 20 sin dato; cuerpo (46) → 11 cabeza,
+27 cuerpo, 8 sin dato.
+
+Recall del detector por altura anotada (dato, no criterio):
+
+| | Anotados | Encontrados | Recall |
+|---|---|---|---|
+| Cabeza | 674 | 345 | 0,512 |
+| Cuerpo | 132 | 46 | 0,348 |
+
+Lectura:
+
+- Punta a punta la regla anda peor que sola (0,608 contra 0,726), y eso con un detector
+  entrenado sobre estas mismas fuentes, que es el caso favorable. Lo que pierde viene sobre
+  todo del cuerpo: el recall de cuerpo baja de 0,818 a 0,587. Con fronteras del detector en
+  lugar de las anotadas, el cuadro de máxima extensión cae en otro lado.
+- La diferencia de recall del detector entre cabeza y cuerpo es de 0,16. Si C9 aplicara, no
+  pasaría: el detector encuentra uno de cada tres golpes al cuerpo y uno de cada dos a la
+  cabeza. Cualquier mapa de exposición armado con este detector subestimaría el cuerpo, y eso
+  vale también para una regla v2 de altura que pase C8. Queda como dato para el Cap 7.
+- Con 46 golpes al cuerpo encontrados, los intervalos por fuente son muy anchos; el número
+  que sirve es el total.
