@@ -150,7 +150,10 @@ test("perfil con dos sesiones y rival con dos perfiles", async ({ page, request 
 
   await page.goto(`/rival/?a=${ana}&b=${bea}`);
   await expect(page.getByRole("table", { name: "Frente a frente" })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Oportunidades y amenazas" })).toContainText("en construcción");
+  // Cambios del 14-10 (W26): oportunidades, amenazas y cruce de zonas en un solo bloque.
+  await expect(page.getByRole("region", { name: "Ataque contra exposición", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Oportunidades y amenazas" })).toHaveCount(0);
+  await expect(page.getByLabel("Brazo adelantado").first()).toBeVisible();
   await sinViolacionesSerias(page, "rival");
 
   await page.goto("/sesiones/");

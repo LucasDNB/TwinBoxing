@@ -44,6 +44,8 @@ export interface Mundo {
   tokenValido: string;
   tramos: Record<string, unknown> | null;
   perfiles: Record<string, Record<string, unknown>>;
+  /* GET /rival (B18): lo que devuelve la API, armado a mano en cada prueba. */
+  rival: Record<string, unknown> | null;
 }
 
 /* Como el servidor con {"objetivo"} (B11): pisa la altura y recuenta cabeza y cuerpo. */
@@ -80,6 +82,7 @@ export function mundoNuevo(): Mundo {
     corregir: "ok",
     tokenValido: "token-bueno",
     perfiles: {},
+    rival: null,
     tramos: {
       cobertura: { A: 0.7948, B: 0.9339, sin_asignar: 0.8554 },
       separacion_color: 1.375,
@@ -191,6 +194,15 @@ export const servidor = setupServer(
     const p = mundo.perfiles[String(params.id)];
     if (!p) return HttpResponse.json({ detail: "no existe ese boxeador" }, { status: 404 });
     return HttpResponse.json(p);
+  }),
+  http.get("*/rival", ({ request }) => {
+    registrar(request);
+    if (!autorizado(request)) return no401();
+    const sesgo = { recall_cabeza: 0.512, recall_cuerpo: 0.348, corregido: true };
+    return HttpResponse.json(mundo.rival ?? {
+      cruces: [], lecturas: [], faltan: null, sesgo_detector: sesgo,
+      base: { A: { ataque: 0, exposicion: 0 }, B: { ataque: 0, exposicion: 0 } },
+    });
   }),
   http.post("*/boxeadores", async ({ request }) => {
     const c = (await request.json()) as Record<string, unknown>;

@@ -693,3 +693,19 @@ PENDIENTE Y PROXIMO PASO
    producto, rotulados como estimacion con la exactitud medida (0,726). C8 sigue
    rechazado; la bandera es BOXTWIN_OBJETIVO_ESTIMADO
 3. 689 pruebas del anotador, 181 de la API, 180 de la web
+
+14-10 Perfil tactico y Rival Fantasma por SDD (prototipo/specs/cambios-14-10)
+
+1. Rounds de 3 minutos: sin rounds declarados el video se corta en segmentos de 180 s
+   y un resto de menos de 60 s se suma al anterior. Visibles por decision de producto,
+   rotulados como sin validar; C2 sigue pendiente
+2. Distribucion por mano (medido) y altura (estimacion), y mapa de exposicion con los
+   golpes dirigidos por el rival, por altura y mano del rival. Corregido por el sesgo del
+   detector: 0,512 a la cabeza contra 0,348 al cuerpo
+3. Distancia de trabajo y estilo cargados a mano en el peleador
+4. Avatar 3D ilustrativo con three.js en chunk aparte; en el Rival, dos maniquies con
+   los brazos que se estiran y el alcance escrito
+5. Rival: oportunidades, amenazas y cruce de zonas en un solo bloque, con las reglas
+   en la API (GET /rival)
+6. 696 pruebas del anotador, 206 de la API, 196 de la web; e2e 6 de 6 en Chromium
+

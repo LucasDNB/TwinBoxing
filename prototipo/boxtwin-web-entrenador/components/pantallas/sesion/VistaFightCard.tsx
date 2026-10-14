@@ -29,7 +29,7 @@ import { useProducto } from "@/lib/api/consultas";
 import { TIPOS_GOLPE, type Sesion } from "@/lib/api/esquemas";
 import { estadoDe } from "@/lib/banderas";
 import {
-  alturaDe, combinacionesDe, lados as ladosDe, lecturaRounds, recallDeCombinaciones, resumen,
+  alturaDe, combinacionesDe, lados as ladosDe, lecturaRounds, prefijoRound, recallDeCombinaciones, resumen,
   type Altura, type FightCard, type Lado, type Resumen,
 } from "@/lib/fightcard";
 import { decimal, entero, nombreDeTipo, porcentajeAR } from "@/lib/formato";
@@ -140,7 +140,13 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
 
       {/* 7. Golpes por round */}
       {rondas.length > 1 && (
-        <EstadoBloque estado={estadoDe("05.rounds", p)} titulo="Golpes por round" motivo={textos.condicionadoC2}>
+        <EstadoBloque
+          estado={estadoDe("05.rounds", p)}
+          titulo="Golpes por round"
+          motivo={textos.condicionadoC2}
+          accion={p?.criterios.C2.estado !== "aprobado" ? <Rotulo className="text-estimado">{textos.roundsSinValidar}</Rotulo> : undefined}
+        >
+          {fc.video.rounds_origen === "segmentos_180s" && <p className="mb-2 text-xs text-texto-3">{textos.roundsSegmentos}</p>}
           <BarrasPorRound fc={fc} nombres={nombreDe} />
           <p className="mt-2 text-sm text-texto-2">
             {lados.map((l) => lecturaRounds(fc.peleadores[l]!.por_round, nombreDe[l])).filter(Boolean).join(". ")}
@@ -203,7 +209,7 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
             <TabsList className="w-max">
               <TabsTrigger value="sesion" className="min-h-11 px-4">Sesión</TabsTrigger>
               {rondas.map((r) => (
-                <TabsTrigger key={r.round} value={String(r.round)} className="min-h-11 px-4">R{r.round}</TabsTrigger>
+                <TabsTrigger key={r.round} value={String(r.round)} className="min-h-11 px-4">{prefijoRound(fc)}{r.round}</TabsTrigger>
               ))}
             </TabsList>
           </div>

@@ -160,3 +160,11 @@ def test_con_la_altura_apagada_el_endpoint_viene_vacio(entorno, monkeypatch):
     beto = c.post("/boxeadores", json={"nombre": "Beto"}).json()["id"]
     r = c.get(f"/rival?a={ana}&b={beto}").json()
     assert r["cruces"] == [] and r["lecturas"] == []
+
+
+def test_sin_golpes_con_altura_no_hay_cruces():
+    # El e2e del 14-10 mostro 0% en las ocho filas con perfiles sin altura: eso no es un dato.
+    vacio = {"zonas": {z: {"n": 0, "fraccion": None, "fraccion_corregida": None} for z in ZONAS}, "con_dato": 0}
+    p = {"boxeador": {"nombre": "A"}, "ataque": vacio, "exposicion": vacio}
+    r = cruzar(p, {**p, "boxeador": {"nombre": "B"}})
+    assert r["cruces"] == [] and r["lecturas"] == []

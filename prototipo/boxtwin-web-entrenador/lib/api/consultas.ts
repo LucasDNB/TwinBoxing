@@ -12,7 +12,7 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tansta
 import { z } from "zod";
 import { ErrorApi, pedir, pedirValidado } from "@/lib/api/cliente";
 import {
-  Boxeador, FightCard, ListaBoxeadores, ListaSesiones, Panel, Perfil, Producto, Sesion,
+  Boxeador, FightCard, ListaBoxeadores, ListaSesiones, Panel, Perfil, Producto, Rival, Sesion,
   Token, Tramos, type EstadoSesion, type TipoCorreccion,
 } from "@/lib/api/esquemas";
 import { normalizarFightCard, type FightCard as FC } from "@/lib/fightcard";
@@ -25,6 +25,7 @@ export const claves = {
   fightcard: (id: string) => ["fightcard", id] as const,
   boxeadores: ["boxeadores"] as const,
   perfil: (id: string, contexto: string) => ["perfil", id, contexto] as const,
+  rival: (a: string, b: string) => ["rival", a, b] as const,
   tramos: (id: string) => ["tramos", id] as const,
   ticket: (id: string) => ["ticket", id] as const,
   procesado: (id: string) => ["procesado", id] as const,
@@ -115,6 +116,17 @@ export function usePerfil(id: string | null, contexto = "todas") {
     queryFn: () =>
       pedirValidado(Perfil, `/boxeadores/${id}/perfil?contexto=${encodeURIComponent(contexto)}`),
     enabled: !!id,
+    staleTime: 0,
+    gcTime: 0,
+  });
+}
+
+/* B18 (cambios-14-10): ataque contra exposicion. Sin cache, como el perfil. */
+export function useRival(a: string, b: string, habilitada: boolean) {
+  return useQuery({
+    queryKey: claves.rival(a, b),
+    queryFn: () => pedirValidado(Rival, `/rival?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`),
+    enabled: habilitada && !!a && !!b && a !== b,
     staleTime: 0,
     gcTime: 0,
   });
@@ -307,6 +319,7 @@ export function useGuardarBoxeador() {
     mutationFn: async (b: {
       id?: string; nombre: string; guardia: "ortodoxa" | "zurda" | null; notas?: string | null;
       categoria?: string | null; altura_m?: number | null; envergadura_m?: number | null;
+      distancia?: "larga" | "media" | "corta" | null; estilo?: "fajador" | "estilista" | null;
     }) => {
       const { id, ...cuerpo } = b;
       const datos = await pedir(id ? `/boxeadores/${id}` : "/boxeadores", {

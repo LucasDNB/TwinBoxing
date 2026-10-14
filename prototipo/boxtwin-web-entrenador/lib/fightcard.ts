@@ -51,6 +51,11 @@ export function normalizarFightCard(fc: FightCardCruda): FightCard {
   };
 }
 
+/* "R" con rounds declarados, "S" con segmentos de 3 minutos (cambios-14-10, DC-5). */
+export function prefijoRound(fc: FightCard): "R" | "S" {
+  return fc.video.rounds_origen === "segmentos_180s" ? "S" : "R";
+}
+
 export function lados(fc: FightCard): Lado[] {
   return fc.peleadores.B ? ["A", "B"] : ["A"];
 }

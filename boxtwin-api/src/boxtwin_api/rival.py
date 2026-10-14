@@ -55,7 +55,8 @@ def nombre_de_zona(zona: str) -> str:
 
 
 def _fracciones(b: dict | None) -> dict[str, float] | None:
-    if not b or not b.get("zonas"):
+    # Sin ningun golpe con altura no hay fracciones: cero por ciento seria un dato inventado.
+    if not b or not b.get("zonas") or not b.get("con_dato"):
         return None
     return {z: (b["zonas"][z].get("fraccion_corregida") or 0.0) for z in ZONAS}
 

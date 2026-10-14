@@ -142,6 +142,9 @@ export const Boxeador = z.object({
   categoria: strN.optional(),
   altura_m: numN.optional(),
   envergadura_m: numN.optional(),
+  // B17 (cambios-14-10): cargados a mano.
+  distancia: z.enum(["larga", "media", "corta"]).nullable().optional(),
+  estilo: z.enum(["fajador", "estilista"]).nullable().optional(),
   sesiones: num.optional(),
   ultima_sesion: strN.optional(),
 });
@@ -245,6 +248,8 @@ export const FightCard = z.object({
     duracion_s: num,
     fps: num,
     rounds: z.array(z.object({ round: num, inicio_s: num, fin_s: num })),
+    // Cambios del 14-10 (DC-5): rounds declarados o segmentos de 3 minutos.
+    rounds_origen: z.enum(["declarados", "segmentos_180s"]).nullable().optional(),
   }),
   identidad: z.object({
     cobertura_A: num.optional(),
@@ -331,10 +336,47 @@ export const EntradaPerfil = z.object({
   contexto: z.string().nullable().optional(),
 });
 
+// -- Zonas (B16, cambios-14-10) ------------------------------------------------------
+// Cabeza o cuerpo, por la mano con que vino el golpe (DC-2). Las fracciones corregidas
+// compensan que el detector encuentra menos golpes al cuerpo (DC-4).
+export const ZONAS = ["cabeza_mano_izq", "cabeza_mano_der", "cuerpo_mano_izq", "cuerpo_mano_der"] as const;
+export type Zona = (typeof ZONAS)[number];
+
+const SesgoDetector = z.object({ recall_cabeza: num, recall_cuerpo: num, corregido: z.boolean() });
+
+const BloqueZonas = z.object({
+  zonas: z.record(z.enum(ZONAS), z.object({ n: num, fraccion: numN, fraccion_corregida: numN })).nullable(),
+  manos: z.object({ izq: num, der: num }),
+  alturas: z.object({ cabeza: num, cuerpo: num, sin_dato: num }).nullable(),
+  total: num,
+  sin_dato: numN,
+  con_dato: numN,
+  sesgo_detector: SesgoDetector,
+});
+export type BloqueZonas = z.infer<typeof BloqueZonas>;
+
+// GET /rival (B18): ataque contra exposicion. La regla vive en la API.
+export const Rival = z.object({
+  cruces: z.array(z.object({
+    atacante: z.enum(["A", "B"]), zona: z.enum(ZONAS),
+    ataque_fraccion: num, exposicion_fraccion: num, n_ataque: num, n_exposicion: num,
+  })),
+  lecturas: z.array(z.object({
+    tipo: z.enum(["oportunidad", "amenaza"]), para: z.enum(["A", "B"]), atacante: z.enum(["A", "B"]),
+    regla: z.string(), zona: z.string(), texto: z.string(),
+  })),
+  base: z.object({ A: z.object({ ataque: num, exposicion: num }), B: z.object({ ataque: num, exposicion: num }) }),
+  faltan: z.object({ minimo: num, base: z.any() }).nullable(),
+  sesgo_detector: SesgoDetector,
+});
+export type Rival = z.infer<typeof Rival>;
+
 export const Perfil = z.object({
   boxeador: z.object({
     id: z.string(), nombre: z.string(), guardia: strN, notas: strN,
     categoria: strN.optional(), altura_m: numN.optional(), envergadura_m: numN.optional(),
+    distancia: z.enum(["larga", "media", "corta"]).nullable().optional(),
+    estilo: z.enum(["fajador", "estilista"]).nullable().optional(),
   }),
   sesiones: z.array(EntradaPerfil),
   totales: z.object({
@@ -359,7 +401,17 @@ export const Perfil = z.object({
     guardia_opuesta_arriba: numN,
     caida_ultimo_round: numN,
   })).optional(),
-  rounds_promedio: z.array(z.object({ round: num, golpes_por_minuto: num })).nullable().optional(),
+  rounds_promedio: z.array(z.object({
+    round: num, golpes_por_minuto: num,
+    origen: z.enum(["declarados", "segmentos_180s", "mixto"]).optional(),
+  })).nullable().optional(),
+  // B16 (cambios-14-10): mano por altura de los golpes propios, y lo que le dirigen.
+  ataque: BloqueZonas.extend({ tipo: z.string().optional() }).nullable().optional(),
+  exposicion: BloqueZonas.extend({
+    tipo: z.literal("dirigidos"),
+    sesiones: num,
+    por_rival: z.array(z.object({ boxeador_id: strN, nombre: z.string(), total: num })),
+  }).nullable().optional(),
   // B10: las combinaciones. null si la instancia no tiene el anotador (no se inventa la regla).
   // Una API anterior manda la lista por tipo de B7: se lee como null, no como error.
   combinaciones: z.preprocess((v) => (Array.isArray(v) ? null : v), z.object({

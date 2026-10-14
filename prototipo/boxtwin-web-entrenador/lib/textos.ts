@@ -62,6 +62,7 @@ export const textos = {
    * W14 con la bandera encendida (14-10, decision de producto). Se dice lo medido y, si no
    * alcanzo el umbral pre-registrado de C8, se dice tambien: el numero no se esconde.
    */
+  alturaMetodo: "La altura es estimada por la posición de la mano respecto del rival.",
   estimacionAltura(medido: { exactitud_balanceada: number; golpes?: number; pasa?: boolean } | null | undefined) {
     const base = "Altura estimada por la posición de la mano respecto del rival.";
     if (!medido) return `${base} Exactitud sin medir.`;
@@ -93,8 +94,42 @@ export const textos = {
     titulo: "En construcción",
     individuales:
       "Las sesiones de bolsa y sombra todavía se están validando. Por ahora se analizan sparring y combate.",
-    lecturas:
-      "Las lecturas de oportunidades y amenazas se están revisando como criterio de dominio. Mientras tanto, el frente a frente muestra los números medidos.",
+  },
+  /* -- Cambios del 14-10 (specs/cambios-14-10) ------------------------------------------ */
+  /* W21 (DC-1, DC-5) */
+  roundsSinValidar: "comparación entre rounds sin validar",
+  roundsSegmentos: "El video no tenía rounds declarados: se dividió en segmentos de 3 minutos.",
+  roundsMixto: "Algunas sesiones tenían rounds declarados y otras se dividieron en segmentos de 3 minutos.",
+  /* W20 y W22 (DC-4): el detector encuentra menos golpes al cuerpo. */
+  sesgoAltura(recallCuerpo: number, recallCabeza: number) {
+    return `El detector encuentra cerca de ${deCada10(recallCuerpo)} de cada 10 golpes al cuerpo y ${deCada10(recallCabeza)} de cada 10 a la cabeza: el cuerpo está subrepresentado en los conteos.`;
+  },
+  exposicionCorregida(recallCuerpo: number, recallCabeza: number) {
+    return `Corregido por el detector: encuentra ${deCada10(recallCuerpo)} de cada 10 golpes al cuerpo y ${deCada10(recallCabeza)} de cada 10 a la cabeza.`;
+  },
+  /* W22 (DC-3): dirigidos, no recibidos. */
+  exposicionSubtitulo:
+    "Golpes de sus rivales que el sistema detectó, según la altura y la mano con que vinieron. No dice si tocaron.",
+  exposicionPreliminar(n: number) {
+    return `Mapa preliminar: ${n} golpes dirigidos, hacen falta 50 para colorear las zonas.`;
+  },
+  exposicionSinRival: "En estos contextos no hay rival.",
+  exposicionDominante(nombre: string) {
+    return `El mapa describe sobre todo a ${nombre}: aporta más del 70% de los golpes.`;
+  },
+  /* W23 (DC-6) */
+  avatarIlustrativo: "ilustrativo, no reconstruido del video",
+  avatarSinMedidas: "Sin medidas cargadas: no está a escala.",
+  avatarSinWebgl: "Este navegador no puede dibujar en 3D.",
+  /* W24 (DC-7) */
+  distanciaManual: "cargado a mano",
+  distanciaSinCargar: "Todavía no se cargó la distancia de trabajo ni el estilo.",
+  /* W25 (DC-9) */
+  distanciaPresentacion: "distancia de presentación, no medida",
+  /* W26 (DC-8) */
+  cruceSinLecturas: "Sin diferencias de zona que superen los umbrales.",
+  cruceFaltan(a: { ataque: number; exposicion: number }, b: { ataque: number; exposicion: number }, minimo: number) {
+    return `Faltan sesiones para cruzar zonas: ${a.ataque} y ${a.exposicion} golpes de un lado, ${b.ataque} y ${b.exposicion} del otro; hacen falta ${minimo} en cada mitad.`;
   },
   rivalAviso:
     "Lectura cualitativa entre perfiles ya construidos. No es un pronóstico ni una probabilidad de victoria.",

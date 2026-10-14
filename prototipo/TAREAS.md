@@ -77,14 +77,14 @@ DC-1 y DC-2 tomadas por Lucas el 14-10; DC-3 a DC-9 en `specs/cambios-14-10/00-R
 
 | Id | Tarea | Spec | Estado | Evidencia / notas |
 |---|---|---|---|---|
-| B15 | Rounds de 3 minutos y bandera de producto | `cambios-14-10/01` §1 | pendiente | |
-| B16 | Distribución por mano y altura, exposición dirigida | `cambios-14-10/01` §2 | pendiente | |
-| B17 | Distancia de trabajo y estilo | `cambios-14-10/01` §3 | pendiente | |
-| W20 | Distribución mano por altura | `cambios-14-10/01` §4 | pendiente | |
-| W21 | Volumen por round con segmentos | `cambios-14-10/01` §4 | pendiente | |
-| W22 | Mapa de exposición | `cambios-14-10/01` §4 | pendiente | |
-| W23 | Avatar 3D estático | `cambios-14-10/01` §4 | pendiente | |
-| W24 | Distancia y estilo en la web | `cambios-14-10/01` §4 | pendiente | |
-| B18 | Ataque contra exposición en Python | `cambios-14-10/02` §1 | pendiente | |
-| W26 | Bloque unificado del Rival | `cambios-14-10/02` §2 | pendiente | |
-| W25 | Avatares 3D del Rival | `cambios-14-10/02` §3 | pendiente | |
+| B15 | Rounds de 3 minutos y bandera de producto | `cambios-14-10/01` §1 | hecha | `segmentos()` en `boxtwin/mvp/sesion.py`, `completar_rounds()` en `fightcard.py`; `enriquecer` completa sesiones sin rounds y es reanudable. `test_mvp_sesion.py` (pruebas 1 a 4), `test_mvp_fightcard.py`, `test_mvp_enriquecer.py` (prueba 5). API: `BOXTWIN_ROUNDS_ESTIMADO` (por defecto 1), C2 sin tocar; el perfil completa en memoria las Fight-Cards viejas con la función del anotador; `rounds_promedio.origen`. `test_web_entrenador_b7.py` (prueba 6) y `test_web_entrenador_b0_b5.py` (prueba 7). La bandera también enciende la comparación por round de la Fight-Card, con el rótulo y "S" en lugar de "R" |
+| B16 | Distribución por mano y altura, exposición dirigida | `cambios-14-10/01` §2 | hecha | `boxtwin_api/zonas.py` y bloques `ataque` y `exposicion` del perfil; recall 0,512 / 0,348 del nivel 2 de C8, diferencia 0,164 > 0,10, así que se corrige. `test_cambios_14_10_b16.py` (6). La bandera `exposicion` va con la decisión de producto de la altura |
+| B17 | Distancia de trabajo y estilo | `cambios-14-10/01` §3 | hecha | Columnas `distancia` y `estilo`; migración `despliegue/migraciones/2026-10-14-perfil.sql` (en SQLite las agrega la API al arrancar). `test_cambios_14_10_b16.py` (2) |
+| W20 | Distribución mano por altura | `cambios-14-10/01` §4 | hecha | `BloquesTacticos.tsx`; `perfil-tactico.test.tsx` (CA-20.1 y bandera apagada). La mezcla por tipo queda debajo, más chica |
+| W21 | Volumen por round con segmentos | `cambios-14-10/01` §4 | hecha | `perfil-tactico.test.tsx`: S1, rótulo "comparación entre rounds sin validar" y aviso de segmentos |
+| W22 | Mapa de exposición | `cambios-14-10/01` §4 | hecha | `SiluetaZonas.tsx`; `perfil-tactico.test.tsx` (5: dirigidos y corregido sin palabras de contacto, preliminar sin color, rival dominante, bolsa, CA-15.3) |
+| W23 | Avatar 3D estático | `cambios-14-10/01` §4 | hecha | `lib/maniqui.ts` (`maniqui.test.ts`, 6) y `Avatar3D.tsx` con `three@0.170.0` importado en el efecto: `/peleador/` queda en 317,7 KB de JS inicial (CA-23.1). Visto en Chromium con las capturas del e2e. Sin WebGL (jsdom) cae al texto con las medidas |
+| W24 | Distancia y estilo en la web | `cambios-14-10/01` §4 | hecha | `HojaPeleador.tsx` (dos selectores que viajan siempre, porque el PATCH reemplaza), bloque en el perfil y línea del encabezado; `perfil-tactico.test.tsx` (CA-24.1) |
+| B18 | Ataque contra exposición en Python | `cambios-14-10/02` §1 | hecha | `boxtwin_api/rival.py` y `GET /rival`; `test_cambios_14_10_b18.py` (14, con los umbrales justos de las tres reglas). Sin golpes con altura no hay cruces (el e2e mostró 0% en las ocho filas antes del arreglo) |
+| W26 | Bloque unificado del Rival | `cambios-14-10/02` §2 | hecha | "Ataque contra exposición"; `rival.test.tsx` (CA-26.1, 26.2 y lecturas a cada lado). Desvío del spec, anotado en él: dos siluetas iguales en lugar de flechas. Se borraron `lib/rival.ts`, `tests/unit/rival.test.ts` y el bloque "Oportunidades y amenazas". Los textos de las tres reglas los valida Lucas |
+| W25 | Avatares 3D del Rival | `cambios-14-10/02` §3 | hecha | Dos maniquíes enfrentados, controles 0 a 100% por brazo con el alcance escrito; `rival.test.tsx` (CA-25.1); `/rival/` en 322,6 KB (CA-25.2). Se borró `Siluetas.tsx`. Si falta una medida se dice cuál |

@@ -68,11 +68,12 @@ describe("06 · Perfil táctico", () => {
 
   it("CA-06.2: al volver, el perfil se pide de nuevo y muestra la correccion", async () => {
     const { unmount } = montar(<PantallaPeleador />);
-    expect(await screen.findByText("37% · 37")).toBeInTheDocument();
+    const dist = () => screen.findByRole("region", { name: "Distribución de golpes" });
+    expect(within(await dist()).getByText("37%")).toBeInTheDocument();
     unmount();
     // Una correccion en una sesion cambia la mezcla del perfil.
     (mundo.perfiles.b1 as any).totales.mezcla = { jab: 38, cross: 30, hook: 19, uppercut: 13 };
     montar(<PantallaPeleador />);
-    expect(await screen.findByText("38% · 38")).toBeInTheDocument();
+    expect(within(await dist()).getByText("38%")).toBeInTheDocument();
   });
 });

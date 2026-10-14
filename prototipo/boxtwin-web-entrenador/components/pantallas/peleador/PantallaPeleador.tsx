@@ -4,10 +4,13 @@
  * 06 · Perfil tactico (04 §06). Ruta /peleador/?id=&contexto=.
  *
  * Se llama "perfil" y no "gemelo digital": no hay un modelo que simule al boxeador (04 §06).
- * Cada bloque lleva su estado (01 §4): la distribucion es estimacion, las combinaciones
- * son medidas (por tiempo y brazo, regla del 14-10; sus tipos van aparte como estimacion, W13),
- * la evolucion y la tabla por contexto son medidas, lo de rounds espera a C2 y lo de guardia
- * a C3, y el mapa de exposicion, el avatar y la distancia no estan en esta version.
+ * Cada bloque lleva su estado (01 §4): la distribucion es por mano (medido) y por altura y tipo
+ * (estimacion), las combinaciones son medidas (por tiempo y brazo, regla del 14-10; sus tipos
+ * van aparte como estimacion, W13), la evolucion y la tabla por contexto son medidas, lo de
+ * rounds se ve por decision de producto rotulado como sin validar (cambios-14-10, DC-1), lo de
+ * guardia espera a C3, el mapa de exposicion es estimacion de lo dirigido (DC-3), el avatar es
+ * ilustrativo (DC-6) y la distancia y el estilo estan cargados a mano (DC-7). Los bloques de
+ * los cambios del 14-10 estan en BloquesTacticos.tsx.
  *
  * El perfil no se cachea (CA-06.2): una correccion se ve al volver.
  */
@@ -26,6 +29,10 @@ import { CONTEXTOS, TIPOS_GOLPE, type Perfil, type Producto } from "@/lib/api/es
 import { estadoDe } from "@/lib/banderas";
 import { decimal, nombreDeTipo, porcentajeAR } from "@/lib/formato";
 import { NOMBRE_CONTEXTO, textos } from "@/lib/textos";
+import {
+  AvatarPerfil, DistanciaEstilo, DistribucionManoAltura, MapaExposicion, NOMBRE_DISTANCIA, NOMBRE_ESTILO,
+  VolumenPorRound,
+} from "@/components/pantallas/peleador/BloquesTacticos";
 
 export function PantallaPeleador() {
   const q = useSearchParams();
@@ -54,7 +61,12 @@ function Contenido({ p, producto, contexto, onContexto }: { p: Perfil; producto?
   const porCtx = p.sesiones_por_contexto ?? {};
   const total = Object.values(porCtx).reduce((a, n) => a + n, 0) || p.totales.sesiones;
   const preliminar = total < (producto?.dominio.perfil_preliminar_sesiones ?? 5);
-  const datos = [b.categoria, b.guardia, b.altura_m ? `${decimal(b.altura_m, 2)} m` : null, b.envergadura_m ? `envergadura ${decimal(b.envergadura_m, 2)} m` : null].filter(Boolean).join(" · ");
+  const datos = [
+    b.categoria, b.guardia, b.altura_m ? `${decimal(b.altura_m, 2)} m` : null,
+    b.envergadura_m ? `envergadura ${decimal(b.envergadura_m, 2)} m` : null,
+    b.estilo ? NOMBRE_ESTILO[b.estilo].toLowerCase() : null,
+    b.distancia ? `distancia ${NOMBRE_DISTANCIA[b.distancia].toLowerCase()}` : null,
+  ].filter(Boolean).join(" · ");
 
   return (
     <>
@@ -92,57 +104,22 @@ function Contenido({ p, producto, contexto, onContexto }: { p: Perfil; producto?
       )}
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <Distribucion p={p} producto={producto} />
+        <DistribucionManoAltura p={p} producto={producto} />
         <EstadoBloque estado={estadoDe("06.evolucion", producto)} titulo="Evolución entre sesiones" className="lg:col-span-2">
           <LineaEvolucion evolucion={p.evolucion} />
         </EstadoBloque>
         <Contextos p={p} producto={producto} />
         <VolumenPorRound p={p} producto={producto} />
         <Combinaciones p={p} producto={producto} />
-        <div className="flex flex-col gap-3 lg:col-span-3">
-          <EstadoBloque estado={estadoDe("06.exposicion", producto)} titulo="Mapa de exposición" motivo={textos.nodispExposicion} />
-          <EstadoBloque estado={estadoDe("06.avatar", producto)} titulo="Avatar 3D" motivo={textos.nodisp3d} />
-          <EstadoBloque estado={estadoDe("06.distancia", producto)} titulo="Distancia de trabajo" motivo={textos.nodispDistancia} />
+        <div className="lg:col-span-2">
+          <MapaExposicion p={p} producto={producto} contexto={contexto} />
+        </div>
+        <div className="flex flex-col gap-4">
+          <AvatarPerfil p={p} producto={producto} />
+          <DistanciaEstilo p={p} producto={producto} />
         </div>
       </div>
     </>
-  );
-}
-
-function Distribucion({ p, producto }: { p: Perfil; producto?: Producto }) {
-  const mezcla = p.totales.mezcla;
-  const clasificados = TIPOS_GOLPE.reduce((a, t) => a + (mezcla[t] ?? 0), 0);
-  const clasificador = p.sesiones.find((s) => s.clasificador)?.clasificador ?? null;
-  const exactitud = p.sesiones.find((s) => s.exactitud_familia != null)?.exactitud_familia ?? null;
-  return (
-    <EstadoBloque
-      estado={estadoDe("06.distribucion", producto)}
-      titulo="Distribución de golpes"
-      nota={textos.estimacionTipo(clasificador, exactitud)}
-    >
-      {clasificados === 0 ? (
-        <p className="text-sm text-texto-3">Ningún golpe tiene tipo estimado todavía.</p>
-      ) : (
-        <ul className="flex flex-col gap-3">
-          {TIPOS_GOLPE.map((t) => {
-            const n = mezcla[t] ?? 0;
-            const f = n / clasificados;
-            return (
-              <li key={t}>
-                <div className="flex items-baseline justify-between text-sm">
-                  <span>{nombreDeTipo(t, p.nomenclatura)}{t === "hook" && <span className="ml-2 text-xs text-estimado">tipo menos confiable</span>}</span>
-                  <Estimado className="dato">{porcentajeAR(f)} · {n}</Estimado>
-                </div>
-                <div aria-hidden="true" className="mt-1 h-1.5 rounded-full bg-superficie-2">
-                  <div className="h-full rounded-full bg-estimado/70" style={{ width: `${Math.round(f * 100)}%` }} />
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-      <p className="mt-3 text-xs text-texto-3">{p.totales.golpes} detectados, {p.totales.sin_clasificar} sin clasificar.</p>
-    </EstadoBloque>
   );
 }
 
@@ -186,28 +163,6 @@ function Contextos({ p, producto }: { p: Perfil; producto?: Producto }) {
         <p className="mt-1 text-xs text-texto-3">
           {!conGuardia && textos.condicionadoC3} {!conR3 && textos.condicionadoC2}
         </p>
-      )}
-    </EstadoBloque>
-  );
-}
-
-function VolumenPorRound({ p, producto }: { p: Perfil; producto?: Producto }) {
-  const rondas = p.rounds_promedio ?? [];
-  const max = Math.max(1, ...rondas.map((r) => r.golpes_por_minuto));
-  return (
-    <EstadoBloque estado={estadoDe("06.volumen_round", producto)} titulo="Volumen por round promedio" motivo={textos.condicionadoC2}>
-      {rondas.length === 0 ? (
-        <p className="text-sm text-texto-3">Sin sesiones con rounds declarados.</p>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {rondas.map((r) => (
-            <li key={r.round} className="grid grid-cols-[2.5rem_1fr_3.5rem] items-center gap-2 text-sm">
-              <span className="dato">R{r.round}</span>
-              <span aria-hidden="true" className="h-2 rounded-full bg-superficie-2"><span className="block h-full rounded-full bg-texto-2" style={{ width: `${(r.golpes_por_minuto / max) * 100}%` }} /></span>
-              <span className="dato text-right">{decimal(r.golpes_por_minuto, 1)}/min</span>
-            </li>
-          ))}
-        </ul>
       )}
     </EstadoBloque>
   );

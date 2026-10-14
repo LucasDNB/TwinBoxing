@@ -32,3 +32,42 @@ export function perfilDePrueba(id: string, nombre: string, extra: Record<string,
     ...extra,
   };
 }
+
+const SESGO = { recall_cabeza: 0.512, recall_cuerpo: 0.348, corregido: true };
+
+/* Un bloque de zonas (B16) con conteos dados, en el orden cabeza izq, cabeza der, cuerpo izq, cuerpo der. */
+export function zonasDePrueba(n: [number, number, number, number], extra: Record<string, unknown> = {}) {
+  const nombres = ["cabeza_mano_izq", "cabeza_mano_der", "cuerpo_mano_izq", "cuerpo_mano_der"] as const;
+  const conDato = n.reduce((a, x) => a + x, 0);
+  const pesos = n.map((x, i) => x / (i < 2 ? SESGO.recall_cabeza : SESGO.recall_cuerpo));
+  const suma = pesos.reduce((a, x) => a + x, 0);
+  const zonas = Object.fromEntries(nombres.map((z, i) => [z, {
+    n: n[i], fraccion: conDato ? n[i] / conDato : null, fraccion_corregida: suma ? pesos[i] / suma : null,
+  }]));
+  return {
+    zonas, manos: { izq: n[0] + n[2] + 3, der: n[1] + n[3] + 2 },
+    alturas: { cabeza: n[0] + n[1], cuerpo: n[2] + n[3], sin_dato: 5 },
+    total: conDato + 5, sin_dato: 5, con_dato: conDato, sesgo_detector: SESGO, ...extra,
+  };
+}
+
+/* La respuesta de GET /rival con dos lecturas de zona coincidente, una por sentido. */
+export function rivalDePrueba() {
+  const zonas = ["cabeza_mano_izq", "cabeza_mano_der", "cuerpo_mano_izq", "cuerpo_mano_der"] as const;
+  const fr = [0.4, 0.3, 0.1, 0.2];
+  const cruces = (["A", "B"] as const).flatMap((at) => zonas.map((z, i) => ({
+    atacante: at, zona: z, ataque_fraccion: fr[i], exposicion_fraccion: fr[3 - i], n_ataque: 40 - i, n_exposicion: 30 + i,
+  })));
+  return {
+    cruces,
+    lecturas: [
+      { tipo: "oportunidad", para: "A", atacante: "A", regla: "zona_coincidente", zona: "cabeza_mano_izq", texto: "Ana Paz suele ir a la cabeza con la izquierda (40%), y ahí es donde a Bea Ruiz suelen buscarlo (35%)." },
+      { tipo: "amenaza", para: "B", atacante: "A", regla: "zona_coincidente", zona: "cabeza_mano_izq", texto: "Ana Paz suele ir a la cabeza con la izquierda (40%), y ahí es donde a Bea Ruiz suelen buscarlo (35%)." },
+      { tipo: "oportunidad", para: "B", atacante: "B", regla: "cuerpo", zona: "cuerpo", texto: "A Ana Paz no suelen trabajarlo al cuerpo (12%) y Bea Ruiz lo hace (30%)." },
+      { tipo: "amenaza", para: "A", atacante: "B", regla: "cuerpo", zona: "cuerpo", texto: "A Ana Paz no suelen trabajarlo al cuerpo (12%) y Bea Ruiz lo hace (30%)." },
+    ],
+    base: { A: { ataque: 120, exposicion: 90 }, B: { ataque: 80, exposicion: 70 } },
+    faltan: null,
+    sesgo_detector: SESGO,
+  };
+}

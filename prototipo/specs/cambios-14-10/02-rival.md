@@ -76,10 +76,14 @@ Con la bandera de altura apagada, `cruces` y `lecturas` vacíos. El mismo pelead
 
 - "Oportunidades y amenazas" y "Dónde ataca uno y dónde recibe el otro" desaparecen como bloques.
   En su lugar, uno solo: "Ataque contra exposición", en estado estimación.
-- Arriba, el selector "A ataca / B ataca" (pestañas de 44 px). Debajo, las dos siluetas del mapa
-  (W22): la del atacante con sus cuatro zonas de ataque como flechas desde las manos, con grosor
-  por fracción, que terminan antes de la silueta del otro (CA-16.3); la del receptor con el
-  relleno de su exposición. En celular, una arriba de la otra.
+- Arriba, el selector "A ataca / B ataca" (pestañas de 44 px). Debajo, dos siluetas iguales a
+  la del mapa (W22), una al lado de la otra: "Hacia dónde tira {atacante}" con sus fracciones de
+  ataque, y "Hacia dónde le tiran a {receptor}" con su exposición. Como las zonas son las mismas
+  (DC-2), la comparación es zona contra zona en el mismo lugar del dibujo. En celular, una arriba
+  de la otra.
+  Cambio respecto de `ampliacion-13-10/05` §3 (14-10, al implementar): se dejan las flechas.
+  Dos siluetas iguales muestran lo mismo sin dibujar un golpe que va de un cuerpo al otro, que
+  es justo lo que CA-16.3 trataba de evitar.
 - Tabla accesible de las ocho filas (cuatro zonas por sentido).
 - Debajo, las lecturas en dos columnas, una por peleador: oportunidades en verde y amenazas en
   rojo, cada una con su zona y sus dos porcentajes. Sin lecturas: "Sin diferencias de zona que
