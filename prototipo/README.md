@@ -43,6 +43,15 @@ E2E_SIN_WEBKIT=1 npm run e2e   # punta a punta contra la API real, sin GPU
 Las pruebas de la API y del anotador: `python -m pytest` desde `boxtwin-api/`, y
 `PYTHONPATH=src python -m pytest tests/` desde `boxtwin-annotator/`.
 
+## Dependencias y `npm audit`
+
+`npm audit` reporta 5 vulnerabilidades "high" (revisado el 14-10). Son una sola cadena,
+`eslint-config-next` → `@next/eslint-plugin-next` → `fast-glob` → `micromatch` → `braces`, y
+solo de desarrollo: `npm audit --omit=dev` da 0, así que no llegan al navegador ni a la API.
+`braces` no tiene versión corregida, y lo que propone `npm audit fix --force` es bajar
+`eslint-config-next` a la 14, que no es compatible con Next 16. No se aplica; se revisa cuando
+salga una versión de `eslint-config-next` que lo resuelva.
+
 ## Estado
 
 El detalle por tarea, con su evidencia, está en `TAREAS.md`. Lo que queda abierto y necesita

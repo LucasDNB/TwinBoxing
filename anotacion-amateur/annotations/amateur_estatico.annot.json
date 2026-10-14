@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "kind": "boxtwin.annot",
+  "generator": {
+    "app": "boxtwin-annotator",
+    "app_version": "0.1.0",
+    "created_at": "2026-09-20T23:48:11+00:00",
+    "updated_at": "2026-09-20T23:48:11+00:00"
+  },
+  "counters": {
+    "event": 0,
+    "assignment": 0,
+    "unreliable": 0,
+    "interpolation": 0,
+    "combo": 0,
+    "session": 0,
+    "op": 0
+  },
+  "video": {
+    "path": "/home/lucasb/Proyectos/TwinBoxing/anotacion-amateur/videos/amateur_estatico.mp4",
+    "sha256": "014a1856cacefdc55117da7495be8ab33187953b7d5aa9a7d51f0e73fc498af8",
+    "size_bytes": 11557482,
+    "mtime": "2026-09-07T12:17:16+00:00",
+    "fps": 30.0,
+    "fps_declared": 30.0,
+    "fps_source": "container_verified",
+    "width": 636,
+    "height": 360,
+    "total_frames": 3601,
+    "total_frames_declared": 3741,
+    "duration_s": 120.1,
+    "codec": "h264"
+  },
+  "pose": {
+    "npz_path": "/home/lucasb/Proyectos/TwinBoxing/anotacion-amateur/cache/amateur_estatico.pose.npz",
+    "meta_path": "/home/lucasb/Proyectos/TwinBoxing/anotacion-amateur/cache/amateur_estatico.meta.json",
+    "meta_sha256": "02813d6c733cabcd8590cd39f42e08a1c16a8952b2ca31f83be657ef6abfba07",
+    "keypoint_format": "coco17",
+    "keypoint_sources": {
+      "0-16": "yolov8l-pose"
+    }
+  },
+  "fighters": {
+    "fighter_A": {
+      "label": "",
+      "guard": "orthodox",
+      "guard_overrides": []
+    },
+    "fighter_B": {
+      "label": "",
+      "guard": "orthodox",
+      "guard_overrides": []
+    }
+  },
+  "identity": {
+    "assignments": [],
+    "manual_tracks": [],
+    "interpolations": []
+  },
+  "unreliable_segments": [],
+  "events": [],
+  "combo_overrides": [],
+  "process": {
+    "annotators": [],
+    "sessions": [],
+    "totals": {
+      "active_ms": 0,
+      "events": 0,
+      "median_ms_per_event": null
+    },
+    "event_metrics": {}
+  },
+  "settings_snapshot": {
+    "interp_max_gap_frames": 60,
+    "interp_min_iou": 0.5,
+    "kp_score_threshold": 0.3,
+    "event_max_duration_frames": 40,
+    "boundary_definitions_version": 2,
+    "same_side_overlap_max_frames": 3,
+    "refire_min_gap_frames": 4,
+    "combo_gap_max_frames": 12,
+    "background_margin_frames": 5,
+    "glove_source": "derived",
+    "glove_extrapolation_k": 0.35,
+    "proxy": {
+      "width": 960,
+      "gop": 12,
+      "crf": 20,
+      "preset": "veryfast"
+    },
+    "player_buffer_mb": 512
+  }
+}

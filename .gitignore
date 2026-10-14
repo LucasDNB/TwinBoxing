@@ -22,6 +22,11 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 
+# === Node ===
+# Las dependencias y los caches de vite/vitest, en cualquier carpeta. El 14-10 aparecio uno en
+# la raiz del checkout de produccion por correr vitest desde ahi.
+node_modules/
+
 # === Conda / virtualenv ===
 .conda/
 venv/
