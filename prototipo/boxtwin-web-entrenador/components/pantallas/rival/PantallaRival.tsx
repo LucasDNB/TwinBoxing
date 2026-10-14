@@ -302,19 +302,31 @@ function AtaqueContraExposicion({ a, b, nombres, producto }: { a: string; b: str
       nota={rival.data?.sesgo_detector.corregido ? textos.exposicionCorregida(rival.data.sesgo_detector.recall_cuerpo, rival.data.sesgo_detector.recall_cabeza) : undefined}
     >
       <p className="mb-3 text-sm text-texto-2">
-        Dónde tira cada uno, contra dónde suelen tirarle al otro. &quot;Le tiran&quot; son golpes dirigidos: no dice si tocaron.
+        Dónde tira cada uno, contra dónde suelen tirarle al otro. &quot;Le tiran&quot; son golpes dirigidos: no dice si tocaron. {textos.cruceSinElOtro}
       </p>
       {rival.isPending ? (
         <Esqueleto filas={2} />
       ) : rival.isError ? (
         <ErrorConReintento error={rival.error} alReintentar={() => rival.refetch()} />
+      ) : soloEntreEllos(rival.data).length > 0 ? (
+        // DC-10: sin exposicion de otros rivales no hay cruce posible, y se dice por que.
+        <ul className="space-y-2 text-sm text-estimado">
+          {soloEntreEllos(rival.data).map((l) => (
+            <li key={l}>{textos.cruceSoloEntreEllos(nombres[l], nombres[l === "A" ? "B" : "A"])}</li>
+          ))}
+        </ul>
       ) : rival.data.cruces.length === 0 ? (
-        <p className="text-sm text-texto-3">Todavía no hay golpes con altura en sparring o combate para cruzar.</p>
+        <p className="text-sm text-texto-3">{rival.data.faltan ? textos.cruceFaltan(rival.data.base.A, rival.data.base.B, rival.data.faltan.minimo) : "Todavía no hay golpes con altura en sparring o combate para cruzar."}</p>
       ) : (
         <ContenidoCruce r={rival.data} nombres={nombres} atacante={atacante} onAtacante={setAtacante} />
       )}
     </EstadoBloque>
   );
+}
+
+/* Los lados a los que no les queda exposicion porque todas sus sesiones eran contra el otro. */
+function soloEntreEllos(r: Rival): ("A" | "B")[] {
+  return (["A", "B"] as const).filter((l) => r.base[l].exposicion === 0 && (r.base[l].excluidas ?? 0) > 0);
 }
 
 function ContenidoCruce({ r, nombres, atacante, onAtacante }: {

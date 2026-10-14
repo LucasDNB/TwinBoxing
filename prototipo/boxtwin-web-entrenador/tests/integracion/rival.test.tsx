@@ -86,6 +86,21 @@ describe("07 · Rival Fantasma", () => {
     expect(within(bloque).queryByText("oportunidad")).toBeNull();
   });
 
+  it("DC-10: si a los dos solo les tiraron entre ellos, no hay cruce y dice por que", async () => {
+    mundo.producto = productoBase({ objetivo: true, exposicion: true });
+    mundo.rival = {
+      ...rivalDePrueba(), cruces: [], lecturas: [], faltan: { minimo: 50, base: {} },
+      base: { A: { ataque: 237, exposicion: 0, excluidas: 7 }, B: { ataque: 255, exposicion: 0, excluidas: 8 } },
+    };
+    enRuta("/rival/?a=b1&b=b2");
+    montar(<PantallaRival />);
+    const bloque = await screen.findByRole("region", { name: "Ataque contra exposición" });
+    expect(await within(bloque).findByText(/Lo que le tiran a Ana Paz sale de sesiones contra Bea Ruiz/)).toBeInTheDocument();
+    expect(within(bloque).getByText(/Lo que le tiran a Bea Ruiz sale de sesiones contra Ana Paz/)).toBeInTheDocument();
+    expect(within(bloque).queryByText("oportunidad")).toBeNull();
+    expect(within(bloque).queryByText(/Hacia dónde tira/)).toBeNull();
+  });
+
   it("CA-26.1: con la altura apagada el bloque no esta disponible y no aparece ninguna zona", async () => {
     mundo.producto = productoBase({ objetivo: false, exposicion: false });
     enRuta("/rival/?a=b1&b=b2");

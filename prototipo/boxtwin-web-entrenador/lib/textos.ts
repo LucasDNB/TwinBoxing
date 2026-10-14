@@ -128,6 +128,12 @@ export const textos = {
   distanciaPresentacion: "distancia de presentación, no medida",
   /* W26 (DC-8) */
   cruceSinLecturas: "Sin diferencias de zona que superen los umbrales.",
+  /* DC-10: a uno no le queda exposicion porque todas sus sesiones de pelea eran contra el otro. */
+  cruceSoloEntreEllos(receptor: string, atacante: string) {
+    return `Lo que le tiran a ${receptor} sale de sesiones contra ${atacante}, y cruzarlo sería comparar a ${atacante} consigo mismo. Hacen falta sesiones de ${receptor} con otros rivales.`;
+  },
+  cruceSinElOtro:
+    "Lo que le tiran a cada uno se cuenta sin las sesiones entre ellos dos.",
   cruceFaltan(a: { ataque: number; exposicion: number }, b: { ataque: number; exposicion: number }, minimo: number) {
     return `Faltan sesiones para cruzar zonas: ${a.ataque} y ${a.exposicion} golpes de un lado, ${b.ataque} y ${b.exposicion} del otro; hacen falta ${minimo} en cada mitad.`;
   },

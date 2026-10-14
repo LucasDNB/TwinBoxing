@@ -72,12 +72,14 @@ def test_4_una_regla_es_oportunidad_para_el_atacante_y_amenaza_para_el_receptor(
                                     "donde a Beto suelen buscarlo (50%).")
 
 
-@pytest.mark.parametrize(("ataque", "dispara"), [(0.25, True), (0.249, False)])
-def test_5_zona_coincidente_en_el_umbral(ataque, dispara):
+@pytest.mark.parametrize(("ataque", "dispara"), [(0.35, True), (0.349, False), (0.25, False)])
+def test_5_zona_coincidente_en_el_umbral_de_35(ataque, dispara):
+    # DC-11: 25% es el reparto parejo entre cuatro zonas y ya no alcanza.
     resto = (1 - ataque) / 3
     at = {"cabeza_mano_izq": ataque, "cabeza_mano_der": resto, "cuerpo_mano_izq": resto, "cuerpo_mano_der": resto}
+    ex = {"cabeza_mano_izq": 0.35, "cabeza_mano_der": 0.25, "cuerpo_mano_izq": 0.2, "cuerpo_mano_der": 0.2}
     pa = _perfil("Ana", at, PAREJO)
-    pb = _perfil("Beto", PAREJO, PAREJO)
+    pb = _perfil("Beto", PAREJO, ex)
     r = cruzar(pa, pb)
     hay = any(x["regla"] == "zona_coincidente" and x["atacante"] == "A" and x["zona"] == "cabeza_mano_izq"
               for x in r["lecturas"])
@@ -118,33 +120,56 @@ def _fc(a, b):
                            "B": {"golpes": b, "por_round": [], "total": {"total": len(b)}}}}
 
 
+def _sesion(cliente, entorno, a_id, b_id, golpes_a, golpes_b, contexto="sparring"):
+    sid = subir_video(cliente, contexto=contexto).json()["job_id"]
+    fc = _fc(golpes_a, golpes_b)
+    if b_id is None:
+        del fc["peleadores"]["B"]
+    (entorno["cfg"].dir_sesion(sid) / "fightcard.json").write_text(json.dumps(fc))
+    cliente.put(f"/sesiones/{sid}/boxeadores", json={"boxeador_a": a_id, "boxeador_b": b_id})
+
+
 @pytest.fixture
 def dos(cliente, registrado, entorno):
     ana = cliente.post("/boxeadores", json={"nombre": "Ana"}).json()["id"]
     beto = cliente.post("/boxeadores", json={"nombre": "Beto"}).json()["id"]
-    # 60 de cada lado: Ana tira a la cabeza con la izquierda, Beto al cuerpo con la derecha.
-    a = [_g(i, "izq", "cabeza") for i in range(60)]
-    b = [_g(100 + i, "der", "cuerpo") for i in range(60)]
-    sid = subir_video(cliente, contexto="sparring").json()["job_id"]
-    (entorno["cfg"].dir_sesion(sid) / "fightcard.json").write_text(json.dumps(_fc(a, b)))
-    cliente.put(f"/sesiones/{sid}/boxeadores", json={"boxeador_a": ana, "boxeador_b": beto})
+    # Ana tira a la cabeza con la izquierda, Beto al cuerpo con la derecha.
+    _sesion(cliente, entorno, ana, beto, [_g(i, "izq", "cabeza") for i in range(60)],
+            [_g(100 + i, "der", "cuerpo") for i in range(60)])
     # una sesion de bolsa de Ana que no tiene que entrar
-    sid = subir_video(cliente, contexto="bolsa").json()["job_id"]
-    fc = _fc([_g(i, "der", "cuerpo") for i in range(200)], [])
-    del fc["peleadores"]["B"]
-    (entorno["cfg"].dir_sesion(sid) / "fightcard.json").write_text(json.dumps(fc))
-    cliente.put(f"/sesiones/{sid}/boxeadores", json={"boxeador_a": ana})
+    _sesion(cliente, entorno, ana, None, [_g(i, "der", "cuerpo") for i in range(200)], [], contexto="bolsa")
     return ana, beto
 
 
-def test_el_endpoint_cruza_solo_sparring_y_combate(cliente, dos):
+def test_2b_dos_que_solo_pelearon_entre_ellos_no_se_comparan_consigo_mismos(cliente, dos):
+    # DC-10, medido sobre produccion el 14-10: antes, ataque y exposicion daban igual en las
+    # ocho filas. Ahora la exposicion de cada uno sale vacia y no hay lecturas.
     ana, beto = dos
     r = cliente.get(f"/rival?a={ana}&b={beto}").json()
-    assert r["base"]["A"] == {"ataque": 60, "exposicion": 60}, "la bolsa no entra"
+    assert r["base"]["A"] == {"ataque": 60, "exposicion": 0, "excluidas": 1}, "la bolsa no entra"
+    assert r["base"]["B"] == {"ataque": 60, "exposicion": 0, "excluidas": 1}
+    assert r["cruces"] == [] and r["lecturas"] == []
+    assert r["faltan"]["minimo"] == 50
+
+
+def test_2b_con_un_tercero_la_exposicion_sale_solo_de_el(cliente, entorno, dos):
+    ana, beto = dos
+    ceci = cliente.post("/boxeadores", json={"nombre": "Ceci"}).json()["id"]
+    # Ceci le tira a Ana al cuerpo con la izquierda y a Beto a la cabeza con la izquierda.
+    _sesion(cliente, entorno, ana, ceci, [_g(i, "izq", "cabeza") for i in range(60)],
+            [_g(300 + i, "izq", "cuerpo") for i in range(60)])
+    _sesion(cliente, entorno, beto, ceci, [_g(i, "der", "cuerpo") for i in range(60)],
+            [_g(500 + i, "izq", "cabeza") for i in range(60)])
+    r = cliente.get(f"/rival?a={ana}&b={beto}").json()
     c = {(x["atacante"], x["zona"]): x for x in r["cruces"]}
-    assert c[("A", "cabeza_mano_izq")]["ataque_fraccion"] == 1.0
-    assert c[("B", "cuerpo_mano_der")]["exposicion_fraccion"] == 1.0, "a Ana le van al cuerpo por la derecha"
-    assert {x["regla"] for x in r["lecturas"]} >= {"zona_coincidente"}
+    # CA-26.5: a Ana solo le cuenta lo que tira Ceci (cuerpo con la izquierda); lo que le tira
+    # Beto (cuerpo con la derecha) queda afuera. Lo mismo del lado de Beto.
+    assert c[("B", "cuerpo_mano_izq")]["exposicion_fraccion"] == 1.0, "a Ana solo le cuenta Ceci"
+    assert c[("B", "cuerpo_mano_der")]["exposicion_fraccion"] == 0.0, "lo que le tira Beto no entra"
+    assert c[("A", "cabeza_mano_izq")]["exposicion_fraccion"] == 1.0
+    assert r["base"]["A"]["excluidas"] == 1 and r["base"]["B"]["excluidas"] == 1
+    lect = {(x["regla"], x["atacante"], x["zona"]) for x in r["lecturas"] if x["tipo"] == "oportunidad"}
+    assert ("zona_coincidente", "A", "cabeza_mano_izq") in lect
 
 
 def test_6_el_mismo_peleador_en_los_dos_lados_da_422(cliente, dos):

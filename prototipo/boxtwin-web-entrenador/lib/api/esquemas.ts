@@ -365,7 +365,11 @@ export const Rival = z.object({
     tipo: z.enum(["oportunidad", "amenaza"]), para: z.enum(["A", "B"]), atacante: z.enum(["A", "B"]),
     regla: z.string(), zona: z.string(), texto: z.string(),
   })),
-  base: z.object({ A: z.object({ ataque: num, exposicion: num }), B: z.object({ ataque: num, exposicion: num }) }),
+  // DC-10: `excluidas` son las sesiones contra el otro que no entran en la exposicion.
+  base: z.object({
+    A: z.object({ ataque: num, exposicion: num, excluidas: num.optional() }),
+    B: z.object({ ataque: num, exposicion: num, excluidas: num.optional() }),
+  }),
   faltan: z.object({ minimo: num, base: z.any() }).nullable(),
   sesgo_detector: SesgoDetector,
 });
