@@ -7,7 +7,7 @@
  */
 import { motion, useReducedMotion } from "motion/react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/animate-ui/components/radix/accordion";
-import { lados as ladosDe, lecturaRounds, type FightCard, type Lado } from "@/lib/fightcard";
+import { lados as ladosDe, lecturaRounds, prefijoRound, type FightCard, type Lado } from "@/lib/fightcard";
 
 const ALTO = 140;
 
@@ -47,7 +47,7 @@ export function BarrasPorRound({ fc, nombres }: { fc: FightCard; nombres: Record
           }),
         )}
         {rondas.map((r, i) => (
-          <text key={r.round} x={20 + i * anchoGrupo + (lados.length * 20 - 4) / 2} y={ALTO + 16} textAnchor="middle" className="fill-tenue font-mono text-[11px]">R{r.round}</text>
+          <text key={r.round} x={20 + i * anchoGrupo + (lados.length * 20 - 4) / 2} y={ALTO + 16} textAnchor="middle" className="fill-tenue font-mono text-[11px]">{prefijoRound(fc)}{r.round}</text>
         ))}
       </svg>
       <Accordion type="single" collapsible className="lg:hidden">
@@ -71,7 +71,7 @@ function Tabla({ fc, lados, nombres, valor }: { fc: FightCard; lados: Lado[]; no
       <tbody>
         {fc.video.rounds.map((r) => (
           <tr key={r.round} className="border-t border-borde-suave">
-            <th scope="row" className="py-1 text-left font-normal">R{r.round}</th>
+            <th scope="row" className="py-1 text-left font-normal">{prefijoRound(fc)}{r.round}</th>
             {lados.map((l) => <td key={l} className="dato py-1 text-right">{valor(l, r.round)}</td>)}
           </tr>
         ))}

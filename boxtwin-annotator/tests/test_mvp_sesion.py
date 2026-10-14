@@ -11,7 +11,7 @@ import json
 
 import pytest
 
-from boxtwin.mvp.sesion import ESTADOS, Sesion, ventanas_de_round
+from boxtwin.mvp.sesion import ESTADOS, Sesion, segmentos, ventanas_de_round
 
 VIDEO = {"nombre": "spar.mp4", "fps": 30.0, "duracion_s": 600.0, "total_frames": 18000}
 
@@ -169,3 +169,35 @@ def test_sin_archivo_no_hay_avance(tmp_path):
     from boxtwin.mvp.sesion import leer_progreso
 
     assert leer_progreso(tmp_path) is None
+
+
+# -- Cambios del 14-10 (prototipo/specs/cambios-14-10/01 §1): segmentos de 3 minutos --------
+
+def _cortes(v):
+    return [(r["inicio_s"], r["fin_s"]) for r in v]
+
+
+def test_B15_1_seiscientos_segundos_son_tres_de_180_y_uno_de_60():
+    v, origen = segmentos(600.0, None, 0.0)
+    assert _cortes(v) == [(0.0, 180.0), (180.0, 360.0), (360.0, 540.0), (540.0, 600.0)]
+    assert origen == "segmentos_180s"
+
+
+def test_B15_2_un_resto_de_menos_de_un_minuto_se_suma_al_anterior():
+    v, _ = segmentos(590.0, None, 0.0)
+    assert _cortes(v) == [(0.0, 180.0), (180.0, 360.0), (360.0, 590.0)]
+
+
+def test_B15_3_un_video_corto_es_un_solo_segmento():
+    v, _ = segmentos(45.0, None, 0.0)
+    assert _cortes(v) == [(0.0, 45.0)]
+
+
+def test_B15_4_con_rounds_declarados_se_usan_los_declarados():
+    v, origen = segmentos(400.0, 120.0, 30.0)
+    assert v == ventanas_de_round(400.0, 120.0, 30.0)
+    assert origen == "declarados"
+
+
+def test_sin_duracion_no_hay_ventanas():
+    assert segmentos(0.0, None, 0.0) == ([], None)

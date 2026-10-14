@@ -27,8 +27,8 @@ QUE HACE
 
   B7 (web entrenador) suma la lectura por contexto -bolsa, sombra, sparring y combate miden
   cosas distintas y se comparan consigo mismos, no contra una linea de base comun- y el
-  volumen por round. Las combinaciones son las izq-der-izq de la ampliacion del 13-10 (B10),
-  contadas con la regla del anotador. Lo que depende de un criterio
+  volumen por round. Las combinaciones (B10, con la regla del 14-10: cualquier secuencia de 2+ golpes)
+  se cuentan con la regla del anotador. Lo que depende de un criterio
   pre-registrado sin aprobar (C2 para rounds, C3 para guardia) se devuelve en nulo aunque
   haya datos: asi ningun cliente lo puede mostrar por error.
 
@@ -57,9 +57,26 @@ def _leer_fightcard(directorio: Path) -> dict | None:
     if not f.is_file():
         return None
     try:
-        return json.loads(f.read_text())
+        fc = json.loads(f.read_text())
     except (OSError, json.JSONDecodeError):
         return None
+    return _con_rounds(fc)
+
+
+def _con_rounds(fc: dict) -> dict:
+    """
+    Una Fight-Card sin rounds (0.1, 0.2, o procesada sin declararlos) recibe en memoria los
+    segmentos de 3 minutos con la misma funcion del anotador (cambios-14-10, DC-5): asi una
+    sesion vieja aporta al volumen por round sin reprocesar. Sin el anotador instalado queda
+    como esta; la API no copia la regla.
+    """
+    try:
+        from boxtwin.mvp.fightcard import completar_rounds
+    except ImportError:  # pragma: no cover - depende del entorno
+        return fc
+    if isinstance(fc.get("peleadores"), dict):
+        completar_rounds(fc)
+    return fc
 
 
 def resumen_de_sesion(fc: dict, lado: str) -> dict | None:
@@ -115,6 +132,7 @@ def resumen_de_sesion(fc: dict, lado: str) -> dict | None:
                                   if minutos and cobertura is not None else None),
         "golpes_por_minuto": round(len(golpes) / minutos, 2) if minutos else None,
         "por_round": pel.get("por_round") or [],
+        "rounds_origen": (fc.get("video") or {}).get("rounds_origen"),
         "mezcla": tipos,
         "sin_clasificar": sin_tipo,
         "confianza_media": (
@@ -131,7 +149,7 @@ def resumen_de_sesion(fc: dict, lado: str) -> dict | None:
 
 
 def regla_de_combinacion() -> dict | None:
-    """La regla izq-der-izq del anotador, o None si esta instancia no lo tiene instalado."""
+    """La regla de combinaciones del anotador, o None si esta instancia no lo tiene instalado."""
     try:
         from boxtwin.mvp.combinaciones import REGLA
     except ImportError:  # pragma: no cover - depende del entorno
@@ -142,7 +160,8 @@ def regla_de_combinacion() -> dict | None:
 def combinaciones(entradas: list[dict], golpes_de: dict[str, list[dict]],
                   recall: float | None = None) -> dict | None:
     """
-    Las combinaciones izq-der-izq del peleador en las sesiones filtradas (ampliacion 01 §3).
+    Las combinaciones del peleador en las sesiones filtradas (ampliacion 01 §3, con la regla
+    del 14-10: cualquier secuencia de dos o mas golpes con menos de 0,5 s entre cada uno).
 
     Usa la MISMA funcion que la Fight-Card, importada del anotador, y la recalcula sobre los
     golpes de cada sesion en vez de leer el bloque guardado: asi una Fight-Card 0.2, que no lo
@@ -151,16 +170,17 @@ def combinaciones(entradas: list[dict], golpes_de: dict[str, list[dict]],
 
     El ritmo se calcula sobre los minutos en que el sistema VIO al peleador (cobertura por
     duracion): si no lo vio, no puede decir que no combino. Una sesion sin cobertura medida no
-    entra en el ritmo, aunque sus ternas si entran en el total.
+    entra en el ritmo, aunque sus combinaciones si entran en el total.
 
-    El patron es por brazo, que es medido. Los tipos de cada terna van aparte, como
-    estimacion, y solo las ternas con los tres tipos estimados entran en ese conteo.
+    Las secuencias de brazos salen del detector y son medidas. Los tipos de cada combinacion
+    van aparte, como estimacion, y solo las que tienen todos sus tipos estimados entran en ese
+    conteo.
 
-    `recall` es el que califica el numero en pantalla (01 §4): el de ternas si C11 se midio,
+    `recall` es el que califica el numero en pantalla (01 §4): el de combinaciones si C11 se midio,
     si no el de golpes, de la Fight-Card mas reciente.
     """
     try:
-        from boxtwin.mvp.combinaciones import REGLA, ternas
+        from boxtwin.mvp.combinaciones import REGLA, brazos_de, cadenas
     except ImportError:  # pragma: no cover - depende del entorno
         return None
 
@@ -168,32 +188,93 @@ def combinaciones(entradas: list[dict], golpes_de: dict[str, list[dict]],
     con = 0
     por_contexto: dict[str, int] = {}
     tipos: dict[tuple, int] = {}
-    ternas_con_ritmo = 0
+    secuencias: dict[tuple, int] = {}
+    por_largo: dict[str, int] = {}
+    con_ritmo = 0
     minutos = 0.0
     for x in entradas:
-        suyas = ternas(golpes_de.get(x["sesion_id"], []), REGLA)
+        suyas = cadenas(golpes_de.get(x["sesion_id"], []), REGLA)
         total += len(suyas)
         con += 1 if suyas else 0
         por_contexto[x["contexto"]] = por_contexto.get(x["contexto"], 0) + len(suyas)
         if x.get("minutos_con_identidad"):
             minutos += x["minutos_con_identidad"]
-            ternas_con_ritmo += len(suyas)
-        for trio in suyas:
-            clave = tuple(_tipo_vigente(g) for g in trio)
+            con_ritmo += len(suyas)
+        for c in suyas:
+            # Cuatro golpes o mas van juntos: son pocas y separarlas no le dice nada al
+            # entrenador (en lo anotado, 26 de 179).
+            largo = str(len(c)) if len(c) < 4 else "4+"
+            por_largo[largo] = por_largo.get(largo, 0) + 1
+            brazos = tuple(brazos_de(c))
+            if all(brazos):
+                secuencias[brazos] = secuencias.get(brazos, 0) + 1
+            clave = tuple(_tipo_vigente(g) for g in c)
             if all(clave):
                 tipos[clave] = tipos.get(clave, 0) + 1
     orden = sorted(tipos.items(), key=lambda kv: (-kv[1], kv[0]))[:3]
+    orden_brazos = sorted(secuencias.items(), key=lambda kv: (-kv[1], kv[0]))[:3]
     return {
         "patron": REGLA["patron"],
         "separacion": REGLA["separacion"],
         "max_s": REGLA["max_s"],
         "total": total,
-        "por_minuto": round(ternas_con_ritmo / minutos, 3) if minutos else None,
+        "por_minuto": round(con_ritmo / minutos, 3) if minutos else None,
         "por_contexto": por_contexto,
+        "por_largo": por_largo,
+        "secuencias_frecuentes": [{"brazos": list(k), "n": n} for k, n in orden_brazos],
         "tipos_frecuentes": [{"tipos": list(k), "n": n, "estimado": True} for k, n in orden],
         "sesiones_con_combinaciones": con,
         "recall_medido": recall,
     }
+
+
+# -- Zonas (cambios del 14-10, B16) --------------------------------------------------------
+
+DE_PELEA = ("sparring", "combate")
+
+
+def ataque(entradas: list[dict], golpes_de: dict[str, list[dict]], con_altura: bool) -> dict:
+    """
+    A que zona dirige el peleador sus golpes: mano por altura. Las manos salen del detector y
+    viajan siempre; las zonas y las alturas dependen de la regla de altura y son nulas con su
+    bandera apagada (CA-14.2).
+    """
+    from boxtwin_api.zonas import bloque
+
+    golpes = [g for x in entradas for g in golpes_de.get(x["sesion_id"], [])]
+    b = bloque(golpes)
+    if not con_altura:
+        b["zonas"] = None
+        b["alturas"] = None
+        b["sin_dato"] = None
+        b["con_dato"] = None
+    return b
+
+
+def exposicion(entradas: list[dict], rival_de: dict[str, tuple]) -> dict | None:
+    """
+    Hacia donde le tiran: los golpes de sus rivales, por la mano con que vinieron y la altura
+    (DC-2, DC-3). Solo sparring y combate: en bolsa y sombra no hay rival. Nulo si no hay
+    ninguna sesion de pelea en el filtro.
+    """
+    from boxtwin_api.zonas import bloque
+
+    suyas = [x for x in entradas if x["contexto"] in DE_PELEA]
+    if not suyas:
+        return None
+    golpes: list[dict] = []
+    por_rival: dict[str, dict] = {}
+    for x in suyas:
+        g, rid, nombre = rival_de.get(x["sesion_id"], ([], None, "sin perfil"))
+        golpes += g
+        clave = rid or "sin_perfil"
+        r = por_rival.setdefault(clave, {"boxeador_id": rid, "nombre": nombre, "total": 0})
+        r["total"] += sum(1 for y in g if not y.get("descartado"))
+    b = bloque(golpes)
+    b["tipo"] = "dirigidos"
+    b["sesiones"] = len(suyas)
+    b["por_rival"] = sorted(por_rival.values(), key=lambda r: -r["total"])
+    return b
 
 
 def _tipo_vigente(g: dict) -> str | None:
@@ -248,19 +329,26 @@ def _por_contexto(entradas: list[dict], banderas: dict) -> list[dict]:
 
 
 def _rounds_promedio(entradas: list[dict]) -> list[dict] | None:
+    """
+    El ritmo promedio por indice de round. `origen` dice si salen de rounds declarados, de
+    segmentos de 3 minutos (cambios-14-10, DC-5) o de una mezcla de sesiones de los dos.
+    """
     por_indice: dict[int, list[float]] = {}
+    origenes: dict[int, set] = {}
     for x in entradas:
         for i, r in enumerate(x["por_round"], start=1):
             if r.get("por_minuto") is not None:
                 por_indice.setdefault(i, []).append(float(r["por_minuto"]))
+                origenes.setdefault(i, set()).add(x.get("rounds_origen") or "declarados")
     if not por_indice:
         return None
-    return [{"round": i, "golpes_por_minuto": round(sum(v) / len(v), 2)}
+    return [{"round": i, "golpes_por_minuto": round(sum(v) / len(v), 2),
+             "origen": origenes[i].pop() if len(origenes[i]) == 1 else "mixto"}
             for i, v in sorted(por_indice.items())]
 
 
 def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: str = "todas",
-                     banderas: dict | None = None) -> dict:
+                     banderas: dict | None = None, solo_pelea: bool = False) -> dict:
     """
     El perfil completo. `sesiones` son pares (sesion, lado) ya filtrados por boxeador.
 
@@ -274,6 +362,8 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: s
     banderas = banderas or {}
     todas = []
     golpes_de: dict[str, list[dict]] = {}
+    # B16: los golpes del otro lado de cada sesion, con quien los tiro, para la exposicion.
+    rival_de: dict[str, tuple[list[dict], str | None, str]] = {}
     nomenclatura: dict[str, str] = {}
     recall: float | None = None
     for ses, lado in sorted(sesiones, key=lambda x: x[0].creada):
@@ -284,6 +374,10 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: s
         if r is None:
             continue
         golpes_de[ses.id] = ((fc.get("peleadores") or {}).get(lado) or {}).get("golpes") or []
+        otro = "B" if lado == "A" else "A"
+        rival = getattr(ses, "boxeador_b" if lado == "A" else "boxeador_a", None)
+        rival_de[ses.id] = (((fc.get("peleadores") or {}).get(otro) or {}).get("golpes") or [],
+                            getattr(rival, "id", None), getattr(rival, "nombre", None) or "sin perfil")
         # La de la Fight-Card mas reciente: los nombres de golpe en pantalla los decide el
         # contrato (RF11, D7), no la web.
         nomenclatura = fc.get("nomenclatura") or nomenclatura
@@ -298,6 +392,9 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: s
             **r,
         })
     entradas = todas if contexto == "todas" else [x for x in todas if x["contexto"] == contexto]
+    # El Rival Fantasma (B18) compara solo sparring y combate de cada perfil.
+    if solo_pelea:
+        entradas = [x for x in entradas if x["contexto"] in DE_PELEA]
 
     total_golpes = sum(e["golpes"] for e in entradas)
     mezcla: dict[str, int] = {}
@@ -350,6 +447,8 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: s
         # caida del ultimo round podria ser del detector y no del boxeador (D3).
         "rounds_promedio": _rounds_promedio(entradas) if banderas.get("comparacion_rounds") else None,
         "combinaciones": combinaciones(entradas, golpes_de, recall),
+        "ataque": ataque(entradas, golpes_de, banderas.get("objetivo", False)),
+        "exposicion": (exposicion(entradas, rival_de) if banderas.get("objetivo") else None),
     }
 
     return {
@@ -362,6 +461,8 @@ def construir_perfil(boxeador, sesiones: list[tuple], dir_de_sesion, contexto: s
             "categoria": getattr(boxeador, "categoria", None),
             "altura_m": getattr(boxeador, "altura_m", None),
             "envergadura_m": getattr(boxeador, "envergadura_m", None),
+            "distancia": getattr(boxeador, "distancia", None),
+            "estilo": getattr(boxeador, "estilo", None),
         },
         "sesiones": entradas,
         "totales": {

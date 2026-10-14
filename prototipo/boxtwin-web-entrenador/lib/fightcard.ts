@@ -51,6 +51,11 @@ export function normalizarFightCard(fc: FightCardCruda): FightCard {
   };
 }
 
+/* "R" con rounds declarados, "S" con segmentos de 3 minutos (cambios-14-10, DC-5). */
+export function prefijoRound(fc: FightCard): "R" | "S" {
+  return fc.video.rounds_origen === "segmentos_180s" ? "S" : "R";
+}
+
 export function lados(fc: FightCard): Lado[] {
   return fc.peleadores.B ? ["A", "B"] : ["A"];
 }
@@ -149,13 +154,33 @@ export function guardiaPorGolpe(p: Peleador): Map<string, NonNullable<Peleador["
   return m;
 }
 
-// -- Combinaciones izq-der-izq (ampliacion 01, B10 y W13) -------------------------------
+// -- Altura del golpe (ampliacion 03, B11 y W14) ---------------------------------------
+//
+// La cuenta el worker (etapa enriquecer) y la recuenta al aplicar correcciones, asi que aca
+// solo se lee: cabeza + cuerpo + sin dato = detectados (CA-14.1).
+
+export interface Altura {
+  cabeza: number;
+  cuerpo: number;
+  sinDato: number;
+}
+
+/* La altura de un peleador en la sesion o en un round; null si el documento no la trae. */
+export function alturaDe(fc: FightCard, lado: Lado, round: number | null = null): Altura | null {
+  const p = fc.peleadores[lado];
+  if (!p) return null;
+  const c = round == null ? p.total : p.por_round.find((r) => r.round === round);
+  if (!c || c.cabeza == null || c.cuerpo == null) return null;
+  return { cabeza: c.cabeza, cuerpo: c.cuerpo, sinDato: c.objetivo_sin_dato ?? c.total - c.cabeza - c.cuerpo };
+}
+
+// -- Combinaciones (ampliacion 01, B10 y W13; regla del 14-10) ---------------------------
 //
 // Las cuenta el worker con la regla del anotador y vienen en el documento (0.3). Aca solo se
 // leen: tener la regla en los dos lados seria tenerla mal en uno. Una 0.1 o 0.2 no las trae y
 // la pantalla lo dice, en vez de calcularlas.
 
-/* Cuantas ternas tiene un peleador en la sesion o en un round; null si el documento no las trae. */
+/* Cuantas combinaciones tiene un peleador en la sesion o en un round; null si el documento no las trae. */
 export function combinacionesDe(fc: FightCard, lado: Lado, round: number | null = null): number | null {
   const c = fc.peleadores[lado]?.combinaciones;
   if (!c) return null;
@@ -163,12 +188,31 @@ export function combinacionesDe(fc: FightCard, lado: Lado, round: number | null 
   return c.por_round.find((r) => r.round === round)?.total ?? 0;
 }
 
-/* Los golpes que forman parte de una terna, para la insignia de la lista. */
+/* Los golpes que forman parte de una combinacion, para la insignia de la lista. */
 export function golpesEnCombinacion(fc: FightCard, lado: Lado): Set<string> {
   return new Set((fc.peleadores[lado]?.combinaciones?.lista ?? []).flatMap((c) => c.golpes));
 }
 
-/* El recall con que se califica el numero: el de ternas si C11 se midio, si no el de golpes. */
+/*
+ * La secuencia de manos de cada combinacion ("izq-der-izq"), por golpe, para la insignia. Una
+ * Fight-Card contada con la regla del 13-10 no trae `brazos`: eran todas izq-der-izq.
+ */
+export function secuenciaPorGolpe(fc: FightCard, lado: Lado): Map<string, string> {
+  const m = new Map<string, string>();
+  for (const c of fc.peleadores[lado]?.combinaciones?.lista ?? []) {
+    const sec = c.brazos ? c.brazos.map((b) => b ?? "?").join("-") : "izq-der-izq";
+    for (const g of c.golpes) m.set(g, sec);
+  }
+  return m;
+}
+
+/* "izq-der-izq" a "izquierda, derecha, izquierda", para lectores de pantalla y titulos. */
+export function secuenciaEnPalabras(brazos: (string | null)[] | undefined): string {
+  const nombre: Record<string, string> = { izq: "izquierda", der: "derecha" };
+  return (brazos ?? ["izq", "der", "izq"]).map((b) => (b ? nombre[b] ?? b : "sin mano")).join(", ");
+}
+
+/* El recall con que se califica el numero: el de combinaciones si C11 se midio, si no el de golpes. */
 export function recallDeCombinaciones(fc: FightCard): number {
   return fc.detector.combinaciones?.recall_medido ?? fc.detector.recall_medido;
 }

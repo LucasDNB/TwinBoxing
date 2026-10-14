@@ -92,11 +92,19 @@ def test_el_conteo_por_round_usa_la_ventana_real(sesion):
     assert rondas[0]["por_minuto"] == pytest.approx(60 / 180, abs=0.01)
 
 
-def test_sin_rounds_declarados_no_hay_agregado_por_round(tmp_path):
+def test_sin_rounds_declarados_se_corta_en_segmentos_de_3_minutos(tmp_path):
+    # Cambios del 14-10 (DC-5): antes no habia agregado por round; ahora 400 s son 180 + 220
+    # (el resto de 40 s se suma al segundo segmento).
     ses = Sesion.nueva(tmp_path, VIDEO, round_s=None, descanso_s=0.0)
-    fc = construir(ses, [_Golpe("A", "left", 10.0)])
-    assert fc["peleadores"]["A"]["por_round"] == []
-    assert fc["video"]["rounds"] == []
+    fc = construir(ses, [_Golpe("A", "left", 10.0), _Golpe("A", "right", 390.0)])
+    assert [(r["inicio_s"], r["fin_s"]) for r in fc["video"]["rounds"]] == [(0.0, 180.0), (180.0, 400.0)]
+    assert fc["video"]["rounds_origen"] == "segmentos_180s"
+    assert [r["total"] for r in fc["peleadores"]["A"]["por_round"]] == [1, 1]
+
+
+def test_con_rounds_declarados_el_origen_lo_dice(sesion):
+    fc = construir(sesion, [_Golpe("A", "left", 10.0)])
+    assert fc["video"]["rounds_origen"] == "declarados"
 
 
 def test_la_caida_entre_rounds_se_calcula_una_sola_vez(sesion):

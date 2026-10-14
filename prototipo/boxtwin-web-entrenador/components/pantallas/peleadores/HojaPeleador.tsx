@@ -38,6 +38,9 @@ export function HojaPeleador({
   const [altura, setAltura] = useState(inicial?.altura_m != null ? String(inicial.altura_m).replace(".", ",") : "");
   const [envergadura, setEnvergadura] = useState(inicial?.envergadura_m != null ? String(inicial.envergadura_m).replace(".", ",") : "");
   const [notas, setNotas] = useState(inicial?.notas ?? "");
+  // B17 / W24 (cambios-14-10): cargados a mano. Viajan siempre, porque el PATCH reemplaza.
+  const [distancia, setDistancia] = useState<string>(inicial?.distancia ?? "");
+  const [estilo, setEstilo] = useState<string>(inicial?.estilo ?? "");
   const [error, setError] = useState<string | null>(null);
 
   async function enviar(e: FormEvent) {
@@ -57,6 +60,8 @@ export function HojaPeleador({
         notas: notas.trim() || null,
         altura_m: a,
         envergadura_m: v,
+        distancia: distancia === "larga" || distancia === "media" || distancia === "corta" ? distancia : null,
+        estilo: estilo === "fajador" || estilo === "estilista" ? estilo : null,
       });
       toast.success(inicial ? "Peleador guardado." : `${b.nombre} agregado.`);
       onGuardado?.(b);
@@ -104,6 +109,25 @@ export function HojaPeleador({
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="p-envergadura">Envergadura (m)</Label>
                   <Input id="p-envergadura" inputMode="decimal" placeholder="1,80" value={envergadura} onChange={(e) => setEnvergadura(e.target.value)} className="h-11 text-base" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="p-distancia">Distancia de trabajo</Label>
+                  <SelectNativo id="p-distancia" value={distancia} onChange={(e) => setDistancia(e.target.value)}>
+                    <option value="">Sin cargar</option>
+                    <option value="larga">Larga</option>
+                    <option value="media">Media</option>
+                    <option value="corta">Corta</option>
+                  </SelectNativo>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="p-estilo">Estilo</Label>
+                  <SelectNativo id="p-estilo" value={estilo} onChange={(e) => setEstilo(e.target.value)}>
+                    <option value="">Sin cargar</option>
+                    <option value="fajador">Fajador</option>
+                    <option value="estilista">Estilista</option>
+                  </SelectNativo>
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">

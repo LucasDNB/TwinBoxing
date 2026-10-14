@@ -30,7 +30,7 @@ describe("06 · Perfil táctico", () => {
     montar(<PantallaPeleador />);
     await screen.findByRole("heading", { name: "Ana Paz" });
     expect(screen.getByRole("region", { name: "Distribución de golpes" })).toHaveAttribute("data-estado", "estimacion");
-    expect(screen.getByRole("region", { name: "Combinaciones izq-der-izq" })).toHaveAttribute("data-estado", "medido");
+    expect(screen.getByRole("region", { name: "Combinaciones" })).toHaveAttribute("data-estado", "medido");
     expect(screen.getByRole("region", { name: "Evolución entre sesiones" })).toHaveAttribute("data-estado", "medido");
     await waitFor(() => expect(mundo.pedidos.some((p) => p.ruta === "/producto")).toBe(true));
     expect(screen.getByRole("region", { name: "Volumen por round promedio" })).toHaveAttribute("data-estado", "apagado");
@@ -68,11 +68,12 @@ describe("06 · Perfil táctico", () => {
 
   it("CA-06.2: al volver, el perfil se pide de nuevo y muestra la correccion", async () => {
     const { unmount } = montar(<PantallaPeleador />);
-    expect(await screen.findByText("37% · 37")).toBeInTheDocument();
+    const dist = () => screen.findByRole("region", { name: "Distribución de golpes" });
+    expect(within(await dist()).getByText("37%")).toBeInTheDocument();
     unmount();
     // Una correccion en una sesion cambia la mezcla del perfil.
     (mundo.perfiles.b1 as any).totales.mezcla = { jab: 38, cross: 30, hook: 19, uppercut: 13 };
     montar(<PantallaPeleador />);
-    expect(await screen.findByText("38% · 38")).toBeInTheDocument();
+    expect(within(await dist()).getByText("38%")).toBeInTheDocument();
   });
 });

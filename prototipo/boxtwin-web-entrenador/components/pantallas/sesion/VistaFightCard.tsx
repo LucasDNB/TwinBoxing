@@ -29,8 +29,8 @@ import { useProducto } from "@/lib/api/consultas";
 import { TIPOS_GOLPE, type Sesion } from "@/lib/api/esquemas";
 import { estadoDe } from "@/lib/banderas";
 import {
-  combinacionesDe, lados as ladosDe, lecturaRounds, recallDeCombinaciones, resumen,
-  type FightCard, type Lado, type Resumen,
+  alturaDe, combinacionesDe, lados as ladosDe, lecturaRounds, prefijoRound, recallDeCombinaciones, resumen,
+  type Altura, type FightCard, type Lado, type Resumen,
 } from "@/lib/fightcard";
 import { decimal, entero, nombreDeTipo, porcentajeAR } from "@/lib/formato";
 import { textos } from "@/lib/textos";
@@ -99,7 +99,7 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
         </div>
       </EstadoBloque>
 
-      {/* 4b. Combinaciones izq-der-izq (W13): medido, por brazo. Por round solo con C2, como el resto. */}
+      {/* 4b. Combinaciones (W13, regla del 14-10): medido, por tiempo y brazo. Por round solo con C2, como el resto. */}
       <Combinaciones fc={fc} lados={lados} round={round} estado={estadoDe("05.combinaciones", p)} />
 
       {/* 5. Filas estimadas */}
@@ -127,6 +127,12 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
         </div>
       </EstadoBloque>
 
+      {/* 5b. A la cabeza y al cuerpo (W14). Estimacion por decision de producto (14-10), con
+          lo medido en C8 en la nota. Apagada, va al final como no disponible. */}
+      {estadoDe("05.altura", p) === "estimacion" && (
+        <AlturaAB fc={fc} lados={lados} round={round} nombreDe={nombreDe} />
+      )}
+
       {/* 6. Guardia opuesta arriba */}
       <EstadoBloque estado={estGuardia} titulo="Guardia opuesta arriba" motivo={textos.condicionadoC3}>
         <FilaAB titulo="Golpes con la otra mano arriba" lados={lados} valores={(l) => guardiaArriba(fc, l, round)} porcentaje />
@@ -134,7 +140,13 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
 
       {/* 7. Golpes por round */}
       {rondas.length > 1 && (
-        <EstadoBloque estado={estadoDe("05.rounds", p)} titulo="Golpes por round" motivo={textos.condicionadoC2}>
+        <EstadoBloque
+          estado={estadoDe("05.rounds", p)}
+          titulo="Golpes por round"
+          motivo={textos.condicionadoC2}
+          accion={p?.criterios.C2.estado !== "aprobado" ? <Rotulo className="text-estimado">{textos.roundsSinValidar}</Rotulo> : undefined}
+        >
+          {fc.video.rounds_origen === "segmentos_180s" && <p className="mb-2 text-xs text-texto-3">{textos.roundsSegmentos}</p>}
           <BarrasPorRound fc={fc} nombres={nombreDe} />
           <p className="mt-2 text-sm text-texto-2">
             {lados.map((l) => lecturaRounds(fc.peleadores[l]!.por_round, nombreDe[l])).filter(Boolean).join(". ")}
@@ -197,7 +209,7 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
             <TabsList className="w-max">
               <TabsTrigger value="sesion" className="min-h-11 px-4">Sesión</TabsTrigger>
               {rondas.map((r) => (
-                <TabsTrigger key={r.round} value={String(r.round)} className="min-h-11 px-4">R{r.round}</TabsTrigger>
+                <TabsTrigger key={r.round} value={String(r.round)} className="min-h-11 px-4">{prefijoRound(fc)}{r.round}</TabsTrigger>
               ))}
             </TabsList>
           </div>
@@ -217,7 +229,9 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
 
       {/* 9. No disponible en esta version */}
       <EstadoBloque estado={estadoDe("05.contacto", p)} titulo="Si el golpe tocó, fue bloqueado o esquivado" motivo={textos.nodispContacto} />
-      <EstadoBloque estado={estadoDe("05.altura", p)} titulo="A la cabeza y al cuerpo" motivo={textos.nodispAltura} />
+      {estadoDe("05.altura", p) !== "estimacion" && (
+        <EstadoBloque estado={estadoDe("05.altura", p)} titulo="A la cabeza y al cuerpo" motivo={textos.nodispAltura} />
+      )}
 
       {/* 10. Exportar */}
       <Exportar s={s} />
@@ -230,7 +244,7 @@ function Combinaciones({ fc, lados, round, estado }: { fc: FightCard; lados: Lad
   const sinDato = lados.every((l) => valores[l] == null);
   const ninguna = !sinDato && lados.every((l) => valores[l] === 0);
   return (
-    <EstadoBloque estado={estado} titulo="Combinaciones izq-der-izq">
+    <EstadoBloque estado={estado} titulo="Combinaciones">
       {sinDato ? (
         <p className="text-sm text-texto-3">{textos.combinacionesVersionVieja}</p>
       ) : (
@@ -238,12 +252,63 @@ function Combinaciones({ fc, lados, round, estado }: { fc: FightCard; lados: Lad
           {ninguna ? (
             <p className="text-sm text-texto-2">{textos.combinacionesVacio}</p>
           ) : (
-            <FilaAB titulo="Mano izquierda, derecha, izquierda, con menos de medio segundo entre golpes" lados={lados} valores={(l) => valores[l]} />
+            <FilaAB titulo={textos.combinacionesRegla} lados={lados} valores={(l) => valores[l]} />
           )}
           <p className="rounded-md border-l-2 border-estimado-borde bg-estimado-fondo px-3 py-2 text-sm text-texto-2">
             {textos.margenCombinaciones(recallDeCombinaciones(fc))}
           </p>
         </div>
+      )}
+    </EstadoBloque>
+  );
+}
+
+function AlturaAB({ fc, lados, round, nombreDe }: { fc: FightCard; lados: Lado[]; round: number | null; nombreDe: Record<Lado, string> }) {
+  const valores = Object.fromEntries(lados.map((l) => [l, alturaDe(fc, l, round)])) as Record<Lado, Altura | null>;
+  const nota = textos.estimacionAltura(fc.metodos?.objetivo?.medido);
+  if (lados.every((l) => valores[l] == null)) {
+    return (
+      <EstadoBloque estado="estimacion" titulo="A la cabeza y al cuerpo" nota={nota}>
+        <p className="text-sm text-texto-3">{textos.alturaVersionVieja}</p>
+      </EstadoBloque>
+    );
+  }
+  const sinDato = lados.reduce((a, l) => a + (valores[l]?.sinDato ?? 0), 0);
+  return (
+    <EstadoBloque estado="estimacion" titulo="A la cabeza y al cuerpo" nota={nota}>
+      <div className={cn("grid gap-3", lados.length > 1 ? "grid-cols-2" : "grid-cols-1")} data-fila>
+        {lados.map((l, i) => {
+          const v = valores[l];
+          if (!v) return <span key={l} className="text-texto-3">—</span>;
+          const conDato = v.cabeza + v.cuerpo;
+          const fCabeza = conDato ? v.cabeza / conDato : 0;
+          return (
+            <div key={l} className={cn("flex flex-col gap-1.5", i === 1 && "items-end text-right")} aria-label={`${nombreDe[l]}: ${v.cabeza} a la cabeza, ${v.cuerpo} al cuerpo`}>
+              <div className={cn("flex gap-4", i === 1 && "flex-row-reverse")}>
+                <span className="flex flex-col">
+                  <span className="text-xs text-texto-3">cabeza</span>
+                  <Estimado><span className="font-display text-2xl font-semibold leading-none">{entero(v.cabeza)}</span></Estimado>
+                  <span className="dato text-xs text-texto-3">{conDato ? porcentajeAR(fCabeza) : "—"}</span>
+                </span>
+                <span className="flex flex-col">
+                  <span className="text-xs text-texto-3">cuerpo</span>
+                  <Estimado><span className="font-display text-2xl font-semibold leading-none">{entero(v.cuerpo)}</span></Estimado>
+                  <span className="dato text-xs text-texto-3">{conDato ? porcentajeAR(1 - fCabeza) : "—"}</span>
+                </span>
+              </div>
+              {/* Barra partida en dos tonos: cabeza llena, cuerpo atenuado. */}
+              <div aria-hidden="true" className={cn("flex h-1.5 w-full overflow-hidden rounded-full bg-superficie-2", i === 1 && "flex-row-reverse")}>
+                <div className={cn("h-full", l === "A" ? "bg-a-trazo" : "bg-b-trazo")} style={{ width: `${Math.round(fCabeza * 100)}%` }} />
+                <div className={cn("h-full opacity-40", l === "A" ? "bg-a-trazo" : "bg-b-trazo")} style={{ width: `${conDato ? Math.round((1 - fCabeza) * 100) : 0}%` }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {sinDato > 0 && (
+        <p className="mt-3 text-xs text-texto-3">
+          {textos.alturaSinDato(lados.length > 1 ? lados.map((l) => `${nombreDe[l]} ${valores[l]?.sinDato ?? 0}`).join(" · ") : String(sinDato))}
+        </p>
       )}
     </EstadoBloque>
   );

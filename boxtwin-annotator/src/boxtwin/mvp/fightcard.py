@@ -184,6 +184,9 @@ def construir(
             "duracion_s": round(duracion, 3),
             "fps": fps,
             "rounds": ventanas,
+            # De donde salen las ventanas (cambios-14-10, DC-5): rounds declarados o cortes de
+            # 3 minutos. La pantalla dice "segmento" en lugar de "round" en el segundo caso.
+            "rounds_origen": (sesion.rounds or {}).get("origen") or ("declarados" if ventanas else None),
         },
         "identidad": ident,
         "detector": det,
@@ -206,10 +209,10 @@ def construir(
 
 def _combinaciones(fc: dict) -> dict:
     """
-    Las ternas izq-der-izq de cada peleador, recalculadas sobre el estado actual del documento.
+    Las combinaciones de cada peleador, recalculadas sobre el estado actual del documento.
 
     Se llama al construir y despues de cada cambio que las puede mover: un "no fue un golpe"
-    rompe una terna y una correccion de tipo cambia lo que se muestra al lado (01 §3).
+    parte una combinacion y una correccion de tipo cambia lo que se muestra al lado (01 §3).
     """
     from boxtwin.mvp.combinaciones import resumen
 
@@ -222,6 +225,36 @@ def _combinaciones(fc: dict) -> dict:
 def _conteo(golpes: list) -> dict:
     izq = sum(1 for g in golpes if g.brazo == "left")
     return {"total": len(golpes), "izq": izq, "der": len(golpes) - izq}
+
+
+def completar_rounds(fc: dict) -> bool:
+    """
+    Le pone segmentos de 3 minutos a una Fight-Card que no trae rounds (0.1, 0.2 o una sesion
+    procesada sin declararlos antes del 14-10) y recuenta `por_round` desde sus golpes, con la
+    misma cuenta que `construir`. Devuelve si cambio algo; una con rounds no se toca.
+    """
+    from boxtwin.mvp.sesion import segmentos
+
+    video = fc.setdefault("video", {})
+    if video.get("rounds"):
+        video.setdefault("rounds_origen", "declarados")
+        return False
+    ventanas, origen = segmentos(float(video.get("duracion_s") or 0.0), None, 0.0)
+    if not ventanas:
+        return False
+    video["rounds"] = ventanas
+    video["rounds_origen"] = origen
+    for datos in fc["peleadores"].values():
+        datos["por_round"] = _por_round([_GolpeDict(g) for g in datos["golpes"]], ventanas)
+    return True
+
+
+class _GolpeDict:
+    """Un golpe ya escrito en la Fight-Card, con la forma que espera `_por_round`."""
+
+    def __init__(self, g: dict):
+        self.t_inicio = float(g["t_inicio"])
+        self.brazo = {"izq": "left", "der": "right"}.get(g.get("brazo"), g.get("brazo"))
 
 
 def _por_round(golpes: list, ventanas: list[dict]) -> list[dict]:

@@ -166,6 +166,18 @@ class Config:
     c9_fecha: str | None = field(default_factory=lambda: os.environ.get("BOXTWIN_C9_FECHA") or None)
     c10: str = field(default_factory=lambda: _criterio("BOXTWIN_C10"))
     c10_fecha: str | None = field(default_factory=lambda: os.environ.get("BOXTWIN_C10_FECHA") or None)
+    # Altura del golpe por decision de producto (14-10, Lucas): se muestra con la regla
+    # medida aunque C8 no haya pasado, rotulada como estimacion y con lo medido al lado, igual
+    # que el clasificador de familia. C8 no se toca: sigue diciendo lo que se midio. Con 0 la
+    # bandera vuelve a depender solo de C8.
+    objetivo_estimado: bool = field(
+        default_factory=lambda: os.environ.get("BOXTWIN_OBJETIVO_ESTIMADO", "1") in ("1", "si")
+    )
+    # Comparacion entre rounds por decision de producto (cambios-14-10, DC-1): se muestra
+    # rotulada como sin validar aunque C2 este pendiente. C2 no se toca. Con 0, depende de C2.
+    rounds_estimado: bool = field(
+        default_factory=lambda: os.environ.get("BOXTWIN_ROUNDS_ESTIMADO", "1") in ("1", "si")
+    )
     # B8: se enciende solo despues de la medicion con criterio fijado en el spec.
     sesiones_individuales: bool = field(
         default_factory=lambda: os.environ.get("BOXTWIN_SESIONES_INDIVIDUALES", "") in ("1", "si")

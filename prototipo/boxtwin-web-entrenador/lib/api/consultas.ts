@@ -12,7 +12,7 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tansta
 import { z } from "zod";
 import { ErrorApi, pedir, pedirValidado } from "@/lib/api/cliente";
 import {
-  Boxeador, FightCard, ListaBoxeadores, ListaSesiones, Panel, Perfil, Producto, Sesion,
+  Boxeador, FightCard, ListaBoxeadores, ListaSesiones, Panel, Perfil, Producto, Rival, Sesion,
   Token, Tramos, type EstadoSesion, type TipoCorreccion,
 } from "@/lib/api/esquemas";
 import { normalizarFightCard, type FightCard as FC } from "@/lib/fightcard";
@@ -25,6 +25,7 @@ export const claves = {
   fightcard: (id: string) => ["fightcard", id] as const,
   boxeadores: ["boxeadores"] as const,
   perfil: (id: string, contexto: string) => ["perfil", id, contexto] as const,
+  rival: (a: string, b: string) => ["rival", a, b] as const,
   tramos: (id: string) => ["tramos", id] as const,
   ticket: (id: string) => ["ticket", id] as const,
   procesado: (id: string) => ["procesado", id] as const,
@@ -115,6 +116,17 @@ export function usePerfil(id: string | null, contexto = "todas") {
     queryFn: () =>
       pedirValidado(Perfil, `/boxeadores/${id}/perfil?contexto=${encodeURIComponent(contexto)}`),
     enabled: !!id,
+    staleTime: 0,
+    gcTime: 0,
+  });
+}
+
+/* B18 (cambios-14-10): ataque contra exposicion. Sin cache, como el perfil. */
+export function useRival(a: string, b: string, habilitada: boolean) {
+  return useQuery({
+    queryKey: claves.rival(a, b),
+    queryFn: () => pedirValidado(Rival, `/rival?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`),
+    enabled: habilitada && !!a && !!b && a !== b,
     staleTime: 0,
     gcTime: 0,
   });
@@ -231,6 +243,55 @@ export function aplicarCorreccionLocal(fc: FC, golpe: string, tipo: TipoCorrecci
   return copia;
 }
 
+/*
+ * La altura corregida a mano (W14). Igual que el tipo, optimista; ademas recuenta cabeza y
+ * cuerpo del peleador y de su round, que la API recuenta al guardar (CA-14.3).
+ */
+export function aplicarAlturaLocal(fc: FC, golpe: string, objetivo: "cabeza" | "cuerpo"): FC {
+  const copia: FC = structuredClone(fc);
+  for (const l of ["A", "B"] as const) {
+    const p = copia.peleadores[l];
+    if (!p || !p.golpes.some((g) => g.id === golpe)) continue;
+    for (const g of p.golpes) {
+      if (g.id !== golpe) continue;
+      g.objetivo_corregido = { objetivo, objetivo_original: g.objetivo_corregido?.objetivo_original ?? g.objetivo ?? null };
+      g.objetivo = objetivo;
+      g.objetivo_confianza = null;
+    }
+    const tres = (gs: typeof p.golpes) => {
+      const cabeza = gs.filter((g) => g.objetivo === "cabeza").length;
+      const cuerpo = gs.filter((g) => g.objetivo === "cuerpo").length;
+      return { cabeza, cuerpo, objetivo_sin_dato: gs.length - cabeza - cuerpo };
+    };
+    if (p.total.cabeza != null) Object.assign(p.total, tres(p.golpes));
+    for (const r of p.por_round) {
+      if (r.cabeza != null) Object.assign(r, tres(p.golpes.filter((g) => r.inicio_s <= g.t_inicio && g.t_inicio < r.fin_s)));
+    }
+  }
+  return copia;
+}
+
+export function useCorregirAltura(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ golpe, objetivo }: { golpe: string; objetivo: "cabeza" | "cuerpo" }) =>
+      pedir(`/fightcards/${id}/golpes/${encodeURIComponent(golpe)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ objetivo }),
+      }),
+    onMutate: async ({ golpe, objetivo }) => {
+      await qc.cancelQueries({ queryKey: claves.fightcard(id) });
+      const antes = qc.getQueryData<FC>(claves.fightcard(id));
+      if (antes) qc.setQueryData(claves.fightcard(id), aplicarAlturaLocal(antes, golpe, objetivo));
+      return { antes };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.antes) qc.setQueryData(claves.fightcard(id), ctx.antes);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: claves.fightcard(id) }),
+  });
+}
+
 export function useCorregir(id: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -258,6 +319,7 @@ export function useGuardarBoxeador() {
     mutationFn: async (b: {
       id?: string; nombre: string; guardia: "ortodoxa" | "zurda" | null; notas?: string | null;
       categoria?: string | null; altura_m?: number | null; envergadura_m?: number | null;
+      distancia?: "larga" | "media" | "corta" | null; estilo?: "fajador" | "estilista" | null;
     }) => {
       const { id, ...cuerpo } = b;
       const datos = await pedir(id ? `/boxeadores/${id}` : "/boxeadores", {

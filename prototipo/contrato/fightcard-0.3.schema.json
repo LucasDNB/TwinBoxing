@@ -199,19 +199,21 @@
       "type": "object",
       "required": ["patron", "separacion", "max_s", "lista", "total", "por_round"],
       "properties": {
-        "patron": { "const": "izq-der-izq" },
+        "patron": { "enum": ["cualquiera", "izq-der-izq"] },
         "separacion": { "enum": ["inicio_a_inicio", "fin_a_inicio"] },
         "max_s": { "type": "number", "exclusiveMinimum": 0 },
+        "min_golpes": { "type": "integer", "minimum": 2 },
         "lista": {
           "type": "array",
           "items": {
             "type": "object",
             "required": ["golpes", "t_inicio", "t_fin", "tipos", "round"],
             "properties": {
-              "golpes": { "type": "array", "items": { "type": "string" }, "minItems": 3, "maxItems": 3 },
+              "golpes": { "type": "array", "items": { "type": "string" }, "minItems": 2 },
               "t_inicio": { "type": "number", "minimum": 0 },
               "t_fin": { "type": "number", "minimum": 0 },
-              "tipos": { "type": "array", "items": { "type": ["string", "null"] }, "minItems": 3, "maxItems": 3 },
+              "brazos": { "type": "array", "items": { "enum": ["izq", "der", null] }, "minItems": 2 },
+              "tipos": { "type": "array", "items": { "type": ["string", "null"] }, "minItems": 2 },
               "round": { "type": ["integer", "null"], "minimum": 1 }
             }
           }

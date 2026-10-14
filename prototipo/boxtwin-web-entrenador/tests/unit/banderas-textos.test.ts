@@ -8,12 +8,12 @@ const producto = (b: Partial<Producto["banderas"]> = {}): Producto => ({
   factor_procesamiento: { min: 1.134, mediana: 1.447, max: 2.624, medido_sobre: "x" },
   criterios: { C2: { estado: "pendiente", fecha: null }, C3: { estado: "pendiente", fecha: null } },
   banderas: { comparacion_rounds: false, guardia: false, sesiones_individuales: false, postura_2d: false, ...b },
-  dominio: { combinacion: { patron: "izq-der-izq", separacion: "inicio_a_inicio", max_s: 0.5 }, perfil_preliminar_sesiones: 5 },
+  dominio: { combinacion: { patron: "cualquiera", separacion: "inicio_a_inicio", max_s: 0.5, min_golpes: 2 }, perfil_preliminar_sesiones: 5 },
 });
 
 describe("estadoDe: cada fila de 01 §4", () => {
   const apagado = producto();
-  const encendido = producto({ comparacion_rounds: true, guardia: true, sesiones_individuales: true });
+  const encendido = producto({ comparacion_rounds: true, guardia: true, sesiones_individuales: true, objetivo: true, exposicion: true });
 
   const esperado: Record<string, [string, string]> = {
     "01.tendencia": ["apagado", "medido"],
@@ -28,13 +28,17 @@ describe("estadoDe: cada fila de 01 §4", () => {
     "06.combinaciones": ["medido", "medido"],
     "05.combinaciones": ["medido", "medido"],
     "05.contacto": ["no_disponible", "no_disponible"],
-    "05.altura": ["no_disponible", "no_disponible"],
-    "06.avatar": ["no_disponible", "no_disponible"],
-    "07.cruces": ["no_disponible", "no_disponible"],
+    // Cambios del 14-10: la altura y el mapa salen con su bandera; apagados, no disponibles.
+    "05.altura": ["no_disponible", "estimacion"],
+    "06.altura": ["no_disponible", "estimacion"],
+    "06.exposicion": ["no_disponible", "estimacion"],
+    "07.cruces": ["no_disponible", "estimacion"],
+    // El avatar es ilustrativo y la distancia, cargada: se ven siempre y lo dicen.
+    "06.avatar": ["medido", "medido"],
+    "06.distancia": ["medido", "medido"],
     "01.plan": ["fuera", "fuera"],
     "02.consumo": ["fuera", "fuera"],
     "05.detectados": ["medido", "medido"],
-    "07.lecturas": ["en_construccion", "en_construccion"],
   };
 
   for (const [bloque, [sin, con]] of Object.entries(esperado)) {

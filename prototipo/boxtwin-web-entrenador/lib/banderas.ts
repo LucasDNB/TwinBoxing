@@ -17,6 +17,8 @@ export type Bandera = keyof Producto["banderas"];
 interface Fila {
   base: EstadoBase;
   bandera?: Bandera;
+  /* Como se ve con la bandera apagada; por omision "apagado" (en validacion). */
+  sinBandera?: "apagado" | "no_disponible";
 }
 
 export const BLOQUES = {
@@ -37,32 +39,40 @@ export const BLOQUES = {
   "04.linea": { base: "medido" },
   "04.tipo": { base: "estimacion" },
   "04.guardia": { base: "medido", bandera: "guardia" },
+  "04.altura": { base: "estimacion", bandera: "objetivo", sinBandera: "no_disponible" },
   "05.detectados": { base: "medido" },
   "05.distribucion": { base: "estimacion" },
   "05.rounds": { base: "medido", bandera: "comparacion_rounds" },
   "05.guardia": { base: "medido", bandera: "guardia" },
-  "05.altura": { base: "no_disponible" },
+  // 14-10: la altura se muestra como estimacion por decision de producto aunque C8 no paso;
+  // la API enciende `objetivo` y la Fight-Card lleva lo medido en el rotulo. Apagada, sigue
+  // como pieza no disponible y sin decir cabeza ni cuerpo (CA-14.2).
+  "05.altura": { base: "estimacion", bandera: "objetivo", sinBandera: "no_disponible" },
   "05.contacto": { base: "no_disponible" },
   "05.exportar": { base: "medido" },
   "05.combinaciones": { base: "medido" },
   "06.datos": { base: "medido" },
   "06.distribucion": { base: "estimacion" },
+  // W20: la division por altura dentro de la distribucion, con la misma bandera que la Fight-Card.
+  "06.altura": { base: "estimacion", bandera: "objetivo", sinBandera: "no_disponible" },
   "06.combinaciones": { base: "medido" },
   "06.volumen_round": { base: "medido", bandera: "comparacion_rounds" },
   "06.contextos": { base: "medido" },
   "06.contextos_guardia": { base: "medido", bandera: "guardia" },
   "06.contextos_r3": { base: "medido", bandera: "comparacion_rounds" },
   "06.evolucion": { base: "medido" },
-  "06.avatar": { base: "no_disponible" },
-  "06.exposicion": { base: "no_disponible" },
-  "06.distancia": { base: "no_disponible" },
+  // Cambios del 14-10: el avatar es ilustrativo (DC-6) y la distancia, cargada a mano (DC-7);
+  // los dos se dibujan siempre y lo dicen. El mapa sale de la altura (DC-3, DC-4).
+  "06.avatar": { base: "medido" },
+  "06.exposicion": { base: "estimacion", bandera: "exposicion", sinBandera: "no_disponible" },
+  "06.distancia": { base: "medido" },
   "07.seleccion": { base: "medido" },
   "07.dimensiones": { base: "medido" },
   "07.frente": { base: "medido" },
   "07.frente_guardia": { base: "medido", bandera: "guardia" },
   "07.frente_r3": { base: "medido", bandera: "comparacion_rounds" },
-  "07.cruces": { base: "no_disponible" },
-  "07.lecturas": { base: "en_construccion" },
+  // DC-8: "Oportunidades y amenazas" y el cruce de zonas son un solo bloque.
+  "07.cruces": { base: "estimacion", bandera: "exposicion", sinBandera: "no_disponible" },
   "08.subida": { base: "medido" },
   "09.fightcard": { base: "medido" },
 } as const satisfies Record<string, Fila>;
@@ -78,7 +88,7 @@ export function estadoDe(bloque: Bloque, producto: Producto | null | undefined):
   if (f.base === "fuera" || f.base === "no_disponible" || f.base === "en_construccion") return f.base;
   if (f.bandera) {
     const encendida = producto?.banderas?.[f.bandera] ?? false;
-    if (!encendida) return "apagado";
+    if (!encendida) return f.sinBandera ?? "apagado";
   }
   return f.base;
 }

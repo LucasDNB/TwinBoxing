@@ -150,3 +150,21 @@ def test_todas_recorre_y_no_frena_por_una_rota(sesion):
     r = enriquecer_todas(sesion.parent)
     assert r == {"s1": "enriquecida", "s2": "sin poses.npz"}
     assert enriquecer_todas(sesion.parent)["s1"] == "ya estaba"
+
+
+def test_B15_5_una_sesion_sin_rounds_sale_con_segmentos_y_suman_el_total(sesion):
+    # Una Fight-Card procesada sin rounds declarados (antes del 14-10 quedaba sin agregado).
+    fc = json.loads((sesion / "fightcard.json").read_text())
+    fc["video"]["rounds"] = []
+    fc["video"].pop("rounds_origen", None)
+    for p in fc["peleadores"].values():
+        p["por_round"] = []
+    (sesion / "fightcard.json").write_text(json.dumps(fc))
+    fc = enriquecer(sesion)
+    assert fc["video"]["rounds_origen"] == "segmentos_180s"
+    assert len(fc["video"]["rounds"]) == 1, "20 s de video: un solo segmento"
+    a = fc["peleadores"]["A"]
+    assert sum(r["total"] for r in a["por_round"]) == a["total"]["total"] == 3
+    assert sum(r["cabeza"] + r["cuerpo"] + r["objetivo_sin_dato"] for r in a["por_round"]) == 3
+    jsonschema.validate(fc, SCHEMA)
+    assert enriquecer(sesion) is None, "reanudable: la segunda pasada no hace nada"

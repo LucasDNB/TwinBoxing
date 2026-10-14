@@ -30,7 +30,7 @@ export function productoBase(banderas: Partial<Record<string, boolean>> = {}) {
     factor_procesamiento: { min: 1.134, mediana: 1.447, max: 2.624, medido_sobre: "campaña de costo del Cap 5" },
     criterios: { C2: { estado: "pendiente", fecha: null }, C3: { estado: "pendiente", fecha: null } },
     banderas: { comparacion_rounds: false, guardia: false, sesiones_individuales: false, postura_2d: false, ...banderas },
-    dominio: { combinacion: { patron: "izq-der-izq", separacion: "inicio_a_inicio", max_s: 0.5 }, perfil_preliminar_sesiones: 5 },
+    dominio: { combinacion: { patron: "cualquiera", separacion: "inicio_a_inicio", max_s: 0.5, min_golpes: 2 }, perfil_preliminar_sesiones: 5 },
   };
 }
 
@@ -44,6 +44,32 @@ export interface Mundo {
   tokenValido: string;
   tramos: Record<string, unknown> | null;
   perfiles: Record<string, Record<string, unknown>>;
+  /* GET /rival (B18): lo que devuelve la API, armado a mano en cada prueba. */
+  rival: Record<string, unknown> | null;
+}
+
+/* Como el servidor con {"objetivo"} (B11): pisa la altura y recuenta cabeza y cuerpo. */
+function corregirAltura(golpe: string, objetivo: "cabeza" | "cuerpo") {
+  type G = { id: string; t_inicio: number; objetivo?: string | null; objetivo_corregido?: unknown; objetivo_confianza?: number | null };
+  type C = { total: number; cabeza?: number; cuerpo?: number; objetivo_sin_dato?: number; inicio_s?: number; fin_s?: number };
+  const fc = mundo.fightcard as { peleadores: Record<string, { golpes: G[]; total: C; por_round: C[] }> } | null;
+  let ev: G | undefined;
+  const tres = (gs: G[]) => {
+    const cabeza = gs.filter((g) => g.objetivo === "cabeza").length;
+    const cuerpo = gs.filter((g) => g.objetivo === "cuerpo").length;
+    return { cabeza, cuerpo, objetivo_sin_dato: gs.length - cabeza - cuerpo };
+  };
+  for (const p of Object.values(fc?.peleadores ?? {})) {
+    const g = p.golpes.find((x) => x.id === golpe);
+    if (!g) continue;
+    g.objetivo_corregido = { objetivo, objetivo_original: g.objetivo ?? null };
+    g.objetivo = objetivo;
+    g.objetivo_confianza = null;
+    ev = g;
+    Object.assign(p.total, tres(p.golpes));
+    for (const r of p.por_round) Object.assign(r, tres(p.golpes.filter((x) => r.inicio_s! <= x.t_inicio && x.t_inicio < r.fin_s!)));
+  }
+  return HttpResponse.json(ev ?? { id: golpe, objetivo });
 }
 
 export function mundoNuevo(): Mundo {
@@ -56,6 +82,7 @@ export function mundoNuevo(): Mundo {
     corregir: "ok",
     tokenValido: "token-bueno",
     perfiles: {},
+    rival: null,
     tramos: {
       cobertura: { A: 0.7948, B: 0.9339, sin_asignar: 0.8554 },
       separacion_color: 1.375,
@@ -124,10 +151,11 @@ export const servidor = setupServer(
     return HttpResponse.json(mundo.fightcard);
   }),
   http.patch("*/fightcards/:id/golpes/:golpe", async ({ request, params }) => {
-    const c = (await request.json()) as { tipo: string };
+    const c = (await request.json()) as { tipo?: string; objetivo?: "cabeza" | "cuerpo" };
     registrar(request, c);
     if (!autorizado(request)) return no401();
     if (mundo.corregir === "422") return HttpResponse.json({ detail: "tipo desconocido" }, { status: 422 });
+    if (c.objetivo) return corregirAltura(String(params.golpe), c.objetivo);
     // Como el servidor: la correccion queda en el documento (sobrevive a recargar).
     type G = { id: string; tipo: string | null; corregido: unknown; descartado?: boolean; confianza_tipo: number | null };
     const fc = mundo.fightcard as { peleadores: Record<string, { golpes: G[]; descartados?: number }> } | null;
@@ -138,7 +166,7 @@ export const servidor = setupServer(
         g.corregido = { tipo: c.tipo, tipo_original: g.tipo };
         g.confianza_tipo = null;
         g.descartado = c.tipo === "no_golpe";
-        if (c.tipo !== "no_golpe") g.tipo = c.tipo;
+        if (c.tipo && c.tipo !== "no_golpe") g.tipo = c.tipo;
         ev = g;
       }
       p.descartados = p.golpes.filter((g) => g.descartado).length;
@@ -166,6 +194,15 @@ export const servidor = setupServer(
     const p = mundo.perfiles[String(params.id)];
     if (!p) return HttpResponse.json({ detail: "no existe ese boxeador" }, { status: 404 });
     return HttpResponse.json(p);
+  }),
+  http.get("*/rival", ({ request }) => {
+    registrar(request);
+    if (!autorizado(request)) return no401();
+    const sesgo = { recall_cabeza: 0.512, recall_cuerpo: 0.348, corregido: true };
+    return HttpResponse.json(mundo.rival ?? {
+      cruces: [], lecturas: [], faltan: null, sesgo_detector: sesgo,
+      base: { A: { ataque: 0, exposicion: 0 }, B: { ataque: 0, exposicion: 0 } },
+    });
   }),
   http.post("*/boxeadores", async ({ request }) => {
     const c = (await request.json()) as Record<string, unknown>;

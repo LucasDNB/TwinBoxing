@@ -3,8 +3,8 @@ B7 de la web entrenador: el perfil extendido (prototipo/specs/05-api-y-datos.md)
 
 Lo que se fija: que lo condicionado vuelva en nulo con la bandera apagada aunque haya datos,
 que la mezcla deje afuera lo descartado y que un peleador sume sus sesiones como A y como B.
-Las combinaciones por tipo de B7 se reemplazaron por las izq-der-izq de la ampliacion del
-13-10: sus pruebas estan en test_ampliacion_b10.py.
+Las combinaciones por tipo de B7 se reemplazaron por las de la ampliacion del
+13-10 (regla del 14-10): sus pruebas estan en test_ampliacion_b10.py.
 """
 
 from __future__ import annotations
@@ -52,13 +52,36 @@ def ana(cliente, registrado):
     return cliente.post("/boxeadores", json={"nombre": "Ana", "guardia": "ortodoxa"}).json()["id"]
 
 
-def test_con_las_banderas_apagadas_lo_condicionado_es_nulo_aunque_haya_datos(cliente, entorno, ana):
-    _sesion(cliente, entorno, _fc([_g(1, "jab")], rounds=RONDAS, guardia=GUARDIA), ana)
-    p = cliente.get(f"/boxeadores/{ana}/perfil").json()
+def test_con_las_banderas_apagadas_lo_condicionado_es_nulo_aunque_haya_datos(entorno, monkeypatch):
+    # Los rounds se encienden por decision de producto (cambios-14-10, DC-1): para verlos
+    # apagados hay que apagar esa decision.
+    c = _recargar(monkeypatch, BOXTWIN_ROUNDS_ESTIMADO="0", BOXTWIN_INVITACION="abierto")
+    t = c.post("/auth/registro", json={"email": "a@b.com", "clave": "clavelarga1"}).json()["token"]
+    c.headers["Authorization"] = f"Bearer {t}"
+    ana = c.post("/boxeadores", json={"nombre": "Ana"}).json()["id"]
+    _sesion(c, entorno, _fc([_g(1, "jab")], rounds=RONDAS, guardia=GUARDIA), ana)
+    p = c.get(f"/boxeadores/{ana}/perfil").json()
     ctx = p["por_contexto"][0]
     assert ctx["guardia_opuesta_arriba"] is None
     assert ctx["caida_ultimo_round"] is None
     assert p["rounds_promedio"] is None
+
+
+def test_los_rounds_se_ven_por_decision_de_producto_con_c2_pendiente(cliente, entorno, ana):
+    _sesion(cliente, entorno, _fc([_g(1, "jab")], rounds=RONDAS, guardia=GUARDIA), ana)
+    p = cliente.get(f"/boxeadores/{ana}/perfil").json()
+    assert p["rounds_promedio"][2]["round"] == 3
+    assert p["por_contexto"][0]["guardia_opuesta_arriba"] is None, "la guardia sigue atada a C3"
+
+
+def test_B15_6_una_fightcard_sin_rounds_aporta_segmentos_de_3_minutos(cliente, entorno, ana):
+    fc = _fc([_g(1, "jab"), _g(200, "jab"), _g(201, "cross")])
+    fc["video"]["duracion_s"] = 410.0
+    _sesion(cliente, entorno, fc, ana)
+    r = cliente.get(f"/boxeadores/{ana}/perfil").json()["rounds_promedio"]
+    assert [x["origen"] for x in r] == ["segmentos_180s", "segmentos_180s"]
+    assert r[0]["golpes_por_minuto"] == pytest.approx(1 / 3, abs=0.01), "1 golpe en 180 s"
+    assert r[1]["golpes_por_minuto"] == pytest.approx(2 / (230 / 60), abs=0.01), "2 en 230 s"
 
 
 def test_con_las_banderas_encendidas_aparecen(entorno, monkeypatch):
@@ -71,7 +94,7 @@ def test_con_las_banderas_encendidas_aparecen(entorno, monkeypatch):
     ctx = p["por_contexto"][0]
     assert ctx["guardia_opuesta_arriba"] == 0.5
     assert ctx["caida_ultimo_round"] == pytest.approx(-0.3, abs=0.001), "de 18 a 12,6 por minuto"
-    assert p["rounds_promedio"][2] == {"round": 3, "golpes_por_minuto": 12.6}
+    assert p["rounds_promedio"][2] == {"round": 3, "golpes_por_minuto": 12.6, "origen": "declarados"}
 
 
 def test_la_mezcla_deja_afuera_lo_descartado(cliente, entorno, ana):

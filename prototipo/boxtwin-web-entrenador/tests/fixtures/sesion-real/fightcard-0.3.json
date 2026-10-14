@@ -1662,22 +1662,108 @@
    ],
    "descartados": 1,
    "combinaciones": {
-    "patron": "izq-der-izq",
+    "patron": "cualquiera",
     "separacion": "inicio_a_inicio",
     "max_s": 0.5,
+    "min_golpes": 2,
     "lista": [
      {
       "golpes": [
-       "A-izq-630",
-       "A-der-643",
-       "A-izq-651"
+       "A-izq-471",
+       "A-der-477"
       ],
-      "t_inicio": 21.0,
-      "t_fin": 21.967,
+      "t_inicio": 15.7,
+      "t_fin": 16.2,
+      "brazos": [
+       "izq",
+       "der"
+      ],
+      "tipos": [
+       "cross",
+       "hook"
+      ],
+      "round": 1
+     },
+     {
+      "golpes": [
+       "A-der-529",
+       "A-izq-537",
+       "A-izq-551"
+      ],
+      "t_inicio": 17.633,
+      "t_fin": 18.667,
+      "brazos": [
+       "der",
+       "izq",
+       "izq"
+      ],
       "tipos": [
        "jab",
        "cross",
        "hook"
+      ],
+      "round": 1
+     },
+     {
+      "golpes": [
+       "A-izq-617",
+       "A-izq-630",
+       "A-der-643",
+       "A-izq-651",
+       "A-der-659",
+       "A-izq-666"
+      ],
+      "t_inicio": 20.567,
+      "t_fin": 22.433,
+      "brazos": [
+       "izq",
+       "izq",
+       "der",
+       "izq",
+       "der",
+       "izq"
+      ],
+      "tipos": [
+       "uppercut",
+       "jab",
+       "cross",
+       "hook",
+       "uppercut",
+       "jab"
+      ],
+      "round": 1
+     },
+     {
+      "golpes": [
+       "A-izq-3298",
+       "A-der-3311"
+      ],
+      "t_inicio": 109.933,
+      "t_fin": 110.567,
+      "brazos": [
+       "izq",
+       "der"
+      ],
+      "tipos": [
+       "uppercut",
+       "jab"
+      ],
+      "round": 1
+     },
+     {
+      "golpes": [
+       "A-izq-3996",
+       "A-der-4004"
+      ],
+      "t_inicio": 133.2,
+      "t_fin": 133.633,
+      "brazos": [
+       "izq",
+       "der"
+      ],
+      "tipos": [
+       "hook",
+       "uppercut"
       ],
       "round": 1
      },
@@ -1689,6 +1775,11 @@
       ],
       "t_inicio": 144.867,
       "t_fin": 145.467,
+      "brazos": [
+       "izq",
+       "der",
+       "izq"
+      ],
       "tipos": [
        "uppercut",
        "jab",
@@ -1700,23 +1791,31 @@
       "golpes": [
        "A-izq-4674",
        "A-der-4681",
-       "A-izq-4687"
+       "A-izq-4687",
+       "A-der-4695"
       ],
       "t_inicio": 155.8,
-      "t_fin": 156.5,
+      "t_fin": 156.733,
+      "brazos": [
+       "izq",
+       "der",
+       "izq",
+       "der"
+      ],
       "tipos": [
        "cross",
        "hook",
-       "uppercut"
+       "uppercut",
+       "jab"
       ],
       "round": 1
      }
     ],
-    "total": 3,
+    "total": 7,
     "por_round": [
      {
       "round": 1,
-      "total": 3
+      "total": 7
      }
     ]
    }
@@ -2742,31 +2841,111 @@
    ],
    "descartados": 0,
    "combinaciones": {
-    "patron": "izq-der-izq",
+    "patron": "cualquiera",
     "separacion": "inicio_a_inicio",
     "max_s": 0.5,
+    "min_golpes": 2,
     "lista": [
      {
       "golpes": [
-       "B-izq-2254",
-       "B-der-2261",
-       "B-izq-2265"
+       "B-der-1011",
+       "B-izq-1024"
       ],
-      "t_inicio": 75.133,
-      "t_fin": 75.767,
+      "t_inicio": 33.7,
+      "t_fin": 34.3,
+      "brazos": [
+       "der",
+       "izq"
+      ],
       "tipos": [
-       "hook",
        "uppercut",
        "jab"
       ],
       "round": 1
+     },
+     {
+      "golpes": [
+       "B-izq-1195",
+       "B-der-1203"
+      ],
+      "t_inicio": 39.833,
+      "t_fin": 40.333,
+      "brazos": [
+       "izq",
+       "der"
+      ],
+      "tipos": [
+       "cross",
+       "hook"
+      ],
+      "round": 1
+     },
+     {
+      "golpes": [
+       "B-izq-2254",
+       "B-der-2261",
+       "B-izq-2265",
+       "B-der-2273"
+      ],
+      "t_inicio": 75.133,
+      "t_fin": 76.0,
+      "brazos": [
+       "izq",
+       "der",
+       "izq",
+       "der"
+      ],
+      "tipos": [
+       "hook",
+       "uppercut",
+       "jab",
+       "cross"
+      ],
+      "round": 1
+     },
+     {
+      "golpes": [
+       "B-der-2452",
+       "B-izq-2466",
+       "B-der-2473"
+      ],
+      "t_inicio": 81.733,
+      "t_fin": 82.767,
+      "brazos": [
+       "der",
+       "izq",
+       "der"
+      ],
+      "tipos": [
+       "cross",
+       "hook",
+       "uppercut"
+      ],
+      "round": 1
+     },
+     {
+      "golpes": [
+       "B-izq-3334",
+       "B-der-3339"
+      ],
+      "t_inicio": 111.133,
+      "t_fin": 111.6,
+      "brazos": [
+       "izq",
+       "der"
+      ],
+      "tipos": [
+       "jab",
+       "cross"
+      ],
+      "round": 1
      }
     ],
-    "total": 1,
+    "total": 5,
     "por_round": [
      {
       "round": 1,
-      "total": 1
+      "total": 5
      }
     ]
    }

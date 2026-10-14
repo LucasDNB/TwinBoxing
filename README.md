@@ -683,3 +683,29 @@ PENDIENTE Y PROXIMO PASO
    construye. Detalle en docs/experiments/2026-10-13-cabeza-cuerpo.md
 6. El avatar 3D queda bloqueado por la regla de corte: C1 y C5 sin medir
 7. 689 pruebas del anotador, 180 de la API, 173 de la web; e2e 6 de 6 en Chromium
+
+14-10 Combinaciones abiertas y altura del golpe como estimacion
+
+1. Combinacion es cualquier secuencia de 2 o mas golpes con menos de 0,5 s de inicio
+   a inicio, sin importar la mano; una serie larga cuenta una. Sobre lo anotado da 179
+   contra las 28 izq-der-izq de la regla anterior
+2. Cabeza y cuerpo se muestran en la Fight-Card y en el analisis por decision de
+   producto, rotulados como estimacion con la exactitud medida (0,726). C8 sigue
+   rechazado; la bandera es BOXTWIN_OBJETIVO_ESTIMADO
+3. 689 pruebas del anotador, 181 de la API, 180 de la web
+
+14-10 Perfil tactico y Rival Fantasma por SDD (prototipo/specs/cambios-14-10)
+
+1. Rounds de 3 minutos: sin rounds declarados el video se corta en segmentos de 180 s
+   y un resto de menos de 60 s se suma al anterior. Visibles por decision de producto,
+   rotulados como sin validar; C2 sigue pendiente
+2. Distribucion por mano (medido) y altura (estimacion), y mapa de exposicion con los
+   golpes dirigidos por el rival, por altura y mano del rival. Corregido por el sesgo del
+   detector: 0,512 a la cabeza contra 0,348 al cuerpo
+3. Distancia de trabajo y estilo cargados a mano en el peleador
+4. Avatar 3D ilustrativo con three.js en chunk aparte; en el Rival, dos maniquies con
+   los brazos que se estiran y el alcance escrito
+5. Rival: oportunidades, amenazas y cruce de zonas en un solo bloque, con las reglas
+   en la API (GET /rival)
+6. 696 pruebas del anotador, 206 de la API, 196 de la web; e2e 6 de 6 en Chromium
+
