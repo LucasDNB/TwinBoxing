@@ -719,3 +719,16 @@ PENDIENTE Y PROXIMO PASO
    recto 19 de 46, uppercut como hook 11 de 26
 4. Auditoria en verde, cegado sin intentos sobre la clave. No se habilita el
    preetiquetado (E5)
+
+15-10 Clasificador por tipo y altura, una fuente afuera (E1 a E3)
+
+1. Solo semilla 0 por decision de Lucas: la corrida cronometrada midio 4472 s, unas
+   75 h para las 63. El benchmark de perfiles paso a correrse despues
+2. P2: familia de E1 fuera de distribucion 0,656 (Wilson 0,627-0,684) contra 0,746 en
+   distribucion; siempre recto da 0,632
+3. P3: E2 no mejora la familia (0,641) y C8b no pasa (balanceada 0,541, recall de
+   cuerpo 0,133 en las fuentes de C8)
+4. P4: el rival mejora la altura segun la regla (0,557 a 0,605, 5 de 7 folds), sin
+   llegar a C8b
+5. Sub-hipotesis 1: ocho clases 0,526 y 0,522, debajo de 0,80. No se entrena modelo final
+6. Auditoria en verde en la segunda pasada

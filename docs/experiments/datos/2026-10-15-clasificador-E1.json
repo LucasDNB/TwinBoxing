@@ -1,0 +1,735 @@
+{
+  "exp": "E1",
+  "que": "replica de produccion: 6 clases tipo x rol (lead-rear), solo atacante",
+  "clases": [
+    "straight-lead",
+    "straight-rear",
+    "hook-lead",
+    "hook-rear",
+    "uppercut-lead",
+    "uppercut-rear"
+  ],
+  "faltan": [
+    "Sparring/s1",
+    "Sparring/s2",
+    "01-sparring/s1",
+    "01-sparring/s2",
+    "02-sparring/s1",
+    "02-sparring/s2",
+    "03-sparring/s1",
+    "03-sparring/s2",
+    "04-sparring/s1",
+    "04-sparring/s2",
+    "sparring-3-rounds/s1",
+    "sparring-3-rounds/s2",
+    "pacquiao_margarito/s1",
+    "pacquiao_margarito/s2"
+  ],
+  "completo": false,
+  "avisos": [],
+  "por_fold": {
+    "Sparring": {
+      "semillas": 1,
+      "golpes": 114,
+      "top1": 0.2544,
+      "familia": {
+        "exactitud": 0.4649,
+        "balanceada": 0.3903,
+        "recall": {
+          "straight": {
+            "n": 64,
+            "aciertos": 28,
+            "recall": 0.4375,
+            "wilson95": [
+              0.3229,
+              0.5591
+            ]
+          },
+          "hook": {
+            "n": 45,
+            "aciertos": 24,
+            "recall": 0.5333,
+            "wilson95": [
+              0.3908,
+              0.6706
+            ]
+          },
+          "uppercut": {
+            "n": 5,
+            "aciertos": 1,
+            "recall": 0.2,
+            "wilson95": [
+              0.0362,
+              0.6245
+            ]
+          }
+        },
+        "wilson95": [
+          0.376,
+          0.5561
+        ]
+      },
+      "eje": {
+        "exactitud": 0.5,
+        "balanceada": 0.5527,
+        "recall": {
+          "lead": {
+            "n": 77,
+            "aciertos": 31,
+            "recall": 0.4026,
+            "wilson95": [
+              0.3002,
+              0.5142
+            ]
+          },
+          "rear": {
+            "n": 37,
+            "aciertos": 26,
+            "recall": 0.7027,
+            "wilson95": [
+              0.5422,
+              0.8251
+            ]
+          }
+        },
+        "wilson95": [
+          0.4097,
+          0.5903
+        ]
+      }
+    },
+    "01-sparring": {
+      "semillas": 1,
+      "golpes": 96,
+      "top1": 0.2812,
+      "familia": {
+        "exactitud": 0.6146,
+        "balanceada": 0.6919,
+        "recall": {
+          "straight": {
+            "n": 66,
+            "aciertos": 38,
+            "recall": 0.5758,
+            "wilson95": [
+              0.4556,
+              0.6876
+            ]
+          },
+          "hook": {
+            "n": 24,
+            "aciertos": 16,
+            "recall": 0.6667,
+            "wilson95": [
+              0.4671,
+              0.8203
+            ]
+          },
+          "uppercut": {
+            "n": 6,
+            "aciertos": 5,
+            "recall": 0.8333,
+            "wilson95": [
+              0.4365,
+              0.9699
+            ]
+          }
+        },
+        "wilson95": [
+          0.5146,
+          0.7057
+        ]
+      },
+      "eje": {
+        "exactitud": 0.4583,
+        "balanceada": 0.4831,
+        "recall": {
+          "lead": {
+            "n": 57,
+            "aciertos": 20,
+            "recall": 0.3509,
+            "wilson95": [
+              0.24,
+              0.4806
+            ]
+          },
+          "rear": {
+            "n": 39,
+            "aciertos": 24,
+            "recall": 0.6154,
+            "wilson95": [
+              0.459,
+              0.7511
+            ]
+          }
+        },
+        "wilson95": [
+          0.3622,
+          0.5577
+        ]
+      }
+    },
+    "02-sparring": {
+      "semillas": 1,
+      "golpes": 62,
+      "top1": 0.7581,
+      "familia": {
+        "exactitud": 0.8387,
+        "balanceada": 0.6895,
+        "recall": {
+          "straight": {
+            "n": 53,
+            "aciertos": 50,
+            "recall": 0.9434,
+            "wilson95": [
+              0.8463,
+              0.9806
+            ]
+          },
+          "hook": {
+            "n": 8,
+            "aciertos": 1,
+            "recall": 0.125,
+            "wilson95": [
+              0.0224,
+              0.4709
+            ]
+          },
+          "uppercut": {
+            "n": 1,
+            "aciertos": 1,
+            "recall": 1.0,
+            "wilson95": [
+              0.2065,
+              1.0
+            ]
+          }
+        },
+        "wilson95": [
+          0.7279,
+          0.91
+        ]
+      },
+      "eje": {
+        "exactitud": 0.871,
+        "balanceada": 0.783,
+        "recall": {
+          "lead": {
+            "n": 45,
+            "aciertos": 44,
+            "recall": 0.9778,
+            "wilson95": [
+              0.8843,
+              0.9961
+            ]
+          },
+          "rear": {
+            "n": 17,
+            "aciertos": 10,
+            "recall": 0.5882,
+            "wilson95": [
+              0.3601,
+              0.7839
+            ]
+          }
+        },
+        "wilson95": [
+          0.7655,
+          0.9331
+        ]
+      }
+    },
+    "03-sparring": {
+      "semillas": 1,
+      "golpes": 129,
+      "top1": 0.5271,
+      "familia": {
+        "exactitud": 0.7132,
+        "balanceada": 0.5267,
+        "recall": {
+          "straight": {
+            "n": 86,
+            "aciertos": 77,
+            "recall": 0.8953,
+            "wilson95": [
+              0.8129,
+              0.944
+            ]
+          },
+          "hook": {
+            "n": 37,
+            "aciertos": 13,
+            "recall": 0.3514,
+            "wilson95": [
+              0.2183,
+              0.5124
+            ]
+          },
+          "uppercut": {
+            "n": 6,
+            "aciertos": 2,
+            "recall": 0.3333,
+            "wilson95": [
+              0.0968,
+              0.7
+            ]
+          }
+        },
+        "wilson95": [
+          0.6299,
+          0.7842
+        ]
+      },
+      "eje": {
+        "exactitud": 0.7054,
+        "balanceada": 0.5319,
+        "recall": {
+          "lead": {
+            "n": 89,
+            "aciertos": 88,
+            "recall": 0.9888,
+            "wilson95": [
+              0.9391,
+              0.998
+            ]
+          },
+          "rear": {
+            "n": 40,
+            "aciertos": 3,
+            "recall": 0.075,
+            "wilson95": [
+              0.0258,
+              0.1986
+            ]
+          }
+        },
+        "wilson95": [
+          0.6217,
+          0.7772
+        ]
+      }
+    },
+    "04-sparring": {
+      "semillas": 1,
+      "golpes": 120,
+      "top1": 0.4417,
+      "familia": {
+        "exactitud": 0.5917,
+        "balanceada": 0.3623,
+        "recall": {
+          "straight": {
+            "n": 70,
+            "aciertos": 68,
+            "recall": 0.9714,
+            "wilson95": [
+              0.9017,
+              0.9921
+            ]
+          },
+          "hook": {
+            "n": 26,
+            "aciertos": 3,
+            "recall": 0.1154,
+            "wilson95": [
+              0.04,
+              0.2898
+            ]
+          },
+          "uppercut": {
+            "n": 24,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.138
+            ]
+          }
+        },
+        "wilson95": [
+          0.5022,
+          0.6754
+        ]
+      },
+      "eje": {
+        "exactitud": 0.6417,
+        "balanceada": 0.6562,
+        "recall": {
+          "lead": {
+            "n": 72,
+            "aciertos": 42,
+            "recall": 0.5833,
+            "wilson95": [
+              0.4681,
+              0.6901
+            ]
+          },
+          "rear": {
+            "n": 48,
+            "aciertos": 35,
+            "recall": 0.7292,
+            "wilson95": [
+              0.59,
+              0.8343
+            ]
+          }
+        },
+        "wilson95": [
+          0.5527,
+          0.7218
+        ]
+      }
+    },
+    "sparring-3-rounds": {
+      "semillas": 1,
+      "golpes": 381,
+      "top1": 0.4488,
+      "familia": {
+        "exactitud": 0.6378,
+        "balanceada": 0.5174,
+        "recall": {
+          "straight": {
+            "n": 204,
+            "aciertos": 194,
+            "recall": 0.951,
+            "wilson95": [
+              0.9121,
+              0.9732
+            ]
+          },
+          "hook": {
+            "n": 139,
+            "aciertos": 36,
+            "recall": 0.259,
+            "wilson95": [
+              0.1933,
+              0.3376
+            ]
+          },
+          "uppercut": {
+            "n": 38,
+            "aciertos": 13,
+            "recall": 0.3421,
+            "wilson95": [
+              0.2121,
+              0.5011
+            ]
+          }
+        },
+        "wilson95": [
+          0.5884,
+          0.6845
+        ]
+      },
+      "eje": {
+        "exactitud": 0.685,
+        "balanceada": 0.6411,
+        "recall": {
+          "lead": {
+            "n": 260,
+            "aciertos": 198,
+            "recall": 0.7615,
+            "wilson95": [
+              0.7062,
+              0.8093
+            ]
+          },
+          "rear": {
+            "n": 121,
+            "aciertos": 63,
+            "recall": 0.5207,
+            "wilson95": [
+              0.4324,
+              0.6077
+            ]
+          }
+        },
+        "wilson95": [
+          0.6367,
+          0.7296
+        ]
+      }
+    },
+    "pacquiao_margarito": {
+      "semillas": 1,
+      "golpes": 145,
+      "top1": 0.6483,
+      "familia": {
+        "exactitud": 0.8069,
+        "balanceada": 0.4323,
+        "recall": {
+          "straight": {
+            "n": 119,
+            "aciertos": 109,
+            "recall": 0.916,
+            "wilson95": [
+              0.8522,
+              0.9537
+            ]
+          },
+          "hook": {
+            "n": 21,
+            "aciertos": 8,
+            "recall": 0.381,
+            "wilson95": [
+              0.2075,
+              0.5912
+            ]
+          },
+          "uppercut": {
+            "n": 5,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.4345
+            ]
+          }
+        },
+        "wilson95": [
+          0.7351,
+          0.8629
+        ]
+      },
+      "eje": {
+        "exactitud": 0.7103,
+        "balanceada": 0.6773,
+        "recall": {
+          "lead": {
+            "n": 99,
+            "aciertos": 76,
+            "recall": 0.7677,
+            "wilson95": [
+              0.6754,
+              0.8399
+            ]
+          },
+          "rear": {
+            "n": 46,
+            "aciertos": 27,
+            "recall": 0.587,
+            "wilson95": [
+              0.4434,
+              0.7171
+            ]
+          }
+        },
+        "wilson95": [
+          0.6318,
+          0.778
+        ]
+      }
+    }
+  },
+  "ensamble_total": {
+    "golpes": 1047,
+    "top1": 0.467,
+    "familia": {
+      "exactitud": 0.6562,
+      "balanceada": 0.4825,
+      "recall": {
+        "straight": {
+          "n": 662,
+          "aciertos": 564,
+          "recall": 0.852,
+          "wilson95": [
+            0.8229,
+            0.877
+          ]
+        },
+        "hook": {
+          "n": 300,
+          "aciertos": 101,
+          "recall": 0.3367,
+          "wilson95": [
+            0.2856,
+            0.3919
+          ]
+        },
+        "uppercut": {
+          "n": 85,
+          "aciertos": 22,
+          "recall": 0.2588,
+          "wilson95": [
+            0.1776,
+            0.3609
+          ]
+        }
+      },
+      "wilson95": [
+        0.6269,
+        0.6843
+      ]
+    },
+    "eje": {
+      "exactitud": 0.6562,
+      "balanceada": 0.6271,
+      "recall": {
+        "lead": {
+          "n": 699,
+          "aciertos": 499,
+          "recall": 0.7139,
+          "wilson95": [
+            0.6793,
+            0.7461
+          ]
+        },
+        "rear": {
+          "n": 348,
+          "aciertos": 188,
+          "recall": 0.5402,
+          "wilson95": [
+            0.4877,
+            0.5919
+          ]
+        }
+      },
+      "wilson95": [
+        0.6269,
+        0.6843
+      ]
+    }
+  },
+  "ensamble_fuentes_c8": {
+    "golpes": 775,
+    "top1": 0.4981,
+    "familia": {
+      "exactitud": 0.6748,
+      "balanceada": 0.4699,
+      "recall": {
+        "straight": {
+          "n": 479,
+          "aciertos": 448,
+          "recall": 0.9353,
+          "wilson95": [
+            0.9096,
+            0.954
+          ]
+        },
+        "hook": {
+          "n": 223,
+          "aciertos": 60,
+          "recall": 0.2691,
+          "wilson95": [
+            0.2151,
+            0.3308
+          ]
+        },
+        "uppercut": {
+          "n": 73,
+          "aciertos": 15,
+          "recall": 0.2055,
+          "wilson95": [
+            0.1287,
+            0.3117
+          ]
+        }
+      },
+      "wilson95": [
+        0.6411,
+        0.7069
+      ]
+    },
+    "eje": {
+      "exactitud": 0.6865,
+      "balanceada": 0.6394,
+      "recall": {
+        "lead": {
+          "n": 520,
+          "aciertos": 404,
+          "recall": 0.7769,
+          "wilson95": [
+            0.7392,
+            0.8106
+          ]
+        },
+        "rear": {
+          "n": 255,
+          "aciertos": 128,
+          "recall": 0.502,
+          "wilson95": [
+            0.441,
+            0.5628
+          ]
+        }
+      },
+      "wilson95": [
+        0.6529,
+        0.7181
+      ]
+    }
+  },
+  "lineas_de_base": {
+    "familia_siempre_straight": 0.6323,
+    "familia_balanceada_azar": 0.3333
+  },
+  "por_semilla_total": {
+    "s0": {
+      "golpes": 1047,
+      "top1": 0.467,
+      "familia": {
+        "exactitud": 0.6562,
+        "balanceada": 0.4825,
+        "recall": {
+          "straight": {
+            "n": 662,
+            "aciertos": 564,
+            "recall": 0.852,
+            "wilson95": [
+              0.8229,
+              0.877
+            ]
+          },
+          "hook": {
+            "n": 300,
+            "aciertos": 101,
+            "recall": 0.3367,
+            "wilson95": [
+              0.2856,
+              0.3919
+            ]
+          },
+          "uppercut": {
+            "n": 85,
+            "aciertos": 22,
+            "recall": 0.2588,
+            "wilson95": [
+              0.1776,
+              0.3609
+            ]
+          }
+        },
+        "wilson95": [
+          0.6269,
+          0.6843
+        ]
+      },
+      "eje": {
+        "exactitud": 0.6562,
+        "balanceada": 0.6271,
+        "recall": {
+          "lead": {
+            "n": 699,
+            "aciertos": 499,
+            "recall": 0.7139,
+            "wilson95": [
+              0.6793,
+              0.7461
+            ]
+          },
+          "rear": {
+            "n": 348,
+            "aciertos": 188,
+            "recall": 0.5402,
+            "wilson95": [
+              0.4877,
+              0.5919
+            ]
+          }
+        },
+        "wilson95": [
+          0.6269,
+          0.6843
+        ]
+      }
+    }
+  }
+}
