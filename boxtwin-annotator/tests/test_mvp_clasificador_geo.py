@@ -126,3 +126,35 @@ def test_tipo_de():
     assert cg.tipo_de("straight", "rear") == "cross"
     assert cg.tipo_de("hook", "lead") == "hook"
     assert cg.tipo_de("uppercut", "rear") == "uppercut"
+
+
+# -- bolsa y sombra: el modelo de E4a, sin rival (16-10) ---------------------------
+
+
+def test_modelo_sin_rival_recorta_las_features_del_rival(tmp_path):
+    clf = cg.ClasificadorGeo.cargar(_modelo(tmp_path / "m", n_features=20))
+    assert clf.sin_rival and clf.n_features == 20
+    kp, sc, valid = _poses(n_peleadores=1)
+    X, M = cg.features_golpe(kp, sc, valid, 0, "left", 40, 50)
+    assert X.shape == (32, 26)
+    p = clf.familia(X, M)
+    # es lo mismo que darle solo las 20 del brazo: las 6 del rival no entran
+    np.testing.assert_allclose(p, clf.familia(X[:, :20], M), atol=1e-7)
+    otro = X.copy()
+    otro[:, 20:] = 99.0
+    np.testing.assert_allclose(p, clf.familia(otro, M), atol=1e-7)
+
+
+def test_modelo_con_rival_no_cambia(tmp_path):
+    clf = cg.ClasificadorGeo.cargar(_modelo(tmp_path / "m"))
+    assert not clf.sin_rival and clf.n_features == 26
+    kp, sc, valid = _poses()
+    X, M = cg.features_golpe(kp, sc, valid, 0, "left", 40, 50)
+    with pytest.raises(ValueError, match="espera 26"):
+        clf.familia(X[:, :20], M)
+
+
+def test_columnas_que_no_cierran_fallan(tmp_path):
+    clf = cg.ClasificadorGeo.cargar(_modelo(tmp_path / "m", n_features=20))
+    with pytest.raises(ValueError, match="espera 20"):
+        clf.familia(np.zeros((32, 23), np.float32), np.ones(32, bool))

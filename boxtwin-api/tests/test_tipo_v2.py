@@ -94,6 +94,39 @@ def test_ca3_geometrico_corre_en_el_entorno_del_anotador(entorno, con_sesion, mo
     db.close()
 
 
+@pytest.mark.parametrize("contexto", ["bolsa", "sombra"])
+def test_bolsa_y_sombra_usan_el_modelo_sin_rival(entorno, cliente, registrado, monkeypatch, contexto):
+    """16-10: una sola persona no tiene rival; va el modelo de E4a y no hay guardia B."""
+    cfg, worker = entorno["cfg"], entorno["worker"]
+    monkeypatch.setattr(cfg, "clasificador", "geometrico")
+    sid = subir_video(cliente, contexto=contexto).json()["job_id"]
+    db, t, s = _trabajo(entorno, sid)
+    assert s.contexto == contexto
+    d = str(cfg.dir_sesion(sid))
+    assert worker.comando_de(t, s)[0] == [
+        "echo", "clasificar", d, "--modelo", str(cfg.modelo_clasificador_geo_individual),
+        "--guardia-a", "desconocida", "--guardia-b", "desconocida"]
+    assert cfg.modelo_clasificador_geo_individual != cfg.modelo_clasificador_geo
+    db.close()
+
+
+@pytest.mark.parametrize("contexto", ["sparring", "combate"])
+def test_sparring_y_combate_siguen_con_el_modelo_con_rival(entorno, cliente, registrado, monkeypatch, contexto):
+    cfg, worker = entorno["cfg"], entorno["worker"]
+    monkeypatch.setattr(cfg, "clasificador", "geometrico")
+    sid = subir_video(cliente, contexto=contexto).json()["job_id"]
+    db, t, s = _trabajo(entorno, sid)
+    assert worker.comando_de(t, s)[0][4] == str(cfg.modelo_clasificador_geo)
+    db.close()
+
+
+def test_modelo_individual_por_variable(monkeypatch, tmp_path):
+    from boxtwin_api.config import Config
+
+    monkeypatch.setenv("BOXTWIN_MODELO_CLASIFICADOR_GEO_INDIVIDUAL", str(tmp_path / "m"))
+    assert Config().modelo_clasificador_geo_individual == tmp_path / "m"
+
+
 # -- CA4: guardia y reclasificacion ---------------------------------------------
 
 
@@ -197,3 +230,15 @@ def test_salud_dice_el_metodo(cliente, entorno, monkeypatch):
     assert cliente.get("/salud").json()["clasificador"] == "poseconv3d"
     monkeypatch.setattr(entorno["cfg"], "clasificador", "geometrico")
     assert cliente.get("/salud").json()["clasificador"] == "geometrico"
+
+
+def test_salud_dice_si_esta_el_modelo_individual(cliente, entorno, monkeypatch, tmp_path):
+    cfg = entorno["cfg"]
+    assert cliente.get("/salud").json()["modelo_individual"] is None      # con v1 no aplica
+    assert cliente.get("/salud").json()["sesiones_individuales"] is False
+    monkeypatch.setattr(cfg, "clasificador", "geometrico")
+    monkeypatch.setattr(cfg, "modelo_clasificador_geo_individual", tmp_path / "sin_rival")
+    assert cliente.get("/salud").json()["modelo_individual"] is False
+    (tmp_path / "sin_rival").mkdir()
+    (tmp_path / "sin_rival" / "meta.json").write_text("{}")
+    assert cliente.get("/salud").json()["modelo_individual"] is True

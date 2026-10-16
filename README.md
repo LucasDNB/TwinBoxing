@@ -732,3 +732,13 @@ PENDIENTE Y PROXIMO PASO
    llegar a C8b
 5. Sub-hipotesis 1: ocho clases 0,526 y 0,522, debajo de 0,80. No se entrena modelo final
 6. Auditoria en verde en la segunda pasada
+
+16-10 Tipo v2 para bolsa y sombra, y scripts para encenderlo en la estacion
+
+1. Bolsa y sombra se clasifican con el modelo de E4a (sin las 6 features del rival):
+   familia 0,724 con una fuente afuera contra 0,727 de E4. Con E4 el rival entraba en cero
+2. El worker elige el modelo por contexto; /salud dice si el modelo individual esta
+3. despliegue/encender_v2.sh: entrena en CPU lo que falte, prueba, escribe el env y verifica
+4. despliegue/medir_bolsa_sombra.sh: medicion de B8 con la cadena del worker; la bandera se
+   enciende solo si pasan los dos videos (95%, pre-registrado)
+5. 225 pruebas de la API, 660 del anotador y 58 de scripts/clasificador_geo, en verde

@@ -53,3 +53,26 @@ def test_metricas_e4_de_json(tmp_path):
     m = ef.metricas_e4(p)
     assert m["familia_fuente_no_vista"] == 0.7268 and m["golpes"] == 1047
     assert ef.metricas_e4(tmp_path / "no.json") == {}
+
+
+def test_variante_e4a_sin_rival(trabajo):
+    """16-10: el modelo de bolsa y sombra tiene otro nombre y declara 20 features y E4a."""
+    import entrenar_final as ef
+    d = _datos(f=20)
+    out = ef.entrenar_final(d, trabajo / "m", None, semillas=(0,), epocas=1, metricas={}, exp="E4a")
+    meta = json.loads((out / "meta.json").read_text())
+    assert meta["exp"] == "E4a" and meta["nombre"] == "clasificador_geo_v1_sin_rival"
+    assert meta["n_features"] == 20 and len(meta["semillas"]["s0"]["media"]) == 20
+    assert ef.VARIANTES["E4a"]["salida"].name == "clasificador_geo_v1_sin_rival"
+    assert ef.VARIANTES["E4a"]["metricas"].name.endswith("E4a.json")
+    # sin exp sigue siendo el de E4, como antes
+    meta = json.loads((ef.entrenar_final(_datos(), trabajo / "n", None, semillas=(0,), epocas=1,
+                                         metricas={}) / "meta.json").read_text())
+    assert meta["exp"] == "E4" and meta["nombre"] == "clasificador_geo_v1"
+
+
+def test_metricas_reales_de_e4a():
+    import entrenar_final as ef
+    m = ef.metricas_e4(ef.VARIANTES["E4a"]["metricas"])
+    assert m["golpes"] == 1047 and round(m["familia_fuente_no_vista"], 3) == 0.724
+

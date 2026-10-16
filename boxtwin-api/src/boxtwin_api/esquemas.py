@@ -26,6 +26,8 @@ __all__ = [
 
 TIPOS = ("jab", "cross", "hook", "uppercut")
 CONTEXTOS = ("bolsa", "sombra", "sparring", "combate")
+# Los de una sola persona (B8): una semilla, sin rival.
+CONTEXTOS_INDIVIDUALES = ("bolsa", "sombra")
 PRACTICAS = ("tecnica_libre", "combinaciones", "defensa")
 
 

@@ -145,6 +145,12 @@ class Config:
     modelo_clasificador_geo: Path = field(
         default_factory=lambda: _ruta("BOXTWIN_MODELO_CLASIFICADOR_GEO", "~/boxtwin/modelos/clasificador_geo_v1")
     )
+    # Bolsa y sombra (16-10): el modelo de E4a, sin las 6 features del rival. Con el de E4 una
+    # sesion de una sola persona entraria con el rival en cero todo el golpe.
+    modelo_clasificador_geo_individual: Path = field(
+        default_factory=lambda: _ruta("BOXTWIN_MODELO_CLASIFICADOR_GEO_INDIVIDUAL",
+                                      "~/boxtwin/modelos/clasificador_geo_v1_sin_rival")
+    )
     umbral_detector: float = field(
         default_factory=lambda: float(os.environ.get("BOXTWIN_UMBRAL", "0.80"))
     )

@@ -36,6 +36,7 @@ from pathlib import Path
 from boxtwin_api.cola import fallar, reclamar, terminar
 from boxtwin_api.config import cfg
 from boxtwin_api.db import crear_tablas, hacer_sesion
+from boxtwin_api.esquemas import CONTEXTOS_INDIVIDUALES
 from boxtwin_api.modelos import Sesion, Trabajo
 
 __all__ = ["correr", "ejecutar_trabajo", "comando_de"]
@@ -92,12 +93,15 @@ def comando_de(trabajo: Trabajo, sesion: Sesion) -> list[list[str]]:
         # Tipo v2: los dos comandos corren en el entorno del anotador. La guardia sale del
         # boxeador asignado a cada lado; sin boxeador o sin guardia, el comando supone
         # ortodoxa y la Fight-Card lo dice.
+        # Bolsa y sombra: una sola persona, sin rival. Va el modelo de E4a y no hay guardia B.
+        individual = (getattr(sesion, "contexto", None) or "sparring") in CONTEXTOS_INDIVIDUALES
         return [
             [
                 *cfg.cmd_boxtwin, "clasificar", str(directorio),
-                "--modelo", str(cfg.modelo_clasificador_geo),
+                "--modelo", str(cfg.modelo_clasificador_geo_individual if individual
+                                else cfg.modelo_clasificador_geo),
                 "--guardia-a", guardia_de(sesion.boxeador_a),
-                "--guardia-b", guardia_de(sesion.boxeador_b),
+                "--guardia-b", "desconocida" if individual else guardia_de(sesion.boxeador_b),
             ],
             [*cfg.cmd_boxtwin, "tipos", str(directorio)],
         ]

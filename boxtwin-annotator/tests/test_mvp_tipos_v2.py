@@ -178,3 +178,22 @@ def test_ca5_contrato_admite_v1_y_v2(sesion_dir, tmp_path):
     malo["peleadores"]["A"]["golpes"][0]["rol"] = "adelantado"
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate(malo, schema)
+
+
+def test_sesion_individual_con_el_modelo_sin_rival(tmp_path):
+    """Bolsa o sombra (16-10): poses de una sola persona, segmentos solo de A, modelo de E4a."""
+    from boxtwin.mvp.clasificador_geo import clasificar_sesion
+
+    d = tmp_path / "bolsa"
+    d.mkdir()
+    kp, sc, valid = _poses(n_peleadores=1)
+    np.savez_compressed(d / "poses.npz", keypoints=kp, kp_score=sc, valid=valid)
+    (d / "segmentos.json").write_text(json.dumps({
+        "version": "0.1", "video": VIDEO, "poses": "poses.npz",
+        "segmentos": [g.a_dict() for g in GOLPES if g.peleador == "A"]}))
+    con = clasificar_sesion(d, _modelo(tmp_path / "e4"), "ortodoxa", "desconocida")
+    sin = clasificar_sesion(d, _modelo(tmp_path / "e4a", n_features=20), "ortodoxa", "desconocida")
+    assert con["entrada"] == "con_rival" and sin["entrada"] == "sin_rival"
+    assert set(sin["tipos"]) == {"A-izq-20", "A-der-50"}
+    assert sin["guardia_supuesta"]["A"] is False
+
