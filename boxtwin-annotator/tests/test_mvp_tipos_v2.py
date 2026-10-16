@@ -152,3 +152,29 @@ def test_cli_clasificar(sesion_dir, tmp_path, capsys):
     assert main(["tipos", str(sesion_dir)]) == 0
     fc = json.loads((sesion_dir / "fightcard.json").read_text())
     assert fc["clasificador"]["metodo"] == "geometrico-v1"
+
+
+def test_ca5_contrato_admite_v1_y_v2(sesion_dir, tmp_path):
+    from pathlib import Path
+
+    import jsonschema
+
+    from boxtwin.mvp.clasificador_geo import clasificar_sesion
+
+    schema = json.loads((Path(__file__).resolve().parents[2]
+                         / "prototipo/contrato/fightcard-0.3.schema.json").read_text())
+    (sesion_dir / "tipos.json").write_text(json.dumps({
+        "version": "0.1", "checkpoint": "poseC3D.pth",
+        "tipos": {"A-izq-20": {"tipo": "jab", "confianza": 0.6, "crudo": "jab"}}}))
+    jsonschema.validate(aplicar_tipos_a_sesion(sesion_dir), schema)
+    clasificar_sesion(sesion_dir, _modelo(tmp_path / "m"), "zurda", None)
+    fc = aplicar_tipos_a_sesion(sesion_dir)
+    jsonschema.validate(fc, schema)
+    malo = copy.deepcopy(fc)
+    malo["clasificador"]["metodo"] = "otro"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(malo, schema)
+    malo = copy.deepcopy(fc)
+    malo["peleadores"]["A"]["golpes"][0]["rol"] = "adelantado"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(malo, schema)

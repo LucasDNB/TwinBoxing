@@ -56,7 +56,14 @@
       "properties": {
         "checkpoint": { "type": ["string", "null"] },
         "exactitud_familia_fuente_no_vista": { "type": ["number", "null"] },
-        "estimado": { "const": true }
+        "estimado": { "const": true },
+        "metodo": { "enum": ["poseconv3d", "geometrico-v1"], "description": "tipo v2 (16-10). Ausente: poseconv3d" },
+        "referencia": { "type": ["string", "null"] },
+        "guardia_supuesta": {
+          "type": "object",
+          "properties": { "A": { "type": "boolean" }, "B": { "type": "boolean" } },
+          "additionalProperties": false
+        }
       }
     },
     "peleadores": {
@@ -161,7 +168,12 @@
         "descartado": { "type": "boolean" },
         "objetivo": { "enum": ["cabeza", "cuerpo", null] },
         "objetivo_confianza": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
-        "objetivo_motivo": { "enum": ["sin_rival", "sin_pose", "individual", null] }
+        "objetivo_motivo": { "enum": ["sin_rival", "sin_pose", "individual", null] },
+        "p_familia": {
+          "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3,
+          "description": "tipo v2: probabilidades de recto, hook y uppercut"
+        },
+        "rol": { "enum": ["lead", "rear"] }
       }
     },
     "peleador": {
