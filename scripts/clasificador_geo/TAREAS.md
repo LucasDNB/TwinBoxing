@@ -10,8 +10,8 @@ Orden: G0 primero. Después G1 a G6 en orden. G7 y G8 son la parte 3D y pueden q
 
 | Id | Tarea | Spec | Depende de | Estado | Evidencia / notas |
 |---|---|---|---|---|---|
-| G0 | Arranque: rama `exp/clasificador-geometrico`, sesión en la raíz, pruebas de `scripts/clasificador` en verde, `huellas.py verificar` (las huellas del 14-10, en `~/boxtwin/clasificador-2026-10/huellas.json`), commit del pre-registro solo, hash en `<trabajo>/preregistro.txt`, `nvidia-smi` con versión de driver en `NOCHE.md` | 00, 01 | — | pendiente | |
-| G1 | `datos.py` + pruebas: golpes por fuente, ventanas, etiquetas, `rol` por `Event.arm_role`; chequeo contra los folds de E1 | 02 §1, §7.1 | G0 | pendiente | |
+| G0 | Arranque: rama `exp/clasificador-geometrico`, sesión en la raíz, pruebas de `scripts/clasificador` en verde, `huellas.py verificar` (las huellas del 14-10, en `~/boxtwin/clasificador-2026-10/huellas.json`), commit del pre-registro solo, hash en `<trabajo>/preregistro.txt`, `nvidia-smi` con versión de driver en `NOCHE.md` | 00, 01 | — | hecha | rama `exp/clasificador-geometrico`; pre-registro commit 703fd11 (solo); 29 pruebas de scripts/clasificador ok; huellas intactas; driver 595.99.02 en NOCHE.md |
+| G1 | `datos.py` + pruebas: golpes por fuente, ventanas, etiquetas, `rol` por `Event.arm_role`; chequeo contra los folds de E1 | 02 §1, §7.1 | G0 | hecha | `datos.py`: 1047 golpes, conteos por fuente = pre-registro, mismo conjunto de frame_dir que folds E1; series por fuente en `<trabajo>/datos/series/`; 5 pruebas ok |
 | G2 | `features2d.py` + pruebas: 20 del brazo (import de `features_de`), 6 del rival, remuestreo a 32; escribe `golpes.npz` | 02 §2, §7.2 | G1 | pendiente | |
 | G3 | `modelo.py`, `entrenar.py` + pruebas: `ClasificadorGolpe`, una fuente afuera, cinco semillas, reanudable, CPU o GPU | 02 §3, §7.3, §7.4 | G2 | pendiente | |
 | G4 | `regla_c8.py` + prueba: la regla de C8 sobre los 775 completos de las cuatro fuentes de C8 | 02 §6 | G1 | pendiente | |
