@@ -6,7 +6,7 @@ Specs: `docs/specs/2026-10-16-fightcard-tipo-v2/` (00 a 03). Estados: `pendiente
 
 | Id | Tarea | Spec | Depende de | Estado | Evidencia / notas |
 |---|---|---|---|---|---|
-| V0 | Arranque: rama `feat/fightcard-tipo-v2` desde `main` con el PR de `exp/clasificador-geometrico` ya mergeado (si no lo está, desde esa rama, y se dice); sesión en la raíz; suites existentes en verde (línea de base, con conteo de pruebas por suite en `NOCHE.md`); huellas; hash del commit que trajo el spec (es el que fija M1: `git log -1 --format=%H -- docs/specs/2026-10-16-fightcard-tipo-v2/01-requisitos.md`) en `~/boxtwin/tipo-v2/spec.txt` | 00, 01 | — | pendiente | |
+| V0 | Arranque: rama `feat/fightcard-tipo-v2` desde `main` con el PR de `exp/clasificador-geometrico` ya mergeado (si no lo está, desde esa rama, y se dice); sesión en la raíz; suites existentes en verde (línea de base, con conteo de pruebas por suite en `NOCHE.md`); huellas; hash del commit que trajo el spec (es el que fija M1: `git log -1 --format=%H -- docs/specs/2026-10-16-fightcard-tipo-v2/01-requisitos.md`) en `~/boxtwin/tipo-v2/spec.txt` | 00, 01 | — | hecha | Rama desde `main` (4ff0712, PR #14 mergeado). Base: anotador 696, detector 152, API 208, scripts 75 (+1 skip), web 197, todo en verde (`~/boxtwin/tipo-v2/base/`). `huellas.py verificar`: intactas. spec.txt = 4ff0712 |
 | V1 | `entrenar_final.py`: modelo completo (s0 a s4) y `sin_<fuente>` para Sparring y las cuatro de C8; `meta.json` con sha256 | 02 §1 | V0 | pendiente | |
 | V2 | `mvp/clasificador_geo.py` + pruebas: clase, `features_golpe`, carga con sha256, ensamble, `rol` | 02 §2, §7 | V0 | pendiente | |
 | V3 | CA1 y CA2 contra datos reales (`test_equivalencia_v2.py`) | 01 §3, 02 §7 | V1, V2 | pendiente | |
