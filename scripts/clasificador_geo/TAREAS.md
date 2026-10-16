@@ -17,8 +17,8 @@ Orden: G0 primero. Después G1 a G6 en orden. G7 y G8 son la parte 3D y pueden q
 | G4 | `regla_c8.py` + prueba: la regla de C8 sobre los 775 completos de las cuatro fuentes de C8 | 02 §6 | G1 | hecha | `regla_c8.py`: 775 golpes, 128 al cuerpo (= pre-registro), ventana anotada sin margen, sin dato = error; 2 pruebas |
 | G5 | `evaluar.py` + pruebas: ensambles, métricas, ocho clases, veredictos del pre-registro §3, fusión F | 02 §6, §7.7 | G3, G4 | hecha | `evaluar.py`: 11 pruebas (perfectas = 1, 0,029 / 0,031 con 4 y 5 de 7, desvío > 0,03, 3 de 4, ocho clases, fusión, orden de pred.npz) |
 | G6 | Correr E4 y E4a (7 folds × 5 semillas cada una) y evaluar; F si están los `pred.pkl` de E3 | 01 §2, §3 | G3, G5 | hecha | 70 corridas (log `logs/G6-entrenar.log`, cuda, ~3 s c/u); `evaluar.py --exp E4 E4a`: E4 familia 0,727 vs E1 0,656, 5 de 7 folds, desvío 0,015 → P5 familia **mejora**; altura C8 0,719 vs regla 0,729, 1 de 4 → **no demostrada**; C8b no; ocho clases 0,623 (lectura a). F 0,741. E3 recalculado desde pred.pkl = 0,667 / 0,605 (igual al 15-10). Huellas intactas |
-| G7 | `elevar3d.py`: MotionBERT sobre las ventanas del atacante; control de calidad de largos de hueso; `pose3d.npz` | 02 §4.1 | G1 | pendiente | |
-| G8 | `features3d.py` + pruebas (invariancia a rotación y espejo); correr E5 y evaluar | 02 §4.2, §7.5 | G6, G7 | pendiente | |
+| G7 | `elevar3d.py`: MotionBERT sobre las ventanas del atacante; control de calidad de largos de hueso; `pose3d.npz` | 02 §4.1 | G1 | hecha | `elevar3d.py` (boxtwin_mmaction, cuda, 117 s, lote 8): 1047 golpes, 99,7% de pasos con 3D; pesos sha256 d80af323… en `pesos/pesos.sha256`; QC en `datos/pose3d.qc.json` (CV antebrazo mediana 0,08 a 0,14 por fuente, brazo 0,05 a 0,08); 4 pruebas de funciones puras |
+| G8 | `features3d.py` + pruebas (invariancia a rotación y espejo); correr E5 y evaluar | 02 §4.2, §7.5 | G6, G7 | en curso | |
 | G9 | `rol_por_brazo.py` + pruebas; correr E6 | 02 §5, §7.6 | G0 | pendiente | |
 | G10 | `auditor-medicion` sobre E4 a E6 (adaptar sus ítems: pre-registro antes que resultados, huellas, sin fuga por fold, recálculo independiente de la familia de E4 y de E6) | 01 | G6, G9 (G8 si se hizo) | pendiente | |
 | G11 | Documentos: `docs/experiments/2026-10-16-clasificador-geometrico.md` (E4, E4a, F, E5) y `docs/experiments/2026-10-16-rol-por-brazo.md` (E6), con el formato de `2026-10-15-clasificador-tipo-altura.md`; datos a `docs/experiments/datos/`; entradas cortas en el README raíz las deja propuestas en el documento (el README pide confirmación) | 01 §5 | G10 | pendiente | |
@@ -47,7 +47,27 @@ Orden: G0 primero. Después G1 a G6 en orden. G7 y G8 son la parte 3D y pueden q
    solo de la familia.
 6. G5. P5 altura compara la balanceada de E4 sobre las cuatro fuentes de C8 (ensamble, 775
    golpes) con la de la regla sobre esos mismos golpes, y por fuente fold contra fuente.
+7. G7. `inference_pose_lifter_model` de MMPose 1.3.2 arma `lifting_target` de un cuadro y falla
+   con secuencias de 243 (el demo eleva cuadro por cuadro, con seq_len 1 del config, y así
+   MotionBERT pierde el contexto temporal). Se usa el mismo pipeline del config y el mismo
+   `model.test_step`, armando el data_info con las formas de 243 cuadros. Una pasada por golpe,
+   contexto centrado en la ventana; la salida se interpola a los 32 pasos en coordenadas de
+   cuadro. `keypoints_visible` en 1 y `norm_pose_2d` apagado, como en esa función: la
+   normalización la hace el codec de MotionBERT con `camera_param` = (ancho, alto).
+8. G7. Lote de 64 secuencias no entra en los 8 GB (OOM); se bajó a 8. No cambia el resultado.
+9. G8. El diseño §4.2 dice "18 en total" pero la lista nombra 16 (9 coordenadas, ángulo del
+   codo, elevación, azimut cos y sin, velocidad horizontal y vertical de la muñeca, velocidad
+   del azimut). Se implementan las 16 nombradas y E5 entra con 26 + 16 = 42, no 44. Inventar dos
+   features para llegar al número sería decidir algo de fondo después de escribir el
+   pre-registro. Va también a preguntas abiertas.
+10. G8. E5 usa la misma máscara que E4 (la 2D), para que lo único que cambie entre las dos sean
+    las features; donde no hay 3D (0,3% de los pasos) las 16 van en cero. Las velocidades 3D
+    van por segundo: derivada sobre los 32 pasos con dt = duración de la ventana / 31.
 
 ## Preguntas abiertas para Lucas
 
 (Lo que no se pudo resolver sin decidir algo de fondo.)
+
+1. Diseño §4.2: ¿cuáles eran las dos features 3D que faltan para llegar a 18? Se corrió E5 con
+   las 16 que nombra la lista (decisión 9). Si había dos más pensadas, E5 se vuelve a correr con
+   ellas como otra configuración, no como reemplazo.
