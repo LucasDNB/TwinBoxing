@@ -131,6 +131,32 @@ tambien workers de las pruebas e2e, con otra `BOXTWIN_DB`, y no hay que confundi
 No hay respaldo automatico de `~/boxtwin/datos` ni copia de `/etc/boxtwin.env`: si se
 pierde el archivo, `BOXTWIN_SECRETO` y la invitacion se vuelven a cargar a mano.
 
+## Tipo v2 y bolsa y sombra (16-10)
+
+Dos scripts, los dos se corren en la estación como `lucasb` desde la raíz del repo y con la
+cola vacía. Hacen copia de `/etc/boxtwin.env` antes de tocarlo.
+
+1. `bash despliegue/encender_v2.sh` enciende el tipo v2. Entrena en CPU lo que falte (el
+   modelo final de E4 para sparring y combate, y el de E4a, sin las features del rival, para
+   bolsa y sombra), corre las pruebas de equivalencia contra los datos reales, escribe
+   `BOXTWIN_CLASIFICADOR=geometrico` y las dos rutas de modelo, reinicia y verifica `/salud`
+   (`clasificador: geometrico` y `modelo_individual: true`). `--apagar` vuelve atrás.
+2. `bash despliegue/medir_bolsa_sombra.sh` es la medición de B8, que es lo único que falta
+   para habilitar bolsa y sombra en la web. `procesar` y `completar` corren la misma cadena
+   que el worker sobre un video propio de al menos 3 minutos; `completar` deja el video
+   procesado y la planilla de saltos de 2 s. Mirar y llenar la planilla es de Lucas.
+   `resultado` da el veredicto con el umbral pre-registrado (95% en cada video) y `encender`
+   pone `BOXTWIN_SESIONES_INDIVIDUALES=1` solo si pasaron los dos.
+
+Por qué un modelo aparte para bolsa y sombra: E4 lleva 6 features que ubican la muñeca
+respecto del torso del rival. Con una sola persona en cuadro entrarían en cero todo el golpe,
+algo que el modelo casi no vio al entrenar. E4a es la misma receta sin esas 6 columnas y ya
+estaba medido con una fuente afuera: familia 0,724 contra 0,727 de E4. Las 6 del rival llevan
+la altura, no la familia (`docs/experiments/2026-10-16-clasificador-geometrico.md` §5). Ninguno
+de los dos se midió sobre bolsa o sombra: el número que muestra la Fight-Card es el de sparring,
+y la web ya lo rotula así en una sesión individual (CA-19.3). La altura no aplica: la regla de
+C8 necesita al rival y devuelve `sin_rival`.
+
 ## El problema real no es el túnel, es la subida
 
 Un video de 30 minutos de celular son unos 3 GB. Funnel es best-effort y no está pensado

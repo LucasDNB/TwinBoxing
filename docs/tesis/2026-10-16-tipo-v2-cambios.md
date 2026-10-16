@@ -67,3 +67,20 @@ una reejecución daría otro cercano."
 QUÉ CAMBIÓ: el Cap 7 tenía E4 como experimento. Ahora tiene su paso al producto, el número de
 punta a punta y el hallazgo sobre reproducibilidad, que vale también para los demás modelos
 entrenados en GPU del proyecto.
+
+## 5. Cap 7, bolsa y sombra con v2 (agregado 16-10 a la tarde)
+
+Párrafo propuesto, a continuación del apartado de v2:
+
+"En bolsa y sombra hay una sola persona en cuadro. El modelo de familia usa seis medidas que
+ubican la muñeca respecto del torso del rival, y sin rival entrarían en cero durante todo el
+golpe, un caso que casi no vio al entrenar. Para esas sesiones uso la misma receta sin esas
+seis medidas, que ya había medido dejando una fuente afuera: acierta la familia en el 72,4%,
+contra 72,7% con el rival. Ninguno de los dos se midió sobre golpes a la bolsa o al aire, así
+que la Fight-Card de una sesión individual muestra el número como medido en sparring. La
+altura no se estima: la regla geométrica necesita al rival."
+
+QUÉ CAMBIÓ: el Cap 7 no decía con qué modelo se clasifican las sesiones de una sola persona.
+
+Si la medición de B8 se hace, su resultado va en el mismo apartado, pase o no pase.
+

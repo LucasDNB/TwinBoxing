@@ -1175,6 +1175,10 @@ def salud() -> dict:
         "frontend": bool(cfg.web and (cfg.web / "index.html").is_file()),
         # Tipo de golpe v2: que metodo clasifica (BOXTWIN_CLASIFICADOR).
         "clasificador": cfg.clasificador,
+        # Bolsa y sombra (B8): si la bandera esta encendida y con que modelo se clasifican.
+        "sesiones_individuales": cfg.sesiones_individuales,
+        "modelo_individual": (cfg.modelo_clasificador_geo_individual / "meta.json").is_file()
+        if cfg.clasificador == "geometrico" else None,
     }
 
 
