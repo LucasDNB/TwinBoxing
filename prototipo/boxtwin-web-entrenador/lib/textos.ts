@@ -50,6 +50,10 @@ export const textos = {
     const ex = exactitud == null ? "sin medir" : porcentajeAR(exactitud);
     return `Tipo estimado por el modelo ${ck}. Exactitud sobre material nuevo: ${ex}.`;
   },
+  // RT10 del tipo v2: jab y cross salen de la guardia, y sin guardia cargada se supone ortodoxa.
+  avisoGuardiaSupuesta(quien: string) {
+    return `Jab y cross suponen guardia ortodoxa. Cargá la guardia de ${quien} para corregirlo.`;
+  },
   condicionadoC2:
     "La comparación entre rounds se muestra cuando se confirme que el sistema detecta parejo en todos los rounds.",
   condicionadoC3:

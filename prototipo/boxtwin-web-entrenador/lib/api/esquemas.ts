@@ -184,6 +184,9 @@ export const Golpe = z.object({
   objetivo_confianza: numN.optional(),
   objetivo_motivo: strN.optional(),
   objetivo_corregido: z.object({ objetivo: z.enum(["cabeza", "cuerpo"]), objetivo_original: strN.optional() }).passthrough().nullable().optional(),
+  // Tipo v2 (16-10): probabilidades de recto, hook y uppercut, y el rol que sale de brazo y guardia.
+  p_familia: z.array(num).length(3).optional(),
+  rol: z.enum(["lead", "rear"]).optional(),
 });
 export type Golpe = z.infer<typeof Golpe>;
 
@@ -280,6 +283,10 @@ export const FightCard = z.object({
     checkpoint: z.string().nullable(),
     exactitud_familia_fuente_no_vista: numN,
     estimado: z.boolean().optional(),
+    // Tipo v2 (16-10). Sin `metodo`, la Fight-Card es de PoseConv3D.
+    metodo: z.enum(["poseconv3d", "geometrico-v1"]).optional(),
+    referencia: strN.optional(),
+    guardia_supuesta: z.object({ A: z.boolean().optional(), B: z.boolean().optional() }).optional(),
   }),
   peleadores: z.object({ A: Peleador, B: Peleador.optional() }),
   // 0.3 (B11): con que regla se calculo la altura y lo que dio C8.

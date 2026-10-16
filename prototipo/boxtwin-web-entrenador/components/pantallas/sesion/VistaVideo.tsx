@@ -27,7 +27,7 @@ import { nombresDe } from "@/components/pantallas/sesion/PantallaSesion";
 import { useProcesado, useProducto, useRender, useTicket } from "@/lib/api/consultas";
 import type { Golpe, Sesion } from "@/lib/api/esquemas";
 import { visible } from "@/lib/banderas";
-import { guardiaPorGolpe, secuenciaPorGolpe, lados as ladosDe, tipoEfectivo, type FightCard, type Lado } from "@/lib/fightcard";
+import { guardiaPorGolpe, secuenciaPorGolpe, lados as ladosDe, ladosConGuardiaSupuesta, tipoEfectivo, type FightCard, type Lado } from "@/lib/fightcard";
 import { decimal, mmss, nombreDeTipo } from "@/lib/formato";
 import { useEsEscritorio } from "@/lib/medios";
 import { textos } from "@/lib/textos";
@@ -186,6 +186,11 @@ export function VistaVideo({ s, fc }: { s: Sesion; fc: FightCard }) {
   const nota = (
     <p className="mt-4 rounded-md border border-borde bg-superficie-2 p-3 text-xs text-texto-3">
       {textos.notaCorreccion(fc.clasificador.checkpoint)} &quot;No fue un golpe&quot; tampoco cambia el conteo de detectados: se cuenta aparte como descartados por el entrenador.
+      {ladosConGuardiaSupuesta(fc).map((l) => (
+        <span key={l} role="note" data-aviso-guardia={l} className="mt-2 block text-texto-2">
+          {textos.avisoGuardiaSupuesta(nombres[l] ?? l)}
+        </span>
+      ))}
     </p>
   );
 
