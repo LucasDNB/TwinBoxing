@@ -24,7 +24,20 @@
       "Bash(sleep *)",
       "Bash(git rev-parse *)",
       "Edit(/scripts/clasificador_geo/**)",
-      "Edit(~/boxtwin/clasificador-geo-2026-10/**)"
+      "Edit(/docs/tareas/**)",
+      "Edit(/boxtwin-annotator/src/**)",
+      "Edit(/boxtwin-annotator/tests/**)",
+      "Edit(/boxtwin-api/src/**)",
+      "Edit(/boxtwin-api/tests/**)",
+      "Edit(/prototipo/boxtwin-web-entrenador/components/**)",
+      "Edit(/prototipo/boxtwin-web-entrenador/lib/**)",
+      "Edit(/prototipo/boxtwin-web-entrenador/tests/**)",
+      "Edit(/prototipo/contrato/**)",
+      "Edit(~/boxtwin/tipo-v2/**)",
+      "Bash(npm --prefix prototipo/boxtwin-web-entrenador test *)",
+      "Bash(npm --prefix prototipo/boxtwin-web-entrenador run *)",
+      "Bash(cp -r ~/boxtwin/mediciones/c8-nivel2/* ~/boxtwin/tipo-v2/*)",
+      "Bash(~/miniforge3/envs/twinboxing_env/bin/boxtwin-annotator *)"
     ],
     "ask": [
       "Bash(tmux *)",
@@ -41,7 +54,10 @@
       "Bash(pip install *)",
       "Bash(conda install *)",
       "Bash(conda update *)",
-      "Bash(mamba *)"
+      "Bash(mamba *)",
+      "Edit(~/boxtwin/mediciones/**)",
+      "Edit(~/boxtwin/clasificador-2026-10/**)",
+      "Edit(~/boxtwin/clasificador-geo-2026-10/**)"
     ]
   }
 }

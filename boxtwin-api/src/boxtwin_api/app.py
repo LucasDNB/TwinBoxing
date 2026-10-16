@@ -980,8 +980,13 @@ def editar_boxeador(
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     b = _boxeador_del_usuario(boxeador_id, usuario, db)
+    guardia_previa = b.guardia
     b.nombre = entrada.nombre.strip()
     b.guardia = entrada.guardia
+    if b.guardia != guardia_previa:
+        # RT8 del tipo v2: jab y cross salen de la guardia, asi que cambiarla reclasifica.
+        _reclasificar(db, db.scalars(select(Sesion).where(
+            (Sesion.boxeador_a_id == b.id) | (Sesion.boxeador_b_id == b.id))).all())
     b.notas = entrada.notas
     b.categoria = entrada.categoria
     b.altura_m = entrada.altura_m
@@ -990,6 +995,25 @@ def editar_boxeador(
     b.estilo = entrada.estilo
     db.commit()
     return _boxeador_a_dict(b, _uso_de_boxeadores(usuario, db))
+
+
+def _reclasificar(db: Session, sesiones) -> list[str]:
+    """
+    Encola `clasificar` en las sesiones listas, solo con el tipo v2 encendido (RT8). Con v1
+    la guardia no interviene en el tipo y no hay nada que recalcular. No commitea.
+    """
+    if cfg.clasificador != "geometrico":
+        return []
+    encoladas = []
+    for s in sesiones:
+        if s.estado != "listo":
+            continue
+        ya = db.scalars(select(Trabajo).where(
+            Trabajo.sesion_id == s.id, Trabajo.etapa == "clasificar", Trabajo.estado == "en_cola")).first()
+        if ya is None:
+            encolar(db, s.id, "clasificar")
+            encoladas.append(s.id)
+    return encoladas
 
 
 @app.put("/sesiones/{sesion_id}/boxeadores")
@@ -1008,11 +1032,15 @@ def asignar_boxeadores(
     los golpes se tocan.
     """
     s = sesion_del_usuario(sesion_id, usuario, db)
+    previa = (s.boxeador_a_id, s.boxeador_b_id)
     for campo, valor in (("boxeador_a_id", entrada.boxeador_a),
                          ("boxeador_b_id", entrada.boxeador_b)):
         if valor is not None:
             _boxeador_del_usuario(valor, usuario, db)
         setattr(s, campo, valor)
+    if (s.boxeador_a_id, s.boxeador_b_id) != previa:
+        # RT8 del tipo v2: con otro boxeador cambia la guardia de la que salen jab y cross.
+        _reclasificar(db, [s])
     db.commit()
     return {"sesion": s.id, "boxeador_a": s.boxeador_a_id, "boxeador_b": s.boxeador_b_id}
 
@@ -1145,6 +1173,8 @@ def salud() -> dict:
         "arrancado": ARRANCADO,
         "commit": COMMIT,
         "frontend": bool(cfg.web and (cfg.web / "index.html").is_file()),
+        # Tipo de golpe v2: que metodo clasifica (BOXTWIN_CLASIFICADOR).
+        "clasificador": cfg.clasificador,
     }
 
 

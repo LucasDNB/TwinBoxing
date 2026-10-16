@@ -1,0 +1,4480 @@
+{
+  "medicion": "M1",
+  "que": "tipo v2 de punta a punta sobre golpes del detector (C8 nivel 2)",
+  "spec_commit": "4ff07123ec4b579fc650c71c8c7310cef55f2b22",
+  "iou": 0.3,
+  "modelo": "clasificador_geo_v1/sin_<fuente>, 5 semillas, CPU",
+  "advertencia": "el detector de produccion se entreno con estas fuentes (como en C8 nivel 2 y E6): los golpes encontrados son optimistas; el clasificador si las tiene afuera",
+  "guardias": {
+    "03-sparring": {
+      "invertido": false,
+      "anotada": {
+        "A": "ortodoxa",
+        "B": "ortodoxa"
+      }
+    },
+    "04-sparring": {
+      "invertido": false,
+      "anotada": {
+        "A": "zurda",
+        "B": "ortodoxa"
+      }
+    },
+    "sparring-3-rounds": {
+      "invertido": false,
+      "anotada": {
+        "A": "ortodoxa",
+        "B": "ortodoxa"
+      }
+    },
+    "pacquiao_margarito": {
+      "invertido": true,
+      "anotada": {
+        "A": "zurda",
+        "B": "ortodoxa"
+      }
+    }
+  },
+  "total": {
+    "anotada": {
+      "golpes": 390,
+      "familia": {
+        "n": 390,
+        "aciertos": 304,
+        "exactitud": 0.7795,
+        "wilson95": [
+          0.7357,
+          0.8178
+        ],
+        "recall": {
+          "straight": {
+            "n": 259,
+            "aciertos": 223,
+            "exactitud": 0.861,
+            "wilson95": [
+              0.8136,
+              0.8979
+            ]
+          },
+          "hook": {
+            "n": 111,
+            "aciertos": 71,
+            "exactitud": 0.6396,
+            "wilson95": [
+              0.547,
+              0.7229
+            ]
+          },
+          "uppercut": {
+            "n": 20,
+            "aciertos": 10,
+            "exactitud": 0.5,
+            "wilson95": [
+              0.2993,
+              0.7007
+            ]
+          }
+        }
+      },
+      "cuatro_clases": {
+        "n": 390,
+        "aciertos": 301,
+        "exactitud": 0.7718,
+        "wilson95": [
+          0.7276,
+          0.8107
+        ],
+        "recall": {
+          "jab": {
+            "n": 181,
+            "aciertos": 160,
+            "exactitud": 0.884,
+            "wilson95": [
+              0.8291,
+              0.9229
+            ]
+          },
+          "cross": {
+            "n": 78,
+            "aciertos": 60,
+            "exactitud": 0.7692,
+            "wilson95": [
+              0.6644,
+              0.8487
+            ]
+          },
+          "hook": {
+            "n": 111,
+            "aciertos": 71,
+            "exactitud": 0.6396,
+            "wilson95": [
+              0.547,
+              0.7229
+            ]
+          },
+          "uppercut": {
+            "n": 20,
+            "aciertos": 10,
+            "exactitud": 0.5,
+            "wilson95": [
+              0.2993,
+              0.7007
+            ]
+          }
+        }
+      }
+    },
+    "ortodoxos": {
+      "golpes": 390,
+      "familia": {
+        "n": 390,
+        "aciertos": 304,
+        "exactitud": 0.7795,
+        "wilson95": [
+          0.7357,
+          0.8178
+        ],
+        "recall": {
+          "straight": {
+            "n": 259,
+            "aciertos": 223,
+            "exactitud": 0.861,
+            "wilson95": [
+              0.8136,
+              0.8979
+            ]
+          },
+          "hook": {
+            "n": 111,
+            "aciertos": 71,
+            "exactitud": 0.6396,
+            "wilson95": [
+              0.547,
+              0.7229
+            ]
+          },
+          "uppercut": {
+            "n": 20,
+            "aciertos": 10,
+            "exactitud": 0.5,
+            "wilson95": [
+              0.2993,
+              0.7007
+            ]
+          }
+        }
+      },
+      "cuatro_clases": {
+        "n": 390,
+        "aciertos": 260,
+        "exactitud": 0.6667,
+        "wilson95": [
+          0.6185,
+          0.7116
+        ],
+        "recall": {
+          "jab": {
+            "n": 181,
+            "aciertos": 128,
+            "exactitud": 0.7072,
+            "wilson95": [
+              0.6371,
+              0.7686
+            ]
+          },
+          "cross": {
+            "n": 78,
+            "aciertos": 51,
+            "exactitud": 0.6538,
+            "wilson95": [
+              0.5433,
+              0.7499
+            ]
+          },
+          "hook": {
+            "n": 111,
+            "aciertos": 71,
+            "exactitud": 0.6396,
+            "wilson95": [
+              0.547,
+              0.7229
+            ]
+          },
+          "uppercut": {
+            "n": 20,
+            "aciertos": 10,
+            "exactitud": 0.5,
+            "wilson95": [
+              0.2993,
+              0.7007
+            ]
+          }
+        }
+      }
+    }
+  },
+  "por_fuente": {
+    "03-sparring": {
+      "anotada": {
+        "golpes_fightcard": 83,
+        "anotados_completos": 129,
+        "golpes": 62,
+        "familia": {
+          "n": 62,
+          "aciertos": 51,
+          "exactitud": 0.8226,
+          "wilson95": [
+            0.7096,
+            0.8979
+          ],
+          "recall": {
+            "straight": {
+              "n": 43,
+              "aciertos": 38,
+              "exactitud": 0.8837,
+              "wilson95": [
+                0.7552,
+                0.9493
+              ]
+            },
+            "hook": {
+              "n": 18,
+              "aciertos": 13,
+              "exactitud": 0.7222,
+              "wilson95": [
+                0.4913,
+                0.875
+              ]
+            },
+            "uppercut": {
+              "n": 1,
+              "aciertos": 0,
+              "exactitud": 0.0,
+              "wilson95": [
+                0.0,
+                0.7935
+              ]
+            }
+          }
+        },
+        "cuatro_clases": {
+          "n": 62,
+          "aciertos": 50,
+          "exactitud": 0.8065,
+          "wilson95": [
+            0.6915,
+            0.8857
+          ],
+          "recall": {
+            "jab": {
+              "n": 29,
+              "aciertos": 26,
+              "exactitud": 0.8966,
+              "wilson95": [
+                0.7361,
+                0.9642
+              ]
+            },
+            "cross": {
+              "n": 14,
+              "aciertos": 11,
+              "exactitud": 0.7857,
+              "wilson95": [
+                0.5241,
+                0.9243
+              ]
+            },
+            "hook": {
+              "n": 18,
+              "aciertos": 13,
+              "exactitud": 0.7222,
+              "wilson95": [
+                0.4913,
+                0.875
+              ]
+            },
+            "uppercut": {
+              "n": 1,
+              "aciertos": 0,
+              "exactitud": 0.0,
+              "wilson95": [
+                0.0,
+                0.7935
+              ]
+            }
+          }
+        }
+      },
+      "ortodoxos": {
+        "golpes_fightcard": 83,
+        "anotados_completos": 129,
+        "golpes": 62,
+        "familia": {
+          "n": 62,
+          "aciertos": 51,
+          "exactitud": 0.8226,
+          "wilson95": [
+            0.7096,
+            0.8979
+          ],
+          "recall": {
+            "straight": {
+              "n": 43,
+              "aciertos": 38,
+              "exactitud": 0.8837,
+              "wilson95": [
+                0.7552,
+                0.9493
+              ]
+            },
+            "hook": {
+              "n": 18,
+              "aciertos": 13,
+              "exactitud": 0.7222,
+              "wilson95": [
+                0.4913,
+                0.875
+              ]
+            },
+            "uppercut": {
+              "n": 1,
+              "aciertos": 0,
+              "exactitud": 0.0,
+              "wilson95": [
+                0.0,
+                0.7935
+              ]
+            }
+          }
+        },
+        "cuatro_clases": {
+          "n": 62,
+          "aciertos": 50,
+          "exactitud": 0.8065,
+          "wilson95": [
+            0.6915,
+            0.8857
+          ],
+          "recall": {
+            "jab": {
+              "n": 29,
+              "aciertos": 26,
+              "exactitud": 0.8966,
+              "wilson95": [
+                0.7361,
+                0.9642
+              ]
+            },
+            "cross": {
+              "n": 14,
+              "aciertos": 11,
+              "exactitud": 0.7857,
+              "wilson95": [
+                0.5241,
+                0.9243
+              ]
+            },
+            "hook": {
+              "n": 18,
+              "aciertos": 13,
+              "exactitud": 0.7222,
+              "wilson95": [
+                0.4913,
+                0.875
+              ]
+            },
+            "uppercut": {
+              "n": 1,
+              "aciertos": 0,
+              "exactitud": 0.0,
+              "wilson95": [
+                0.0,
+                0.7935
+              ]
+            }
+          }
+        }
+      }
+    },
+    "04-sparring": {
+      "anotada": {
+        "golpes_fightcard": 75,
+        "anotados_completos": 120,
+        "golpes": 58,
+        "familia": {
+          "n": 58,
+          "aciertos": 45,
+          "exactitud": 0.7759,
+          "wilson95": [
+            0.6534,
+            0.8641
+          ],
+          "recall": {
+            "straight": {
+              "n": 36,
+              "aciertos": 31,
+              "exactitud": 0.8611,
+              "wilson95": [
+                0.7134,
+                0.9392
+              ]
+            },
+            "hook": {
+              "n": 12,
+              "aciertos": 8,
+              "exactitud": 0.6667,
+              "wilson95": [
+                0.3906,
+                0.8619
+              ]
+            },
+            "uppercut": {
+              "n": 10,
+              "aciertos": 6,
+              "exactitud": 0.6,
+              "wilson95": [
+                0.3127,
+                0.8318
+              ]
+            }
+          }
+        },
+        "cuatro_clases": {
+          "n": 58,
+          "aciertos": 44,
+          "exactitud": 0.7586,
+          "wilson95": [
+            0.6347,
+            0.8504
+          ],
+          "recall": {
+            "jab": {
+              "n": 26,
+              "aciertos": 22,
+              "exactitud": 0.8462,
+              "wilson95": [
+                0.6647,
+                0.9385
+              ]
+            },
+            "cross": {
+              "n": 10,
+              "aciertos": 8,
+              "exactitud": 0.8,
+              "wilson95": [
+                0.4902,
+                0.9433
+              ]
+            },
+            "hook": {
+              "n": 12,
+              "aciertos": 8,
+              "exactitud": 0.6667,
+              "wilson95": [
+                0.3906,
+                0.8619
+              ]
+            },
+            "uppercut": {
+              "n": 10,
+              "aciertos": 6,
+              "exactitud": 0.6,
+              "wilson95": [
+                0.3127,
+                0.8318
+              ]
+            }
+          }
+        }
+      },
+      "ortodoxos": {
+        "golpes_fightcard": 75,
+        "anotados_completos": 120,
+        "golpes": 58,
+        "familia": {
+          "n": 58,
+          "aciertos": 45,
+          "exactitud": 0.7759,
+          "wilson95": [
+            0.6534,
+            0.8641
+          ],
+          "recall": {
+            "straight": {
+              "n": 36,
+              "aciertos": 31,
+              "exactitud": 0.8611,
+              "wilson95": [
+                0.7134,
+                0.9392
+              ]
+            },
+            "hook": {
+              "n": 12,
+              "aciertos": 8,
+              "exactitud": 0.6667,
+              "wilson95": [
+                0.3906,
+                0.8619
+              ]
+            },
+            "uppercut": {
+              "n": 10,
+              "aciertos": 6,
+              "exactitud": 0.6,
+              "wilson95": [
+                0.3127,
+                0.8318
+              ]
+            }
+          }
+        },
+        "cuatro_clases": {
+          "n": 58,
+          "aciertos": 25,
+          "exactitud": 0.431,
+          "wilson95": [
+            0.3118,
+            0.5588
+          ],
+          "recall": {
+            "jab": {
+              "n": 26,
+              "aciertos": 7,
+              "exactitud": 0.2692,
+              "wilson95": [
+                0.137,
+                0.4608
+              ]
+            },
+            "cross": {
+              "n": 10,
+              "aciertos": 4,
+              "exactitud": 0.4,
+              "wilson95": [
+                0.1682,
+                0.6873
+              ]
+            },
+            "hook": {
+              "n": 12,
+              "aciertos": 8,
+              "exactitud": 0.6667,
+              "wilson95": [
+                0.3906,
+                0.8619
+              ]
+            },
+            "uppercut": {
+              "n": 10,
+              "aciertos": 6,
+              "exactitud": 0.6,
+              "wilson95": [
+                0.3127,
+                0.8318
+              ]
+            }
+          }
+        }
+      }
+    },
+    "sparring-3-rounds": {
+      "anotada": {
+        "golpes_fightcard": 244,
+        "anotados_completos": 381,
+        "golpes": 199,
+        "familia": {
+          "n": 199,
+          "aciertos": 150,
+          "exactitud": 0.7538,
+          "wilson95": [
+            0.6895,
+            0.8084
+          ],
+          "recall": {
+            "straight": {
+              "n": 120,
+              "aciertos": 98,
+              "exactitud": 0.8167,
+              "wilson95": [
+                0.738,
+                0.8757
+              ]
+            },
+            "hook": {
+              "n": 72,
+              "aciertos": 48,
+              "exactitud": 0.6667,
+              "wilson95": [
+                0.5518,
+                0.7647
+              ]
+            },
+            "uppercut": {
+              "n": 7,
+              "aciertos": 4,
+              "exactitud": 0.5714,
+              "wilson95": [
+                0.2505,
+                0.8418
+              ]
+            }
+          }
+        },
+        "cuatro_clases": {
+          "n": 199,
+          "aciertos": 149,
+          "exactitud": 0.7487,
+          "wilson95": [
+            0.6842,
+            0.8039
+          ],
+          "recall": {
+            "jab": {
+              "n": 80,
+              "aciertos": 66,
+              "exactitud": 0.825,
+              "wilson95": [
+                0.7274,
+                0.8928
+              ]
+            },
+            "cross": {
+              "n": 40,
+              "aciertos": 31,
+              "exactitud": 0.775,
+              "wilson95": [
+                0.625,
+                0.8768
+              ]
+            },
+            "hook": {
+              "n": 72,
+              "aciertos": 48,
+              "exactitud": 0.6667,
+              "wilson95": [
+                0.5518,
+                0.7647
+              ]
+            },
+            "uppercut": {
+              "n": 7,
+              "aciertos": 4,
+              "exactitud": 0.5714,
+              "wilson95": [
+                0.2505,
+                0.8418
+              ]
+            }
+          }
+        }
+      },
+      "ortodoxos": {
+        "golpes_fightcard": 244,
+        "anotados_completos": 381,
+        "golpes": 199,
+        "familia": {
+          "n": 199,
+          "aciertos": 150,
+          "exactitud": 0.7538,
+          "wilson95": [
+            0.6895,
+            0.8084
+          ],
+          "recall": {
+            "straight": {
+              "n": 120,
+              "aciertos": 98,
+              "exactitud": 0.8167,
+              "wilson95": [
+                0.738,
+                0.8757
+              ]
+            },
+            "hook": {
+              "n": 72,
+              "aciertos": 48,
+              "exactitud": 0.6667,
+              "wilson95": [
+                0.5518,
+                0.7647
+              ]
+            },
+            "uppercut": {
+              "n": 7,
+              "aciertos": 4,
+              "exactitud": 0.5714,
+              "wilson95": [
+                0.2505,
+                0.8418
+              ]
+            }
+          }
+        },
+        "cuatro_clases": {
+          "n": 199,
+          "aciertos": 149,
+          "exactitud": 0.7487,
+          "wilson95": [
+            0.6842,
+            0.8039
+          ],
+          "recall": {
+            "jab": {
+              "n": 80,
+              "aciertos": 66,
+              "exactitud": 0.825,
+              "wilson95": [
+                0.7274,
+                0.8928
+              ]
+            },
+            "cross": {
+              "n": 40,
+              "aciertos": 31,
+              "exactitud": 0.775,
+              "wilson95": [
+                0.625,
+                0.8768
+              ]
+            },
+            "hook": {
+              "n": 72,
+              "aciertos": 48,
+              "exactitud": 0.6667,
+              "wilson95": [
+                0.5518,
+                0.7647
+              ]
+            },
+            "uppercut": {
+              "n": 7,
+              "aciertos": 4,
+              "exactitud": 0.5714,
+              "wilson95": [
+                0.2505,
+                0.8418
+              ]
+            }
+          }
+        }
+      }
+    },
+    "pacquiao_margarito": {
+      "anotada": {
+        "golpes_fightcard": 883,
+        "anotados_completos": 145,
+        "golpes": 71,
+        "familia": {
+          "n": 71,
+          "aciertos": 58,
+          "exactitud": 0.8169,
+          "wilson95": [
+            0.7115,
+            0.8898
+          ],
+          "recall": {
+            "straight": {
+              "n": 60,
+              "aciertos": 56,
+              "exactitud": 0.9333,
+              "wilson95": [
+                0.8407,
+                0.9738
+              ]
+            },
+            "hook": {
+              "n": 9,
+              "aciertos": 2,
+              "exactitud": 0.2222,
+              "wilson95": [
+                0.0632,
+                0.5474
+              ]
+            },
+            "uppercut": {
+              "n": 2,
+              "aciertos": 0,
+              "exactitud": 0.0,
+              "wilson95": [
+                0.0,
+                0.6576
+              ]
+            }
+          }
+        },
+        "cuatro_clases": {
+          "n": 71,
+          "aciertos": 58,
+          "exactitud": 0.8169,
+          "wilson95": [
+            0.7115,
+            0.8898
+          ],
+          "recall": {
+            "jab": {
+              "n": 46,
+              "aciertos": 46,
+              "exactitud": 1.0,
+              "wilson95": [
+                0.9229,
+                1.0
+              ]
+            },
+            "cross": {
+              "n": 14,
+              "aciertos": 10,
+              "exactitud": 0.7143,
+              "wilson95": [
+                0.4535,
+                0.8828
+              ]
+            },
+            "hook": {
+              "n": 9,
+              "aciertos": 2,
+              "exactitud": 0.2222,
+              "wilson95": [
+                0.0632,
+                0.5474
+              ]
+            },
+            "uppercut": {
+              "n": 2,
+              "aciertos": 0,
+              "exactitud": 0.0,
+              "wilson95": [
+                0.0,
+                0.6576
+              ]
+            }
+          }
+        }
+      },
+      "ortodoxos": {
+        "golpes_fightcard": 883,
+        "anotados_completos": 145,
+        "golpes": 71,
+        "familia": {
+          "n": 71,
+          "aciertos": 58,
+          "exactitud": 0.8169,
+          "wilson95": [
+            0.7115,
+            0.8898
+          ],
+          "recall": {
+            "straight": {
+              "n": 60,
+              "aciertos": 56,
+              "exactitud": 0.9333,
+              "wilson95": [
+                0.8407,
+                0.9738
+              ]
+            },
+            "hook": {
+              "n": 9,
+              "aciertos": 2,
+              "exactitud": 0.2222,
+              "wilson95": [
+                0.0632,
+                0.5474
+              ]
+            },
+            "uppercut": {
+              "n": 2,
+              "aciertos": 0,
+              "exactitud": 0.0,
+              "wilson95": [
+                0.0,
+                0.6576
+              ]
+            }
+          }
+        },
+        "cuatro_clases": {
+          "n": 71,
+          "aciertos": 36,
+          "exactitud": 0.507,
+          "wilson95": [
+            0.3934,
+            0.6199
+          ],
+          "recall": {
+            "jab": {
+              "n": 46,
+              "aciertos": 29,
+              "exactitud": 0.6304,
+              "wilson95": [
+                0.486,
+                0.7548
+              ]
+            },
+            "cross": {
+              "n": 14,
+              "aciertos": 5,
+              "exactitud": 0.3571,
+              "wilson95": [
+                0.1634,
+                0.6124
+              ]
+            },
+            "hook": {
+              "n": 9,
+              "aciertos": 2,
+              "exactitud": 0.2222,
+              "wilson95": [
+                0.0632,
+                0.5474
+              ]
+            },
+            "uppercut": {
+              "n": 2,
+              "aciertos": 0,
+              "exactitud": 0.0,
+              "wilson95": [
+                0.0,
+                0.6576
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "comparacion_e4_ventana_anotada": {
+    "golpes": 390,
+    "sin_prediccion_e4": 0,
+    "familia_v2_detector": {
+      "n": 390,
+      "aciertos": 304,
+      "exactitud": 0.7795,
+      "wilson95": [
+        0.7357,
+        0.8178
+      ]
+    },
+    "familia_e4_ventana_anotada": {
+      "n": 390,
+      "aciertos": 308,
+      "exactitud": 0.7897,
+      "wilson95": [
+        0.7466,
+        0.8273
+      ]
+    }
+  },
+  "filas": [
+    {
+      "frame_dir": "03-sparring_ev_0007",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0016",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0098",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0104",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0109",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0111",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0117",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0120",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0124",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0108",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0084",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "uppercut",
+      "familia_pred": "hook",
+      "cuatro": "uppercut",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0008",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0037",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0118",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0002",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0004",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0011",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0019",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0022",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0103",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0006",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0012",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0021",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0105",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0110",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0097",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0100",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0014",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0020",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0027",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0087",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0112",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0119",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0122",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "uppercut",
+      "cuatro": "hook",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0123",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0107",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0013",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0082",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0121",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0009",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0078",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0086",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0017",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0038",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0125",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0099",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0010",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0058",
+      "fuente": "03-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0029",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0023",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0034",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0096",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0114",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0030",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0077",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0106",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0130",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0080",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "uppercut",
+      "cuatro": "jab",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0102",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0024",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0032",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "03-sparring_ev_0059",
+      "fuente": "03-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0019",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0023",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0024",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0029",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "uppercut",
+      "familia_pred": "hook",
+      "cuatro": "uppercut",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0035",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0069",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0078",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "uppercut",
+      "familia_pred": "uppercut",
+      "cuatro": "uppercut",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0074",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0119",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0016",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0026",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0108",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0117",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0012",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0013",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0027",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0034",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0115",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0116",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0124",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0080",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0038",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0103",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0110",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "uppercut",
+      "familia_pred": "uppercut",
+      "cuatro": "uppercut",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0122",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0022",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0071",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0070",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "uppercut",
+      "familia_pred": "uppercut",
+      "cuatro": "uppercut",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0112",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0043",
+      "fuente": "04-sparring",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0031",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0066",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0082",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0088",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "uppercut",
+      "cuatro": "jab",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0101",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0102",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0062",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0064",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "uppercut",
+      "familia_pred": "uppercut",
+      "cuatro": "uppercut",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0075",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0083",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0123",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0084",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "uppercut",
+      "familia_pred": "uppercut",
+      "cuatro": "uppercut",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0092",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0018",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0090",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0100",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0111",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0089",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0098",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0126",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0028",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0061",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "uppercut",
+      "familia_pred": "straight",
+      "cuatro": "uppercut",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0107",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "uppercut",
+      "familia_pred": "uppercut",
+      "cuatro": "uppercut",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0073",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0087",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0065",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "uppercut",
+      "cuatro": "hook",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0097",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "uppercut",
+      "familia_pred": "straight",
+      "cuatro": "uppercut",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "04-sparring_ev_0099",
+      "fuente": "04-sparring",
+      "peleador": "B",
+      "familia": "uppercut",
+      "familia_pred": "straight",
+      "cuatro": "uppercut",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0042",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0070",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0132",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0135",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0145",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0148",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0301",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "uppercut",
+      "familia_pred": "uppercut",
+      "cuatro": "uppercut",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0319",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "uppercut",
+      "familia_pred": "uppercut",
+      "cuatro": "uppercut",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0331",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0364",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0375",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0092",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0217",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0321",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0382",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "uppercut",
+      "familia_pred": "uppercut",
+      "cuatro": "uppercut",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0041",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0215",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0224",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "uppercut",
+      "cuatro": "hook",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0243",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0363",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0368",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0014",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0016",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0026",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0068",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0080",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0146",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0242",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0298",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "uppercut",
+      "familia_pred": "uppercut",
+      "cuatro": "uppercut",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0038",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0065",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0136",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0137",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0149",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0210",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0264",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0374",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0022",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0077",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0095",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0305",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "uppercut",
+      "cuatro": "hook",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0324",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0370",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0390",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0027",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0030",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0034",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0096",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0250",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0393",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0195",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0036",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0037",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0039",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0072",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0078",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0099",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "uppercut",
+      "cuatro": "hook",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0117",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0144",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0211",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0372",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0057",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0064",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0120",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0125",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0222",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0325",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0333",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0369",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0392",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0204",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0386",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0060",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0118",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0326",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0101",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0012",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0082",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0151",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0174",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0123",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0046",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0380",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0006",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0262",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0312",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "uppercut",
+      "cuatro": "hook",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0329",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "uppercut",
+      "cuatro": "hook",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0166",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "uppercut",
+      "familia_pred": "hook",
+      "cuatro": "uppercut",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0059",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0074",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0394",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0004",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0245",
+      "fuente": "sparring-3-rounds",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0021",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0088",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0109",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0177",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0218",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0271",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0274",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0297",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0334",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0358",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0049",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0028",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0032",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0129",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0309",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0322",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0017",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0020",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0104",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0192",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0241",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0300",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0318",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0362",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0400",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0406",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0019",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0044",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0071",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0102",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0107",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "uppercut",
+      "familia_pred": "hook",
+      "cuatro": "uppercut",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0122",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0143",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0249",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0287",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0288",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0294",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0404",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0033",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0031",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0035",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0069",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0113",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0186",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0188",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0247",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0286",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0383",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0389",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0402",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0029",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0278",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0403",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0066",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0086",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0108",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0377",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0085",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0127",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0128",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0203",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0208",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0225",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0257",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0259",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0267",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0317",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0361",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0015",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0131",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0248",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0272",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0273",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0388",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0043",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0254",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0091",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0105",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0112",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0183",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0275",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0379",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "uppercut",
+      "familia_pred": "straight",
+      "cuatro": "uppercut",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0005",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0197",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0253",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0285",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0299",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0307",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0315",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "uppercut",
+      "cuatro": "hook",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0395",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0147",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0205",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0084",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0289",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0399",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0391",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0067",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0121",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0011",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0191",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0232",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0182",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0340",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0007",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "jab",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0185",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0054",
+      "fuente": "sparring-3-rounds",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0087",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0103",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0053",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0127",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "uppercut",
+      "familia_pred": "straight",
+      "cuatro": "uppercut",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0010",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0118",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0138",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0027",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0038",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0051",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0052",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "uppercut",
+      "cuatro": "hook",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0102",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0064",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "uppercut",
+      "cuatro": "hook",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0011",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0066",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0015",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0058",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0137",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0117",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0057",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0147",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0054",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0150",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0100",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0034",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0061",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0090",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0007",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0126",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0040",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0002",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0120",
+      "fuente": "pacquiao_margarito",
+      "peleador": "A",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0073",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "hook",
+      "cuatro": "hook",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0144",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0088",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0119",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0142",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0055",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0041",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0089",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "hook",
+      "cuatro": "cross",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0105",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0136",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0070",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0071",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0146",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0037",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0099",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0139",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0024",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0135",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0091",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0039",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0101",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0049",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0043",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "uppercut",
+      "familia_pred": "hook",
+      "cuatro": "uppercut",
+      "cuatro_pred": "hook"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0067",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0056",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0125",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0148",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0014",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0046",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0009",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0104",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0023",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0044",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0065",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0048",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "cross",
+      "cuatro_pred": "cross"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0050",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0047",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "straight",
+      "familia_pred": "straight",
+      "cuatro": "jab",
+      "cuatro_pred": "jab"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0022",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "uppercut",
+      "cuatro": "hook",
+      "cuatro_pred": "uppercut"
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0072",
+      "fuente": "pacquiao_margarito",
+      "peleador": "B",
+      "familia": "hook",
+      "familia_pred": "straight",
+      "cuatro": "hook",
+      "cuatro_pred": "jab"
+    }
+  ]
+}

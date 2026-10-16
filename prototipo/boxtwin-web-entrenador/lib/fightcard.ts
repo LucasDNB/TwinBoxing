@@ -60,6 +60,16 @@ export function lados(fc: FightCard): Lado[] {
   return fc.peleadores.B ? ["A", "B"] : ["A"];
 }
 
+/*
+ * Tipo v2 (RT10): los lados con golpes cuya guardia se supuso ortodoxa. Un lado sin golpes no
+ * avisa: no hay jab ni cross que pueda estar invertido.
+ */
+export function ladosConGuardiaSupuesta(fc: FightCard): Lado[] {
+  const sup = fc.clasificador.guardia_supuesta;
+  if (!sup) return [];
+  return lados(fc).filter((l) => sup[l] === true && (fc.peleadores[l]?.golpes.length ?? 0) > 0);
+}
+
 /* El tipo que cuenta: el corregido si existe, si no el del modelo. */
 export function tipoEfectivo(g: Golpe): string | null {
   return g.corregido?.tipo ?? g.tipo ?? null;

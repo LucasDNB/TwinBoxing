@@ -597,7 +597,13 @@ def aplicar_tipos_a_sesion(directorio: Path, exactitud: float | None = None) -> 
     directorio = Path(directorio)
     d = json.loads((directorio / TIPOS).read_text())
     fc = leer_fightcard(directorio)
-    fc = aplicar_tipos(fc, d.get("tipos", {}), d.get("checkpoint", ""), exactitud)
+    # tipos.json 0.2 (tipo v2) trae su exactitud y los campos de metodo y guardia; 0.1 no,
+    # y ahi todo sigue como antes.
+    v2 = d.get("version") == "0.2"
+    if exactitud is None and v2:
+        exactitud = d.get("exactitud_familia_fuente_no_vista")
+    fc = aplicar_tipos(fc, d.get("tipos", {}), d.get("checkpoint", ""), exactitud,
+                       extra=d if v2 else None)
     fc = aplicar_correcciones(fc, leer_correcciones(directorio))
     escribir_fightcard(directorio, fc)
     return fc

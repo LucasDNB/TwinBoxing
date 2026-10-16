@@ -29,7 +29,7 @@ import { useProducto } from "@/lib/api/consultas";
 import { TIPOS_GOLPE, type Sesion } from "@/lib/api/esquemas";
 import { estadoDe } from "@/lib/banderas";
 import {
-  alturaDe, combinacionesDe, lados as ladosDe, lecturaRounds, prefijoRound, recallDeCombinaciones, resumen,
+  alturaDe, combinacionesDe, lados as ladosDe, ladosConGuardiaSupuesta, lecturaRounds, prefijoRound, recallDeCombinaciones, resumen,
   type Altura, type FightCard, type Lado, type Resumen,
 } from "@/lib/fightcard";
 import { decimal, entero, nombreDeTipo, porcentajeAR } from "@/lib/formato";
@@ -109,6 +109,11 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
         nota={textos.estimacionTipo(clasif.checkpoint, clasif.exactitud_familia_fuente_no_vista)}
       >
         <div className="flex flex-col gap-4">
+          {ladosConGuardiaSupuesta(fc).map((l) => (
+            <p key={l} role="note" data-aviso-guardia={l} className="rounded-md border border-estimado-borde bg-superficie-2 p-2 text-xs text-texto-2">
+              {textos.avisoGuardiaSupuesta(nombres[l] ?? l)}
+            </p>
+          ))}
           {TIPOS_GOLPE.map((t) => (
             <FilaAB
               key={t}
