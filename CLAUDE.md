@@ -292,6 +292,13 @@ instante exacto del video.
 Están pre-registrados en la sección 7 de la spec, escritos antes de medir. No se
 tocan después de ver los resultados.
 
+## 5quater. Fight-Card, tipo de golpe v2 (desde el 16-10)
+
+Specs SDD en `docs/specs/2026-10-16-fightcard-tipo-v2/`, registro en
+`docs/tareas/2026-10-16-fightcard-tipo-v2.md`, trabajo desatendido con `/noche-tipo-v2`. Familia
+con el modelo geométrico E4 y jab/cross por brazo del detector y guardia, detrás de
+`BOXTWIN_CLASIFICADOR` (por defecto `poseconv3d`, el comportamiento de antes).
+
 ## 5ter. Clasificador geométrico y 3D, E4 a E6 (desde el 15-10)
 
 Specs SDD en `docs/specs/2026-10-16-clasificador-geometrico/` (00 a 03), registro de tareas
