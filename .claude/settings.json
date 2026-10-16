@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador/*)",
+      "Bash(~/miniforge3/envs/boxtwin_mmaction/bin/python scripts/clasificador/*)",
+      "Bash(~/miniforge3/envs/twinboxing_env/bin/python -m pytest *)",
+      "Bash(bash scripts/clasificador/correr_campana.sh --solo *)",
+      "Bash(nvidia-smi *)",
+      "Bash(tail *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git switch *)",
+      "Edit(/docs/experiments/**)",
+      "Edit(/docs/tesis/**)"
+    ],
+    "ask": [
+      "Bash(tmux *)",
+      "Edit(/README.md)",
+      "Edit(/docs/specs/**)"
+    ],
+    "deny": [
+      "Edit(/anotacion*/annotations/**)",
+      "Read(~/boxtwin/clasificador-2026-10/lotes/*/clave/**)",
+      "Bash(git push *)",
+      "Bash(git reset *)",
+      "Bash(git clean *)",
+      "Bash(rm *)",
+      "Bash(pip install *)",
+      "Bash(conda install *)",
+      "Bash(conda update *)",
+      "Bash(mamba *)"
+    ]
+  }
+}

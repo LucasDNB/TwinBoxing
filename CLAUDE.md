@@ -292,6 +292,14 @@ instante exacto del video.
 Están pre-registrados en la sección 7 de la spec, escritos antes de medir. No se
 tocan después de ver los resultados.
 
+## 5bis. Campaña del clasificador por tipo y altura (desde el 14-10)
+
+Pre-registro en `docs/specs/2026-10-14-clasificador-tipo-altura.md`. Se corre fase por fase
+con `/etiquetado-reentreno <fase>` (`.claude/skills/etiquetado-reentreno/`), con dos
+subagentes: `etiquetador-golpes` (a ciegas, con un hook que le bloquea todo menos las tiras) y
+`auditor-medicion`. Scripts en `scripts/clasificador/`, datos en
+`~/boxtwin/clasificador-2026-10/`. Nada de esa campaña corre antes del commit del pre-registro.
+
 ## 6. Experimentos pendientes que bloquean la escritura
 
 Ninguno depende del dataset y ninguno está hecho todavía. **El Capítulo 4 no se

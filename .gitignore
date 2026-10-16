@@ -44,4 +44,10 @@ Thumbs.db
 # === Inicial ===
 *.pt
 test-inicial/runs
-.claude/
+.claude/*
+# Se versiona la configuracion compartida de Claude Code (agentes, skills, hooks y permisos de la
+# campana del clasificador, 14-10). Los worktrees de sesiones y settings.local.json siguen afuera.
+!.claude/settings.json
+!.claude/agents/
+!.claude/skills/
+!.claude/hooks/
