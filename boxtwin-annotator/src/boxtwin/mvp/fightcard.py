@@ -316,7 +316,8 @@ def _lectura(fc: dict) -> dict:
     }
 
 
-def aplicar_tipos(fc: dict, tipos: dict, checkpoint: str, exactitud: float | None = None) -> dict:
+def aplicar_tipos(fc: dict, tipos: dict, checkpoint: str, exactitud: float | None = None,
+                  extra: dict | None = None) -> dict:
     """
     Pega los tipos que produjo la etapa de clasificacion, sobre la Fight-Card ya escrita.
 
@@ -326,6 +327,10 @@ def aplicar_tipos(fc: dict, tipos: dict, checkpoint: str, exactitud: float | Non
 
     Una correccion del entrenador NO se pisa. Un modelo nuevo puede mejorar el promedio y
     seguir equivocandose justo donde una persona ya miro y dijo otra cosa.
+
+    `extra` es lo que trae un tipos.json 0.2 (tipo v2): metodo, referencia y guardia_supuesta
+    van al bloque clasificador, y p_familia y rol a cada golpe. Sin `extra` (tipos.json 0.1)
+    esos campos se sacan si estaban, para que volver a v1 no deje rotulos de v2 colgados.
     """
     fc["clasificador"] = {
         **fc.get("clasificador", {}),
@@ -333,6 +338,11 @@ def aplicar_tipos(fc: dict, tipos: dict, checkpoint: str, exactitud: float | Non
         "exactitud_familia_fuente_no_vista": exactitud,
         "estimado": True,
     }
+    for campo in CAMPOS_V2_CLASIFICADOR:
+        if extra and extra.get(campo) is not None:
+            fc["clasificador"][campo] = extra[campo]
+        else:
+            fc["clasificador"].pop(campo, None)
     for datos in fc["peleadores"].values():
         for g in datos["golpes"]:
             t = tipos.get(g["id"])
@@ -346,7 +356,18 @@ def aplicar_tipos(fc: dict, tipos: dict, checkpoint: str, exactitud: float | Non
             g["tipo"] = t.get("tipo")
             g["confianza_tipo"] = t.get("confianza")
             g["tipo_clasificador"] = t.get("crudo")
+            for campo in CAMPOS_V2_GOLPE:
+                if extra and t.get(campo) is not None:
+                    g[campo] = t[campo]
+                else:
+                    g.pop(campo, None)
     return _combinaciones(fc)
+
+
+# Tipo v2 (docs/specs/2026-10-16-fightcard-tipo-v2): campos opcionales, una Fight-Card sin
+# ellos es una de v1 (metodo poseconv3d).
+CAMPOS_V2_CLASIFICADOR = ("metodo", "referencia", "guardia_supuesta")
+CAMPOS_V2_GOLPE = ("p_familia", "rol")
 
 
 def aplicar_correcciones(fc: dict, correcciones: list[dict]) -> dict:

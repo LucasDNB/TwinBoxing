@@ -377,6 +377,23 @@ def build_parser() -> argparse.ArgumentParser:
                     help="exactitud de familia medida del checkpoint sobre fuente no "
                          "vista. Va al documento para que el numero se lea con su margen")
 
+    cl = sub.add_parser(
+        "clasificar",
+        help="tipo de golpe v2: familia con el modelo geometrico (E4) y jab/cross por guardia",
+        description=(
+            "Lee segmentos.json y poses.npz y escribe tipos.json 0.2. Corre en este entorno, "
+            "sin boxtwin_mmaction. Despues va 'tipos', igual que con v1."
+        ),
+    )
+    cl.add_argument("sesion", type=Path)
+    cl.add_argument("--modelo", type=Path, default=Path("~/boxtwin/modelos/clasificador_geo_v1"),
+                    help="directorio con meta.json y las semillas")
+    for lado in ("a", "b"):
+        cl.add_argument(f"--guardia-{lado}", dest=f"guardia_{lado}", default="desconocida",
+                        choices=["ortodoxa", "zurda", "desconocida"],
+                        help="guardia del boxeador de ese lado. Desconocida: se supone ortodoxa "
+                             "y la Fight-Card lo dice")
+
     rv = sub.add_parser(
         "render",
         help="escribe el video procesado: los dos peleadores marcados y una consola para cada uno",
@@ -731,6 +748,26 @@ def _cmd_tipos(args: argparse.Namespace) -> int:
         print(f"  {corregidos} correcciones del entrenador conservadas")
     print("\n  El tipo es una ESTIMACION y esta rotulado como tal: el clasificador no")
     print("  generaliza a fuentes nuevas.")
+    return 0
+
+
+def _cmd_clasificar(args: argparse.Namespace) -> int:
+    import time
+
+    from boxtwin.mvp.clasificador_geo import clasificar_sesion
+
+    t0 = time.perf_counter()
+    d = clasificar_sesion(
+        args.sesion, args.modelo.expanduser(),
+        None if args.guardia_a == "desconocida" else args.guardia_a,
+        None if args.guardia_b == "desconocida" else args.guardia_b,
+    )
+    print(f"{len(d['tipos'])} segmentos clasificados, {d['segmentos_sin_clasificar']} sin pasos "
+          f"usables ({time.perf_counter() - t0:.2f} s, {d['checkpoint']})")
+    supuestas = [lado for lado, s in d["guardia_supuesta"].items() if s]
+    if supuestas:
+        print(f"  guardia supuesta ortodoxa en {', '.join(supuestas)}: jab y cross pueden estar invertidos")
+    print(f"  -> {Path(args.sesion) / 'tipos.json'}")
     return 0
 
 
@@ -1126,6 +1163,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_completar(args)
         if args.comando == "tipos":
             return _cmd_tipos(args)
+        if args.comando == "clasificar":
+            return _cmd_clasificar(args)
         if args.comando == "enriquecer":
             return _cmd_enriquecer(args)
         if args.comando == "corregir":
