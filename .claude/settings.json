@@ -15,7 +15,16 @@
       "Bash(git commit *)",
       "Bash(git switch *)",
       "Edit(/docs/experiments/**)",
-      "Edit(/docs/tesis/**)"
+      "Edit(/docs/tesis/**)",
+      "Bash(~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/*)",
+      "Bash(~/miniforge3/envs/boxtwin_mmaction/bin/python scripts/clasificador_geo/*)",
+      "Bash(~/miniforge3/envs/twinboxing_env/bin/python -c *)",
+      "Bash(~/miniforge3/envs/boxtwin_mmaction/bin/python -c *)",
+      "Bash(mkdir -p ~/boxtwin/*)",
+      "Bash(sleep *)",
+      "Bash(git rev-parse *)",
+      "Edit(/scripts/clasificador_geo/**)",
+      "Edit(~/boxtwin/clasificador-geo-2026-10/**)"
     ],
     "ask": [
       "Bash(tmux *)",

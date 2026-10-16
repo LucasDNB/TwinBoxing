@@ -292,6 +292,13 @@ instante exacto del video.
 Están pre-registrados en la sección 7 de la spec, escritos antes de medir. No se
 tocan después de ver los resultados.
 
+## 5ter. Clasificador geométrico y 3D, E4 a E6 (desde el 15-10)
+
+Specs SDD en `docs/specs/2026-10-16-clasificador-geometrico/` (00 a 03), registro de tareas
+en `scripts/clasificador_geo/TAREAS.md`, trabajo desatendido con `/noche-geometrico`. Datos en
+`~/boxtwin/clasificador-geo-2026-10/`. Resultados de E1 a E3 que motivan esto:
+`docs/experiments/2026-10-15-clasificador-tipo-altura.md`.
+
 ## 5bis. Campaña del clasificador por tipo y altura (desde el 14-10)
 
 Pre-registro en `docs/specs/2026-10-14-clasificador-tipo-altura.md`. Se corre fase por fase

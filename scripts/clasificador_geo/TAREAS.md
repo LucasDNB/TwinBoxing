@@ -1,0 +1,33 @@
+# Registro de tareas (SDD) · clasificador geométrico y 3D, noche del 15 al 16-10
+
+Specs: `docs/specs/2026-10-16-clasificador-geometrico/` (00 a 03). Estados: `pendiente`,
+`en curso`, `hecha` (pruebas en verde, evidencia escrita), `bloqueada` (qué la bloquea),
+`no realizado` (decisión delegada que la saca, con el Id de la decisión). La evidencia es el
+comando que la verifica o el archivo que deja.
+
+Orden: G0 primero. Después G1 a G6 en orden. G7 y G8 son la parte 3D y pueden quedar
+`no realizado` sin afectar al resto. G9 a G12 cierran.
+
+| Id | Tarea | Spec | Depende de | Estado | Evidencia / notas |
+|---|---|---|---|---|---|
+| G0 | Arranque: rama `exp/clasificador-geometrico`, sesión en la raíz, pruebas de `scripts/clasificador` en verde, `huellas.py verificar` (las huellas del 14-10, en `~/boxtwin/clasificador-2026-10/huellas.json`), commit del pre-registro solo, hash en `<trabajo>/preregistro.txt`, `nvidia-smi` con versión de driver en `NOCHE.md` | 00, 01 | — | pendiente | |
+| G1 | `datos.py` + pruebas: golpes por fuente, ventanas, etiquetas, `rol` por `Event.arm_role`; chequeo contra los folds de E1 | 02 §1, §7.1 | G0 | pendiente | |
+| G2 | `features2d.py` + pruebas: 20 del brazo (import de `features_de`), 6 del rival, remuestreo a 32; escribe `golpes.npz` | 02 §2, §7.2 | G1 | pendiente | |
+| G3 | `modelo.py`, `entrenar.py` + pruebas: `ClasificadorGolpe`, una fuente afuera, cinco semillas, reanudable, CPU o GPU | 02 §3, §7.3, §7.4 | G2 | pendiente | |
+| G4 | `regla_c8.py` + prueba: la regla de C8 sobre los 775 completos de las cuatro fuentes de C8 | 02 §6 | G1 | pendiente | |
+| G5 | `evaluar.py` + pruebas: ensambles, métricas, ocho clases, veredictos del pre-registro §3, fusión F | 02 §6, §7.7 | G3, G4 | pendiente | |
+| G6 | Correr E4 y E4a (7 folds × 5 semillas cada una) y evaluar; F si están los `pred.pkl` de E3 | 01 §2, §3 | G3, G5 | pendiente | |
+| G7 | `elevar3d.py`: MotionBERT sobre las ventanas del atacante; control de calidad de largos de hueso; `pose3d.npz` | 02 §4.1 | G1 | pendiente | |
+| G8 | `features3d.py` + pruebas (invariancia a rotación y espejo); correr E5 y evaluar | 02 §4.2, §7.5 | G6, G7 | pendiente | |
+| G9 | `rol_por_brazo.py` + pruebas; correr E6 | 02 §5, §7.6 | G0 | pendiente | |
+| G10 | `auditor-medicion` sobre E4 a E6 (adaptar sus ítems: pre-registro antes que resultados, huellas, sin fuga por fold, recálculo independiente de la familia de E4 y de E6) | 01 | G6, G9 (G8 si se hizo) | pendiente | |
+| G11 | Documentos: `docs/experiments/2026-10-16-clasificador-geometrico.md` (E4, E4a, F, E5) y `docs/experiments/2026-10-16-rol-por-brazo.md` (E6), con el formato de `2026-10-15-clasificador-tipo-altura.md`; datos a `docs/experiments/datos/`; entradas cortas en el README raíz las deja propuestas en el documento (el README pide confirmación) | 01 §5 | G10 | pendiente | |
+| G12 | Notas de tesis `docs/tesis/2026-10-16-clasificador-geometrico-cambios.md` (Cap 7, Cap 8 con BoxMind, R-01, Declaración de uso de IA) y resumen final en `NOCHE.md` | 01 §5 | G11 | pendiente | |
+
+## Decisiones tomadas durante la noche
+
+(Claude Code agrega acá cada elección de D10, con motivo.)
+
+## Preguntas abiertas para Lucas
+
+(Lo que no se pudo resolver sin decidir algo de fondo.)
