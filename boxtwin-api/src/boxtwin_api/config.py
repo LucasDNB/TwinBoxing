@@ -132,6 +132,19 @@ class Config:
     checkpoint_clasificador: Path = field(
         default_factory=lambda: _ruta("BOXTWIN_CHECKPOINT_CLASIFICADOR", "modelos/poseC3D.pth")
     )
+    # Tipo de golpe v2 (docs/specs/2026-10-16-fightcard-tipo-v2): "geometrico" clasifica la
+    # familia con el modelo de E4 en el entorno del anotador, sin boxtwin_mmaction. Por
+    # defecto "poseconv3d", el comportamiento de antes; lo enciende Lucas. Un valor mal
+    # escrito cuenta como el de antes.
+    clasificador: str = field(
+        default_factory=lambda: (
+            "geometrico" if os.environ.get("BOXTWIN_CLASIFICADOR", "").strip().lower() == "geometrico"
+            else "poseconv3d"
+        )
+    )
+    modelo_clasificador_geo: Path = field(
+        default_factory=lambda: _ruta("BOXTWIN_MODELO_CLASIFICADOR_GEO", "~/boxtwin/modelos/clasificador_geo_v1")
+    )
     umbral_detector: float = field(
         default_factory=lambda: float(os.environ.get("BOXTWIN_UMBRAL", "0.80"))
     )
@@ -204,6 +217,11 @@ class Config:
         if not self.invitacion:
             return "cerrado"
         return "abierto" if self.invitacion == "abierto" else "invitacion"
+
+    @property
+    def hay_clasificador(self) -> bool:
+        """Si la etapa clasificar se puede correr: v2 no necesita BOXTWIN_CMD_CLASIFICADOR."""
+        return self.clasificador == "geometrico" or bool(self.cmd_clasificador)
 
     def dir_sesion(self, sesion_id: str) -> Path:
         return self.datos / "sesiones" / sesion_id

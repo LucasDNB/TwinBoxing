@@ -88,6 +88,20 @@ def comando_de(trabajo: Trabajo, sesion: Sesion) -> list[list[str]]:
             *(["--manual"] if p.get("manual") else []),
         ]]
 
+    if trabajo.etapa == "clasificar" and cfg.clasificador == "geometrico":
+        # Tipo v2: los dos comandos corren en el entorno del anotador. La guardia sale del
+        # boxeador asignado a cada lado; sin boxeador o sin guardia, el comando supone
+        # ortodoxa y la Fight-Card lo dice.
+        return [
+            [
+                *cfg.cmd_boxtwin, "clasificar", str(directorio),
+                "--modelo", str(cfg.modelo_clasificador_geo),
+                "--guardia-a", guardia_de(sesion.boxeador_a),
+                "--guardia-b", guardia_de(sesion.boxeador_b),
+            ],
+            [*cfg.cmd_boxtwin, "tipos", str(directorio)],
+        ]
+
     if trabajo.etapa == "clasificar":
         if not cfg.cmd_clasificador:
             raise RuntimeError(
@@ -111,6 +125,12 @@ def comando_de(trabajo: Trabajo, sesion: Sesion) -> list[list[str]]:
         return [cmd]
 
     raise RuntimeError(f"etapa desconocida: {trabajo.etapa}")
+
+
+def guardia_de(boxeador) -> str:
+    """La guardia de un boxeador como la pide `boxtwin-annotator clasificar`."""
+    g = getattr(boxeador, "guardia", None)
+    return g if g in ("ortodoxa", "zurda") else "desconocida"
 
 
 def ejecutar_trabajo(db, trabajo: Trabajo, timeout: float | None = None) -> str:
@@ -187,8 +207,10 @@ def correr(una_vuelta: bool = False, worker: str | None = None) -> int:
                     terminar(db, trabajo, estado_sesion=estado)
                     # Encadenar la clasificacion aca y no en la API: recien cuando existe
                     # segmentos.json hay algo que clasificar, y eso lo sabe el worker.
+                    # Con v2 se encadena aunque no haya BOXTWIN_CMD_CLASIFICADOR: es el
+                    # caso de un worker sin boxtwin_mmaction.
                     if (trabajo.etapa == "completar" and estado == "listo"
-                            and cfg.cmd_clasificador):
+                            and cfg.hay_clasificador):
                         from boxtwin_api.cola import encolar
 
                         encolar(db, trabajo.sesion_id, "clasificar")
