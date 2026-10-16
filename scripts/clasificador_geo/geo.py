@@ -24,7 +24,8 @@ from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
 REPO = AQUI.parents[1]
-sys.path.insert(0, str(REPO / "scripts" / "clasificador"))
+# al final: scripts/clasificador tiene su propio evaluar.py y no tiene que tapar el de aca
+sys.path.append(str(REPO / "scripts" / "clasificador"))
 import comun  # noqa: E402
 
 # Directorio de trabajo de esta campana. Nada pesado entra a git.

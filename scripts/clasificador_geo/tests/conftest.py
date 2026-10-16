@@ -21,7 +21,7 @@ def trabajo(tmp_path, monkeypatch):
     monkeypatch.setenv("BOXTWIN_CLASIFICADOR_GEO", str(tmp_path))
     import geo
     importlib.reload(geo)
-    for nombre in ("datos", "features2d", "entrenar", "evaluar_geo", "regla_c8", "rol_por_brazo",
+    for nombre in ("datos", "features2d", "entrenar", "evaluar", "regla_c8", "rol_por_brazo",
                    "features3d", "elevar3d"):
         if nombre in sys.modules:
             importlib.reload(sys.modules[nombre])

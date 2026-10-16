@@ -14,8 +14,8 @@ Orden: G0 primero. Después G1 a G6 en orden. G7 y G8 son la parte 3D y pueden q
 | G1 | `datos.py` + pruebas: golpes por fuente, ventanas, etiquetas, `rol` por `Event.arm_role`; chequeo contra los folds de E1 | 02 §1, §7.1 | G0 | hecha | `datos.py`: 1047 golpes, conteos por fuente = pre-registro, mismo conjunto de frame_dir que folds E1; series por fuente en `<trabajo>/datos/series/`; 5 pruebas ok |
 | G2 | `features2d.py` + pruebas: 20 del brazo (import de `features_de`), 6 del rival, remuestreo a 32; escribe `golpes.npz` | 02 §2, §7.2 | G1 | hecha | `features2d.py`: X (1047, 32, 26), 84,2% de pasos usables, 13 golpes sin ningun paso usable (ver decisiones); 5 pruebas ok; huellas intactas |
 | G3 | `modelo.py`, `entrenar.py` + pruebas: `ClasificadorGolpe`, una fuente afuera, cinco semillas, reanudable, CPU o GPU | 02 §3, §7.3, §7.4 | G2 | hecha | `modelo.py`, `entrenar.py`; 8 pruebas nuevas (forma, máscara, sobreajuste, misma semilla = mismo pred en CPU, sin fuga de la fuente de prueba, reanudable, CropResize) |
-| G4 | `regla_c8.py` + prueba: la regla de C8 sobre los 775 completos de las cuatro fuentes de C8 | 02 §6 | G1 | pendiente | |
-| G5 | `evaluar.py` + pruebas: ensambles, métricas, ocho clases, veredictos del pre-registro §3, fusión F | 02 §6, §7.7 | G3, G4 | pendiente | |
+| G4 | `regla_c8.py` + prueba: la regla de C8 sobre los 775 completos de las cuatro fuentes de C8 | 02 §6 | G1 | hecha | `regla_c8.py`: 775 golpes, 128 al cuerpo (= pre-registro), ventana anotada sin margen, sin dato = error; 2 pruebas |
+| G5 | `evaluar.py` + pruebas: ensambles, métricas, ocho clases, veredictos del pre-registro §3, fusión F | 02 §6, §7.7 | G3, G4 | hecha | `evaluar.py`: 11 pruebas (perfectas = 1, 0,029 / 0,031 con 4 y 5 de 7, desvío > 0,03, 3 de 4, ocho clases, fusión, orden de pred.npz) |
 | G6 | Correr E4 y E4a (7 folds × 5 semillas cada una) y evaluar; F si están los `pred.pkl` de E3 | 01 §2, §3 | G3, G5 | pendiente | |
 | G7 | `elevar3d.py`: MotionBERT sobre las ventanas del atacante; control de calidad de largos de hueso; `pose3d.npz` | 02 §4.1 | G1 | pendiente | |
 | G8 | `features3d.py` + pruebas (invariancia a rotación y espejo); correr E5 y evaluar | 02 §4.2, §7.5 | G6, G7 | pendiente | |
@@ -41,6 +41,12 @@ Orden: G0 primero. Después G1 a G6 en orden. G7 y G8 son la parte 3D y pueden q
    convolución: si no, las convoluciones dilatadas llevan a los pasos usables lo que hay en los no
    usables. Un lote de una sola muestra se saltea (BatchNorm no entrena con una); con los tamaños
    de fold reales no pasa.
+5. G5. "Gana en un fold" se lee como estrictamente mayor; un empate no cuenta. Para P6, el
+   freno del punto 6 se aplica si el desvío de familia de E4 o el de E5 pasa de 0,03 (la lectura
+   más estricta, D10). El freno de dispersión no se aplica a la altura, porque el punto 6 habla
+   solo de la familia.
+6. G5. P5 altura compara la balanceada de E4 sobre las cuatro fuentes de C8 (ensamble, 775
+   golpes) con la de la regla sobre esos mismos golpes, y por fuente fold contra fuente.
 
 ## Preguntas abiertas para Lucas
 
