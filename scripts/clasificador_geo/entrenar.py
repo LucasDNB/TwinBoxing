@@ -48,7 +48,7 @@ HIPER = {"lr": 1e-3, "weight_decay": 1e-4, "batch": 64, "epocas": 60, "crop_min"
 EXPERIMENTOS = {
     "E4": {"columnas": list(range(26)), "con_3d": False, "que": "20 del brazo + 6 del rival"},
     "E4a": {"columnas": list(range(20)), "con_3d": False, "que": "solo las 20 del brazo (ablacion)"},
-    "E5": {"columnas": list(range(26)), "con_3d": True, "que": "26 de E4 + 18 features 3D"},
+    "E5": {"columnas": list(range(26)), "con_3d": True, "que": "26 de E4 + 16 features 3D (el diseno dice 18; ver TAREAS.md, decision 9)"},
 }
 
 
