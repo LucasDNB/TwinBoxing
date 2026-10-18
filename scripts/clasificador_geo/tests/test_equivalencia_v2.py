@@ -25,6 +25,7 @@ cg = pytest.importorskip("boxtwin.mvp.clasificador_geo")
 
 TRABAJO_REAL = Path("~/boxtwin/clasificador-geo-2026-10").expanduser()
 MODELO_REAL = Path("~/boxtwin/modelos/clasificador_geo_v1").expanduser()
+MODELO_REAL_SIN_RIVAL = Path("~/boxtwin/modelos/clasificador_geo_v1_sin_rival").expanduser()
 TOL_X = 1e-5
 TOL_P = 1e-4
 
@@ -139,3 +140,53 @@ def test_ca2_real_sparring():
     linea += f"; ensamble de 5 semillas {(ens.argmax(1) == y).mean():.3f}"
     print(linea)
     assert dif <= TOL_P
+
+
+# ---------------------------------------------------------------------------
+# Bolsa y sombra (16-10): el modelo de E4a. El producto le pasa las 26 columnas de
+# features_golpe y ClasificadorGeo recorta a las 20 del brazo; tiene que dar lo mismo que
+# entrenar.predecir con las columnas de E4a.
+# ---------------------------------------------------------------------------
+
+def test_ca2_logica_sin_rival(tmp_path):
+    import entrenar
+    import entrenar_final
+    rng = np.random.default_rng(1)
+    n = 30
+    X26 = rng.normal(size=(n, 32, 26)).astype(np.float32)
+    d = {"X": X26[..., :20].copy(), "M": rng.uniform(size=(n, 32)) > 0.1,
+         "y_tipo": rng.integers(0, 3, n), "y_altura": rng.integers(0, 2, n),
+         "fuente": np.array(["a"] * 10 + ["b"] * 20), "frame_dir": np.arange(n).astype(str),
+         "nombres": [str(i) for i in range(20)]}
+    out = entrenar_final.entrenar_final(d, tmp_path, None, semillas=(0,), epocas=2, metricas={}, exp="E4a")
+    clf = cg.ClasificadorGeo.cargar(out)
+    assert clf.sin_rival
+    info = json.loads((out / "meta.json").read_text())["semillas"]["s0"]
+    net = entrenar.ClasificadorGolpe(20)
+    net.load_state_dict(torch.load(out / "s0.pt"))
+    net.eval()
+    ref, _ = entrenar.predecir(net, d["X"], d["M"], np.array(info["media"], np.float32),
+                               np.array(info["desvio"], np.float32))
+    assert np.abs(clf.familia(X26, d["M"]) - ref).max() <= TOL_P
+
+
+@pytest.mark.skipif(not (_hay_reales() and (MODELO_REAL_SIN_RIVAL / "meta.json").is_file()),
+                    reason="sin golpes.npz o sin el modelo sin rival")
+def test_ca2_real_sin_rival():
+    import entrenar
+    d26 = entrenar.cargar_entrada("E4", TRABAJO_REAL)
+    d20 = entrenar.cargar_entrada("E4a", TRABAJO_REAL)
+    assert np.array_equal(d26["X"][..., :20], d20["X"])
+    clf = cg.ClasificadorGeo.cargar(MODELO_REAL_SIN_RIVAL)
+    assert clf.sin_rival and clf.meta.get("exp") == "E4a"
+    info = clf.meta["semillas"]["s0"]
+    net = entrenar.ClasificadorGolpe(20)
+    net.load_state_dict(torch.load(MODELO_REAL_SIN_RIVAL / info["archivo"]))
+    net.eval()
+    ref, _ = entrenar.predecir(net, d20["X"], d20["M"], np.array(info["media"], np.float32),
+                               np.array(info["desvio"], np.float32))
+    s0 = cg.ClasificadorGeo(clf.modelos[:1], clf.medias[:1], clf.desvios[:1], clf.meta)
+    dif = float(np.abs(s0.familia(d26["X"], d26["M"]) - ref).max())
+    print(f"CA2 sin rival: 1047 golpes, produccion (26 recortadas) contra predecir E4a (s0) {dif:.2e}")
+    assert dif <= TOL_P
+

@@ -20,6 +20,10 @@ QUE HACE
     sus probabilidades de familia.
   - rol y tipo_de: adelantado o atrasado con core.types.arm_role, y el tipo de pantalla.
   - clasificar_sesion: de segmentos.json y poses.npz a tipos.json version 0.2.
+  - Bolsa y sombra: no hay rival y E4 recibiria sus 6 features en cero todo el golpe, algo
+    que casi no vio al entrenar. Para esas sesiones el worker pasa el modelo de E4a (solo las
+    20 del brazo, familia 0,724 con una fuente afuera contra 0,727 de E4) y ClasificadorGeo
+    recorta las columnas segun el n_features de su meta.json.
 
 USO
   from boxtwin.mvp.clasificador_geo import clasificar_sesion
@@ -53,6 +57,8 @@ VERSION_TIPOS = "0.2"
 # Pre-registro de E4, seccion 2 (scripts/clasificador_geo/geo.py): margen y pasos.
 MARGEN = 8
 PASOS = 32
+# Columnas de features_golpe: 20 del brazo (detector) y 6 del rival. E4 usa las 26, E4a las 20.
+N_BRAZO, N_RIVAL = 20, 6
 
 # De scripts/clasificador_geo/features2d.py, sin cambios.
 MIN_SCORE = 0.3
@@ -222,6 +228,16 @@ class ClasificadorGeo:
             desvios.append(np.asarray(info["desvio"], np.float32))
         return cls(modelos, medias, desvios, meta)
 
+    @property
+    def n_features(self) -> int:
+        # Sin meta (como en las pruebas que arman el ensamble a mano), lo dice la estandarizacion.
+        return int(self.meta.get("n_features") or len(self.medias[0]))
+
+    @property
+    def sin_rival(self) -> bool:
+        """El modelo de E4a (solo las 20 del brazo): el de bolsa y sombra, donde no hay rival."""
+        return self.n_features == N_BRAZO
+
     def familia(self, X: np.ndarray, M: np.ndarray) -> np.ndarray:
         """(n, 3): promedio de las probabilidades de familia de las semillas."""
         import torch
@@ -229,6 +245,12 @@ class ClasificadorGeo:
         X = np.asarray(X, np.float32)
         if X.ndim == 2:
             X, M = X[None], np.asarray(M)[None]
+        # features_golpe da siempre las 26 de E4; el modelo de E4a usa las 20 primeras, que
+        # son las del brazo (scripts/clasificador_geo/entrenar.py, EXPERIMENTOS["E4a"]).
+        if X.shape[-1] != self.n_features:
+            if self.n_features != N_BRAZO or X.shape[-1] != N_BRAZO + N_RIVAL:
+                raise ValueError(f"el modelo espera {self.n_features} features y llegan {X.shape[-1]}")
+            X = X[..., :N_BRAZO]
         m = torch.tensor(np.asarray(M, bool), dtype=torch.float32)
         ps = []
         with torch.no_grad():
@@ -325,6 +347,8 @@ def clasificar_sesion(directorio: Path, modelo: Path = MODELO_POR_DEFECTO, guard
         "exactitud_familia_fuente_no_vista": met.get("familia_fuente_no_vista"),
         "referencia": met.get("referencia"),
         "clases": list(FAMILIAS),
+        # "con_rival" (E4, sparring y combate) o "sin_rival" (E4a, bolsa y sombra)
+        "entrada": "sin_rival" if clf.sin_rival else "con_rival",
         "guardia": guardia,
         "guardia_supuesta": supuesta,
         "segmentos_sin_clasificar": saltados,

@@ -18,8 +18,14 @@ QUE HACE
   hiperparametros, el commit, el sha256 de cada .pt y de golpes.npz, y las metricas de E4 que
   muestra la Fight-Card, copiadas del json de E4. Reanudable: una semilla con .pt se saltea.
 
+  Con --exp E4a (16-10, bolsa y sombra) usa las columnas 0 a 19, las del brazo: en una sesion
+  de una sola persona no hay rival y E4 veria sus 6 features en cero todo el golpe. Guarda en
+  ~/boxtwin/modelos/clasificador_geo_v1_sin_rival con las metricas de E4a (familia 0,724 con
+  una fuente afuera). La receta es la misma; solo cambian las columnas.
+
 USO
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar_final.py
+  ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar_final.py --exp E4a --dispositivo cpu
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar_final.py --excluir Sparring --semillas 0
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar_final.py --excluir 03-sparring 04-sparring
 """
@@ -43,6 +49,14 @@ SALIDA = Path("~/boxtwin/modelos/clasificador_geo_v1").expanduser()
 METRICAS_E4 = REPO / "docs" / "experiments" / "datos" / "2026-10-16-clasificador-geo-E4.json"
 REFERENCIA = "docs/experiments/2026-10-16-clasificador-geometrico.md"
 EXP = "E4"
+# Por experimento: nombre del modelo, salida por defecto y de donde salen las metricas que
+# muestra la Fight-Card. E4a es el de bolsa y sombra (sin rival).
+VARIANTES = {
+    "E4": {"nombre": "clasificador_geo_v1", "salida": SALIDA, "metricas": METRICAS_E4},
+    "E4a": {"nombre": "clasificador_geo_v1_sin_rival",
+            "salida": Path("~/boxtwin/modelos/clasificador_geo_v1_sin_rival").expanduser(),
+            "metricas": REPO / "docs" / "experiments" / "datos" / "2026-10-16-clasificador-geo-E4a.json"},
+}
 
 
 def sha256(p: Path) -> str:
@@ -71,7 +85,7 @@ def metricas_e4(ruta: Path = METRICAS_E4) -> dict:
 
 def entrenar_final(d: dict, salida: Path, excluir: str | None = None, semillas=SEMILLAS,
                    dispositivo: str = "cpu", epocas: int = entrenar.HIPER["epocas"],
-                   golpes_npz: Path | None = None, metricas: dict | None = None) -> Path:
+                   golpes_npz: Path | None = None, metricas: dict | None = None, exp: str = EXP) -> Path:
     """
     Entrena las semillas pedidas sobre todo menos `excluir` y escribe .pt y meta.json en
     `salida` (o salida/sin_<fuente>). Devuelve el directorio.
@@ -91,10 +105,11 @@ def entrenar_final(d: dict, salida: Path, excluir: str | None = None, semillas=S
         torch.save({k: v.detach().cpu() for k, v in modelo.state_dict().items()}, pt)
         por_semilla[f"s{s}"] = {"archivo": pt.name, "sha256": sha256(pt),
                                 "media": media.tolist(), "desvio": desvio.tolist()}
+    base = VARIANTES[exp]["nombre"]
     meta = {
-        "nombre": "clasificador_geo_v1" if not excluir else f"clasificador_geo_v1_sin_{excluir}",
+        "nombre": base if not excluir else f"{base}_sin_{excluir}",
         "metodo": "geometrico-v1",
-        "exp": EXP,
+        "exp": exp,
         "n_features": int(d["X"].shape[-1]),
         "features": list(d["nombres"]),
         "pasos": PASOS,
@@ -107,7 +122,9 @@ def entrenar_final(d: dict, salida: Path, excluir: str | None = None, semillas=S
         "dispositivo": dispositivo,
         "commit": entrenar._commit(),
         "golpes_npz_sha256": sha256(golpes_npz) if golpes_npz and Path(golpes_npz).is_file() else None,
-        "metricas_e4": metricas if metricas is not None else metricas_e4(),
+        # La clave sigue siendo metricas_e4 porque es la que lee el producto; con --exp E4a
+        # trae las de E4a.
+        "metricas_e4": metricas if metricas is not None else metricas_e4(VARIANTES[exp]["metricas"]),
         "semillas": dict(sorted(por_semilla.items())),
     }
     meta_previo.write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n")
@@ -119,17 +136,21 @@ def main(argv=None) -> int:
     ap.add_argument("--excluir", nargs="*", default=None, choices=FUENTES,
                     help="una o mas fuentes: un modelo por fuente, entrenado sin ella")
     ap.add_argument("--semillas", nargs="*", type=int, default=list(SEMILLAS))
-    ap.add_argument("--salida", type=Path, default=SALIDA)
+    ap.add_argument("--exp", default=EXP, choices=list(VARIANTES),
+                    help="E4 (con rival, sparring y combate) o E4a (sin rival, bolsa y sombra)")
+    ap.add_argument("--salida", type=Path, default=None,
+                    help="por defecto la de la variante (~/boxtwin/modelos/clasificador_geo_v1[_sin_rival])")
     ap.add_argument("--dispositivo", default="auto", choices=["auto", "cpu", "cuda"],
                     help="E4 se entreno en cuda; para reproducirlo (CA2) hace falta el mismo")
     args = ap.parse_args(argv)
     dispositivo = args.dispositivo
     if dispositivo == "auto":
         dispositivo = "cuda" if entrenar.gpu_libre() else "cpu"
-    d = entrenar.cargar_entrada(EXP)
+    d = entrenar.cargar_entrada(args.exp)
+    salida = args.salida or VARIANTES[args.exp]["salida"]
     npz = TRABAJO / "datos" / "golpes.npz"
     for excluir in (args.excluir or [None]):
-        out = entrenar_final(d, args.salida, excluir, args.semillas, dispositivo, golpes_npz=npz)
+        out = entrenar_final(d, salida, excluir, args.semillas, dispositivo, golpes_npz=npz, exp=args.exp)
         print(f"{excluir or 'completo'} ({dispositivo}): {out}", flush=True)
     return 0
 
