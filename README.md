@@ -772,3 +772,16 @@ PENDIENTE Y PROXIMO PASO
 5. Dos bugs de la pagina de marcado (Enter de a dos, respuestas pisadas) arreglados
    antes de terminar; Lucas reviso los 100 y cambio 10 de 107 respuestas previas
 6. Documentado en docs/experiments/2026-10-20-c3-guardia.md
+
+20-10 C5, ensayo del tiempo: la evidencia de guante saltaba en el video
+
+1. Pre-registro de C5 antes de tocar nada: reloj hasta la Fight-Card desde la tabla de
+   trabajos. Se mide sobre las sesiones de prueba del 27-10; este ensayo no cuenta
+2. Ensayo sobre las sesiones de la estacion: mediana 2,741, seis de ocho entre 2,3x y
+   3,0x. El 1,098x del 22-09 era un video corto con 20 tracks
+3. La mitad del tiempo era la evidencia de guante: un salto CAP_PROP_POS_FRAMES cada 5
+   cuadros decodifica desde el keyframe. 61,3 s contra 3,2 s en orden sobre 50 s
+4. Lectura en orden con grab(): guantes 260 a 66 s y 251 a 51 s, con evidencia identica
+   track por track (401 y 351). C1 no cambia
+5. Proyeccion sin medir: 1,74x a 1,86x. El plan B (YOLOv8m) no habria tocado esto
+6. Documentado en docs/experiments/2026-10-20-c5-ensayo-tiempo.md
