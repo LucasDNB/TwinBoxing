@@ -276,11 +276,10 @@ instante exacto del video.
    `annot.json` no tiene identidad anotada. Cuesta una pasada del detector de
    guantes por fuente, del orden de 25 s por cada 2 minutos de video.
 3. **Medir C3**: 100 golpes de `sparring-3` marcados a mano contra el indicador
-   de guardia, umbral de acuerdo 80%. Si no pasa, F5 sale del MVP. De ahí sale
-   también el umbral de retorno lento, que hoy no existe. **Antes hay que
-   corregir el radio de la zona**, que con 0,6 anchos de hombro marca la guardia
-   caída en 40 de 41 golpes: es decisión de dominio y va antes de medir, no
-   después.
+   de guardia, umbral de acuerdo 80%. Si no pasa, F5 sale del MVP. **Radio corregido el
+   20-10 por Lucas, antes de medir:** zona de 1,0 ancho de hombro y retorno por
+   tiempo límite fijo de 1000 ms (no por mediana, así que no hay umbral de
+   retorno lento). Pre-registro en `docs/specs/2026-10-20-c3-guardia-preregistro.md`.
 4. **Medir C5**: tiempo de procesamiento, umbral 2x la duración del video. La
    instrumentación por etapa ya está y la escribe `sesion.json`.
 5. Construir la imagen del worker. Está escrita y **nunca se construyó**: mmcv
