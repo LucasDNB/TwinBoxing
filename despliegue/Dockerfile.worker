@@ -8,9 +8,11 @@
 #   disponible por fuera del contenedor, con el entorno conda local y
 #   BOXTWIN_CMD_CLASIFICADOR + BOXTWIN_CLASIFICADOR=poseconv3d.
 #
-# LAS VERSIONES SON LAS DE LA ESTACION (20-10): python 3.12, torch 2.6.0+cu124, torchvision
+# LAS VERSIONES SON LAS DE LA ESTACION (20-10): python 3.12.13, torch 2.6.0+cu124, torchvision
 #   0.21.0, ultralytics 8.4.41, opencv 4.13.0, numpy 2.4.3. El worker medido corre con eso;
-#   otra version es otro sistema.
+#   otra version es otro sistema. opencv-python va fijado aunque ya este el headless:
+#   ultralytics lo pide como dependencia y, suelto, pip trae el ultimo (5.0.0 el 20-10), que
+#   es el que termina importando cv2.
 #
 # NO HACE FALTA LA IMAGEN devel: no se compila nada. Las ruedas de torch traen su runtime
 #   de CUDA y el driver lo pone el NVIDIA Container Toolkit del host.
@@ -29,11 +31,11 @@ RUN wget -qO /tmp/mf.sh https://github.com/conda-forge/miniforge/releases/latest
     && bash /tmp/mf.sh -b -p /opt/conda && rm /tmp/mf.sh
 
 # -- entorno 1: pose, identidad y detector -----------------------------------
-RUN conda create -y -n twinboxing_env python=3.12 && conda clean -afy
+RUN conda create -y -n twinboxing_env python=3.12.13 && conda clean -afy
 RUN /opt/conda/envs/twinboxing_env/bin/pip install --no-cache-dir \
         torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124 \
     && /opt/conda/envs/twinboxing_env/bin/pip install --no-cache-dir \
-        ultralytics==8.4.41 "opencv-python-headless==4.13.*" numpy==2.4.3 \
+        ultralytics==8.4.41 "opencv-python==4.13.*" "opencv-python-headless==4.13.*" numpy==2.4.3 \
         "pydantic>=2.6" pyyaml lap==0.5.13
 
 WORKDIR /app
