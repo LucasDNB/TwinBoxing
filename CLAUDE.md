@@ -401,7 +401,9 @@ Argparse con defaults sensatos. Todo lo que produzca datos, reanudable.
 
 ### Git
 
-Branch `testeoDS`. Commits con mensaje fechado.
+Ramas con PR contra `main`; commits con mensaje fechado. `testeoDS` está mergeada y
+borrada (20-10). La estación corre `main` desde `~/Proyectos/TwinBoxing`, y
+`GET /salud` dice el commit que está corriendo.
 
 ### Documentación de experimentos
 
