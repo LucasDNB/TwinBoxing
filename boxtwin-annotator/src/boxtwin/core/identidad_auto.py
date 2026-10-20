@@ -189,10 +189,17 @@ def analizar(
         raise RuntimeError(f"no se pudo abrir el video {video}")
 
     ev: dict[int, EvidenciaTrack] = {}
+    # Se lee en orden y se descartan los cuadros intermedios con grab(), sin decodificarlos a
+    # imagen. Antes se saltaba con CAP_PROP_POS_FRAMES cada `paso` cuadros, y en H.264 cada
+    # salto decodifica desde el keyframe anterior: medido el 20-10 sobre 50 s de 02-sparring,
+    # 61,3 s saltando contra 3,2 s en orden. Era la mitad del tiempo de procesar (C5).
+    siguiente = 0                         # el cuadro que va a devolver la proxima lectura
     try:
         for f in range(0, fin, cfg.paso):
-            cap.set(cv2.CAP_PROP_POS_FRAMES, f)
-            ok, frame = cap.read()
+            while siguiente < f and cap.grab():
+                siguiente += 1
+            ok, frame = cap.read() if siguiente == f else (False, None)
+            siguiente += 1
             if not ok:
                 break
             dets = cache.detections(f)
