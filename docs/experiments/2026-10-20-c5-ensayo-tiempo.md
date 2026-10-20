@@ -30,7 +30,8 @@ Solo da40de0b tiene `clasificar` (1,7 s, clasificador geométrico).
 
 El 1,098x del 22-09 era sobre un video de 2 minutos con 20 tracks y no representaba el
 sparring de gimnasio. De las tres sesiones re-corridas en §3, las dos lentas tienen 351 y 401
-tracks, y la rápida 40: el costo de la evidencia crece con los tracks.
+tracks, y la rápida 40. Sugiere que el costo de la evidencia crece con los tracks; con tres
+sesiones no da para más.
 
 ## 2. La causa: un salto por cuadro en la lectura de video
 
