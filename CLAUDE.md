@@ -278,11 +278,11 @@ instante exacto del video.
    la web. 18 de los 20 errores son de la geometría: tracks mixtos que generan
    coexistencia espuria. Arreglarlo es diseño nuevo con pre-registro propio. En
    `docs/experiments/2026-10-20-c1-identidad-con-siembra.md`.
-3. **Medir C3**: 100 golpes de `sparring-3` marcados a mano contra el indicador
-   de guardia, umbral de acuerdo 80%. Si no pasa, F5 sale del MVP. **Radio corregido el
-   20-10 por Lucas, antes de medir:** zona de 1,0 ancho de hombro y retorno por
-   tiempo límite fijo de 1000 ms (no por mediana, así que no hay umbral de
-   retorno lento). Pre-registro en `docs/specs/2026-10-20-c3-guardia-preregistro.md`.
+3. ~~Medir C3.~~ **Hecho el 20-10, no pasa: F5 sale del MVP.** Volvió a la
+   guardia 51/88 (0,580, kappa −0,01), mano opuesta caída 31/86 (0,360, kappa
+   0,09), contra 0,80 en cada uno. El indicador marca la mano caída en 71 de 86
+   golpes, igual que con 0,6 el 22-09. Queda como línea futura
+   (`BOXTWIN_C3=rechazado`). En `docs/experiments/2026-10-20-c3-guardia.md`.
 4. **Medir C5**: tiempo de procesamiento, umbral 2x la duración del video. La
    instrumentación por etapa ya está y la escribe `sesion.json`.
 5. Construir la imagen del worker. Está escrita y **nunca se construyó**: mmcv
