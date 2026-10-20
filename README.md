@@ -758,3 +758,17 @@ PENDIENTE Y PROXIMO PASO
    13 componentes sin arista espuria tiene error. La causa es la geometria, no el color
 7. Fix de ruta de Sparring en medir_c1.py (6555213) antes de medir nada
 8. Documentado en docs/experiments/2026-10-20-c1-identidad-con-siembra.md
+
+20-10 C3, indicador de guardia contra 100 golpes marcados a mano: no pasa
+
+1. Volvio a la guardia 51/88, 0,580 (Wilson 0,475-0,677), kappa -0,01; mano opuesta
+   caida 31/86, 0,360 (Wilson 0,267-0,466), kappa 0,09. Umbral 0,80 en cada uno
+2. F5 sale del MVP y queda como linea futura (BOXTWIN_C3=rechazado)
+3. La mano opuesta sale caida en 71 de 86 golpes contra 16 de Lucas: el radio 1,0 no
+   arreglo lo que el 0,6 ya mostraba el 22-09
+4. Muestra: 100 de los 381 golpes anotados completos de sparring-3, semilla 20102026,
+   pre-registrada antes de sortear. Marcado a ciegas, indicador corrido despues de
+   congelar las marcas
+5. Dos bugs de la pagina de marcado (Enter de a dos, respuestas pisadas) arreglados
+   antes de terminar; Lucas reviso los 100 y cambio 10 de 107 respuestas previas
+6. Documentado en docs/experiments/2026-10-20-c3-guardia.md
