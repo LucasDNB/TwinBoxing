@@ -4,8 +4,8 @@ BoxTwin - El estado de una sesion de analisis.
 POR QUE EXISTE
   El procesamiento se corta en dos por una razon de producto y no de ingenieria: entre la
   pose y el detector hay una pregunta que solo una persona puede contestar, que es cual de
-  los dos cuerpos es cual. Medido, la diferencia entre resolver la identidad sola y
-  resolverla con esa respuesta es 82,4% contra 99,1% de los tracks.
+  los dos cuerpos es cual. Sin esa respuesta la identidad puede salir con A y B al reves
+  en una fuente entera; con ella, C1 midio 0,810 de los tracks (20-10).
 
   Eso obliga a que el trabajo sea reanudable en un punto intermedio y a que ese punto sea
   explicito. Un pipeline de un solo tiro no puede parar a preguntar, y guardar el estado en

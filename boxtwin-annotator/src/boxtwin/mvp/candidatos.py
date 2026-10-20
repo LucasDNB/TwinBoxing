@@ -3,9 +3,11 @@ BoxTwin - Los dos recortes que se le muestran al usuario para que diga cual es c
 
 POR QUE EXISTE
   Es el paso 4 del flujo y la unica intervencion humana del producto. Existe porque esta
-  medido lo que cuesta no tenerlo: la identidad automatica resuelve 82,4% de los tracks
-  sola y 99,1% cuando los perfiles se siembran desde dos tracks con rol conocido. Toda esa
-  diferencia es la siembra.
+  medido lo que cuesta no tenerlo: la identidad automatica pone A y B al reves en fuentes
+  enteras (Sparring 0/8, 03-sparring 4/20 en C1) y la siembra lo arregla. No arregla los
+  errores de la geometria: con siembra, C1 dio 0,810 (docs/experiments/
+  2026-10-20-c1-identidad-con-siembra.md). El 99,1% que se citaba aca era color con
+  perfiles de oraculo, otra medicion.
 
   Lo que se le pide a la persona no es que revise el video entero sino que conteste una
   pregunta de dos opciones sobre dos imagenes. Por eso los candidatos tienen que ser dos

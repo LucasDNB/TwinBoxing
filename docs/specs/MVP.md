@@ -19,8 +19,10 @@ Lo que existe y está medido:
   2080 Super para una pelea de 37,9 min.
 - Identidad automática (nuevo, 18 al 22-09): altura + guante + color del guante.
   82,4% de la partición sobre seis fuentes de gimnasio (84/102 tracks), 95,7% sobre
-  transmisión (44/46). Con perfiles sembrados desde tracks con rol conocido, el color asigna
-  112 de 113 tracks (99,1%). La diferencia entre 82,4% y 99,1% es toda de la siembra.
+  transmisión (44/46). Con perfiles armados desde toda la anotación (oráculo), el color
+  asigna 112 de 113 tracks (99,1%). Corregido el 20-10: decía "con perfiles sembrados desde
+  tracks con rol conocido" y que la diferencia entre 82,4% y 99,1% era toda de la siembra.
+  No es la misma medición; con siembra humana C1 dio 0,810 (`docs/experiments/2026-10-20-c1-identidad-con-siembra.md`).
   No adivina cuando los guantes son del mismo color: se abstiene.
 - Detector de golpes (TCN, por brazo): sobre fuente no vista, precisión 0,885, recall 0,484.
 - Clasificador de familia (PoseConv3D, entorno `boxtwin_mmaction`): no generaliza a fuentes
@@ -107,7 +109,9 @@ se comunican por el archivo JSON de segmentos, como ya lo hace el pipeline.
    ahí mismo. Puede exportar.
 
 El paso 4 es la única intervención humana y es deliberada: reemplaza la siembra automática,
-que es donde se pierde la diferencia entre 82,4% y 99,1%.
+que se equivoca en la polaridad de A y B. Corregido el 20-10: decía que ahí se pierde toda la
+diferencia entre 82,4% y 99,1%, y C1 mostró que la siembra arregla la polaridad pero no los
+errores de la geometría.
 
 ---
 

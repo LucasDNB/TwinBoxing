@@ -9,9 +9,9 @@ POR QUE EXISTE
   punta a punta sobre una sesion nueva no se puede tomar si tomarlo requiere anotarla.
 
   Va en dos comandos y no en uno por una razon que no es de ingenieria. Entre la pose y el
-  detector hay una pregunta que el sistema contesta bien el 82,4% de las veces y una persona
-  el 99,1%: cual de los dos cuerpos es cual. Cuesta dos clicks y es la unica intervencion
-  humana del producto.
+  detector hay una pregunta que el sistema puede contestar al reves para una fuente entera
+  y una persona no: cual de los dos cuerpos es cual. Con esa respuesta, la identidad midio
+  0,810 en C1 (20-10). Cuesta dos clicks y es la unica intervencion humana del producto.
 
 QUE HACE
   procesar   pose, tracking, evidencia de guante y propuesta de los dos candidatos.
