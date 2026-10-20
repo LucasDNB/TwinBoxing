@@ -62,8 +62,13 @@ Si escribís prosa o código que contradiga esto, está mal.
 - **Tracking:** BoT-SORT.
 - **Reconocimiento de acciones:** PoseConv3D (baseline). Fine-tuning previo sobre
   dataset Bhargav: 84,51% top-1 en epoch 8, 270 train / 71 val, 6 clases.
-- **Backend:** Python + FastAPI. **Frontend:** React + Three.js.
-  **Persistencia:** PostgreSQL. **Optimización:** TensorRT.
+- **Backend:** Python + FastAPI. **Persistencia:** PostgreSQL previsto; la estación
+  corre SQLite (`~/boxtwin/datos/boxtwin.db`). **Optimización:** TensorRT.
+- **Frontend:** desde el 13-10, la web entrenador en Next 16.4 con exportación estática
+  (`out/`), servida por la FastAPI vía `BOXTWIN_WEB`. Tailwind 4, componentes de Animate
+  UI con `motion` fijado en 12.43.0. Three.js 0.170 (fijado) solo para el avatar 3D
+  estático del perfil y del rival, desde el 14-10: un maniquí de primitivas en un chunk
+  aparte, sin profundidad medida. `boxtwin-web` (React + Vite) queda de respaldo.
 - **Hardware:** desktop `desarrollo-lucas` con NVIDIA RTX 2080 Super (8 GB VRAM),
   Ubuntu, más una notebook. El límite de 8 GB de VRAM es real: verificalo antes
   de proponer batch sizes o modelos grandes.
@@ -88,12 +93,17 @@ frágil. **No actualices nada ahí sin pedir confirmación explícita.**
 ├── boxtwin-guantes/       detector de guantes, que es lo que separa peleador de
 │                          arbitro y decide A contra B por color
 ├── boxtwin-api/           API, cola en PostgreSQL y worker del MVP
-├── boxtwin-web/           frontend React + Vite
+├── boxtwin-web/           frontend viejo, React + Vite (respaldo desde el 13-10)
+├── prototipo/             web entrenador: specs/ (SDD), TAREAS.md (registro por
+│                          tarea), contrato/ (JSON Schema de la Fight-Card 0.3) y
+│                          boxtwin-web-entrenador/ (Next 16, la web en producción)
 ├── despliegue/            Dockerfiles y compose de un nodo
 ├── anotacion-*/           las siete fuentes anotadas, una por directorio
 ├── modelos/               configs y checkpoints (los pesos van fuera de git)
 ├── scripts/               scripts del dataset BoxingVI, cerrado (ver §4)
-└── docs/                  specs y changelog de experimentos
+├── docs/                  specs y changelog de experimentos
+└── .github/workflows/     CI de la web entrenador (lint, tests, build, e2e) y
+                           pytest de boxtwin-api
 ```
 
 Cada paquete se instala con `pip install -e ".[dev]"` sobre `twinboxing_env` y
@@ -264,6 +274,24 @@ instante exacto del video.
    entornos conda por subproceso, y la Fight-Card servida con el video por
    rangos.
 5. `boxtwin-web`: los seis pasos del flujo.
+6. Web entrenador (12 y 13-10, por SDD sobre `prototipo/specs/`): las pantallas del
+   diseño sobre datos reales y, en la API, las tareas B0 a B8 (B8 parcial). Siguieron la
+   ampliación del 13-10 y los cambios del 14-10 (`prototipo/specs/ampliacion-13-10/`,
+   `cambios-14-10/`). El registro de cada tarea con su prueba está en
+   `prototipo/TAREAS.md`.
+
+### Web entrenador en producción (desde el 13-10)
+
+- La estación sirve `prototipo/boxtwin-web-entrenador/out` (`BOXTWIN_WEB` en
+  `/etc/boxtwin.env`).
+- Vuelta atrás: copiar `~/boxtwin/boxtwin.env.antes-web-nueva.bak` sobre
+  `/etc/boxtwin.env` y `sudo systemctl restart boxtwin-api`. **Ese .bak falta** (20-10):
+  no está en `~/boxtwin/`, y los tres respaldos de `/etc/boxtwin.env*` ya apuntan a la web
+  nueva. Hoy volver es cambiar `BOXTWIN_WEB` a mano hacia `boxtwin-web/dist`, que sigue
+  construido en la copia principal, y reiniciar.
+- Respaldo de la base previo al deploy: `~/boxtwin/datos/boxtwin.db.antes-del-13-10.bak`
+  (existe, 13-10).
+- Build y deploy después de cada merge: `despliegue/README.md`, "Los pasos".
 
 ### Lo que falta, en orden
 
