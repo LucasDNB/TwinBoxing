@@ -238,9 +238,11 @@ instante exacto del video.
 - Pose y seguimiento: YOLOv8l-pose + BoT-SORT, 2,3x tiempo real sobre la 2080.
 - **Identidad automática** (18 al 22-09): altura, guante y color de guante.
   82,4% de la partición sobre seis fuentes de gimnasio, 95,7% sobre transmisión.
-  Con los perfiles sembrados desde dos tracks de rol conocido, 99,1%. Toda la
-  diferencia entre 82,4% y 99,1% es la siembra, y por eso el flujo tiene un solo
-  paso humano.
+  El 99,1% que se citaba al lado es otra medición: el color decidiendo track por
+  track con perfiles armados desde toda la anotación (oráculo). Con siembra humana
+  real, C1 dio 0,810 el 20-10; la caída es de la geometría (tracks mixtos que
+  generan coexistencia espuria), no del color ni de la siembra. Ver
+  `docs/experiments/2026-10-20-c1-identidad-con-siembra.md`.
 - Detector de golpes (TCN por brazo), sobre fuente no vista: precisión 0,885,
   recall 0,484. Ensamble de cinco semillas, F1 0,635 sobre los seis folds
   comparables contra 0,907 del techo humano.
@@ -271,10 +273,11 @@ instante exacto del video.
    `docs/experiments/2026-09-22-mvp-sobre-video-real.md`: la siembra sirve pero
    por el ancla y no por el color de los guantes, y el indicador de guardia no
    mide lo que dice medir con el umbral pre-registrado.
-2. **Medir C1**: identidad con siembra humana sobre las seis fuentes de
-   gimnasio, umbral ≥ 95%. No se pudo tomar sobre el amateur porque su
-   `annot.json` no tiene identidad anotada. Cuesta una pasada del detector de
-   guantes por fuente, del orden de 25 s por cada 2 minutos de video.
+2. ~~Medir C1.~~ **Hecho el 20-10, no pasa**: 85/105, 0,810 (Wilson
+   0,724-0,873) contra 0,95. Entra el plan B, corrección manual por track en
+   la web. 18 de los 20 errores son de la geometría: tracks mixtos que generan
+   coexistencia espuria. Arreglarlo es diseño nuevo con pre-registro propio. En
+   `docs/experiments/2026-10-20-c1-identidad-con-siembra.md`.
 3. **Medir C3**: 100 golpes de `sparring-3` marcados a mano contra el indicador
    de guardia, umbral de acuerdo 80%. Si no pasa, F5 sale del MVP. **Radio corregido el
    20-10 por Lucas, antes de medir:** zona de 1,0 ancho de hombro y retorno por
