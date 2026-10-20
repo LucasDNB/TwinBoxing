@@ -273,10 +273,11 @@ instante exacto del video.
    `docs/experiments/2026-09-22-mvp-sobre-video-real.md`: la siembra sirve pero
    por el ancla y no por el color de los guantes, y el indicador de guardia no
    mide lo que dice medir con el umbral pre-registrado.
-2. **Medir C1**: identidad con siembra humana sobre las seis fuentes de
-   gimnasio, umbral ≥ 95%. No se pudo tomar sobre el amateur porque su
-   `annot.json` no tiene identidad anotada. Cuesta una pasada del detector de
-   guantes por fuente, del orden de 25 s por cada 2 minutos de video.
+2. ~~Medir C1.~~ **Hecho el 20-10, no pasa**: 85/105, 0,810 (Wilson
+   0,724-0,873) contra 0,95. Entra el plan B, corrección manual por track en
+   la web. 18 de los 20 errores son de la geometría: tracks mixtos que generan
+   coexistencia espuria. Arreglarlo es diseño nuevo con pre-registro propio. En
+   `docs/experiments/2026-10-20-c1-identidad-con-siembra.md`.
 3. **Medir C3**: 100 golpes de `sparring-3` marcados a mano contra el indicador
    de guardia, umbral de acuerdo 80%. Si no pasa, F5 sale del MVP. **Radio corregido el
    20-10 por Lucas, antes de medir:** zona de 1,0 ancho de hombro y retorno por
