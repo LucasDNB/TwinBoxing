@@ -751,7 +751,10 @@ PENDIENTE Y PROXIMO PASO
    las asignaciones: en 04-sparring y sparring-3-rounds el puntaje no cambia
 3. sparring-3-rounds aporta 13 de los 20 errores; las otras cinco dan 57/64
 4. Cobertura de tracks 0,460, de cuadros 0,793. Guantes del mismo color en 01 y 03
-5. Sin explicar: la spec da 99,1% con siembra sobre la misma base. No se reporta como
-   regresion hasta reproducirlo con el codigo de hoy
-6. Fix de ruta de Sparring en medir_c1.py (6555213) antes de medir nada
-7. Documentado en docs/experiments/2026-10-20-c1-identidad-con-siembra.md
+5. El 99,1% de la spec no es la misma medicion: era color con perfiles de oraculo,
+   track por track. Sobre los mismos tracks, el oraculo da 93/96 y el producto 79/96
+6. 18 de los 20 errores caen en seis componentes de coexistencia que tienen un track
+   mixto (cambio de persona del tracker) y una coexistencia espuria. Ninguno de los
+   13 componentes sin arista espuria tiene error. La causa es la geometria, no el color
+7. Fix de ruta de Sparring en medir_c1.py (6555213) antes de medir nada
+8. Documentado en docs/experiments/2026-10-20-c1-identidad-con-siembra.md

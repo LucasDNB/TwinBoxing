@@ -50,21 +50,63 @@ el 0,619 sin siembra de esta corrida no es el 82,4% del 18 al 22-09, que sí pro
    tan arriba de la de tracks (0,460) sugiere que lo no decidido son tracks cortos; no lo
    medí por track.
 
-## 4. Lo que no se explica todavía
+## 4. La caída desde el 99,1%, investigada
 
-La spec del MVP dice que con perfiles sembrados desde tracks de rol conocido el color asigna
-112 de 113 tracks (99,1%), y el pre-registro los pone sobre la misma base que esta medición.
-Acá da 0,810 sobre 105. No sé de dónde sale la diferencia sin medirla. Candidatos, sin
-orden de probabilidad:
+Diagnóstico con `boxtwin-annotator/scripts/diagnosticar_c1.py` sobre la evidencia ya
+guardada, sin correr el detector de guantes otra vez.
 
-- Las semillas. Entonces eran tracks de rol conocido elegidos desde la anotación; acá es el
-  par sugerido por el producto, que la regla del pre-registro confirma sin buscar otro.
-- La verdad. El pre-registro usa el rol mayoritario por cuadros; la versión anterior
-  (`puntuar_contra`) tomaba la última asignación de cada track. Solo afecta a los 18 tracks
-  mixtos.
-- El detector de guantes o la evidencia, si cambiaron entre el 22-09 y hoy.
+**El 99,1% no es la misma medición, y la spec lo cita mal.** Sale de
+`boxtwin-guantes/docs/experiments/2026-09-18-color-del-guante-separa-A-de-B.md`: perfiles de
+color armados con todos los guantes de la anotación (dejando el track afuera), solo tracks con
+10 guantes o más, y el color decidiendo cada track por separado. Ese mismo documento dice que
+sembrar los perfiles en un video nuevo "es una pieza que no está resuelta ni medida". La spec
+del MVP lo reescribió como "con perfiles sembrados desde tracks con rol conocido" y de ahí
+sacó que "la diferencia entre 82,4% y 99,1% es toda de la siembra". Esa frase no tenía
+medición atrás, y el pre-registro de C1 la heredó al decir que las dos cifras están sobre la
+misma base.
 
-No reportaría esto como regresión hasta reproducir el 99,1% con el código de hoy.
+**La señal de color sigue estando.** Con perfiles de oráculo como los del 18-09, sobre los 96
+tracks evaluables de esta corrida que tienen 10 guantes o más, el color acierta 93 (0,969).
+El producto, sobre esos mismos 96, acierta 79 (0,823). La caída no está en el color.
+
+**Está en la geometría, y la causa son los tracks mixtos.** Por mecanismo:
+
+| Mecanismo | Tracks | Errores |
+|---|---|---|
+| Componente de la semilla A (ancla) | 33 | 4 |
+| Componente orientado por color contra el ancla | 63 | 14 |
+| Suelto, voto por color | 6 | 1 |
+| Rescate | 3 | 1 |
+
+18 de los 20 errores caen en seis componentes de coexistencia (uno de 03-sparring, uno de
+04-sparring, cuatro de sparring-3-rounds). Los seis tienen las dos cosas: un track mixto (el
+tracker cambió de persona a mitad del track) y una arista de coexistencia entre dos tracks del
+mismo rol según la anotación, y cada una de esas aristas toca a un track mixto. Ninguno de
+los 13 componentes sin arista espuria tiene un solo error, y dos de ellos (en Sparring y
+03-sparring) tienen un track mixto igual: el track mixto solo no alcanza, lo que rompe es que
+genere una coexistencia con alguien de su mismo rol.
+
+El mecanismo: `particionar` da por hecho que dos tracks en el mismo cuadro son dos personas
+distintas ("la geometría no se equivoca"). Un track mixto rompe eso. Su tramo de B coexiste
+con otro track de B, la bipartición los pone en lados opuestos y el reparto del componente
+queda mal. Los errores salen de a pares A por B, como se espera de eso. En sparring-3-rounds los perfiles separan bien (1,694), así que el
+problema no es el color. Lo que falla es el reparto adentro del componente, antes de que el
+color intervenga.
+
+Los dos errores restantes son fragmentos de 7 y 4 guantes (voto y rescate).
+
+Esto contesta las tres hipótesis de la versión anterior de esta sección. Las semillas
+explican la diferencia de base de comparación, no los errores. La definición de la verdad
+toca justo a los tracks mixtos, pero el problema no es cómo se puntúan sino cómo los reparte
+la propuesta. Y el detector de guantes no es la causa: el oráculo con `guantes-v2` da 0,969.
+
+**Lo que no se puede concluir.** Este diagnóstico es exploratorio y se hizo después de ver el
+resultado, sobre los mismos datos: describe por qué falló esta corrida, no predice. C1 sigue sin pasar: el pre-registro no se toca. Cualquier
+arreglo (cortar tracks en el cambio de persona, exigir más coexistencia que
+`min_coexistencia = 3`, orientar por track en vez de por componente) es un diseño nuevo, y se
+mide con otro pre-registro sobre material que no sea este. Las aristas espurias tienen entre 3
+y 69 cuadros compartidos: subir el umbral de coexistencia no las elimina todas sin medir
+cuántas legítimas se pierden.
 
 ## 5. Desvíos y lo que hay que declarar
 
