@@ -19,6 +19,10 @@ nada al primer despliegue.
 Corriendo directo en `twinboxing_env` con dos units estás online hoy. El Docker queda para
 cuando haga falta de verdad, que es el PoC de nube.
 
+Desde el 20-10 la imagen del worker ya no lleva mmcv: un solo entorno con el clasificador
+geométrico, que es lo que corre la estación (ver la sección de la imagen, abajo). La razón
+de arriba para no usar Docker en la estación sigue en pie: no le ahorra nada.
+
 ## Los pasos
 
 ```bash
@@ -156,6 +160,40 @@ la altura, no la familia (`docs/experiments/2026-10-16-clasificador-geometrico.m
 de los dos se midió sobre bolsa o sombra: el número que muestra la Fight-Card es el de sparring,
 y la web ya lo rotula así en una sesión individual (CA-19.3). La altura no aplica: la regla de
 C8 necesita al rival y devuelve `sin_rival`.
+
+## La imagen del worker (PoC de nube)
+
+Un solo entorno, `twinboxing_env`, con las versiones de la estación y el clasificador
+geométrico. Sin OpenMMLab: PoseConv3D queda afuera del contenedor (decisión del 20-10). No
+reemplaza a las units de systemd en la estación; es la imagen del PoC de §6.3.
+
+```bash
+# 1. una sola vez: que Docker vea la GPU (requiere sudo). Sin esto `--gpus` falla.
+#    https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+sudo apt-get install -y nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+docker info | grep -i runtimes            # tiene que aparecer nvidia
+
+# 2. /modelos con los nombres que espera la imagen. Enlaces duros: mismo disco, no ocupan
+#    lugar, y a diferencia de un symlink se ven desde adentro del contenedor.
+cd ~/Proyectos/TwinBoxing
+ln -f yolov8l-pose.pt                         ~/boxtwin/modelos/yolov8l-pose.pt
+ln -f boxtwin-guantes/modelos/guantes-v2.pt   ~/boxtwin/modelos/guantes-v2.pt
+ln -f modelos/detector_7fuentes.ens.pt        ~/boxtwin/modelos/detector_7fuentes.ens.pt
+#    clasificador_geo_v1 y clasificador_geo_v1_sin_rival ya estan en ~/boxtwin/modelos
+
+# 3. construir. El contexto es la raiz del repo; .dockerignore deja entrar solo los tres
+#    paquetes, no los 27 GB de videos y caches.
+docker build -f despliegue/Dockerfile.worker -t boxtwin-worker .
+
+# 4. que la imagen vea la GPU y los modelos, sin tocar la base ni las sesiones
+docker run --rm --gpus all -v ~/boxtwin/modelos:/modelos:ro boxtwin-worker \
+    /opt/conda/envs/twinboxing_env/bin/python -c \
+    "import torch,os; print(torch.cuda.is_available(), sorted(os.listdir('/modelos')))"
+```
+
+Con compose, `BOXTWIN_MODELOS=~/boxtwin/modelos`.
 
 ## El problema real no es el túnel, es la subida
 

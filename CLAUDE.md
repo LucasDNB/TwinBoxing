@@ -283,11 +283,17 @@ instante exacto del video.
    0,09), contra 0,80 en cada uno. El indicador marca la mano caída en 71 de 86
    golpes, igual que con 0,6 el 22-09. Queda como línea futura
    (`BOXTWIN_C3=rechazado`). En `docs/experiments/2026-10-20-c3-guardia.md`.
-4. **Medir C5**: tiempo de procesamiento, umbral 2x la duración del video. La
-   instrumentación por etapa ya está y la escribe `sesion.json`.
-5. Construir la imagen del worker. Está escrita y **nunca se construyó**: mmcv
-   compilado contra CUDA 11.8 adentro de una imagen es donde suelen irse días.
+4. **Medir C5** en las sesiones de prueba: umbral 2x, reloj hasta la Fight-Card
+   pre-registrado el 20-10 (`docs/specs/2026-10-20-c5-tiempo-preregistro.md`,
+   `boxtwin-api/scripts/medir_c5.py`). El ensayo dio 2,741x; la mitad era un salto
+   por cuadro en la lectura de video de la evidencia de guante, arreglado el 20-10
+   (`docs/experiments/2026-10-20-c5-ensayo-tiempo.md`). Proyección 1,74x a 1,86x.
+5. ~~Construir la imagen del worker.~~ **Construida el 20-10**, sin mmaction (el
+   clasificador geométrico corre en `twinboxing_env`) y con las versiones de la
+   estación. Falta probarla con GPU: el host no tiene el NVIDIA Container Toolkit.
 6. Sesiones de prueba con usuarios (C4, C6).
+
+Qué sigue y en qué orden, al 20-10: `docs/tareas/2026-10-20-proxima-sesion.md`.
 
 ### Criterios de aceptación
 

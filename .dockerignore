@@ -1,0 +1,15 @@
+# El contexto de las imagenes es la raiz del repo, que pesa 27 GB entre videos, caches de pose
+# y datasets. Sin esto, cada build le manda todo eso al daemon. Lista de lo que entra; el
+# resto queda afuera. Los pesos tampoco entran: se montan en /modelos.
+*
+!boxtwin-annotator/pyproject.toml
+!boxtwin-annotator/README.md
+!boxtwin-annotator/src
+!boxtwin-detector/pyproject.toml
+!boxtwin-detector/README.md
+!boxtwin-detector/src
+!boxtwin-api/pyproject.toml
+!boxtwin-api/README.md
+!boxtwin-api/src
+**/__pycache__
+**/*.pyc
