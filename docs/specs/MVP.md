@@ -242,6 +242,10 @@ fin del golpe y la vuelta a esa zona, con N fijado sobre la mediana de `sparring
 correr la comparación. Monocular: la profundidad no se ve, así que el indicador se declara como
 estimación.
 
+**20-10-2026, decisión de Lucas antes de C3:** la zona pasa a 1,0 ancho de hombro y "volvió
+a la guardia" se lee por tiempo límite fijo (1000 ms), no por la mediana. Pre-registro en
+`docs/specs/2026-10-20-c3-guardia-preregistro.md`.
+
 ---
 
 ## 8. Plan de 8 semanas (con las entregas de tesis encima)

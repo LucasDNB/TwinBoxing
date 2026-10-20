@@ -19,9 +19,10 @@ QUE HACE
   Sobre cada golpe detectado mide dos cosas:
 
   RETORNO. Cuantos milisegundos tarda la mano que pego en volver a la zona de guardia. La
-  zona es "muneca a menos de 0,6 anchos de hombro de la nariz", que es la definicion
-  operativa del criterio de dominio. Si no vuelve antes del proximo golpe del mismo brazo,
-  o antes del limite de busqueda, se reporta como "no vuelve" y no como un numero grande.
+  zona es "muneca a menos de 1,0 ancho de hombro de la nariz", que es la definicion
+  operativa del criterio de dominio (fijada por Lucas el 20-10-2026, antes de C3). Si no
+  vuelve dentro de 1000 ms, o antes del proximo golpe del mismo brazo, se reporta como "no
+  vuelve" y no como un numero grande. Esa es la lectura oficial de C3: volvio si o no.
 
   MANO OPUESTA. Que fraccion del golpe la otra mano estuvo FUERA de esa zona. Es la que
   tiene que quedarse arriba tapando mientras la otra sale.
@@ -56,9 +57,10 @@ class ConfigGuardia:
     """
     Parametros de los dos indicadores.
 
-    `radio_guardia` es la definicion operativa del criterio de dominio: 0,6 anchos de hombro
-    entre la muneca y la nariz. Se mide en anchos de hombro y no en pixeles porque la
-    distancia a la camara cambia entre un video y otro, y un umbral en pixeles mide el zoom.
+    `radio_guardia` es la definicion operativa del criterio de dominio: 1,0 ancho de hombro
+    entre la muneca y la nariz (era 0,6 hasta el 20-10-2026). Se mide en anchos de hombro y
+    no en pixeles porque la distancia a la camara cambia entre un video y otro, y un umbral en
+    pixeles mide el zoom.
 
     MEDIDO EL 22-09 SOBRE amateur_estatico Y HAY QUE DECIRLO: con 0,6 el indicador marca la
     mano opuesta caida en 40 de 41 golpes, que leido como tactica diria que dos amateurs de
@@ -68,22 +70,23 @@ class ConfigGuardia:
     lado del menton, y del menton a la nariz ya hay distancia. El 0,6 no describe "mano
     arriba" sino "mano tocandose la cara".
 
-    NO se cambio el default, a proposito: la definicion esta pre-registrada en la spec como
-    criterio de dominio a confirmar por Lucas, y moverla mirando estos datos seria elegir el
-    criterio despues de ver el resultado. El p10 medido anda entre 0,75 y 1,09, asi que la
-    calibracion de C3 probablemente termine cerca de 1,0. Ver
+    20-10-2026, decision de dominio de Lucas antes de correr C3: radio 1,0 (puno al costado
+    del menton) y retorno por tiempo limite fijo de 1000 ms. Se declara que el 1,0 se eligio
+    habiendo visto la distribucion de amateur_estatico (p10 entre 0,75 y 1,09); C3 se mide
+    sobre sparring-3, que no entro en esa decision. Pre-registro en
+    docs/specs/2026-10-20-c3-guardia-preregistro.md; antes en
     docs/experiments/2026-09-22-mvp-sobre-video-real.md
 
-    `retorno_lento_ms` es el unico numero sin calibrar del modulo y por eso es None por
-    defecto: con un valor inventado el indicador diria "guardia baja" sin que nadie haya
-    comprobado que eso es guardia baja. Con None se reporta el tiempo medido y nada mas.
+    `retorno_lento_ms` queda en None: C3 no usa la lectura por mediana ("lento"), usa la de
+    tiempo limite. El veredicto es `retorno_ms` None (no volvio dentro del limite) contra un
+    numero (volvio). El tiempo medido se sigue reportando.
     """
 
-    radio_guardia: float = 0.6
+    radio_guardia: float = 1.0
     retorno_lento_ms: float | None = None
-    # Hasta donde se busca el retorno despues del golpe. Un segundo y medio es mucho mas que
-    # cualquier retorno legitimo; pasado eso, lo que haya que decir no es "tardo".
-    limite_busqueda_ms: float = 1500.0
+    # Tiempo limite para volver a la guardia, lectura oficial de C3 (Lucas, 20-10-2026):
+    # si la mano no entra a la zona dentro de 1000 ms del fin del golpe, "no vuelve".
+    limite_busqueda_ms: float = 1000.0
     # Fraccion del golpe con la otra mano afuera para marcarla caida. La mitad es un punto
     # de partida razonado y tambien entra en C3.
     fraccion_mano_caida: float = 0.5

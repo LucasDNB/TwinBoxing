@@ -87,3 +87,12 @@ Orden: G0 primero. Después G1 a G6 en orden. G7 y G8 son la parte 3D y pueden q
    0,811, una cota pesimista).
 4. Cap 8: verificar el identificador arXiv de BoxMind (2601.11492) antes de citarlo; viene del
    spec y no se verificó en esta sesión.
+
+### Respuestas de Lucas (20-10-2026)
+
+1. E5 con 18 features: no se corre. Queda como línea futura.
+2. Rol con el checkpoint de producción: no se corre. P7 queda decidido contra E1.
+3. Guardia estimada en E6: sigue abierta como limitación declarada.
+
+Sub-hipótesis 1: Lucas sigue intentando hasta el corte del 31-10, con las mediciones primero
+(C1 y benchmark R-11 esta semana) y el clasificador después en la GPU.

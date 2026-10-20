@@ -31,3 +31,11 @@ Specs: `docs/specs/2026-10-16-fightcard-tipo-v2/` (00 a 03). Estados: `pendiente
 2. ¿El aviso de guardia supuesta va también en el perfil del boxeador? Hoy está en la Fight-Card y en el análisis de video, como pide RT10.
 3. Hoy `/etc/boxtwin.env` tiene `BOXTWIN_CMD_CLASIFICADOR` comentado: la estación produce Fight-Cards sin tipo. Encender v2 es pasar de sin tipo a v2, no de PoseConv3D a v2.
 4. La estación corre los paquetes en modo editable desde este checkout, que ahora está en `feat/fightcard-tipo-v2`. Con la bandera apagada no cambia nada (CA8), pero el worker ya ejecuta el código de la rama.
+
+### Respuestas de Lucas (20-10-2026)
+
+1. CA2 reformulado: se acepta como está. No se re-mide E4 en CPU; el Cap 7 declara la
+   diferencia entre los pesos de cuda y los de CPU.
+2. Aviso de guardia supuesta: sí, va también en el perfil del boxeador (tarea pendiente en la
+   web entrenador).
+3. y 4. Sin decisión pedida; quedan como notas operativas.
