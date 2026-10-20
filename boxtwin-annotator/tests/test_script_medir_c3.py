@@ -74,3 +74,14 @@ def test_faltan_pide_las_dos_respuestas_validas():
     marcas = {"a": {"volvio": "si", "caida": "no"}, "b": {"volvio": "si"},
               "c": {"volvio": "x", "caida": "no"}}
     assert m.faltan(muestra, marcas) == ["b", "c"]
+
+
+def test_aplicar_marca_suma_sin_pisar_la_otra_respuesta_y_valida():
+    marcas = {}
+    m.aplicar_marca(marcas, {"a"}, {"id": "a", "k": "volvio", "r": "si"})
+    assert m.aplicar_marca(marcas, {"a"}, {"id": "a", "k": "caida", "r": "no"}) == \
+        {"volvio": "si", "caida": "no"}
+    for malo in ({"id": "z", "k": "volvio", "r": "si"}, {"id": "a", "k": "otra", "r": "si"},
+                 {"id": "a", "k": "volvio", "r": "quizas"}):
+        with pytest.raises(ValueError):
+            m.aplicar_marca(marcas, {"a"}, malo)

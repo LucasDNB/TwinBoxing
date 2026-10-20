@@ -139,6 +139,15 @@ def acuerdo(lucas: list[str], indicador: list[str | None]) -> dict:
     }
 
 
+def aplicar_marca(marcas: dict, ids: set[str], datos: dict) -> dict:
+    """Valida y aplica una respuesta. Devuelve las marcas de ese golpe; ValueError si es invalida."""
+    if datos.get("id") not in ids or datos.get("k") not in INDICADORES \
+            or datos.get("r") not in RESPUESTAS:
+        raise ValueError("marca invalida")
+    marcas.setdefault(datos["id"], {})[datos["k"]] = datos["r"]
+    return marcas[datos["id"]]
+
+
 def faltan(muestra: list[dict], marcas: dict) -> list[str]:
     """Los ids de la muestra que no tienen las dos respuestas validas."""
     return [g["id"] for g in muestra
@@ -285,7 +294,8 @@ button.on{background:#2a7;border-color:#2a7;color:#000}
 </div>
 <div class="fila"><button id="ant">&larr; anterior</button><button id="sig">siguiente &rarr;</button>
 <button id="sigf">proximo sin marcar</button></div>
-<p class="ayuda">Espacio pausa. , y . un cuadro. Z X C velocidad 0,25 / 0,5 / 1. Enter siguiente.
+<p class="ayuda">Espacio pausa. , y . un cuadro. Z X C velocidad 0,25 / 0,5 / 1. Enter o flecha derecha
+siguiente, flecha izquierda anterior, Inicio al golpe 1.
 Cada respuesta se guarda al momento.</p>
 <script>
 let golpes=[],marcas={},i=0;const v=document.getElementById('v');
@@ -296,29 +306,43 @@ function mostrar(){const g=golpes[i];v.src='/clips/'+g.id+'.mp4';v.playbackRate=
  const hechos=golpes.filter(x=>completo(x.id)).length;
  document.getElementById('estado').textContent=`Golpe ${i+1} de ${golpes.length} (${g.id}) - marcados ${hechos}`;
  const m=marcas[g.id]||{};document.querySelectorAll('button[data-k]').forEach(b=>b.classList.toggle('on',m[b.dataset.k]===b.dataset.r));}
-async function marcar(k,r){const id=golpes[i].id;marcas[id]=Object.assign({},marcas[id],{[k]:r});
- await fetch('/marca',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,k,r})});mostrar();}
+async function marcar(k,r){const id=golpes[i].id;
+ const resp=await fetch('/marca',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,k,r})});
+ if(!resp.ok){alert('No se guardo la marca');return;}
+ marcas[id]=await resp.json();if(golpes[i].id===id)mostrar();}
 function ir(d){i=Math.min(golpes.length-1,Math.max(0,i+d));mostrar();}
 document.querySelectorAll('button[data-k]').forEach(b=>b.onclick=()=>marcar(b.dataset.k,b.dataset.r));
+// Un boton con foco convierte Enter o Espacio en un segundo clic: avanzaba dos golpes o marcaba
+// el golpe siguiente sin verlo. Ningun boton se queda con el foco.
+document.querySelectorAll('button').forEach(b=>b.addEventListener('mouseup',()=>b.blur()));
+document.querySelectorAll('button').forEach(b=>b.addEventListener('focus',()=>b.blur()));
 document.getElementById('ant').onclick=()=>ir(-1);document.getElementById('sig').onclick=()=>ir(1);
 document.getElementById('sigf').onclick=()=>{const j=golpes.findIndex(g=>!completo(g.id));if(j>=0){i=j;mostrar();}};
 const teclas={'1':['volvio','si'],'2':['volvio','no'],'3':['volvio','no_se_ve'],'q':['caida','si'],'w':['caida','no'],'e':['caida','no_se_ve']};
-document.onkeydown=e=>{const t=e.key.toLowerCase();
- if(teclas[t])marcar(...teclas[t]);else if(t===' '){e.preventDefault();v.paused?v.play():v.pause();}
+document.onkeydown=e=>{const t=e.key.toLowerCase();if(e.repeat)return;
+ if(teclas[t]||[' ',',','.','z','x','c','enter','arrowleft','arrowright','home'].includes(t))e.preventDefault();
+ if(teclas[t])marcar(...teclas[t]);else if(t===' '){v.paused?v.play():v.pause();}
  else if(t===','){v.pause();v.currentTime-=1/30;}else if(t==='.'){v.pause();v.currentTime+=1/30;}
  else if(t==='z')v.playbackRate=0.25;else if(t==='x')v.playbackRate=0.5;else if(t==='c')v.playbackRate=1;
- else if(t==='enter')ir(1);else if(t==='arrowleft')ir(-1);else if(t==='arrowright')ir(1);};
+ else if(t==='enter')ir(1);else if(t==='arrowleft')ir(-1);else if(t==='arrowright')ir(1);
+ else if(t==='home'){i=0;mostrar();}};
 cargar();
 </script></html>"""
 
 
 def _cmd_marcar(args) -> int:
+    import threading
+    import time
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
     d = Path(args.dir).expanduser()
     muestra = json.loads((d / "muestra.json").read_text())
     ruta_marcas = d / "marcas.json"
+    ruta_log = d / "marcas.log.jsonl"
     ids = {g["id"] for g in muestra["golpes"]}
+    # El servidor atiende en hilos: sin este candado, dos respuestas seguidas leian el mismo
+    # archivo y la segunda pisaba a la primera (paso el 20-10, 18 golpes con una sola marca).
+    candado = threading.Lock()
     # Lo que ve la pagina: id, peleador y brazo. Nada del indicador.
     publico = [{"id": g["id"], "fighter": g["fighter"], "side": g["side"]}
                for g in muestra["golpes"]]
@@ -351,15 +375,23 @@ def _cmd_marcar(args) -> int:
             if self.path != "/marca":
                 return self._enviar(404, b"no", "text/plain")
             datos = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
-            if datos.get("id") not in ids or datos.get("k") not in INDICADORES \
-                    or datos.get("r") not in RESPUESTAS:
-                return self._enviar(400, b"marca invalida", "text/plain")
-            marcas = _leer_json(ruta_marcas, {})
-            marcas.setdefault(datos["id"], {})[datos["k"]] = datos["r"]
-            _escribir_json(ruta_marcas, marcas)
-            self._enviar(200, b"ok", "text/plain")
+            with candado:
+                marcas = _leer_json(ruta_marcas, {})
+                try:
+                    del_golpe = aplicar_marca(marcas, ids, datos)
+                except ValueError:
+                    return self._enviar(400, b"marca invalida", "text/plain")
+                _escribir_json(ruta_marcas, marcas)
+                # Registro de solo agregar, con hora: permite auditar que se marco y cuando.
+                with ruta_log.open("a") as f:
+                    f.write(json.dumps({"t": time.time(), "id": datos["id"], "k": datos["k"],
+                                        "r": datos["r"]}) + "\n")
+            self._enviar(200, json.dumps(del_golpe).encode(), "application/json")
 
-    srv = ThreadingHTTPServer(("127.0.0.1", args.puerto), Manejador)
+    class Servidor(ThreadingHTTPServer):
+        request_queue_size = 64      # el defecto (5) corta conexiones si llegan varias juntas
+
+    srv = Servidor(("127.0.0.1", args.puerto), Manejador)
     print(f"marcado en http://127.0.0.1:{args.puerto}  (Ctrl+C para cortar; lo marcado queda)")
     try:
         srv.serve_forever()
