@@ -52,7 +52,7 @@ UMBRAL = 0.95
 # Las seis fuentes de gimnasio, relativas a la raiz del repo. Pacquiao-Margarito es
 # transmision y no entra en C1.
 FUENTES = [
-    "videos/Sparring.mp4",
+    "anotacion/videos/Sparring.mp4",
     "anotacion-spar-01/videos/01-sparring.mp4",
     "anotacion-spar-02/videos/02-sparring.mp4",
     "anotacion-spar-03/videos/03-sparring.mp4",
