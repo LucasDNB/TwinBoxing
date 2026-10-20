@@ -33,7 +33,7 @@ QUE HACE
 
 USO
   python scripts/medir_c1.py medir --raiz ~/Proyectos/TwinBoxing \
-      --modelo ~/boxtwin/modelos/guantes-v2.pt -o ~/boxtwin/mediciones/c1
+      --modelo boxtwin-guantes/modelos/guantes-v2.pt -o ~/boxtwin/mediciones/c1
   python scripts/medir_c1.py resumen ~/boxtwin/mediciones/c1
   (con --video se reemplaza la lista de fuentes; con --device cpu corre sin GPU)
 """
