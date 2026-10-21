@@ -785,3 +785,15 @@ PENDIENTE Y PROXIMO PASO
    track por track (401 y 351). C1 no cambia
 5. Proyeccion sin medir: 1,74x a 1,86x. El plan B (YOLOv8m) no habria tocado esto
 6. Documentado en docs/experiments/2026-10-20-c5-ensayo-tiempo.md
+
+21-10 Bolsa y sombra entran al MVP por decision de producto, sin medir B8
+
+1. BOXTWIN_SESIONES_INDIVIDUALES se enciende sin la medicion pre-registrada (>= 95% de
+   saltos de 2 s con la persona asignada, sobre dos videos propios). El criterio no se toca:
+   queda sin medir, no aprobado
+2. Motivo: cierre del proyecto, sin tiempo para grabar y revisar los dos videos
+3. El piloto del 16-10 (canelo, heavy, loma-sombra) tiene las tres planillas vacias y no son
+   videos propios. No cuenta como evidencia
+4. Lo que la Fight-Card ya declara en estas sesiones: margen del detector medido en sparring,
+   tipo como estimacion. La identidad se corrige a mano por tramos
+5. Mismo camino que PoseConv3D en el MVP. En la tesis va como funcion sin validar

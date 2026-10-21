@@ -21,6 +21,8 @@ La copia principal (`~/Proyectos/TwinBoxing`) quedó en `main` con el arreglo de
 - [x] Borrar del remoto las ramas mergeadas: `c1-medicion-resultado-20-10`,
       `c3-medicion-20-10`, `c5-medicion-20-10`. Hecho el 20-10 junto con el resto de las
       ramas contenidas en `main` (PR de CLAUDE.md, rescate de `d843f26`).
+- [ ] Bolsa y sombra por decisión de producto (21-10): `BOXTWIN_SESIONES_INDIVIDUALES=1`
+      en `/etc/boxtwin.env`, restart de la API, mirar `/producto`. B8 queda sin medir.
 - [ ] Opcional: `docker builder prune` libera unos 15 GB del primer build.
 
 ## 2. Preparar las sesiones de prueba del 27-10 (lo primero)
