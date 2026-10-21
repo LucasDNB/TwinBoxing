@@ -275,10 +275,11 @@ instante exacto del video.
    rangos.
 5. `boxtwin-web`: los seis pasos del flujo.
 6. Web entrenador (12 y 13-10, por SDD sobre `prototipo/specs/`): las pantallas del
-   diseño sobre datos reales y, en la API, las tareas B0 a B8 (B8 parcial). Siguieron la
-   ampliación del 13-10 y los cambios del 14-10 (`prototipo/specs/ampliacion-13-10/`,
-   `cambios-14-10/`). El registro de cada tarea con su prueba está en
-   `prototipo/TAREAS.md`.
+   diseño sobre datos reales y, en la API, las tareas B0 a B8. Bolsa y sombra (B8) se
+   encienden el 21-10 por decisión de producto, sin la medición de cobertura: son función
+   sin validar. Siguieron la ampliación del 13-10 y los cambios del 14-10
+   (`prototipo/specs/ampliacion-13-10/`, `cambios-14-10/`). El registro de cada tarea con
+   su prueba está en `prototipo/TAREAS.md`.
 
 ### Web entrenador en producción (desde el 13-10)
 
