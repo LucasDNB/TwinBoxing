@@ -16,8 +16,9 @@ La copia principal (`~/Proyectos/TwinBoxing`) quedó en `main` con el arreglo de
 
 ## 1. Pendientes rápidos de Lucas (unos 10 minutos)
 
-- [ ] `BOXTWIN_C3=rechazado` y `BOXTWIN_C3_FECHA=2026-10-20` en `/etc/boxtwin.env`;
-      `sudo systemctl restart boxtwin-api`; mirar `/producto`.
+- [x] `BOXTWIN_C3=rechazado` y `BOXTWIN_C3_FECHA=2026-10-20` en `/etc/boxtwin.env`;
+      `sudo systemctl restart boxtwin-api`; mirar `/producto`. Hecho el 21-10: `/producto`
+      da C3 `rechazado` (2026-10-20) y la bandera `guardia` en `false`.
 - [x] Borrar del remoto las ramas mergeadas: `c1-medicion-resultado-20-10`,
       `c3-medicion-20-10`, `c5-medicion-20-10`. Hecho el 20-10 junto con el resto de las
       ramas contenidas en `main` (PR de CLAUDE.md, rescate de `d843f26`).
