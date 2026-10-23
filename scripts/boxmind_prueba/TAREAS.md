@@ -13,20 +13,20 @@ Intérpretes: `twinboxing_env` (por defecto), `boxtwin_mmaction` (solo `elevar.p
 
 | Id | Tarea | Estado |
 |---|---|---|
-| P1 | Rama `exp/boxmind-prueba-22-10` en la estación, con el pre-registro commiteado | pendiente |
-| P2 | Clon de BoxingWeb en `e06add2`, visible en `~/externos/BoxingWeb` (enlace simbólico si está en otro lado) | pendiente |
-| P3 | Datos visibles en `~/externos/boxingweb-datos/boxingweb/` con `data_train/` y `data_test/` adentro (enlace simbólico si están en otro lado) | pendiente |
-| P4 | Entorno `boxmind_bm0` (clon de `twinboxing_env` + opencv-python, scikit-learn, joblib, torchvision, tensorboard, matplotlib) | pendiente |
-| P5 | Benchmark R-11 terminado o la GPU libre esa noche | pendiente |
-| P6 | Datos de E4 en `~/boxtwin/clasificador-geo-2026-10/datos/` (`golpes.csv`, `series/`) y pesos de MotionBERT en `pesos/` | pendiente |
+| P1 | Rama `exp/boxmind-prueba-22-10` en la estación, con el pre-registro commiteado | hecha |
+| P2 | Clon de BoxingWeb en `e06add2`, visible en `~/externos/BoxingWeb` (enlace simbólico si está en otro lado) | hecha |
+| P3 | Datos visibles en `~/externos/boxingweb-datos/boxingweb/` con `data_train/` y `data_test/` adentro (enlace simbólico si están en otro lado) | hecha |
+| P4 | Entorno `boxmind_bm0` (clon de `twinboxing_env` + opencv-python, scikit-learn, joblib, torchvision, tensorboard, matplotlib) | hecha |
+| P5 | Benchmark R-11 terminado o la GPU libre esa noche | hecha (GPU sin procesos de cómputo a las 18:05 del 23-10) |
+| P6 | Datos de E4 en `~/boxtwin/clasificador-geo-2026-10/datos/` (`golpes.csv`, `series/`) y pesos de MotionBERT en `pesos/` | hecha |
 
 ## Registro
 
 | Id | Tarea | Depende de | Spec | Estado | Evidencia / notas |
 |---|---|---|---|---|---|
-| BM0 | Chequeo de entorno: rutas, commit del clon, GPU, espacio en disco, archivos de E4 | P1 a P6 | 03 §1 | pendiente | |
-| BM1 | Pruebas en verde, con el clon presente y sin saltear ninguna | BM0 | 01 §8 | pendiente | `python -m pytest scripts/boxmind_prueba/tests -q -rs` |
-| BM2 | Inspección de BoxingWeb: rondas por partición, archivos por ronda, términos o licencia en el paquete, qué es `pose_gt` contra `uve.pkl` | BM1 | 01 §7 | pendiente | `<bm>/inspeccion.json` |
+| BM0 | Chequeo de entorno: rutas, commit del clon, GPU, espacio en disco, archivos de E4 | P1 a P6 | 03 §1 | hecha | 23-10 18:05: rama y pre-registro ok, clon e06add2, 40/10 rondas, E4 y MotionBERT presentes, imports de boxmind_bm0 ok, GPU libre, 730 GB libres |
+| BM1 | Pruebas en verde, con el clon presente y sin saltear ninguna | BM0 | 01 §8 | hecha | `python -m pytest scripts/boxmind_prueba/tests -q -rs`: 33 pasadas, 0 salteadas |
+| BM2 | Inspección de BoxingWeb: rondas por partición, archivos por ronda, términos o licencia en el paquete, qué es `pose_gt` contra `uve.pkl` | BM1 | 01 §7 | hecha | `<bm>/inspeccion.json`: 40 rondas train y 10 test; sin licencia ni términos; 6910 eventos, 5307 + 1215 pasan el filtro de largo; solo `pose_gt.pkl` (45 articulaciones, 2D y 3D por esquina), no hay `uve.pkl`: la comparación gt contra uve no se puede hacer |
 | BM3 | BM-0: `train.py` original sobre su test | BM2 | 01 §4.3 | pendiente | `<bm>/bm0/bm0.json` |
 | BM4 | BoxingWeb re-estimado con el preproceso de BoxTwin y emparejado de identidad | BM2 | 01 §4.1 B3 | pendiente | `<bm>/boxingweb/golpes.meta.json` |
 | BM5 | Elevación 3D de BoxingWeb | BM4 | 01 §4.1 | pendiente | `<bm>/datos/pose3d_boxingweb.npz` |
@@ -47,6 +47,10 @@ parte afectada. Las delegadas están en `docs/specs/2026-10-22-boxmind-prueba/03
    B6). BM-0 usa `train.py` tal cual para separar los dos efectos.
 2. 22-10: `evaluar.py` de esta carpeta se llama `evaluar_bm.py` para no tapar a
    `scripts/clasificador_geo/evaluar.py`, del que importa las reglas.
+3. 23-10 (BM2): el paquete descargado trae solo `pose_gt.pkl` por ronda (45 articulaciones de
+   4D-Humans, 2D y 3D por esquina) y ningún `uve.pkl`. Según B3, la identidad roja y azul sale
+   de `pose_gt`; la comparación contra el seguidor automático queda sin hacer. Son 6910 eventos
+   en las 50 rondas, no los 10,9 mil del paper (que suman BoxingStudio).
 
 ## Preguntas abiertas
 
