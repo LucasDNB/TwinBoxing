@@ -40,9 +40,10 @@ def leer_3d(ruta: Path) -> dict:
     """{(frame_dir, persona): P3 (largo, 17, 3)}"""
     if not ruta.exists():
         raise SystemExit(f"falta {ruta}: correr elevar.py en boxtwin_mmaction")
+    # cada z["P3"] descomprime el arreglo entero: se lee una vez y se recorta desde ahi
     with np.load(ruta) as z:
-        return {(str(fd), int(pe)): z["P3"][i, :int(n)]
-                for i, (fd, pe, n) in enumerate(zip(z["frame_dir"], z["persona"], z["largo"]))}
+        P3, fds, pes, ns = z["P3"], z["frame_dir"], z["persona"], z["largo"]
+    return {(str(fd), int(pe)): P3[i, :int(n)] for i, (fd, pe, n) in enumerate(zip(fds, pes, ns))}
 
 
 def armar(golpes: list[dict], serie, P3: dict) -> dict:

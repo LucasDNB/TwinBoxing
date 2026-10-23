@@ -58,6 +58,9 @@ parte afectada. Las delegadas están en `docs/specs/2026-10-22-boxmind-prueba/03
 5. 23-10 (BM6): la espera de GPU de `elevar3d.elegir_dispositivo` cuenta como ocupada la GPU
    que usa BM4, que es de esta misma prueba (420 MB de 8 GB). BM6 y BM5 corren con
    `--dispositivo cuda:0`. El dispositivo no está pre-registrado.
+6. 23-10 (BM7): `armar.py --dominio boxingweb` murió por memoria (15 GB): `leer_3d` releía y
+   descomprimía `P3` entero por cada una de las 11.336 elevaciones. Se lee una vez
+   (`test_armar.py`, falla sin el arreglo). Es de lectura: el conjunto de BoxTwin no cambia.
 
 ## Preguntas abiertas
 
