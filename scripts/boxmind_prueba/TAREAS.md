@@ -27,10 +27,10 @@ Intérpretes: `twinboxing_env` (por defecto), `boxtwin_mmaction` (solo `elevar.p
 | BM0 | Chequeo de entorno: rutas, commit del clon, GPU, espacio en disco, archivos de E4 | P1 a P6 | 03 §1 | hecha | 23-10 18:05: rama y pre-registro ok, clon e06add2, 40/10 rondas, E4 y MotionBERT presentes, imports de boxmind_bm0 ok, GPU libre, 730 GB libres |
 | BM1 | Pruebas en verde, con el clon presente y sin saltear ninguna | BM0 | 01 §8 | hecha | `python -m pytest scripts/boxmind_prueba/tests -q -rs`: 33 pasadas, 0 salteadas |
 | BM2 | Inspección de BoxingWeb: rondas por partición, archivos por ronda, términos o licencia en el paquete, qué es `pose_gt` contra `uve.pkl` | BM1 | 01 §7 | hecha | `<bm>/inspeccion.json`: 40 rondas train y 10 test; sin licencia ni términos; 6910 eventos, 5307 + 1215 pasan el filtro de largo; solo `pose_gt.pkl` (45 articulaciones, 2D y 3D por esquina), no hay `uve.pkl`: la comparación gt contra uve no se puede hacer |
-| BM3 | BM-0: `train.py` original sobre su test | BM2 | 01 §4.3 | pendiente | `<bm>/bm0/bm0.json` |
-| BM4 | BoxingWeb re-estimado con el preproceso de BoxTwin y emparejado de identidad | BM2 | 01 §4.1 B3 | pendiente | `<bm>/boxingweb/golpes.meta.json` |
+| BM3 | BM-0: `train.py` original sobre su test | BM2 | 01 §4.3 | en curso | `<bm>/bm0/bm0.json` |
+| BM4 | BoxingWeb re-estimado con el preproceso de BoxTwin y emparejado de identidad | BM2 | 01 §4.1 B3 | en curso | `<bm>/boxingweb/golpes.meta.json` |
 | BM5 | Elevación 3D de BoxingWeb | BM4 | 01 §4.1 | pendiente | `<bm>/datos/pose3d_boxingweb.npz` |
-| BM6 | Elevación 3D de BoxTwin (atacante y rival, ventana anotada) | BM1 | 01 §4.1 | pendiente | `<bm>/datos/pose3d_boxtwin.npz` |
+| BM6 | Elevación 3D de BoxTwin (atacante y rival, ventana anotada) | BM1 | 01 §4.1 | en curso | `<bm>/datos/pose3d_boxtwin.npz` |
 | BM7 | Armado de los dos conjuntos | BM5, BM6 | 01 §4.1 | pendiente | `<bm>/datos/conjunto_{boxtwin,boxingweb}.npz`; BoxTwin con 1.047 golpes |
 | BM8 | Entrenamiento BM-0b (V0) | BM7 | 01 §4.3 | pendiente | `<bm>/corridas/BM-0b/` |
 | BM9 | Entrenamiento BM-1b, BM-1, BM-2, BM-2-50, BM-2-25, en ese orden | BM8 | 01 §4.3 | pendiente | `<bm>/corridas/<exp>/` |
@@ -51,6 +51,13 @@ parte afectada. Las delegadas están en `docs/specs/2026-10-22-boxmind-prueba/03
    4D-Humans, 2D y 3D por esquina) y ningún `uve.pkl`. Según B3, la identidad roja y azul sale
    de `pose_gt`; la comparación contra el seguidor automático queda sin hacer. Son 6910 eventos
    en las 50 rondas, no los 10,9 mil del paper (que suman BoxingStudio).
+4. 23-10 (BM4): `boxtwin.preprocess` busca `yolov8l-pose.pt` en el directorio de trabajo y el
+   worktree no lo tiene. BM4 corre con cwd en `~/Proyectos/TwinBoxing`, cuyo checkpoint es el de
+   producción (`BOXTWIN_MODELO_POSE`, sha256 `4be6ab6c…`, igual que las otras copias). Es de
+   entorno, no cambia ninguna regla.
+5. 23-10 (BM6): la espera de GPU de `elevar3d.elegir_dispositivo` cuenta como ocupada la GPU
+   que usa BM4, que es de esta misma prueba (420 MB de 8 GB). BM6 y BM5 corren con
+   `--dispositivo cuda:0`. El dispositivo no está pre-registrado.
 
 ## Preguntas abiertas
 
