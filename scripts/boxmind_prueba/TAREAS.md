@@ -33,9 +33,9 @@ Intérpretes: `twinboxing_env` (por defecto), `boxtwin_mmaction` (solo `elevar.p
 | BM6 | Elevación 3D de BoxTwin (atacante y rival, ventana anotada) | BM1 | 01 §4.1 | hecha | `<bm>/datos/pose3d_boxtwin.npz`: 1047 golpes, 2094 elevaciones en 309 s (cuda:0); sin 3D: 0 atacantes, 34 rivales; ventana máxima 18 cuadros |
 | BM7 | Armado de los dos conjuntos | BM5, BM6 | 01 §4.1 | hecha | `<bm>/datos/conjunto_{boxtwin,boxingweb}.npz`: BoxTwin 1047 golpes, largo máx. 18, sin 2D 0, sin 3D 0; BoxingWeb 5668, largo máx. 29, sin 2D 0, sin 3D 0 (decisión 6) |
 | BM8 | Entrenamiento BM-0b (V0) | BM7 | 01 §4.3 | hecha | `<bm>/corridas/BM-0b/`: 4616 de entrenamiento, 1052 de prueba, unos 9 s por semilla; F1 macro de técnica s0 a s4: 0,511 0,478 0,513 0,454 0,471 (cifra de control, la lectura es de BM10) |
-| BM9 | Entrenamiento BM-1b, BM-1, BM-2, BM-2-50, BM-2-25, en ese orden | BM8 | 01 §4.3 | en curso | `<bm>/corridas/<exp>/` |
-| BM10 | Evaluación contra el pre-registro | BM9 (y BM3 si se hizo) | 01 §5, §6 | pendiente | `<bm>/resultados/veredictos.json`, `resumen.md` |
-| BM11 | Documento de experimento y entrada del README raíz preparada (sin tocar el README) | BM10 | CLAUDE.md §7 | pendiente | `docs/experiments/2026-10-XX-boxmind-prueba.md` |
+| BM9 | Entrenamiento BM-1b, BM-1, BM-2, BM-2-50, BM-2-25, en ese orden | BM8 | 01 §4.3 | hecha | `<bm>/corridas/`: BM-1b, BM-1, BM-2, BM-2-50 y BM-2-25, cinco semillas cada uno (siete folds donde corresponde), de 21:25 a 21:41 |
+| BM10 | Evaluación contra el pre-registro | BM9 (y BM3 si se hizo) | 01 §5, §6 | hecha | `<bm>/resultados/veredictos.json`, `resumen.md`: V0 no válida, P7 a P10 no demostradas, sub-hipótesis 1 lectura a, gatillo no respaldada |
+| BM11 | Documento de experimento y entrada del README raíz preparada (sin tocar el README) | BM10 | CLAUDE.md §7 | hecha | `docs/experiments/2026-10-23-boxmind-prueba.md`, con la entrada del README raíz en §8 sin aplicar |
 
 ## Decisiones
 
