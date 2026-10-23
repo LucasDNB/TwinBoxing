@@ -8,7 +8,7 @@ producen estos pasos entra a git; todo queda en `~/boxtwin/boxmind-prueba-2026-1
 | 0 | `git clone https://github.com/gouba2333/BoxingWeb ~/externos/BoxingWeb && git -C ~/externos/BoxingWeb checkout e06add2` | — | pendiente |
 | 1 | Descargar BoxingWeb de Tsinghua Cloud (enlace del README del clon) y descomprimir en `~/externos/boxingweb-datos/` hasta que exista `boxingweb/data_train/` y `boxingweb/data_test/`. Anotar en Decisiones si el paquete trae términos de uso o licencia | — | pendiente |
 | 2 | `python -m pytest scripts/boxmind_prueba/tests -q` con el clon presente: las dos pruebas de equivalencia y las tres de torch tienen que pasar, no saltearse | twinboxing_env | pendiente |
-| 3 | Revisar el contenido de un `pose_gt.pkl` y un `video_event.json` y anotar en Decisiones qué es `pose_gt` (pose anotada o estimada) | twinboxing_env | pendiente |
+| 3 | Revisar el contenido de un `pose_gt.pkl` y un `video_event.json` y confirmar lo que sugiere la historia del repo: `pose_gt` es 4D-Humans con identidad verificada y `uve.pkl` la del seguidor automático (comparar los dos en una ronda: si difieren solo en la asignación roja/azul, se confirma). Anotarlo en Decisiones | twinboxing_env | pendiente |
 | 4 | `python scripts/boxmind_prueba/bm0.py` (BM-0, `train.py` original; puede pedir instalar opencv, scikit-learn, joblib, torchvision, tensorboard y matplotlib en un entorno aparte) | entorno aparte | pendiente |
 | 5 | `python scripts/boxmind_prueba/boxingweb.py` (de noche, después de R-11) | twinboxing_env, GPU | pendiente |
 | 6 | `python scripts/boxmind_prueba/elevar.py --dominio boxingweb` y `--dominio boxtwin` | boxtwin_mmaction, GPU | pendiente |

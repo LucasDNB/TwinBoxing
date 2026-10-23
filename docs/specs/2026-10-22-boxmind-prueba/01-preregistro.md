@@ -147,7 +147,11 @@ función es `evaluar_bm.gatillo`, con prueba.
 
 - **No es la comparación del paper.** El 0,725 de BoxMind es F1 macro, con la variante de
   video, sobre 10 rondas al azar del mismo corpus, y el `train.py` publicado entrena y evalúa
-  con `pose_gt.pkl` (a verificar al descargar qué contiene). BM mide exactitud de familia
+  con `pose_gt.pkl`. Por la historia del repositorio (el cargador de BoxingStudio, borrado en
+  `eb71982`, distingue la captura multicámara de la salida de 4D-Humans, y en BoxingWeb el
+  comentario de `pose_gt` dice "orden de 4D-Humans"), `pose_gt` sería 4D-Humans con la
+  identidad verificada y `uve.pkl` la salida del seguidor automático: su número supone
+  identidad resuelta, como la anotación de BoxTwin. Se confirma al descargar. BM mide exactitud de familia
   dejando una fuente afuera.
 - **P7 no separa arquitectura de representación.** BM-1b cambia las dos cosas respecto de E4
   (articulaciones de los dos peleadores con 3D contra 26 features geométricas; ventana
