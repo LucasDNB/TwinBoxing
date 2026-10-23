@@ -30,7 +30,7 @@ Intérpretes: `twinboxing_env` (por defecto), `boxtwin_mmaction` (solo `elevar.p
 | BM3 | BM-0: `train.py` original sobre su test | BM2 | 01 §4.3 | en curso | `<bm>/bm0/bm0.json` |
 | BM4 | BoxingWeb re-estimado con el preproceso de BoxTwin y emparejado de identidad | BM2 | 01 §4.1 B3 | en curso | `<bm>/boxingweb/golpes.meta.json` |
 | BM5 | Elevación 3D de BoxingWeb | BM4 | 01 §4.1 | pendiente | `<bm>/datos/pose3d_boxingweb.npz` |
-| BM6 | Elevación 3D de BoxTwin (atacante y rival, ventana anotada) | BM1 | 01 §4.1 | en curso | `<bm>/datos/pose3d_boxtwin.npz` |
+| BM6 | Elevación 3D de BoxTwin (atacante y rival, ventana anotada) | BM1 | 01 §4.1 | hecha | `<bm>/datos/pose3d_boxtwin.npz`: 1047 golpes, 2094 elevaciones en 309 s (cuda:0); sin 3D: 0 atacantes, 34 rivales; ventana máxima 18 cuadros |
 | BM7 | Armado de los dos conjuntos | BM5, BM6 | 01 §4.1 | pendiente | `<bm>/datos/conjunto_{boxtwin,boxingweb}.npz`; BoxTwin con 1.047 golpes |
 | BM8 | Entrenamiento BM-0b (V0) | BM7 | 01 §4.3 | pendiente | `<bm>/corridas/BM-0b/` |
 | BM9 | Entrenamiento BM-1b, BM-1, BM-2, BM-2-50, BM-2-25, en ese orden | BM8 | 01 §4.3 | pendiente | `<bm>/corridas/<exp>/` |
