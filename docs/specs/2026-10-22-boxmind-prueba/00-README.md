@@ -6,7 +6,9 @@
   reglas de lectura y el gatillo de la propuesta. Se commitea antes de correr nada.
 - `02-dataset-propio.md`: la propuesta de dataset propio para un BoxTwin comercial, que se
   presenta como respaldada o no según el gatillo.
-- Scripts y pasos de corrida: `scripts/boxmind_prueba/` y su `TAREAS.md`.
+- `03-instructivo-noche.md`: el procedimiento desatendido para Claude Code (`/noche-boxmind`):
+  chequeo de entorno, bucle SDD, comandos, decisiones delegadas y resumen final.
+- Scripts y registro de tareas: `scripts/boxmind_prueba/` y su `TAREAS.md`.
 
 Lo que BoxMind publicó (verificado en `e06add2`): la arquitectura del clasificador de
 atributos, un `train.py` atado a sus datos y el cargador de BoxingWeb. No hay pesos, ni

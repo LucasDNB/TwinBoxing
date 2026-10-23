@@ -24,7 +24,7 @@ def trabajo(tmp_path, monkeypatch):
     import geo
     importlib.reload(geo)
     importlib.reload(bm)
-    for nombre in ("boxingweb", "entrenar", "evaluar_bm", "bm0"):
+    for nombre in ("boxingweb", "entrenar", "evaluar_bm", "bm0", "inspeccionar"):
         if nombre in sys.modules:
             importlib.reload(sys.modules[nombre])
     return tmp_path
