@@ -105,11 +105,11 @@ en `~/boxtwin/e7-4dhumans/`. Pasos manuales en el 00-README (Q1 a Q4).
 | Id | Tarea | Spec | Depende de | Estado | Evidencia / notas |
 |---|---|---|---|---|---|
 | Q1 | Pre-registro aprobado | 00 | — | hecha | `083dc70`, 24-10 |
-| Q2 | Modelo SMPL neutral en `~/boxtwin/e7-4dhumans/smpl/` (Lucas) | 00 | — | pendiente | `~/.cache/4DHumans/data/smpl/SMPL_NEUTRAL.pkl` ya es un enlace a ese archivo; queda roto hasta que esté |
+| Q2 | Modelo SMPL neutral en `~/boxtwin/e7-4dhumans/smpl/` (Lucas) | 00 | — | hecha | 24-10, 39 MB, sha256 `98e65c74ad9b998783132f00880d1025a8d64b158e040e6ef13a557e5098bc42`; `~/.cache/4DHumans/data/smpl/SMPL_NEUTRAL.pkl` es un enlace a él |
 | Q3 | Entorno `boxtwin_4dhumans` | 02 §1 | — | hecha | Ver abajo |
 | Q4 | GPU libre la noche de la corrida | 00 | — | pendiente | |
 | E7-0 | Commit del pre-registro aprobado | 02 §3 | Q1 | hecha | `083dc70` |
-| E7-1 | Prueba de humo: un golpe, VRAM, velocidad, claves de salida | 02 §3 | Q2, Q3 | pendiente | |
+| E7-1 | Prueba de humo: un golpe, VRAM, velocidad, claves de salida | 02 §3 | Q2, Q3 | hecha | `humo_hmr2.py`, `~/boxtwin/e7-4dhumans/humo.json`: `02-sparring_ev_0001`, 21 cuadros, 21 recortes, ninguno sin caja; VRAM pico 2756 MB con lote 8 (de 7786); 0,048 s por recorte con lote 1 y 0,033 con lote 8; carga 6,7 s. Salidas: `pred_smpl_params` (global_orient 1×3×3, body_pose 23×3×3, betas 10), `pred_keypoints_3d` 44 (orden OpenPose más extras, no se usa); el forward de `smplx.SMPL` da 45 articulaciones, las primeras 24 son las de SMPL. Ancho de hombros SMPL mediano 0,329 m. E7 es viable; con 33,5 mil recortes, unos 19 min de GPU más la lectura de video |
 | E7-2 | Pruebas en verde | 02 §2 | E7-1 | pendiente | |
 | E7-3 | `elevar_hmr2.py` sobre las siete fuentes | 02 §2 | E7-2, Q4 | pendiente | |
 | E7-4 | `features3d.py --trabajo ~/boxtwin/e7-4dhumans` | 02 §2 | E7-3 | pendiente | |
@@ -130,6 +130,9 @@ en `~/boxtwin/e7-4dhumans/`. Pasos manuales en el 00-README (Q1 a Q4).
 - Pesos HMR2.0b de `download_models()` en `~/.cache/4DHumans` (5,1 GB con el tar):
   `epoch=35-step=1000000.ckpt`, sha256 `c9ea09c834161468638c9de7a782c614e300c622709bf52967274c543ec72fcf`.
 - `twinboxing_env` y `boxtwin_mmaction` sin cambios: `pip freeze` idéntico antes y después.
+- 24-10 (E7-1): el checkpoint de HMR2 guarda objetos de `omegaconf`, que `setup.py` no
+  declara. Se instaló `omegaconf` 2.4.0 en `boxtwin_4dhumans` con el resto de las versiones
+  fijas (torch y numpy no cambiaron).
 - 24-10: el modelo neutral `basicModel_neutral_lbs_10_207_0_v1.0.0.pkl` se distribuye con
   SMPLify (`smplify.is.tue.mpg.de`, README de 4D-Humans), no en el sitio de SMPL que cita el
   pre-registro §2. La licencia que vale es la que Lucas acepta al bajarlo; se anota acá cuando
