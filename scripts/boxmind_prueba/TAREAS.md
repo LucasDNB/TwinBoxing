@@ -36,6 +36,7 @@ Intérpretes: `twinboxing_env` (por defecto), `boxtwin_mmaction` (solo `elevar.p
 | BM9 | Entrenamiento BM-1b, BM-1, BM-2, BM-2-50, BM-2-25, en ese orden | BM8 | 01 §4.3 | hecha | `<bm>/corridas/`: BM-1b, BM-1, BM-2, BM-2-50 y BM-2-25, cinco semillas cada uno (siete folds donde corresponde), de 21:25 a 21:41 |
 | BM10 | Evaluación contra el pre-registro | BM9 (y BM3 si se hizo) | 01 §5, §6 | hecha | `<bm>/resultados/veredictos.json`, `resumen.md`: V0 no válida, P7 a P10 no demostradas, sub-hipótesis 1 lectura a, gatillo no respaldada |
 | BM11 | Documento de experimento y entrada del README raíz preparada (sin tocar el README) | BM10 | CLAUDE.md §7 | hecha | `docs/experiments/2026-10-23-boxmind-prueba.md`, con la entrada del README raíz en §8 sin aplicar |
+| BM12 | Análisis de estructura y consistencia de BoxingWeb (24-10, posterior a BM10, sin umbral) | BM6 | — | hecha | `analisis_boxingweb.py`, `<bm>/analisis_boxingweb.json`: 50 rondas, 151,5 min, 6872 golpes; 316 con fin ≤ inicio (311 de un cuadro); índices en fps nativos (último evento entre 0,93 y 1,00 del largo; rectos a 60 fps coinciden 0,818 tal cual y 0,516 con índices ×2); ventana mediana 11 a 13 cuadros en toda tasa = 500 ms a 24 fps, 400 a 30, 183 a 60; mano por la muñeca que se extiende: rectos 0,724, hooks 0,632, uppercuts 0,554, contra 0,707, 0,547 y 0,494 en BoxTwin; 7 de 18 peleadores de test están en train, 0 combates partidos |
 
 ## Decisiones
 
