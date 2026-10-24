@@ -107,11 +107,11 @@ en `~/boxtwin/e7-4dhumans/`. Pasos manuales en el 00-README (Q1 a Q4).
 | Q1 | Pre-registro aprobado | 00 | — | hecha | `083dc70`, 24-10 |
 | Q2 | Modelo SMPL neutral en `~/boxtwin/e7-4dhumans/smpl/` (Lucas) | 00 | — | hecha | 24-10, 39 MB, sha256 `98e65c74ad9b998783132f00880d1025a8d64b158e040e6ef13a557e5098bc42`; `~/.cache/4DHumans/data/smpl/SMPL_NEUTRAL.pkl` es un enlace a él |
 | Q3 | Entorno `boxtwin_4dhumans` | 02 §1 | — | hecha | Ver abajo |
-| Q4 | GPU libre la noche de la corrida | 00 | — | pendiente | |
+| Q4 | GPU libre la noche de la corrida | 00 | — | hecha | 24-10 23:19, sin procesos de cómputo; Lucas lanzó E7-3 a E7-6 |
 | E7-0 | Commit del pre-registro aprobado | 02 §3 | Q1 | hecha | `083dc70` |
 | E7-1 | Prueba de humo: un golpe, VRAM, velocidad, claves de salida | 02 §3 | Q2, Q3 | hecha | `humo_hmr2.py`, `~/boxtwin/e7-4dhumans/humo.json`: `02-sparring_ev_0001`, 21 cuadros, 21 recortes, ninguno sin caja; VRAM pico 2756 MB con lote 8 (de 7786); 0,048 s por recorte con lote 1 y 0,033 con lote 8; carga 6,7 s. Salidas: `pred_smpl_params` (global_orient 1×3×3, body_pose 23×3×3, betas 10), `pred_keypoints_3d` 44 (orden OpenPose más extras, no se usa); el forward de `smplx.SMPL` da 45 articulaciones, las primeras 24 son las de SMPL. Ancho de hombros SMPL mediano 0,329 m. E7 es viable; con 33,5 mil recortes, unos 19 min de GPU más la lectura de video |
 | E7-2 | Pruebas en verde | 02 §2 | E7-1 | hecha | `tests/test_e7.py`, 8 pruebas de los cinco puntos del diseño §2, escritas antes del código y en rojo; `python -m pytest scripts/clasificador_geo/tests`: 69 pasadas, 1 salteada (la de mmpose, como antes). Código: `elevar_hmr2.py`, `geo.TRABAJO_E7`, `features3d.py --trabajo`, `entrenar.py --exp E7` (3D y corridas en el trabajo de E7), `evaluar.py --e7`. Integración sobre 02-sparring en un directorio temporal: 62 golpes, todos los pasos con 3D, 180 s (los 1047 serían unos 50 min) |
-| E7-3 | `elevar_hmr2.py` sobre las siete fuentes | 02 §2 | E7-2, Q4 | pendiente | |
+| E7-3 | `elevar_hmr2.py` sobre las siete fuentes | 02 §2 | E7-2, Q4 | en curso | 24-10 23:19, encadenado con E7-4 a E7-6, log en `~/boxtwin/e7-4dhumans/logs/` |
 | E7-4 | `features3d.py --trabajo ~/boxtwin/e7-4dhumans` | 02 §2 | E7-3 | pendiente | |
 | E7-5 | `entrenar.py --exp E7` | 02 §2 | E7-4 | pendiente | |
 | E7-6 | `evaluar.py` contra el pre-registro | 02 §2 | E7-5 | pendiente | |
