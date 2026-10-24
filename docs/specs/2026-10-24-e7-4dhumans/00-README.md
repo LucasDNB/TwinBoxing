@@ -19,7 +19,7 @@ Pasos manuales de Lucas antes de correr, con lo que no se puede automatizar:
 | Id | Paso |
 |---|---|
 | Q1 | Aprobar este pre-registro |
-| Q2 | Registrarse en `smpl.is.tue.mpg.de`, aceptar la licencia y bajar `basicModel_neutral_lbs_10_207_0_v1.0.0.pkl` a `~/boxtwin/e7-4dhumans/smpl/` |
+| Q2 | Registrarse en `smplify.is.tue.mpg.de` (de ahí lo toma 4D-Humans; corregido el 24-10, antes decía `smpl.is.tue.mpg.de`), aceptar la licencia y dejar `basicModel_neutral_lbs_10_207_0_v1.0.0.pkl`, que viene dentro del zip de SMPLify, en `~/boxtwin/e7-4dhumans/smpl/` |
 | Q3 | Autorizar el entorno conda nuevo `boxtwin_4dhumans` (diseño §1). No toca `boxtwin_mmaction` ni `twinboxing_env` |
 | Q4 | GPU libre la noche de la corrida |
 

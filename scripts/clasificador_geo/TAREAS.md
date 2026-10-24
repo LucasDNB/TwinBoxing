@@ -130,3 +130,8 @@ en `~/boxtwin/e7-4dhumans/`. Pasos manuales en el 00-README (Q1 a Q4).
 - Pesos HMR2.0b de `download_models()` en `~/.cache/4DHumans` (5,1 GB con el tar):
   `epoch=35-step=1000000.ckpt`, sha256 `c9ea09c834161468638c9de7a782c614e300c622709bf52967274c543ec72fcf`.
 - `twinboxing_env` y `boxtwin_mmaction` sin cambios: `pip freeze` idéntico antes y después.
+- 24-10: el modelo neutral `basicModel_neutral_lbs_10_207_0_v1.0.0.pkl` se distribuye con
+  SMPLify (`smplify.is.tue.mpg.de`, README de 4D-Humans), no en el sitio de SMPL que cita el
+  pre-registro §2. La licencia que vale es la que Lucas acepta al bajarlo; se anota acá cuando
+  la confirme. El pre-registro no se edita: la condición de uso (solo investigación, nada al
+  producto) no cambia.
