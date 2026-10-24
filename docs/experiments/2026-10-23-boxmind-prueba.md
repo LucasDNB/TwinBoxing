@@ -132,3 +132,25 @@ de gimnasio con celular. Eso solo lo respondería el piloto de la fase 0.
 3. Sumar 5668 golpes de BoxingWeb: 0,678 contra 0,672, no demostrada; curva plana
 4. Propuesta de dataset propio: no respaldada, la linea futura principal es la segunda camara
 ```
+
+## 9. Análisis posterior de BoxingWeb (24-10, sin umbral)
+
+`scripts/boxmind_prueba/analisis_boxingweb.py` (BM12), salida en
+`~/boxtwin/boxmind-prueba-2026-10/analisis_boxingweb.json`. Se hizo después de BM10 y no cambia
+ninguna lectura de arriba.
+
+1. 50 rondas, 151,5 min, 6872 golpes. Seis fps distintos: 30 (27 rondas), 60 (11), 24 (9), 25,
+   29,91 y 29,97. 316 golpes tienen fin ≤ inicio, 311 de ellos de un solo cuadro.
+2. Los índices están en los fps nativos. El último evento cae entre el 93% y el 100% del largo
+   de la pose en toda tasa, y en los rectos a 60 fps la mano de la etiqueta coincide con la
+   muñeca que se extiende en 0,818 con los índices tal cual y en 0,516 con los índices
+   duplicados.
+3. La ventana anotada mide lo mismo en cuadros y no en tiempo. La mediana es de 11 a 13 cuadros
+   en toda tasa: 500 ms a 24 fps, 400 ms a 30 y 183 ms a 60. El filtro de 4 a 30 cuadros de
+   BoxMind descarta el 12,9% a 24 fps y el 1,1% a 60.
+4. La mano de la etiqueta coincide con la muñeca que se extiende en 0,724 de los rectos, 0,632
+   de los hooks y 0,554 de los uppercuts. La misma heurística sobre BoxTwin, con el brazo
+   anotado por el autor, da 0,707, 0,547 y 0,494. Con esta medida no hay evidencia de que la
+   mano de BoxingWeb esté peor anotada que la de BoxTwin.
+5. La partición de BoxingWeb es por ronda: ningún combate queda partido, pero 7 de los 18
+   peleadores de test aparecen en train.
