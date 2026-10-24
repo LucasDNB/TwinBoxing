@@ -33,19 +33,8 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from geo import TRABAJO, comun  # noqa: E402
-
-TRABAJO_E7 = Path("~/boxtwin/e7-4dhumans").expanduser()
-SCORE_MIN = 0.3
-
-
-def caja(kp: np.ndarray, sc: np.ndarray, score_min: float = SCORE_MIN) -> np.ndarray | None:
-    """xyxy desde los keypoints con score >= score_min; None si no hay ninguno."""
-    ok = sc >= score_min
-    if not ok.any():
-        return None
-    p = kp[ok]
-    return np.array([p[:, 0].min(), p[:, 1].min(), p[:, 0].max(), p[:, 1].max()], np.float32)
+from elevar_hmr2 import caja  # noqa: E402
+from geo import TRABAJO, TRABAJO_E7, comun  # noqa: E402
 
 
 def cuadros(video: Path, ini: int, fin: int) -> list[np.ndarray]:

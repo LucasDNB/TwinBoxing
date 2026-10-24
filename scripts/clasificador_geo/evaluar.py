@@ -17,9 +17,14 @@ QUE HACE
   probabilidades sumadas por tipo y por altura). Veredictos de P5 (familia contra E1, altura
   contra la regla de C8), P6 (E5 contra E4) y sub-hipotesis 1. Escribe
   <trabajo>/resultados/{E4,E4a,E5,F}.json, veredictos.json y resumen.md.
+  Con --e7 (24-10): P11a (E7 contra E5), P11b (E7 contra E4) y sub-hipotesis 1 de E7, con la
+  misma veredicto_mejora, mas lo que el pre-registro de E7 pide sin umbral (altura en las
+  fuentes de C8, pasos con 3D, vibracion del 3D de E5 y E7). Lee E4 y E5 sin tocarlos y escribe
+  en ~/boxtwin/e7-4dhumans/resultados/.
 
 USO
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/evaluar.py
+  ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/evaluar.py --e7
 """
 
 from __future__ import annotations
@@ -35,7 +40,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from geo import (ALTURAS, FUENTES, FUENTES_C8, REPO, SEMILLAS, TIPOS, TRABAJO, TRABAJO_E1E3,  # noqa: E402
-                 comun)
+                 TRABAJO_E7, comun)
 
 DIF_MIN = 0.03          # pre-registro, seccion 3, puntos 1 a 3
 FOLDS_MIN = 5           # de 7
@@ -326,12 +331,103 @@ def resumen_md(res: dict, ver: dict, regla: dict | None) -> str:
     return "\n".join(lineas) + "\n"
 
 
+# ---------------------------------------------------------------------------
+# E7 (24-10): 3D de 4D-Humans contra MotionBERT
+# ---------------------------------------------------------------------------
+
+
+def vibracion(P: np.ndarray, M: np.ndarray, side: str) -> float | None:
+    """
+    Mediana del modulo de la segunda diferencia de la muneca que golpea, en el marco del cuerpo
+    de features3d (escala pelvis-torax), sobre los trios de pasos con 3D. None si no hay ninguno.
+    """
+    import features3d
+    if side == "right":
+        P = features3d.espejar(P)
+    w = features3d.marco_cuerpo(np.asarray(P, np.float64))[:, features3d.MUNECA]
+    d2 = w[2:] - 2 * w[1:-1] + w[:-2]
+    M = np.asarray(M, bool)
+    ok = M[2:] & M[1:-1] & M[:-2]
+    if not ok.any():
+        return None
+    return float(np.median(np.linalg.norm(d2[ok], axis=-1)))
+
+
+def vibracion_por_fuente(ruta: Path, golpes: list[dict]) -> dict | None:
+    if not ruta.exists():
+        return None
+    por_fd = {g["frame_dir"]: g for g in golpes}
+    with np.load(ruta) as z:
+        fd, P3, M3 = z["frame_dir"], z["P3"], z["M3"]
+    vals, cobertura = {}, {}
+    for n, P, M in zip(fd, P3, M3):
+        g = por_fd[str(n)]
+        v = vibracion(P, M, g["side"])
+        if v is not None:
+            vals.setdefault(g["fuente"], []).append(v)
+        cobertura.setdefault(g["fuente"], []).append(float(np.mean(M)))
+    return {f: {"golpes_con_dato": len(vals.get(f, [])),
+                "vibracion_mediana": float(np.median(vals[f])) if vals.get(f) else None,
+                "pasos_con_3d": float(np.mean(cobertura[f]))} for f in FUENTES if f in cobertura}
+
+
+def veredictos_e7(res: dict) -> dict:
+    """P11a, P11b, sub-hipotesis 1 y D9 de E7 (pre-registro E7, seccion 4)."""
+    v = {}
+    e7 = res.get("E7")
+    if not (e7 and "ensamble_total" in e7):
+        return {"P11a": {"veredicto": "no realizado"}, "P11b": {"veredicto": "no realizado"},
+                "subhipotesis_1": {"lectura": "no realizado"}, "D9_sospechosos": []}
+    desv = lambda r: r.get("dispersion_entre_semillas", {}).get("familia_exactitud", {}).get("desvio")  # noqa: E731
+    for clave, base in (("P11a", "E5"), ("P11b", "E4")):
+        b = res.get(base)
+        if not (b and "ensamble_total" in b):
+            v[clave] = {"veredicto": "no realizado", "motivo": f"no hay corridas de {base}"}
+            continue
+        ds = [x for x in (desv(e7), desv(b)) if x is not None]
+        v[clave] = {"compara": f"E7 contra {base}", **veredicto_mejora(
+            e7["ensamble_total"]["familia"]["exactitud"], b["ensamble_total"]["familia"]["exactitud"],
+            familia_por_fold(e7), familia_por_fold(b), FOLDS_MIN, ds or None),
+            "recall_hook": {k: res[k]["ensamble_total"]["familia"]["recall"]["hook"] for k in ("E7", base)}}
+    v["subhipotesis_1"] = lectura_ocho({"E7": e7["ensamble_total"]["ocho_clases"]["exactitud"]})
+    v["D9_sospechosos"] = ["E7"] if sospechoso(e7["ensamble_total"]) else []
+    v["sin_umbral"] = {"altura_balanceada_c8": {k: res[k]["ensamble_fuentes_c8"]["altura"]["balanceada"]
+                                                for k in ("E4", "E5", "E7")
+                                                if res.get(k) and "ensamble_fuentes_c8" in res[k]}}
+    return v
+
+
+def main_e7(golpes: list[dict]) -> int:
+    dest = TRABAJO_E7 / "resultados"
+    dest.mkdir(parents=True, exist_ok=True)
+    res = {}
+    for exp, trabajo in (("E4", TRABAJO), ("E5", TRABAJO), ("E7", TRABAJO_E7)):
+        c = leer_corridas(exp, golpes, trabajo)
+        res[exp] = comun.redondear({"exp": exp, "faltan": c["faltan"], "completo": not c["faltan"],
+                                    **evaluar_probs(c["preds"], golpes)}) if c["preds"] else None
+    (dest / "E7.json").write_text(json.dumps(res["E7"], indent=2, ensure_ascii=False) + "\n")
+    ver = veredictos_e7(res)
+    meta = TRABAJO_E7 / "datos" / "pose3d.meta.json"
+    ver.setdefault("sin_umbral", {}).update({
+        "por_fuente_E5": vibracion_por_fuente(TRABAJO / "datos" / "pose3d.npz", golpes),
+        "por_fuente_E7": vibracion_por_fuente(TRABAJO_E7 / "datos" / "pose3d.npz", golpes),
+        "segundos_elevacion_E7": json.loads(meta.read_text()).get("segundos") if meta.exists() else None})
+    ver = comun.redondear(ver)
+    (dest / "veredictos.json").write_text(json.dumps(ver, indent=2, ensure_ascii=False) + "\n")
+    print(json.dumps({k: ver[k].get("veredicto", ver[k].get("lectura")) for k in ("P11a", "P11b", "subhipotesis_1")},
+                     ensure_ascii=False))
+    return 0
+
+
 def main(argv=None) -> int:
     from datos import leer_csv
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--exp", nargs="+", default=["E4", "E4a", "E5"])
+    ap.add_argument("--e7", action="store_true", help="P11a y P11b de E7, en el trabajo de E7")
     args = ap.parse_args(argv)
     golpes = leer_csv(TRABAJO / "datos" / "golpes.csv")
+    if args.e7:
+        return main_e7(golpes)
     dest = TRABAJO / "resultados"
     dest.mkdir(parents=True, exist_ok=True)
     res, ens_e4 = {}, None
