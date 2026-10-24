@@ -1,6 +1,6 @@
 # E7 · Pre-registro · 3D de 4D-Humans en lugar de MotionBERT
 
-**Estado: propuesto el 24-10-2026, pendiente de aprobación de Lucas.** Se commitea aprobado,
+**Estado: aprobado por Lucas el 24-10-2026.** Se commitea aprobado,
 solo, antes de correr cualquier parte; su hash va en el documento de resultados. Después de ese
 commit no se edita: un cambio que obligue el entorno se anota en `TAREAS.md` con el motivo,
 antes de correr la parte afectada.
