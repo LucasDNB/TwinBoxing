@@ -96,3 +96,37 @@ Orden: G0 primero. Después G1 a G6 en orden. G7 y G8 son la parte 3D y pueden q
 
 Sub-hipótesis 1: Lucas sigue intentando hasta el corte del 31-10, con las mediciones primero
 (C1 y benchmark R-11 esta semana) y el clasificador después en la GPU.
+
+## E7 · 3D de 4D-Humans (desde el 24-10)
+
+Spec: `docs/specs/2026-10-24-e7-4dhumans/` (00 a 02), pre-registro aprobado en `083dc70`. Trabajo
+en `~/boxtwin/e7-4dhumans/`. Pasos manuales en el 00-README (Q1 a Q4).
+
+| Id | Tarea | Spec | Depende de | Estado | Evidencia / notas |
+|---|---|---|---|---|---|
+| Q1 | Pre-registro aprobado | 00 | — | hecha | `083dc70`, 24-10 |
+| Q2 | Modelo SMPL neutral en `~/boxtwin/e7-4dhumans/smpl/` (Lucas) | 00 | — | pendiente | `~/.cache/4DHumans/data/smpl/SMPL_NEUTRAL.pkl` ya es un enlace a ese archivo; queda roto hasta que esté |
+| Q3 | Entorno `boxtwin_4dhumans` | 02 §1 | — | hecha | Ver abajo |
+| Q4 | GPU libre la noche de la corrida | 00 | — | pendiente | |
+| E7-0 | Commit del pre-registro aprobado | 02 §3 | Q1 | hecha | `083dc70` |
+| E7-1 | Prueba de humo: un golpe, VRAM, velocidad, claves de salida | 02 §3 | Q2, Q3 | pendiente | |
+| E7-2 | Pruebas en verde | 02 §2 | E7-1 | pendiente | |
+| E7-3 | `elevar_hmr2.py` sobre las siete fuentes | 02 §2 | E7-2, Q4 | pendiente | |
+| E7-4 | `features3d.py --trabajo ~/boxtwin/e7-4dhumans` | 02 §2 | E7-3 | pendiente | |
+| E7-5 | `entrenar.py --exp E7` | 02 §2 | E7-4 | pendiente | |
+| E7-6 | `evaluar.py` contra el pre-registro | 02 §2 | E7-5 | pendiente | |
+| E7-7 | Documento y entrada del README preparada | 02 §3 | E7-6 | pendiente | |
+
+### Entorno (Q3, 24-10)
+
+- Clon `~/externos/4D-Humans`, commit `efe18deff163b29dff87ddbd575fa29b716a356c` (7-2-2026).
+- `boxtwin_4dhumans`: Python 3.10, torch 2.4.1+cu121, torchvision 0.19.1+cu121, numpy 1.23.5,
+  smplx 0.1.28, chumpy 0.71, pytorch-lightning 2.6.6, timm 1.0.30, opencv-python 4.11.0.86,
+  `hmr2` editable desde el clon. 85 paquetes. Sin detectron2: `import hmr2.models` y
+  `hmr2.datasets.vitdet_dataset` no lo cargan (verificado).
+- Decisiones de instalación: numpy fijo en 1.23.5 porque `chumpy` importa alias de numpy
+  borrados en 1.24; `chumpy` y el `-e` de 4D-Humans con `--no-build-isolation`, porque el
+  `setup.py` de `chumpy` hace `import pip`.
+- Pesos HMR2.0b de `download_models()` en `~/.cache/4DHumans` (5,1 GB con el tar):
+  `epoch=35-step=1000000.ckpt`, sha256 `c9ea09c834161468638c9de7a782c614e300c622709bf52967274c543ec72fcf`.
+- `twinboxing_env` y `boxtwin_mmaction` sin cambios: `pip freeze` idéntico antes y después.
