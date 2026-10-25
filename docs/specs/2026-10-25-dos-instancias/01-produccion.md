@@ -21,7 +21,7 @@
 Nada de esta lista se toca para lanzar B ni mientras B corre:
 
 1. Las dos unidades de systemd y `/etc/boxtwin.env`.
-2. La copia principal: ni checkout, ni pull, ni merge, ni build. Mergear #27 y #28 en GitHub no
+2. La copia principal: ni checkout, ni pull, ni merge, ni build. Mergear el PR #29 en GitHub no
    la cambia, y no se la actualiza por esto.
 3. Las instalaciones editables de `twinboxing_env`. B no instala nada en ese entorno.
 4. `~/boxtwin/datos/`: base, sesiones y respaldos.
@@ -31,7 +31,7 @@ Nada de esta lista se toca para lanzar B ni mientras B corre:
 
 ## Cómo se comprueba
 
-Huella tomada antes de lanzar B (paso 1 de `04-pasos.md`) y repetida después de lanzarla y de
+Huella tomada antes de lanzar B (S1 de `04-pasos.md`) y repetida después de lanzarla y de
 cada demo. Tienen que dar igual:
 
 - `sha256sum /etc/boxtwin.env /etc/systemd/system/boxtwin-api.service /etc/systemd/system/boxtwin-worker.service`

@@ -6,11 +6,12 @@ Un worktree **fijo**, fuera de `.claude/worktrees/`, porque esos los borra la li
 sesiones y B quedaría apuntando a la nada:
 
 ```
-git -C ~/Proyectos/TwinBoxing worktree add ~/Proyectos/TwinBoxing-academico e7-modo-academico
+git -C ~/Proyectos/TwinBoxing worktree add --detach ~/Proyectos/TwinBoxing-academico <hash>
 ```
 
-Queda en la punta de la rama al momento de lanzar. El hash se anota en `04-pasos.md` y no se
-mueve durante la demo. Cambiarlo es repetir los pasos 3 y 7.
+`<hash>` es la punta de `cambios-academicos` (PR #29) después de T1. El worktree queda
+**desacoplado** en ese commit, no en la rama: un push a `cambios-academicos` durante la demo no
+cambia B. El hash se anota en S3 de `04-pasos.md`. Moverlo es repetir S3, S4, L2 y S7.
 
 `twinboxing_env` resuelve `boxtwin` y `boxtwin_api` hacia la copia principal (editables). B no
 reinstala nada: antepone su código con `PYTHONPATH`, que gana sobre las instalaciones editables
@@ -18,9 +19,25 @@ reinstala nada: antepone su código con `PYTHONPATH`, que gana sobre las instala
 entorno (`worker.py`: `env={**os.environ, ...}`), así que el `boxtwin-annotator` que llama
 también usa el código de B.
 
-`/salud` lee el commit de `<repo>/.git/HEAD`. En un worktree `.git` es un archivo, así que hoy B
-informaría `commit: null`. **Cambio chico pendiente (T1):** que `_commit()` siga el `gitdir:`
-del archivo `.git`. Va con su prueba, en la rama de B, y A no lo ve.
+`/salud` lee el commit de `<repo>/.git/HEAD`. En un worktree `.git` es un archivo
+(`gitdir: <repo principal>/.git/worktrees/<nombre>`), así que hoy B informaría `commit: null`.
+
+**T1.** `_commit()` (`boxtwin-api/src/boxtwin_api/app.py`) resuelve también un worktree. Diff
+mínimo: si `.git` es un archivo, seguir su `gitdir:`; las referencias se buscan en el directorio
+común que indica `commondir` dentro de ese `gitdir`, primero como archivo suelto y después en
+`packed-refs`. Sigue sin subprocesos. Pruebas, con repos falsos armados en `tmp_path`, escritas
+antes del código:
+
+1. `.git` carpeta, `HEAD` con `ref:` a una referencia suelta → los 7 primeros del hash (lo de hoy).
+2. `.git` carpeta, referencia solo en `packed-refs` → el hash de `packed-refs` (lo de hoy).
+3. `.git` archivo con `gitdir:`, `HEAD` del worktree desacoplado (un hash) → ese hash. Es el caso de B.
+4. `.git` archivo con `gitdir:` y `HEAD` con `ref:` a una rama; la referencia está en el directorio
+   común (`commondir`) → el hash de esa rama.
+5. Sin `.git`, o un `gitdir:` que apunta a algo que no existe → `None`, sin excepción.
+
+`_commit()` recibe la raíz como parámetro opcional (por defecto la de hoy), para poder probarla
+sin mover el paquete. A no recibe este cambio hasta que se mergee el PR #29 y se actualice la
+estación, y eso no es parte de este spec.
 
 ## Web
 
@@ -33,6 +50,11 @@ cd ~/Proyectos/TwinBoxing-academico/prototipo/boxtwin-web-entrenador && npm ci &
 `npm ci` instala sus propios `node_modules`, así que B no comparte ni toca los de A.
 
 ## Entorno · `/etc/boxtwin-academico.env` (permisos 600, dueño lucasb)
+
+Lo arma el SDD en S5: copia `despliegue/academico/boxtwin-academico.env.ejemplo` (versionado, sin
+secretos, con los valores de abajo y los dos marcadores) a `~/boxtwin-academico/boxtwin-academico.env`
+con permisos 600, y completa el secreto y la invitación con valores nuevos. Lucas lo instala en
+`/etc` en L1. El archivo con secretos nunca entra a git.
 
 ```
 # B · instancia académica (docs/specs/2026-10-25-dos-instancias). Nunca para usuarios.
@@ -70,6 +92,9 @@ Las rutas de los modelos de A se leen, no se copian: son los mismos archivos que
 sha256 verificado al cargar.
 
 ## Unidades · `/etc/systemd/system/boxtwin-academico-{api,worker}.service`
+
+Versionadas en `despliegue/academico/systemd/` (S5) y copiadas a `/etc/systemd/system/` por Lucas
+en L1.
 
 Copias de las de A con cuatro diferencias: nombre, `WorkingDirectory`, `EnvironmentFile` y
 puerto. **No se habilitan al arrancar** (`enable` no): se encienden para la demo y se apagan
@@ -129,6 +154,8 @@ con Funnel en ningún caso: la enmienda la prohíbe para usuarios y SMPL no tien
 comercial.
 
 ## Cómo se comprueba que B es lo que dice
+
+Son CA2 a CA6 de `00-README.md`, y se registran en S7, S8, S9 y L5 de `04-pasos.md`. En detalle:
 
 - `curl -s 127.0.0.1:8001/salud`: `clasificador` `e7`, `modelo_e7` `true`, `modelo_individual`
   `true`, `commit` el de la rama (después de T1).
