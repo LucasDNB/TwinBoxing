@@ -28,6 +28,8 @@ USO
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar_final.py --exp E4a --dispositivo cpu
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar_final.py --excluir Sparring --semillas 0
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar_final.py --excluir 03-sparring 04-sparring
+  ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar_final.py --exp E7 --dispositivo cuda
+    (25-10, modo academico: lee el 3D de ~/boxtwin/e7-4dhumans, guarda en ~/boxtwin/modelos/clasificador_e7_v1)
 """
 
 from __future__ import annotations
@@ -56,6 +58,14 @@ VARIANTES = {
     "E4a": {"nombre": "clasificador_geo_v1_sin_rival",
             "salida": Path("~/boxtwin/modelos/clasificador_geo_v1_sin_rival").expanduser(),
             "metricas": REPO / "docs" / "experiments" / "datos" / "2026-10-16-clasificador-geo-E4a.json"},
+    # E7 (25-10, docs/specs/2026-10-25-e7-modo-academico): modo academico de la app, apagado por
+    # defecto. 26 de E4 + 16 features 3D de HMR2.0b. Depende de SMPL, solo investigacion.
+    "E7": {"nombre": "clasificador_e7_v1", "metodo": "geometrico-e7",
+           "salida": Path("~/boxtwin/modelos/clasificador_e7_v1").expanduser(),
+           "metricas": REPO / "docs" / "experiments" / "datos" / "2026-10-24-e7-4dhumans-E7.json",
+           "referencia": "docs/experiments/2026-10-24-e7-4dhumans.md",
+           "licencia": ("modo academico: 3D de 4D-Humans con SMPL, licencia de investigacion no "
+                        "comercial; texto de la licencia de SMPLify pendiente de confirmar (25-10)")},
 }
 
 
@@ -67,7 +77,7 @@ def sha256(p: Path) -> str:
     return h.hexdigest()
 
 
-def metricas_e4(ruta: Path = METRICAS_E4) -> dict:
+def metricas_e4(ruta: Path = METRICAS_E4, referencia: str = REFERENCIA) -> dict:
     """Lo que la Fight-Card muestra del clasificador: familia del ensamble con una fuente afuera."""
     if not ruta.is_file():
         return {}
@@ -78,7 +88,7 @@ def metricas_e4(ruta: Path = METRICAS_E4) -> dict:
         "familia_balanceada": fam.get("balanceada"),
         "recall_por_familia": fam.get("recall"),
         "golpes": json.loads(ruta.read_text())["ensamble_total"]["golpes"],
-        "referencia": REFERENCIA,
+        "referencia": referencia,
         "de": str(ruta.relative_to(REPO)) if ruta.is_relative_to(REPO) else str(ruta),
     }
 
@@ -108,7 +118,7 @@ def entrenar_final(d: dict, salida: Path, excluir: str | None = None, semillas=S
     base = VARIANTES[exp]["nombre"]
     meta = {
         "nombre": base if not excluir else f"{base}_sin_{excluir}",
-        "metodo": "geometrico-v1",
+        "metodo": VARIANTES[exp].get("metodo", "geometrico-v1"),
         "exp": exp,
         "n_features": int(d["X"].shape[-1]),
         "features": list(d["nombres"]),
@@ -124,9 +134,12 @@ def entrenar_final(d: dict, salida: Path, excluir: str | None = None, semillas=S
         "golpes_npz_sha256": sha256(golpes_npz) if golpes_npz and Path(golpes_npz).is_file() else None,
         # La clave sigue siendo metricas_e4 porque es la que lee el producto; con --exp E4a
         # trae las de E4a.
-        "metricas_e4": metricas if metricas is not None else metricas_e4(VARIANTES[exp]["metricas"]),
+        "metricas_e4": metricas if metricas is not None else metricas_e4(
+            VARIANTES[exp]["metricas"], VARIANTES[exp].get("referencia", REFERENCIA)),
         "semillas": dict(sorted(por_semilla.items())),
     }
+    if VARIANTES[exp].get("licencia"):
+        meta["licencia"] = VARIANTES[exp]["licencia"]
     meta_previo.write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n")
     return destino
 
@@ -137,7 +150,8 @@ def main(argv=None) -> int:
                     help="una o mas fuentes: un modelo por fuente, entrenado sin ella")
     ap.add_argument("--semillas", nargs="*", type=int, default=list(SEMILLAS))
     ap.add_argument("--exp", default=EXP, choices=list(VARIANTES),
-                    help="E4 (con rival, sparring y combate) o E4a (sin rival, bolsa y sombra)")
+                    help="E4 (con rival, sparring y combate), E4a (sin rival, bolsa y sombra) o E7 "
+                         "(modo academico, con el 3D de HMR2; solo investigacion)")
     ap.add_argument("--salida", type=Path, default=None,
                     help="por defecto la de la variante (~/boxtwin/modelos/clasificador_geo_v1[_sin_rival])")
     ap.add_argument("--dispositivo", default="auto", choices=["auto", "cpu", "cuda"],
