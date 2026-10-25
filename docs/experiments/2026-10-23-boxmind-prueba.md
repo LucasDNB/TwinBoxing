@@ -121,7 +121,7 @@ de gimnasio con celular. Eso solo lo respondería el piloto de la fase 0.
 - No es la comparación del paper (pre-registro §7): mismo esquema de etiquetas y misma
   arquitectura, pero otra pose, otra partición y exactitud de familia dejando una fuente afuera.
 
-## 8. Entrada para el README raíz (preparada, sin aplicar)
+## 8. Entrada para el README raíz (aplicada el 25-10, con el análisis de BoxingWeb y la ruta de este documento agregados)
 
 ```
 23-10 BM: prueba académica con el modelo de BoxMind (exploratoria)
