@@ -186,6 +186,12 @@ export function VistaVideo({ s, fc }: { s: Sesion; fc: FightCard }) {
   const nota = (
     <p className="mt-4 rounded-md border border-borde bg-superficie-2 p-3 text-xs text-texto-3">
       {textos.notaCorreccion(fc.clasificador.checkpoint)} &quot;No fue un golpe&quot; tampoco cambia el conteo de detectados: se cuenta aparte como descartados por el entrenador.
+      {/* Modo académico E7 (25-10): la licencia de SMPL, también al pie del video. */}
+      {textos.modoAcademico(fc.clasificador.metodo, fc.clasificador.licencia) && (
+        <span role="note" data-modo-academico className="mt-2 block text-texto-2">
+          {textos.modoAcademico(fc.clasificador.metodo, fc.clasificador.licencia)}
+        </span>
+      )}
       {ladosConGuardiaSupuesta(fc).map((l) => (
         <span key={l} role="note" data-aviso-guardia={l} className="mt-2 block text-texto-2">
           {textos.avisoGuardiaSupuesta(nombres[l] ?? l)}

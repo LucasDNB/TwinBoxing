@@ -86,6 +86,8 @@ describe("modo académico E7", () => {
   it("la nota del modo académico nombra la licencia y E4 no lleva nota", () => {
     expect(textos.modoAcademico("geometrico-e7", LIC)).toContain("4D-Humans");
     expect(textos.modoAcademico("geometrico-e7", null)).toContain("modo académico");
+    // 25-10: la licencia de SMPLify solo permite uso no comercial y sin fines de lucro
+    expect(textos.modoAcademico("geometrico-e7", LIC)).toContain("uso no comercial y sin fines de lucro");
     expect(textos.modoAcademico("geometrico-v1", LIC)).toBe("");
     expect(textos.modoAcademico(undefined, undefined)).toBe("");
   });

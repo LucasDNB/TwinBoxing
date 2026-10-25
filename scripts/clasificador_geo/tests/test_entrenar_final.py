@@ -86,7 +86,7 @@ def test_variante_e7_modo_academico(trabajo):
     meta = json.loads((out / "meta.json").read_text())
     assert meta["exp"] == "E7" and meta["nombre"] == "clasificador_e7_v1"
     assert meta["metodo"] == "geometrico-e7" and meta["n_features"] == 42
-    assert "SMPL" in meta["licencia"] and "pendiente" in meta["licencia"]
+    assert "SMPL" in meta["licencia"] and "no comercial y sin fines de lucro" in meta["licencia"]
     assert ef.VARIANTES["E7"]["salida"].name == "clasificador_e7_v1"
     # E4 sigue sin licencia y con su metodo
     meta4 = json.loads((ef.entrenar_final(_datos(), trabajo / "n", None, semillas=(0,), epocas=1,

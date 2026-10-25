@@ -5,7 +5,7 @@ corre Lucas o se le piden.
 
 | # | Paso | Verificación | Estado |
 |---|---|---|---|
-| 0 | Licencia de SMPLify pegada, o condición 3 enmendada para B (`00-README.md`) | texto en `docs/specs/2026-10-25-e7-modo-academico/02-registro.md` | pendiente (Lucas) |
+| 0 | Licencia de SMPLify pegada, o condición 3 enmendada para B (`00-README.md`) | texto en `docs/specs/2026-10-25-e7-modo-academico/02-registro.md` | hecha, 25-10 |
 | 1 | Huella de A (`01-produccion.md`, "Cómo se comprueba"), guardada en `~/boxtwin-academico/huella-A-antes.txt` | el archivo existe y `/salud` da `34e991d` y `geometrico` | pendiente |
 | 2 | T1: `_commit()` sigue el `gitdir:` de un worktree, con prueba, en `e7-modo-academico` | prueba nueva en verde; suite de la API en verde | pendiente |
 | 3 | Worktree fijo `~/Proyectos/TwinBoxing-academico` en `e7-modo-academico`; anotar el hash | `git -C ~/Proyectos/TwinBoxing-academico rev-parse HEAD` | pendiente |

@@ -7,12 +7,12 @@
 | Id | Tarea | Estado | Evidencia |
 |---|---|---|---|
 | Q | Enmienda y plan aprobados | hecha | `53012c9`, 25-10 |
-| L | Texto de la licencia de SMPLify | **pendiente** | Lucas lo deja pendiente (25-10). Mientras siga así, la condición 3 de la enmienda impide encender el modo |
+| L | Texto de la licencia de SMPLify | hecha | Lucas lo pega el 25-10 (abajo). Permite uso personal, de investigación, educativo o artístico sin fines comerciales y prohíbe todo uso comercial. La demo académica de un PFI, sin cobro, en la tailnet y con material propio entra; la condición 3 de la enmienda se cumple |
 | M1 | Modelo final de E7 | hecha | `entrenar_final.py --exp E7 --dispositivo cuda` → `~/boxtwin/modelos/clasificador_e7_v1`: 5 semillas, 42 features, 1047 golpes, `metodo: geometrico-e7`, familia 0,7775, leyenda de licencia; `sin_Sparring/` para CA2-E7. Métricas de E7 copiadas a `docs/experiments/datos/2026-10-24-e7-4dhumans-*.json` (solo números) |
 | M2 | Elevación por sesión | hecha | `boxtwin-annotator/tools/elevar_hmr2_sesion.py` (corre en `boxtwin_4dhumans`) → `pose3d_hmr2.npz` y su meta |
 | M3 | Features 3D en el producto | hecha | `boxtwin.mvp.clasificador_geo`: `features_3d`, `features_3d_golpe`, `ClasificadorGeo.con_3d`, `clasificar_sesion(..., pose3d=)`; `boxtwin clasificar --pose3d`. Sin el archivo, error claro con un modelo E7 |
 | M4 | Worker y configuración | hecha | `BOXTWIN_CLASIFICADOR=e7`, `BOXTWIN_CMD_HMR2`, `BOXTWIN_MODELO_CLASIFICADOR_E7`; `Config.tipo_v2`; la etapa `clasificar` corre elevar, clasificar con `--pose3d` y tipos; bolsa y sombra siguen con E4a; `/salud` dice `modelo_e7` |
-| M5 | Contrato y Fight-Card | hecha | `geometrico-e7` y `licencia` en el schema 0.3 (`CHANGELOG.md`), en `fightcard.py` y en zod; la vista del tipo suma "Tipo en modo académico, no apto para uso comercial: …" |
+| M5 | Contrato y Fight-Card | hecha | `geometrico-e7` y `licencia` en el schema 0.3 (`CHANGELOG.md`), en `fightcard.py` y en zod; la vista del tipo suma "Tipo en modo académico, uso no comercial y sin fines de lucro: …" (texto del 25-10; antes decía "no apto para uso comercial") |
 | M6 | Tiempo contra C5 | hecha | `scripts/clasificador_geo/medir_tiempo_e7.py`, `~/boxtwin/e7-4dhumans/tiempo/tiempo_e7.json` (abajo) |
 
 ## Pruebas
@@ -52,8 +52,36 @@ segmentos salieron con 3D (pasos con 3D 0,995).
 
 ## Lo que falta para encender el modo (no es de este PR)
 
-1. El texto de la licencia de SMPLify (L).
+1. ~~El texto de la licencia de SMPLify (L).~~ Hecho el 25-10.
 2. En la estación, solo para la demo y sin sesiones de prueba: `BOXTWIN_CLASIFICADOR=e7` y
    `BOXTWIN_CMD_HMR2=~/miniforge3/envs/boxtwin_4dhumans/bin/python <repo>/boxtwin-annotator/tools/elevar_hmr2_sesion.py`
    en `/etc/boxtwin.env`, el build de la web (`despliegue/README.md`, "Los pasos") y reiniciar.
    Volver es sacar las dos variables.
+
+## Licencia de SMPLify (condición 3)
+
+Texto que pegó Lucas el 25-10. Es su resumen de la página de la licencia, con las fuentes al lado;
+el texto legal completo está en `https://smplify.is.tue.mpg.de/license.html`:
+
+> La licencia de SMPLify es una licencia de derechos de autor para investigación científica sin
+> fines de lucro otorgada por el Max-Planck-Gesellschaft.
+>
+> - Uso gratuito: es gratuito exclusivamente para fines personales, investigación científica,
+>   educación o proyectos artísticos que no tengan fines comerciales.
+> - Modificaciones: está permitido modificar, adaptar, traducir o crear obras derivadas basadas en
+>   el software bajo ese mismo propósito.
+> - Prohibición comercial: cualquier uso comercial está estrictamente prohibido. Esto incluye la
+>   integración en productos comerciales, servicios de pago o la creación de artefactos con fines
+>   de lucro.
+
+Pedido de Lucas el 25-10: aclarar en el pie del procesamiento que el uso es "comercial y sin fines
+de lucro". Se escribió **no comercial** y sin fines de lucro, porque "comercial" contradice la
+licencia que el mismo texto prohíbe. Dónde va:
+
+- Pie del video procesado (`boxtwin.mvp.render.LEYENDA_E7`): "modo academico: uso no comercial y
+  sin fines de lucro (SMPL)", al lado del reloj, solo con `geometrico-e7`.
+- Web: la nota fija al pie de la vista de video y la nota del tipo de golpe: "Tipo en modo
+  académico, uso no comercial y sin fines de lucro: …".
+- `meta.json` de `clasificador_e7_v1` (y de `tipos.json` y la Fight-Card, que la copian): la
+  leyenda de la licencia sin "pendiente". Se reescribió el meta sin reentrenar: los `.pt` tienen el
+  mismo sha256.

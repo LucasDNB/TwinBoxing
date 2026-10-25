@@ -22,7 +22,10 @@ Archivos:
 - `03-convivencia.md`: GPU, red, datos, sesiones de prueba y vuelta atrás.
 - `04-pasos.md`: el orden, con la verificación de cada paso.
 
-## Antes de lanzar B (bloqueante)
+## Antes de lanzar B (resuelto el 25-10)
+
+Lucas pegó el texto de la licencia de SMPLify el 25-10 y permite este uso (salida 1). Lo que
+sigue queda como registro de por qué hacía falta.
 
 La enmienda del modo académico (`docs/specs/2026-10-25-e7-modo-academico/00-enmienda.md`) no deja
 encender E7 sin el texto de la licencia de SMPLify (condición 3), y B lo enciende. Hay dos

@@ -1,8 +1,8 @@
 # Enmienda al pre-registro de E7 · modo académico en la app
 
 **Estado: aprobada por Lucas el 25-10-2026, junto con el plan (`01-plan.md`). Licencia de
-SMPLify: pendiente** ("no importa la licencia, lo dejamos como pendiente"). El código se
-escribe; la condición 3 sigue valiendo para encender el modo. Se commitea aprobada,
+SMPLify: confirmada el 25-10** (texto en `02-registro.md`: uso no comercial y sin fines de
+lucro). La condición 3 se cumple para una demo académica sin cobro. Se commitea aprobada,
 sola, antes de escribir código del producto. No edita `docs/specs/2026-10-24-e7-4dhumans/01-preregistro.md`:
 lo enmienda desde acá, con fecha y motivo.
 
@@ -24,7 +24,7 @@ dentro del uso no comercial.
 2. **Nunca para usuarios.** No se enciende en la estación mientras haya sesiones de prueba,
    entrenadores u otros usuarios cargando videos. Solo en una instancia de demostración o en la
    presentación, con material propio.
-3. **Licencia confirmada antes de encender (pendiente al 25-10).** Lucas pega en `TAREAS.md` el texto de la licencia
+3. **Licencia confirmada antes de encender (confirmada el 25-10, `02-registro.md`).** Lucas pega en `TAREAS.md` el texto de la licencia
    de SMPLify que aceptó al bajar el modelo, y el modo solo se enciende si ese texto permite este
    uso (demostración académica de un PFI, sin cobro ni distribución del modelo).
 4. **Tiempo medido antes de encender.** El modo se mide contra C5 (reloj hasta la Fight-Card,

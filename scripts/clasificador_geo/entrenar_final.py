@@ -64,8 +64,9 @@ VARIANTES = {
            "salida": Path("~/boxtwin/modelos/clasificador_e7_v1").expanduser(),
            "metricas": REPO / "docs" / "experiments" / "datos" / "2026-10-24-e7-4dhumans-E7.json",
            "referencia": "docs/experiments/2026-10-24-e7-4dhumans.md",
-           "licencia": ("modo academico: 3D de 4D-Humans con SMPL, licencia de investigacion no "
-                        "comercial; texto de la licencia de SMPLify pendiente de confirmar (25-10)")},
+           "licencia": ("modo academico: 3D de 4D-Humans con SMPL, licencia de SMPLify "
+                        "(Max-Planck-Gesellschaft): uso no comercial y sin fines de lucro, solo "
+                        "investigacion y educacion")},
 }
 
 

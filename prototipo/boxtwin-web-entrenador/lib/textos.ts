@@ -54,7 +54,7 @@ export const textos = {
   modoAcademico(metodo: string | null | undefined, licencia: string | null | undefined) {
     if (metodo !== "geometrico-e7") return "";
     const lic = licencia && licencia.trim() ? licencia : "3D de 4D-Humans con SMPL, licencia de investigación";
-    return `Tipo en modo académico, no apto para uso comercial: ${lic}.`;
+    return `Tipo en modo académico, uso no comercial y sin fines de lucro: ${lic}.`;
   },
   // RT10 del tipo v2: jab y cross salen de la guardia, y sin guardia cargada se supone ortodoxa.
   avisoGuardiaSupuesta(quien: string) {
