@@ -114,7 +114,7 @@ en `~/boxtwin/e7-4dhumans/`. Pasos manuales en el 00-README (Q1 a Q4).
 | E7-3 | `elevar_hmr2.py` sobre las siete fuentes | 02 §2 | E7-2, Q4 | hecha | 24-10 23:19 a 23:59, `~/boxtwin/e7-4dhumans/datos/pose3d.npz`: 1047 golpes, pasos con 3D 0,997 (por fuente de 0,995 a 1,000), 2352 s |
 | E7-4 | `features3d.py --trabajo ~/boxtwin/e7-4dhumans` | 02 §2 | E7-3 | hecha | X3 (1047, 32, 16), pasos con 3D 0,997 |
 | E7-5 | `entrenar.py --exp E7` | 02 §2 | E7-4 | hecha | 35 corridas en `cuda`, unos 3 s cada una, en `~/boxtwin/e7-4dhumans/corridas/E7/`; completo |
-| E7-6 | `evaluar.py` contra el pre-registro | 02 §2 | E7-5 | hecha | `~/boxtwin/e7-4dhumans/resultados/{E7,veredictos}.json`. Familia 0,778 (Wilson 0,751–0,802), recall de hook 0,683 (0,629–0,733). P11a mejora: +0,039 contra E5, 5 de 7, desvío 0,013. P11b mejora: +0,051 contra E4, 5 de 7. Sub-hipótesis 1: a (ocho clases 0,673). D9: ninguno. Sin umbral: altura balanceada en C8 0,751 (E4 0,719, E5 0,713); vibración de la muñeca 2 a 3 veces la de E5 en todas las fuentes |
+| E7-6 | `evaluar.py` contra el pre-registro | 02 §2 | E7-5 | hecha | `~/boxtwin/e7-4dhumans/resultados/{E7,veredictos}.json`. Familia 0,777 (814 de 1047; Wilson 0,751–0,802; el commit 06fe4b5 decía 0,778 por redondear un valor ya redondeado), recall de hook 0,683 (0,629–0,733). P11a mejora: +0,039 contra E5, 5 de 7, desvío 0,013. P11b mejora: +0,051 contra E4, 5 de 7. Sub-hipótesis 1: a (ocho clases 0,673). D9: ninguno. Sin umbral: altura balanceada en C8 0,751 (E4 0,719, E5 0,713); vibración de la muñeca 2 a 3 veces la de E5 en todas las fuentes |
 | E7-7 | Documento y entrada del README preparada | 02 §3 | E7-6 | pendiente | |
 
 ### Entorno (Q3, 24-10)
