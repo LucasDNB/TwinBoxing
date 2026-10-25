@@ -1,0 +1,32 @@
+# BoxTwin academica (docs/specs/2026-10-25-dos-instancias/02-academica.md).
+#
+# Copia de la unidad de A con nombre, directorio, entorno, puerto y Restart distintos. No se
+# habilita al arrancar: se enciende para la demo y se apaga despues. Restart=on-failure y no
+# always: si alguien la para a mano, queda parada. Nunca con Funnel ni para usuarios.
+#
+# Instalacion (L1, Lucas):
+#   sudo cp boxtwin-academico-*.service /etc/systemd/system/ && sudo systemctl daemon-reload
+#   (sin enable)
+
+[Unit]
+Description=BoxTwin academica (E7, modo academico) - API
+Documentation=https://github.com/LucasDNB/TwinBoxing
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lucasb
+Group=lucasb
+WorkingDirectory=/home/lucasb/Proyectos/TwinBoxing-academico
+EnvironmentFile=/etc/boxtwin-academico.env
+ExecStart=/home/lucasb/miniforge3/envs/twinboxing_env/bin/uvicorn boxtwin_api.app:app \
+          --host 127.0.0.1 --port 8001 --proxy-headers
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
