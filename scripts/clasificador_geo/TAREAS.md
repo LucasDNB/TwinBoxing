@@ -111,10 +111,10 @@ en `~/boxtwin/e7-4dhumans/`. Pasos manuales en el 00-README (Q1 a Q4).
 | E7-0 | Commit del pre-registro aprobado | 02 §3 | Q1 | hecha | `083dc70` |
 | E7-1 | Prueba de humo: un golpe, VRAM, velocidad, claves de salida | 02 §3 | Q2, Q3 | hecha | `humo_hmr2.py`, `~/boxtwin/e7-4dhumans/humo.json`: `02-sparring_ev_0001`, 21 cuadros, 21 recortes, ninguno sin caja; VRAM pico 2756 MB con lote 8 (de 7786); 0,048 s por recorte con lote 1 y 0,033 con lote 8; carga 6,7 s. Salidas: `pred_smpl_params` (global_orient 1×3×3, body_pose 23×3×3, betas 10), `pred_keypoints_3d` 44 (orden OpenPose más extras, no se usa); el forward de `smplx.SMPL` da 45 articulaciones, las primeras 24 son las de SMPL. Ancho de hombros SMPL mediano 0,329 m. E7 es viable; con 33,5 mil recortes, unos 19 min de GPU más la lectura de video |
 | E7-2 | Pruebas en verde | 02 §2 | E7-1 | hecha | `tests/test_e7.py`, 8 pruebas de los cinco puntos del diseño §2, escritas antes del código y en rojo; `python -m pytest scripts/clasificador_geo/tests`: 69 pasadas, 1 salteada (la de mmpose, como antes). Código: `elevar_hmr2.py`, `geo.TRABAJO_E7`, `features3d.py --trabajo`, `entrenar.py --exp E7` (3D y corridas en el trabajo de E7), `evaluar.py --e7`. Integración sobre 02-sparring en un directorio temporal: 62 golpes, todos los pasos con 3D, 180 s (los 1047 serían unos 50 min) |
-| E7-3 | `elevar_hmr2.py` sobre las siete fuentes | 02 §2 | E7-2, Q4 | en curso | 24-10 23:19, encadenado con E7-4 a E7-6, log en `~/boxtwin/e7-4dhumans/logs/` |
-| E7-4 | `features3d.py --trabajo ~/boxtwin/e7-4dhumans` | 02 §2 | E7-3 | pendiente | |
-| E7-5 | `entrenar.py --exp E7` | 02 §2 | E7-4 | pendiente | |
-| E7-6 | `evaluar.py` contra el pre-registro | 02 §2 | E7-5 | pendiente | |
+| E7-3 | `elevar_hmr2.py` sobre las siete fuentes | 02 §2 | E7-2, Q4 | hecha | 24-10 23:19 a 23:59, `~/boxtwin/e7-4dhumans/datos/pose3d.npz`: 1047 golpes, pasos con 3D 0,997 (por fuente de 0,995 a 1,000), 2352 s |
+| E7-4 | `features3d.py --trabajo ~/boxtwin/e7-4dhumans` | 02 §2 | E7-3 | hecha | X3 (1047, 32, 16), pasos con 3D 0,997 |
+| E7-5 | `entrenar.py --exp E7` | 02 §2 | E7-4 | hecha | 35 corridas en `cuda`, unos 3 s cada una, en `~/boxtwin/e7-4dhumans/corridas/E7/`; completo |
+| E7-6 | `evaluar.py` contra el pre-registro | 02 §2 | E7-5 | hecha | `~/boxtwin/e7-4dhumans/resultados/{E7,veredictos}.json`. Familia 0,778 (Wilson 0,751–0,802), recall de hook 0,683 (0,629–0,733). P11a mejora: +0,039 contra E5, 5 de 7, desvío 0,013. P11b mejora: +0,051 contra E4, 5 de 7. Sub-hipótesis 1: a (ocho clases 0,673). D9: ninguno. Sin umbral: altura balanceada en C8 0,751 (E4 0,719, E5 0,713); vibración de la muñeca 2 a 3 veces la de E5 en todas las fuentes |
 | E7-7 | Documento y entrada del README preparada | 02 §3 | E7-6 | pendiente | |
 
 ### Entorno (Q3, 24-10)
