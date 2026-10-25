@@ -284,7 +284,9 @@ export const FightCard = z.object({
     exactitud_familia_fuente_no_vista: numN,
     estimado: z.boolean().optional(),
     // Tipo v2 (16-10). Sin `metodo`, la Fight-Card es de PoseConv3D.
-    metodo: z.enum(["poseconv3d", "geometrico-v1"]).optional(),
+    // geometrico-e7: modo académico (25-10), E4 más el 3D de HMR2; trae la leyenda de licencia.
+    metodo: z.enum(["poseconv3d", "geometrico-v1", "geometrico-e7"]).optional(),
+    licencia: strN.optional(),
     referencia: strN.optional(),
     guardia_supuesta: z.object({ A: z.boolean().optional(), B: z.boolean().optional() }).optional(),
   }),

@@ -366,7 +366,8 @@ def aplicar_tipos(fc: dict, tipos: dict, checkpoint: str, exactitud: float | Non
 
 # Tipo v2 (docs/specs/2026-10-16-fightcard-tipo-v2): campos opcionales, una Fight-Card sin
 # ellos es una de v1 (metodo poseconv3d).
-CAMPOS_V2_CLASIFICADOR = ("metodo", "referencia", "guardia_supuesta")
+# "licencia": modo academico E7 (25-10); con E4 no viene y se saca.
+CAMPOS_V2_CLASIFICADOR = ("metodo", "referencia", "guardia_supuesta", "licencia")
 CAMPOS_V2_GOLPE = ("p_familia", "rol")
 
 

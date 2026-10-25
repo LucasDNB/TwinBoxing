@@ -50,6 +50,12 @@ export const textos = {
     const ex = exactitud == null ? "sin medir" : porcentajeAR(exactitud);
     return `Tipo estimado por el modelo ${ck}. Exactitud sobre material nuevo: ${ex}.`;
   },
+  // Modo académico E7 (docs/specs/2026-10-25-e7-modo-academico): la Fight-Card lo dice siempre.
+  modoAcademico(metodo: string | null | undefined, licencia: string | null | undefined) {
+    if (metodo !== "geometrico-e7") return "";
+    const lic = licencia && licencia.trim() ? licencia : "3D de 4D-Humans con SMPL, licencia de investigación";
+    return `Tipo en modo académico, no apto para uso comercial: ${lic}.`;
+  },
   // RT10 del tipo v2: jab y cross salen de la guardia, y sin guardia cargada se supone ortodoxa.
   avisoGuardiaSupuesta(quien: string) {
     return `Jab y cross suponen guardia ortodoxa. Cargá la guardia de ${quien} para corregirlo.`;

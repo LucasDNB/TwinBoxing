@@ -65,3 +65,28 @@ describe("aviso de guardia supuesta", () => {
       "Jab y cross suponen guardia ortodoxa. Cargá la guardia de Mono para corregirlo.");
   });
 });
+
+/*
+ * Modo académico E7 (docs/specs/2026-10-25-e7-modo-academico, M5): el método nuevo y su
+ * leyenda de licencia valen en el schema y en zod, y la nota del tipo lo dice.
+ */
+describe("modo académico E7", () => {
+  const LIC = "modo academico: 3D de 4D-Humans con SMPL, licencia de investigacion no comercial";
+
+  it("geometrico-e7 con licencia cumple el schema y zod la acepta", () => {
+    const d = fcV2();
+    d.clasificador.metodo = "geometrico-e7";
+    (d.clasificador as Record<string, unknown>).licencia = LIC;
+    expect(validar(d), JSON.stringify(validar.errors)).toBe(true);
+    const r = FightCard.safeParse(d);
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.clasificador.licencia).toBe(LIC);
+  });
+
+  it("la nota del modo académico nombra la licencia y E4 no lleva nota", () => {
+    expect(textos.modoAcademico("geometrico-e7", LIC)).toContain("4D-Humans");
+    expect(textos.modoAcademico("geometrico-e7", null)).toContain("modo académico");
+    expect(textos.modoAcademico("geometrico-v1", LIC)).toBe("");
+    expect(textos.modoAcademico(undefined, undefined)).toBe("");
+  });
+});
