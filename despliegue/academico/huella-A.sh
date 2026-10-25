@@ -14,7 +14,8 @@ git -C "$REPO" rev-parse HEAD
 echo "## /salud de A"
 curl -s 127.0.0.1:8000/salud; echo
 echo "## tailscale serve status"
-tailscale serve status 2>&1
+# El bloque del 8443 es B (L3), no A: se deja afuera para comparar solo lo de A.
+tailscale serve status 2>&1 | awk '/:8443/{salta=1} /^$/{salta=0} !salta' | cat -s
 echo "## pip freeze de twinboxing_env (sha256)"
 "$PY" -m pip freeze 2>/dev/null | sha256sum
 echo "## mtime de out/index.html de A"

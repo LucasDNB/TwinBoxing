@@ -16,8 +16,8 @@ Ninguna tarea escribe en A. `S` = la corre el SDD sin `sudo`; `L` = la hace Luca
 | L1 | Lucas | `sudo install -m 600 -o lucasb -g lucasb ~/boxtwin-academico/boxtwin-academico.env /etc/boxtwin-academico.env`; `sudo cp ~/boxtwin-academico/systemd/*.service /etc/systemd/system/` (copia idéntica a las versionadas); `sudo systemctl daemon-reload`; **sin** `enable` | S6 | `systemctl is-enabled boxtwin-academico-api` da `disabled` | hecha | 25-10, las dos unidades `disabled`; `/etc/boxtwin-academico.env` 600 lucasb, igual al armado en S5 |
 | L2 | Lucas | Arrancar B: `sudo systemctl start boxtwin-academico-api boxtwin-academico-worker` | L1 | — | hecha | 25-10 16:48, las dos `active` |
 | S7 | SDD | CA2 | L2 | `curl 127.0.0.1:8001/salud` | hecha | 25-10, `clasificador` `e7`, `modelo_e7` `true`, `modelo_individual` `true`, `commit` `efcec23` (el de S3); la web responde 200; la base nueva quedó en `~/boxtwin-academico/datos/`; la huella de A sigue igual a S1 |
-| L3 | Lucas | `tailscale serve --bg --https=8443 http://127.0.0.1:8001`, sin Funnel | S7 | — | pendiente | |
-| S8 | SDD | CA3 | L3 | `tailscale serve status` | pendiente | |
+| L3 | Lucas | `tailscale serve --bg --https=8443 http://127.0.0.1:8001`, sin Funnel | S7 | — | hecha | 25-10 |
+| S8 | SDD | CA3 | L3 | `tailscale serve status` | hecha | 25-10, `:8443 (tailnet only)` → `127.0.0.1:8001`; `AllowFunnel` solo para `:443`, que sigue → `127.0.0.1:8000`; `https://…:8443/salud` responde desde la tailnet con `e7` y `efcec23`; huella de A igual a S1 (decisión 6) |
 | L4 | Lucas | Material de la demo: elegir los videos propios (al menos un sparring con los dos peleadores y una bolsa), crear la cuenta en B con la invitación nueva y subirlos desde `https://…:8443` | S8 | la lista de videos anotada acá, con quién aparece y su consentimiento | pendiente | |
 | S9 | SDD | CA5 y CA4 sobre lo que subió Lucas | L4 | lo de CA5 en las carpetas de sesión de B; conteo de sesiones de A igual que en S1 | pendiente | |
 | L5 | Lucas | CA6: en el mismo navegador, sesión abierta en A y en B; cerrar sesión en B y recargar A | L4 | A sigue con su sesión; B pide ingresar | pendiente | |
@@ -51,6 +51,9 @@ afectada.
    `enable`), y se copian también a `~/boxtwin-academico/systemd/` porque el worktree de B está
    congelado antes de que existieran. `boxtwin-academico.env` se lee como lo lee systemd (la línea
    entera es el valor): no se carga con `source` de bash, porque `BOXTWIN_CMD_HMR2` lleva un espacio.
+
+6. 25-10: `huella-A.sh` deja afuera el bloque `:8443` de `tailscale serve status`, que es B (L3) y
+   no A. El filtro no cambia la huella de S1, tomada sin ese bloque; con él, la de S8 es igual a S1.
 
 ## Preguntas abiertas
 
