@@ -847,3 +847,11 @@ PENDIENTE Y PROXIMO PASO
    los cuatro botones de prueba entran a su version
 6. despliegue/PRODUCCION.md ordena el despliegue; produccion.sh hace los pasos sin sudo
 7. Nada desplegado: A sigue en 34e991d y B en efcec23
+
+26-10 Despliegue de produccion en la estacion (A), antes de las sesiones de prueba
+
+1. Decision de Lucas: desvio de versiones-26-10/06 §1. C4 a C6 se miden sobre c936b0f
+2. Respaldos de la base (12 sesiones) y de /etc/boxtwin.env; B apagada durante el despliegue
+3. Migracion al arrancar: la cuenta real quedo Entrenador con sus 12 sesiones y 5 peleadores
+4. verificar a ok, tambien por el Funnel. B de nuevo arriba en efcec23, sin cambios
+5. Version de prueba apagada; CV6 pendiente. Registro en despliegue/PRODUCCION.md

@@ -62,7 +62,35 @@ Las dos instancias levantadas en local desde los ejemplos de entorno de esta ram
   respuesta que cualquier ruta inexistente con POST (la atiende el montaje de la web), así que no
   delata que la ruta existe, que es lo que el requisito protege. Se deja así y se declara.
 
-## Estado de la estación al 26-10 (leído, sin tocar)
+## Registro del despliegue de A (26-10, 16:37 a 16:40)
+
+Lucas decidió desplegar antes de las sesiones de prueba del 27-10. Es un **desvío de
+`versiones-26-10/06` §1** (y de `dos-instancias/01-produccion.md`, que daba A por intacta): C4, C5
+y C6 se miden sobre `c936b0f` y no sobre `34e991d`. Va así a la tesis, con fecha y motivo.
+
+1. Antes: cola vacía, GPU libre, una cuenta real con 12 sesiones. Huella en
+   `~/boxtwin/huella-antes-de-produccion.txt`.
+2. Respaldos: `~/boxtwin/datos/boxtwin.db.antes-de-produccion-20261026-1637.bak` (12 sesiones,
+   abre) y `/etc/boxtwin.env.antes-de-produccion-20261026-1637.bak`. B apagada.
+3. Copia principal: `git checkout --detach produccion` → `c936b0f`. Web con `produccion.sh web`
+   (el primer build cortó con el aviso de Next y el reintento siguió; presupuesto y sin-demo ok).
+4. `/etc/boxtwin.env`: se agregaron `BOXTWIN_CUPO=informar`, `BOXTWIN_DEMO=` y
+   `BOXTWIN_DEMO_SUBIR=1` (sigue en 600, lucasb). Restart de `boxtwin-api` y `boxtwin-worker`.
+5. Migración al arrancar: columnas nuevas en `usuarios`, `boxeadores`, `sesiones` y
+   `correcciones`; la cuenta real quedó Entrenador titular con sus 12 sesiones y 5 peleadores; 12
+   duraciones copiadas; índice `uq_boxeador_cuenta_nombre`.
+6. `produccion.sh verificar a`: todo ok, versión de prueba apagada. Por el Funnel: `/salud` con
+   `c936b0f`, `/ingresar/` 200, `/cuenta` sin token 401.
+7. B encendida de nuevo, sin cambios: `verificar b` ok en `efcec23`, sin arranque automático,
+   `:8443` solo en la tailnet.
+8. Huella después en `~/boxtwin/huella-despues-de-produccion.txt`. Cambian el entorno, el commit,
+   `/salud`, la fecha de la web y el hash de `pip freeze`. Este último solo porque las líneas
+   editables llevan el commit de la copia; ningún paquete cambió. Sesiones: 12 antes y después.
+
+Sin hacer: CV6 y la versión de prueba (`BOXTWIN_DEMO` sigue vacía), y entrar con la cuenta real
+desde el navegador. Eso último lo verifica Lucas, porque la clave no la tiene el SDD.
+
+## Estado de la estación al 26-10 antes del despliegue (leído, sin tocar)
 
 - A: `boxtwin-api` y `boxtwin-worker` activos, `/salud` `34e991d`, `geometrico`. Sin las versiones.
 - B: `boxtwin-academico-api` y `-worker` activos y **no habilitados al arranque**, `/salud`

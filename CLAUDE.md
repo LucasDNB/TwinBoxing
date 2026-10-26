@@ -414,8 +414,9 @@ Argparse con defaults sensatos. Todo lo que produzca datos, reanudable.
 ### Git
 
 Ramas con PR contra `main`; commits con mensaje fechado. `testeoDS` está mergeada y
-borrada (20-10). La estación corre `main` desde `~/Proyectos/TwinBoxing`, y
-`GET /salud` dice el commit que está corriendo.
+borrada (20-10). Desde el 26-10 la estación corre la rama `produccion` (desacoplada,
+`c936b0f`) desde `~/Proyectos/TwinBoxing`, con las versiones; la instancia académica B sigue en
+`efcec23` (`despliegue/PRODUCCION.md`). `GET /salud` dice el commit que está corriendo.
 
 ### Documentación de experimentos
 
