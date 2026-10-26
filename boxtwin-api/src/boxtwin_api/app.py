@@ -85,16 +85,29 @@ __all__ = ["app"]
 ARRANCADO = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def _commit() -> str | None:
-    """El commit del checkout donde vive el paquete, leido del archivo, sin subprocesos."""
+def _commit(checkout: Path | None = None) -> str | None:
+    """El commit del checkout donde vive el paquete, leido del archivo, sin subprocesos.
+
+    En un worktree `.git` es un archivo con `gitdir:`; HEAD se lee ahi y las referencias en el
+    directorio comun que indica `commondir` (docs/specs/2026-10-25-dos-instancias, T1).
+    """
     try:
-        raiz = Path(__file__).resolve().parents[3] / ".git"
+        raiz = (checkout or Path(__file__).resolve().parents[3]) / ".git"
+        comun = raiz
+        if raiz.is_file():
+            texto = raiz.read_text().strip()
+            if not texto.startswith("gitdir: "):
+                return None
+            raiz = Path(texto[8:])
+            comun = raiz
+            if (raiz / "commondir").is_file():
+                comun = raiz / (raiz / "commondir").read_text().strip()
         cabeza = (raiz / "HEAD").read_text().strip()
         if cabeza.startswith("ref: "):
-            ref = raiz / cabeza[5:]
+            ref = comun / cabeza[5:]
             if not ref.is_file():          # empaquetado en packed-refs
                 nombre = cabeza[5:]
-                for linea in (raiz / "packed-refs").read_text().splitlines():
+                for linea in (comun / "packed-refs").read_text().splitlines():
                     if linea.endswith(" " + nombre):
                         return linea.split()[0][:7]
                 return None
