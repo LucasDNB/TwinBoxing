@@ -218,6 +218,33 @@ class Config:
         default_factory=lambda: int(os.environ.get("BOXTWIN_PERFIL_PRELIMINAR", "5"))
     )
 
+    # -- Versiones (prototipo/specs/versiones-26-10) ----------------------------------------
+    #
+    # Cupo de horas (DV-2): "informar" deja subir y avisa; "bloquear" rechaza con 409. Un valor
+    # mal escrito cuenta como informar. En las cuentas de prueba bloquea siempre (RNF-D3).
+    cupo: str = field(
+        default_factory=lambda: (
+            "bloquear" if os.environ.get("BOXTWIN_CUPO", "").strip().lower() == "bloquear"
+            else "informar"
+        )
+    )
+    # Version de prueba (B29). Apagada por defecto: apagada, POST /auth/demo ni se registra.
+    # Se enciende solo en las ventanas de ensayo y presentacion (DV-10).
+    demo: bool = field(
+        default_factory=lambda: os.environ.get("BOXTWIN_DEMO", "").strip().lower() in ("1", "si")
+    )
+    # Cortar la subida en las cuentas de prueba sin apagar el resto (DV-11). Encendida por
+    # defecto: solo "0" o "no" la apagan.
+    demo_subir: bool = field(
+        default_factory=lambda: os.environ.get("BOXTWIN_DEMO_SUBIR", "1").strip().lower()
+        not in ("0", "no")
+    )
+    # El texto del consentimiento por atleta (B25) vive en archivos versionados. Si falta, la
+    # API no lo inventa: GET /cuenta/consentimiento contesta 409 y dice donde cargarlo (DV-5).
+    # Sin variable de entorno a proposito (02 §8: no hay variables nuevas fuera de las tres):
+    # el texto se versiona con el codigo.
+    textos: Path = field(default_factory=lambda: Path(__file__).resolve().parent / "textos")
+
     @property
     def modo_registro(self) -> str:
         if not self.invitacion:

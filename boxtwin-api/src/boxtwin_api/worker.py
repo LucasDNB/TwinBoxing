@@ -168,7 +168,29 @@ def ejecutar_trabajo(db, trabajo: Trabajo, timeout: float | None = None) -> str:
             )
         log.debug("%s", (r.stdout or "")[-2000:])
 
+    if trabajo.etapa == "procesar":
+        _copiar_duracion(ses, cfg.dir_sesion(ses.id))
     return _estado_en_disco(cfg.dir_sesion(ses.id)) or "listo"
+
+
+def _copiar_duracion(ses: Sesion, directorio: Path) -> None:
+    """
+    B20 (versiones 26-10): la duracion real y los fps a la base, para el cupo de horas.
+
+    Las columnas existen desde el MVP pero nadie las escribia: la duracion vivia solo en
+    sesion.json. Sin esto el cupo contaria lo que declaro la web y no lo que se subio. No
+    commitea: lo hace terminar(), en el mismo commit que el estado.
+    """
+    import json
+
+    try:
+        v = json.loads((directorio / "sesion.json").read_text()).get("video") or {}
+    except (OSError, ValueError, AttributeError):
+        return
+    if isinstance(v.get("duracion_s"), (int, float)):
+        ses.duracion_s = float(v["duracion_s"])
+    if isinstance(v.get("fps"), (int, float)):
+        ses.fps = float(v["fps"])
 
 
 def _estado_en_disco(directorio: Path) -> str | None:

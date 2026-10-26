@@ -19,6 +19,9 @@ dependencies = [
     "sqlalchemy>=2.0",
     "python-multipart>=0.0.9",
     "uvicorn[standard]>=0.27",
+    # Versiones 26-10 (B29): demo.yaml dice que se carga en las cuentas de prueba. Ya estaba
+    # en twinboxing_env (lo trae ultralytics); se declara para que la imagen no dependa de eso.
+    "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
@@ -37,6 +40,9 @@ version = { attr = "boxtwin_api.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+boxtwin_api = ["textos/*.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

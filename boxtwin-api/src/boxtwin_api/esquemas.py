@@ -18,6 +18,8 @@ from pydantic import BaseModel, EmailStr, Field, field_validator, model_validato
 
 __all__ = [
     "Credenciales",
+    "EntradaConsentimiento",
+    "EntradaDemo",
     "EntradaCorreccion",
     "Siembra",
     "Token",
@@ -43,6 +45,8 @@ class Token(BaseModel):
     token: str
     tipo: str = "bearer"
     usuario: str
+    # B29: el perfil de la version de prueba con que se entro. Nulo en el ingreso normal.
+    perfil: str | None = None
 
 
 class Siembra(BaseModel):
@@ -74,6 +78,23 @@ class EntradaBoxeador(BaseModel):
     # B17 (cambios-14-10): cargados a mano.
     distancia: Literal["larga", "media", "corta"] | None = None
     estilo: Literal["fajador", "estilista"] | None = None
+    # B24 (versiones 26-10): el entrenador a cargo, solo en Gimnasio. En PATCH solo se toca si
+    # viene en el pedido.
+    entrenador_id: str | None = Field(default=None, max_length=32)
+
+
+class EntradaDemo(BaseModel):
+    """B29: el perfil de la version de prueba. No acepta ids ni emails (02 §11)."""
+
+    perfil: str = Field(min_length=1, max_length=40)
+
+
+class EntradaConsentimiento(BaseModel):
+    """B25: el consentimiento de un atleta, con la version del texto que acepto."""
+
+    texto_version: str = Field(min_length=1, max_length=40)
+    mayor_de_edad: bool
+    nota: str | None = Field(default=None, max_length=200)
 
 
 class AsignarBoxeadores(BaseModel):

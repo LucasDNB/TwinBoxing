@@ -1,0 +1,33 @@
+# Las cuentas de la version de prueba (prototipo/specs/versiones-26-10, 02 §11 y 04 B29).
+#
+# El archivo real vive en la estacion, en ~/boxtwin/demo.yaml, como /etc/boxtwin.env: no se
+# versiona porque lista sesiones reales. Que sesiones entran lo decide Lucas (DV-9): solo
+# aquellas en que todos los que aparecen firmaron que se pueden mostrar, con seudonimos
+# ("Atleta 1") salvo que hayan aceptado su nombre. Si no alcanza, menos sesiones.
+#
+#   python -m boxtwin_api.demo sembrar   --yaml ~/boxtwin/demo.yaml
+#   python -m boxtwin_api.demo reiniciar --yaml ~/boxtwin/demo.yaml
+#
+# Cada sesion se copia con id nuevo: el video y la cache de pose con enlace duro, el resto
+# copiado. La Fight-Card no se reprocesa.
+
+individual:
+  cuenta: "Individual de prueba"
+  peleador: {nombre: "Boxeador de prueba", guardia: ortodoxa, altura_m: 1.75}
+  # Los mismos videos propios de bolsa y sombra de CV4 (DV-9).
+  sesiones: ["<id de una sesion real de bolsa>", "<id de una de sombra>"]
+
+entrenador:
+  cuenta: "Entrenador de prueba"
+  titular: "Entrenador de prueba"
+  peleadores: [{nombre: "Atleta 1", guardia: ortodoxa}, {nombre: "Atleta 2", guardia: zurda}]
+  sesiones: [{id: "<id>", a: "Atleta 1", b: "Atleta 2"}]
+
+gimnasio:
+  cuenta: "Gimnasio de prueba"
+  miembros: {gimnasio_titular: "Titular de prueba", gimnasio_entrenador: "Entrenador de prueba"}
+  # La version del texto con que se cargan los consentimientos de la semilla (B25). Cada
+  # atleta del gimnasio entra con uno vigente, que en la version de prueba no se revoca.
+  consentimiento_version: "semilla"
+  peleadores: [{nombre: "Atleta 3", entrenador: gimnasio_entrenador}]
+  sesiones: [{id: "<id>", a: "Atleta 3", b: null, subida_por: gimnasio_entrenador}]

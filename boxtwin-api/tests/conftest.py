@@ -47,12 +47,19 @@ def entorno(tmp_path, monkeypatch):
                    "boxtwin_api.worker"):
         if nombre in sys.modules:
             importlib.reload(sys.modules[nombre])
+    import boxtwin_api.acceso as acceso_mod
     import boxtwin_api.app as app_mod
     import boxtwin_api.cola as cola_mod
+    import boxtwin_api.cuentas as cuentas_mod
     import boxtwin_api.db as db_mod
     import boxtwin_api.worker as worker_mod
 
     importlib.reload(db_mod)
+    # Versiones 26-10: acceso y cuentas toman obtener_sesion de db al importarse. Se recargan
+    # despues de db y antes de app para que la ruta y su dependencia de acceso compartan la
+    # misma sesion de base por pedido, como en produccion.
+    importlib.reload(acceso_mod)
+    importlib.reload(cuentas_mod)
     importlib.reload(cola_mod)
     importlib.reload(app_mod)
     importlib.reload(worker_mod)

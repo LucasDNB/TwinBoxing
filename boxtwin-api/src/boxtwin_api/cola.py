@@ -35,7 +35,7 @@ from boxtwin_api.config import cfg
 from boxtwin_api.db import es_postgres
 from boxtwin_api.modelos import ETAPAS, Sesion, Trabajo, ahora
 
-__all__ = ["encolar", "fallar", "liberar_abandonados", "reclamar", "terminar"]
+__all__ = ["encolar", "fallar", "liberar_abandonados", "posicion_en_cola", "reclamar", "terminar"]
 
 
 def encolar(db: Session, sesion_id: str, etapa: str, **parametros) -> Trabajo:
@@ -169,3 +169,45 @@ def liberar_abandonados(db: Session) -> int:
     # 500. Paso en produccion el 22-09.
     db.commit()
     return int(r.rowcount or 0)
+
+
+def posicion_en_cola(db: Session, sesion_id: str, factor_min: float, factor_max: float) -> dict:
+    """
+    B27 (versiones 26-10): cuantos trabajos van antes que el de esta sesion y cuanto falta,
+    aproximado. Solo lectura: no toca la toma de trabajos.
+
+    Cuenta los de TODAS las cuentas, porque la GPU es una, y no devuelve de quien son. La
+    espera multiplica la duracion real o declarada de cada uno por el factor de
+    procesamiento medido; un trabajo sin duracion conocida suma cero y se dice en
+    `sin_duracion`. Solo `procesar` corre sobre el video entero: las otras etapas reutilizan
+    la pose y cuestan segundos, asi que no suman a la espera.
+    """
+    propio = db.scalars(
+        select(Trabajo).where(Trabajo.sesion_id == sesion_id, Trabajo.estado == "en_cola")
+        .order_by(Trabajo.creado)
+    ).first()
+    if propio is None:
+        return {"delante": 0, "espera_min": [0, 0], "sin_duracion": 0}
+    antes = db.execute(
+        select(Trabajo.etapa, Sesion.duracion_s, Sesion.duracion_declarada_s)
+        .join(Sesion, Sesion.id == Trabajo.sesion_id)
+        .where(
+            Trabajo.id != propio.id,
+            (Trabajo.estado == "tomado")
+            | ((Trabajo.estado == "en_cola") & (Trabajo.creado < propio.creado)),
+        )
+    ).all()
+    segundos, sin_duracion = 0.0, 0
+    for etapa, dur, declarada in antes:
+        if etapa != "procesar":
+            continue
+        d = dur if dur is not None else declarada
+        if d is None:
+            sin_duracion += 1
+        else:
+            segundos += float(d)
+    return {
+        "delante": len(antes),
+        "espera_min": [round(segundos * factor_min / 60), round(segundos * factor_max / 60)],
+        "sin_duracion": sin_duracion,
+    }
