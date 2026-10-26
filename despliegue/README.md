@@ -135,6 +135,47 @@ tambien workers de las pruebas e2e, con otra `BOXTWIN_DB`, y no hay que confundi
 No hay respaldo automatico de `~/boxtwin/datos` ni copia de `/etc/boxtwin.env`: si se
 pierde el archivo, `BOXTWIN_SECRETO` y la invitacion se vuelven a cargar a mano.
 
+## Versiones Individual y Gimnasio (26-10, sin desplegar)
+
+Specs en `prototipo/specs/versiones-26-10/`, registro en `prototipo/TAREAS.md`. Regla de `06` §1:
+nada de esto se despliega mientras haya sesiones de prueba por delante, y cada tanda una sola vez,
+después de su compuerta (CV1 y CV2), con la base respaldada y fuera del horario de una sesión.
+
+```bash
+# 1. respaldo de la base ANTES de migrar (R-12), y prueba de que la copia abre
+cp ~/boxtwin/datos/boxtwin.db ~/boxtwin/datos/boxtwin.db.antes-de-versiones.bak
+sqlite3 ~/boxtwin/datos/boxtwin.db.antes-de-versiones.bak "select count(*) from sesiones"
+
+# 2. merge, build y restart como en "Los pasos". La migracion es aditiva y la hace la API sola
+#    al arrancar: tablas cuentas, miembros y consentimientos, columnas nulas, el indice unico
+#    (cuenta_id, nombre) y una cuenta Entrenador por cada usuario existente. En PostgreSQL,
+#    despliegue/migraciones/2026-10-versiones.sql. Volver atras es volver de commit: el codigo
+#    anterior ignora lo nuevo. PyYAML ya esta en twinboxing_env (lo trae ultralytics).
+
+# 3. verificar: la cuenta real sigue entrando con email y clave, y es Entrenador
+curl -s -H "Authorization: Bearer $TOKEN" localhost:8000/cuenta | python -m json.tool | head
+
+# 4. variables nuevas en /etc/boxtwin.env (las tres vienen apagadas o en su default)
+#    BOXTWIN_CUPO=informar      # o bloquear (DV-2: informar en el PFI)
+#    BOXTWIN_DEMO=              # 1 SOLO en las ventanas de ensayo y presentacion (DV-10)
+#    BOXTWIN_DEMO_SUBIR=1       # 0 corta la subida en las cuentas de prueba (DV-11)
+
+# 5. las cuentas de prueba: el yaml real vive en la estacion y lista sesiones reales con
+#    permiso para mostrarse (DV-9). Lucas decide cuales; con seudonimos.
+cp despliegue/demo.yaml.ejemplo ~/boxtwin/demo.yaml && editor ~/boxtwin/demo.yaml
+BOXTWIN_DB=sqlite:////home/lucasb/boxtwin/datos/boxtwin.db BOXTWIN_DATOS=~/boxtwin/datos \
+  ~/miniforge3/envs/twinboxing_env/bin/python -m boxtwin_api.demo sembrar --yaml ~/boxtwin/demo.yaml
+#    Despues de cada ventana, para el siguiente visitante: el mismo comando con `reiniciar`.
+#    Solo toca cuentas con demo = true y falla sin borrar nada si algo real depende de ellas.
+
+# 6. CV6 con la bandera encendida: entrar por cada boton y pedir por id una sesion real
+#    conocida. Tiene que dar 404 en las cuatro. Si no, la bandera no se enciende.
+```
+
+El consentimiento por atleta (B25) no tiene texto: `boxtwin_api/textos/` va vacío a propósito
+(DV-5) y la API contesta 409 hasta que Lucas cargue `consentimiento-<version>.md`. Los de la semilla
+de prueba no lo necesitan. `BOXTWIN_TEXTOS` existe solo para los e2e; en la estación no se setea.
+
 ## Tipo v2 y bolsa y sombra (16-10)
 
 Dos scripts, los dos se corren en la estación como `lucasb` desde la raíz del repo y con la

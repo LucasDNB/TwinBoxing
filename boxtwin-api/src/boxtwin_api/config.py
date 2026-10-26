@@ -241,9 +241,12 @@ class Config:
     )
     # El texto del consentimiento por atleta (B25) vive en archivos versionados. Si falta, la
     # API no lo inventa: GET /cuenta/consentimiento contesta 409 y dice donde cargarlo (DV-5).
-    # Sin variable de entorno a proposito (02 §8: no hay variables nuevas fuera de las tres):
-    # el texto se versiona con el codigo.
-    textos: Path = field(default_factory=lambda: Path(__file__).resolve().parent / "textos")
+    # El texto se versiona con el codigo. BOXTWIN_TEXTOS es SOLO para las pruebas de punta a
+    # punta, que necesitan un texto de prueba sin meterlo en el paquete; en la estacion no se
+    # setea (02 §8 dice que las variables nuevas son tres: esta es un desvio declarado).
+    textos: Path = field(
+        default_factory=lambda: _ruta("BOXTWIN_TEXTOS", str(Path(__file__).resolve().parent / "textos"))
+    )
 
     @property
     def modo_registro(self) -> str:

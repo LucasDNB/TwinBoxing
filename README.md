@@ -797,3 +797,19 @@ PENDIENTE Y PROXIMO PASO
 4. Lo que la Fight-Card ya declara en estas sesiones: margen del detector medido en sparring,
    tipo como estimacion. La identidad se corrige a mano por tramos
 5. Mismo camino que PoseConv3D en el MVP. En la tesis va como funcion sin validar
+
+26-10 Versiones Individual y Gimnasio, por SDD sobre prototipo/specs/versiones-26-10
+
+1. Una version es el plan de la cuenta: tablas cuentas y miembros, y todas las rutas pasan
+   por acceso_actual. Ninguna compara usuario_id; lo verifica una prueba estructural
+2. Construido B19, B20, B22, B24, B25, B27, B29 y W27, W29 a W35, W38. Quedan especificados
+   y sin construir B21, B23, B26, B28, W28, W36 y W37, como dicen los specs
+3. Paridad: las 230 pruebas de la API y las 207 de la web pasan sin cambios. Nuevas: 65 en
+   la API (I1 a I5 y estructural) y 34 en la web; e2e 12 de 12, con WebKit por primera vez
+4. Ingreso de prueba con un boton por version detras de BOXTWIN_DEMO, apagado por defecto.
+   demo.py siembra y reinicia; reiniciar deja las cuentas reales identicas, probado
+5. Hallazgo: FastAPI 0.141 no aplana los routers incluidos en app.routes, y una prueba que
+   enumera rutas se salteaba las de cuentas.py sin avisar. Arreglado en las pruebas
+6. Hallazgo: el export HTML se rompia con una Fight-Card de bolsa (sin B). Arreglado
+7. B25 sin texto legal: no se invento uno (DV-5). La API contesta 409 hasta que se cargue
+8. Nada desplegado: la estacion sigue en main hasta que cierren las sesiones de prueba

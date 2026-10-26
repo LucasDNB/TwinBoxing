@@ -114,6 +114,19 @@ cualquier otro.
 > declara en la entrega final con fecha y motivo, y lo que no llegue al 03-11 queda especificado y
 > sin construir. `06-plan.md` §4 dice qué va a cada capítulo.
 
+## Decisiones tomadas (26-10)
+
+Lucas delegó el 26-10: "tomá todas las decisiones según tu criterio de recomendaciones". DV-1 a
+DV-11 quedan con la recomendación de la tabla de abajo, sin cambios. Lo que eso significó al
+construir:
+
+- DV-1: se construyeron la tanda 1, la tanda 2 y la P1 en la rama `versiones-26-10`. Nada se
+  desplegó: la regla de `06` §1 sigue, y el despliegue de cada tanda espera a su compuerta en la
+  estación y a que terminen las sesiones de prueba.
+- DV-5: el texto del 08-10 no estaba en el repo, así que B25 se construyó sin texto y la API
+  contesta 409 hasta que se cargue en `boxtwin_api/textos/`. No se inventó uno.
+- DV-6 y DV-9 dependen de Lucas y de la GPU: CV4 sin medir, y `~/boxtwin/demo.yaml` sin armar.
+
 ## Decisiones pendientes de Lucas
 
 Cada una tiene una recomendación. Si no se decide, los specs se construyen con la recomendación.
