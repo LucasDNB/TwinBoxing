@@ -89,22 +89,35 @@ def comando_de(trabajo: Trabajo, sesion: Sesion) -> list[list[str]]:
             *(["--manual"] if p.get("manual") else []),
         ]]
 
-    if trabajo.etapa == "clasificar" and cfg.clasificador == "geometrico":
+    if trabajo.etapa == "clasificar" and cfg.tipo_v2:
         # Tipo v2: los dos comandos corren en el entorno del anotador. La guardia sale del
         # boxeador asignado a cada lado; sin boxeador o sin guardia, el comando supone
         # ortodoxa y la Fight-Card lo dice.
-        # Bolsa y sombra: una sola persona, sin rival. Va el modelo de E4a y no hay guardia B.
+        # Bolsa y sombra: una sola persona, sin rival. Va el modelo de E4a y no hay guardia B,
+        # tambien en el modo E7: E7 se entreno con el rival.
         individual = (getattr(sesion, "contexto", None) or "sparring") in CONTEXTOS_INDIVIDUALES
-        return [
-            [
-                *cfg.cmd_boxtwin, "clasificar", str(directorio),
-                "--modelo", str(cfg.modelo_clasificador_geo_individual if individual
-                                else cfg.modelo_clasificador_geo),
-                "--guardia-a", guardia_de(sesion.boxeador_a),
-                "--guardia-b", "desconocida" if individual else guardia_de(sesion.boxeador_b),
-            ],
-            [*cfg.cmd_boxtwin, "tipos", str(directorio)],
+        e7 = cfg.clasificador == "e7" and not individual
+        if e7 and not cfg.cmd_hmr2:
+            raise RuntimeError(
+                "modo academico E7 sin comando de elevacion (BOXTWIN_CMD_HMR2): hace falta "
+                "tools/elevar_hmr2_sesion.py en boxtwin_4dhumans")
+        modelo = (cfg.modelo_clasificador_e7 if e7 else
+                  cfg.modelo_clasificador_geo_individual if individual else cfg.modelo_clasificador_geo)
+        clasificar = [
+            *cfg.cmd_boxtwin, "clasificar", str(directorio),
+            "--modelo", str(modelo),
+            "--guardia-a", guardia_de(sesion.boxeador_a),
+            "--guardia-b", "desconocida" if individual else guardia_de(sesion.boxeador_b),
         ]
+        if e7:
+            # Modo academico (docs/specs/2026-10-25-e7-modo-academico): primero el 3D de HMR2
+            # en boxtwin_4dhumans, despues el clasificador de 42 features con ese 3D.
+            return [
+                [*cfg.cmd_hmr2, str(directorio)],
+                [*clasificar, "--pose3d", str(directorio / "pose3d_hmr2.npz")],
+                [*cfg.cmd_boxtwin, "tipos", str(directorio)],
+            ]
+        return [clasificar, [*cfg.cmd_boxtwin, "tipos", str(directorio)]]
 
     if trabajo.etapa == "clasificar":
         if not cfg.cmd_clasificador:

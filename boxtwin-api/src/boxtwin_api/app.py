@@ -1116,7 +1116,7 @@ def _reclasificar(db: Session, sesiones) -> list[str]:
     Encola `clasificar` en las sesiones listas, solo con el tipo v2 encendido (RT8). Con v1
     la guardia no interviene en el tipo y no hay nada que recalcular. No commitea.
     """
-    if cfg.clasificador != "geometrico":
+    if not cfg.tipo_v2:
         return []
     encoladas = []
     for s in sesiones:
@@ -1327,7 +1327,10 @@ def salud() -> dict:
         # Bolsa y sombra (B8): si la bandera esta encendida y con que modelo se clasifican.
         "sesiones_individuales": cfg.sesiones_individuales,
         "modelo_individual": (cfg.modelo_clasificador_geo_individual / "meta.json").is_file()
-        if cfg.clasificador == "geometrico" else None,
+        if cfg.tipo_v2 else None,
+        # Modo academico E7 (25-10): si esta el modelo de 42 features. Solo con e7.
+        "modelo_e7": (cfg.modelo_clasificador_e7 / "meta.json").is_file()
+        if cfg.clasificador == "e7" else None,
     }
 
 

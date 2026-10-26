@@ -21,6 +21,8 @@ USO
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar.py --exp E4 E4a
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar.py --exp E4 --fuentes Sparring --semillas 0
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar.py --exp E5 --dispositivo cpu
+  ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar.py --exp E7 --dispositivo cuda
+    (E7, 24-10: lee el 3D de ~/boxtwin/e7-4dhumans y escribe ahi sus corridas)
 """
 
 from __future__ import annotations
@@ -38,7 +40,7 @@ import torch
 from torch import nn
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from geo import FUENTES, PASOS, REPO, SEMILLAS, TRABAJO  # noqa: E402
+from geo import FUENTES, PASOS, REPO, SEMILLAS, TRABAJO, TRABAJO_E7  # noqa: E402
 from modelo import ClasificadorGolpe  # noqa: E402
 
 HIPER = {"lr": 1e-3, "weight_decay": 1e-4, "batch": 64, "epocas": 60, "crop_min": 0.8, "crop_max": 1.0,
@@ -49,6 +51,8 @@ EXPERIMENTOS = {
     "E4": {"columnas": list(range(26)), "con_3d": False, "que": "20 del brazo + 6 del rival"},
     "E4a": {"columnas": list(range(20)), "con_3d": False, "que": "solo las 20 del brazo (ablacion)"},
     "E5": {"columnas": list(range(26)), "con_3d": True, "que": "26 de E4 + 16 features 3D (el diseno dice 18; ver TAREAS.md, decision 9)"},
+    # E7 (24-10): las mismas 16 features 3D, calculadas sobre HMR2.0b; su 3D y sus corridas viven en TRABAJO_E7
+    "E7": {"columnas": list(range(26)), "con_3d": True, "trabajo_3d": "E7", "que": "26 de E4 + 16 features 3D de HMR2.0b (4D-Humans)"},
 }
 
 
@@ -141,6 +145,11 @@ def predecir(modelo, X: np.ndarray, M: np.ndarray, media, desvio, dispositivo: s
     return torch.softmax(lt, -1).cpu().numpy(), torch.softmax(la, -1).cpu().numpy()
 
 
+def trabajo_de(exp: str, trabajo: Path = None) -> Path:
+    """Donde viven el 3D y las corridas de un experimento: E7 aparte, para no tocar E4 y E5."""
+    return TRABAJO_E7 if EXPERIMENTOS[exp].get("trabajo_3d") == "E7" else (trabajo or TRABAJO)
+
+
 def cargar_entrada(exp: str, trabajo: Path = None) -> dict:
     """X con las columnas del experimento, M, etiquetas, frame_dir y fuente, en el orden de golpes.npz."""
     trabajo = trabajo or TRABAJO
@@ -153,14 +162,15 @@ def cargar_entrada(exp: str, trabajo: Path = None) -> dict:
     M = d["M"].astype(bool)
     sel = np.ones(len(X), bool)
     if cfg["con_3d"]:
-        with np.load(trabajo / "datos" / "features3d.npz") as z:
+        base3d = trabajo_de(exp, trabajo)
+        with np.load(base3d / "datos" / "features3d.npz") as z:
             f3 = {k: z[k] for k in z.files}
         pos = {n: i for i, n in enumerate(f3["frame_dir"])}
         sel = np.array([n in pos for n in d["frame_dir"]])
         idx = np.array([pos.get(n, 0) for n in d["frame_dir"]])
         X3 = np.where(sel[:, None, None], f3["X3"][idx], 0.0).astype(np.float32)
         X = np.concatenate([X, X3], -1)
-        nombres = nombres + json.loads((trabajo / "datos" / "features3d.meta.json").read_text())["features"]
+        nombres = nombres + json.loads((base3d / "datos" / "features3d.meta.json").read_text())["features"]
     return {"X": X[sel], "M": M[sel], "y_tipo": d["y_tipo"][sel], "y_altura": d["y_altura"][sel],
             "frame_dir": d["frame_dir"][sel], "fuente": d["fuente"][sel], "nombres": nombres}
 
@@ -226,7 +236,7 @@ def main(argv=None) -> int:
         for fuente in args.fuentes:
             for s in args.semillas:
                 t0 = time.time()
-                out = correr(exp, fuente, s, d, dispositivo)
+                out = correr(exp, fuente, s, d, dispositivo, trabajo_de(exp))
                 print(f"{exp}/{fuente}/s{s}: {time.time() - t0:.1f} s -> {out}", flush=True)
     return 0
 

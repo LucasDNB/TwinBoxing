@@ -798,6 +798,29 @@ PENDIENTE Y PROXIMO PASO
    tipo como estimacion. La identidad se corrige a mano por tramos
 5. Mismo camino que PoseConv3D en el MVP. En la tesis va como funcion sin validar
 
+23-10 BM: prueba academica con el modelo de BoxMind (exploratoria)
+
+1. V0 no valida: BM-0b 0,478 de F1 de tecnica en BoxingWeb contra piso 0,642;
+   el train.py publicado tampoco llega (0,617 contra 0,692 del paper)
+2. BM-1b contra E4 en familia: 0,672 contra 0,727, no demostrada
+3. Sumar 5668 golpes de BoxingWeb: 0,678 contra 0,672, no demostrada; curva plana
+4. Propuesta de dataset propio: no respaldada, la linea futura principal es la segunda camara
+5. Analisis de BoxingWeb (24-10): la ventana anotada mide lo mismo en cuadros y no en
+   tiempo (500 ms a 24 fps, 183 a 60); la mano es tan consistente como en BoxTwin; 7 de
+   18 peleadores de test estan en train
+6. Nada de BoxingWeb entra a git ni al producto: no tiene licencia
+7. Documentado en docs/experiments/2026-10-23-boxmind-prueba.md
+
+24-10 E7: 3D de 4D-Humans (HMR2.0b) en lugar de MotionBERT
+
+1. Mismas 16 features 3D de E5, mismos 1047 golpes y siete folds; solo cambia el estimador
+2. Familia 0,777 contra 0,738 de E5 y 0,727 de E4: mejora contra los dos, 5 de 7 folds
+3. Recall de hook 0,683 contra 0,590 de E5; ocho clases 0,673, lectura a
+4. Pasa justo: un empate exacto en cada comparacion y 3 de 5 semillas contra E5
+5. Auditoria independiente: 11 de 11 items pasan
+6. Solo investigacion: SMPL no tiene licencia comercial, nada va al producto
+7. Documentado en docs/experiments/2026-10-24-e7-4dhumans.md
+
 26-10 Versiones Individual y Gimnasio, por SDD sobre prototipo/specs/versiones-26-10
 
 1. Una version es el plan de la cuenta: tablas cuentas y miembros, y todas las rutas pasan

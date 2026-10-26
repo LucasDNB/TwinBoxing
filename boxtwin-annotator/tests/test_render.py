@@ -183,3 +183,26 @@ def test_el_video_sale_en_algo_que_el_navegador_reproduce(tmp_path):
     assert etiqueta.lower() in ("avc1", "h264"), (
         f"salio {etiqueta!r}: si es mp4v o mpeg4, el navegador muestra un reproductor vacio"
     )
+
+
+# -- modo academico E7 (25-10): la licencia de SMPLify en el pie del video procesado ------
+
+
+def test_leyenda_del_modo_academico_solo_con_e7():
+    from boxtwin.mvp.render import LEYENDA_E7, leyenda_pie
+
+    assert leyenda_pie({"metodo": "geometrico-e7"}) == LEYENDA_E7
+    assert "no comercial" in LEYENDA_E7 and "sin fines de lucro" in LEYENDA_E7
+    assert LEYENDA_E7.isascii()                      # la fuente de opencv no dibuja tildes
+    assert leyenda_pie({"metodo": "geometrico-v1"}) is None
+    assert leyenda_pie({}) is None and leyenda_pie(None) is None
+
+
+def test_la_leyenda_va_en_el_pie_sin_tapar_el_video():
+    img = np.full((540, 960, 3), 200, np.uint8)
+    sin = componer(img, _estado(), ancho_consola=ANCHO_CONSOLA)
+    con = componer(img, {**_estado(), "leyenda": "modo academico: uso no comercial"}, ancho_consola=ANCHO_CONSOLA)
+    video = con[:, ANCHO_CONSOLA:ANCHO_CONSOLA + 960]
+    assert (video[:500] == 200).all(), "la leyenda va en la franja del reloj, no sobre la imagen"
+    franja = slice(500, 540)
+    assert (con[franja] != sin[franja]).any(), "la leyenda se dibuja"

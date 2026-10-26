@@ -1,0 +1,165 @@
+{
+  "P11a": {
+    "compara": "E7 contra E5",
+    "veredicto": "mejora",
+    "diferencia": 0.0392,
+    "folds_ganados": 5,
+    "folds": 7,
+    "folds_min": 5,
+    "ganados": [
+      "Sparring",
+      "01-sparring",
+      "03-sparring",
+      "sparring-3-rounds",
+      "pacquiao_margarito"
+    ],
+    "desvio_familia_max": 0.013,
+    "recall_hook": {
+      "E7": {
+        "n": 300,
+        "aciertos": 205,
+        "recall": 0.6833,
+        "wilson95": [
+          0.6287,
+          0.7334
+        ]
+      },
+      "E5": {
+        "n": 300,
+        "aciertos": 177,
+        "recall": 0.59,
+        "wilson95": [
+          0.5335,
+          0.6442
+        ]
+      }
+    }
+  },
+  "P11b": {
+    "compara": "E7 contra E4",
+    "veredicto": "mejora",
+    "diferencia": 0.0507,
+    "folds_ganados": 5,
+    "folds": 7,
+    "folds_min": 5,
+    "ganados": [
+      "Sparring",
+      "01-sparring",
+      "02-sparring",
+      "sparring-3-rounds",
+      "pacquiao_margarito"
+    ],
+    "desvio_familia_max": 0.015,
+    "recall_hook": {
+      "E7": {
+        "n": 300,
+        "aciertos": 205,
+        "recall": 0.6833,
+        "wilson95": [
+          0.6287,
+          0.7334
+        ]
+      },
+      "E4": {
+        "n": 300,
+        "aciertos": 186,
+        "recall": 0.62,
+        "wilson95": [
+          0.5639,
+          0.6731
+        ]
+      }
+    }
+  },
+  "subhipotesis_1": {
+    "lectura": "a",
+    "texto": "a: por debajo de 0,80 en todas; la parte de golpes no alcanza el umbral",
+    "exactitudes": {
+      "E7": 0.6734
+    },
+    "c": "jab y cross salen del rol anotado: supone un detector que acierta el brazo siempre"
+  },
+  "D9_sospechosos": [],
+  "sin_umbral": {
+    "altura_balanceada_c8": {
+      "E4": 0.7185,
+      "E5": 0.713,
+      "E7": 0.7512
+    },
+    "por_fuente_E5": {
+      "Sparring": {
+        "golpes_con_dato": 114,
+        "vibracion_mediana": 0.0511,
+        "pasos_con_3d": 0.9973
+      },
+      "01-sparring": {
+        "golpes_con_dato": 96,
+        "vibracion_mediana": 0.0246,
+        "pasos_con_3d": 0.9948
+      },
+      "02-sparring": {
+        "golpes_con_dato": 62,
+        "vibracion_mediana": 0.0204,
+        "pasos_con_3d": 1.0
+      },
+      "03-sparring": {
+        "golpes_con_dato": 129,
+        "vibracion_mediana": 0.0232,
+        "pasos_con_3d": 0.9956
+      },
+      "04-sparring": {
+        "golpes_con_dato": 120,
+        "vibracion_mediana": 0.0204,
+        "pasos_con_3d": 1.0
+      },
+      "sparring-3-rounds": {
+        "golpes_con_dato": 381,
+        "vibracion_mediana": 0.0267,
+        "pasos_con_3d": 0.9961
+      },
+      "pacquiao_margarito": {
+        "golpes_con_dato": 145,
+        "vibracion_mediana": 0.01,
+        "pasos_con_3d": 0.9955
+      }
+    },
+    "por_fuente_E7": {
+      "Sparring": {
+        "golpes_con_dato": 114,
+        "vibracion_mediana": 0.0965,
+        "pasos_con_3d": 0.9973
+      },
+      "01-sparring": {
+        "golpes_con_dato": 96,
+        "vibracion_mediana": 0.0609,
+        "pasos_con_3d": 0.9948
+      },
+      "02-sparring": {
+        "golpes_con_dato": 62,
+        "vibracion_mediana": 0.055,
+        "pasos_con_3d": 1.0
+      },
+      "03-sparring": {
+        "golpes_con_dato": 129,
+        "vibracion_mediana": 0.062,
+        "pasos_con_3d": 0.9956
+      },
+      "04-sparring": {
+        "golpes_con_dato": 120,
+        "vibracion_mediana": 0.0534,
+        "pasos_con_3d": 1.0
+      },
+      "sparring-3-rounds": {
+        "golpes_con_dato": 381,
+        "vibracion_mediana": 0.0694,
+        "pasos_con_3d": 0.9961
+      },
+      "pacquiao_margarito": {
+        "golpes_con_dato": 145,
+        "vibracion_mediana": 0.0295,
+        "pasos_con_3d": 0.9955
+      }
+    },
+    "segundos_elevacion_E7": 2352.0
+  }
+}

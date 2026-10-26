@@ -112,7 +112,8 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
       <EstadoBloque
         estado={estadoDe("05.distribucion", p)}
         titulo="Tipo de golpe"
-        nota={textos.estimacionTipo(clasif.checkpoint, clasif.exactitud_familia_fuente_no_vista)}
+        nota={[textos.estimacionTipo(clasif.checkpoint, clasif.exactitud_familia_fuente_no_vista),
+          textos.modoAcademico(clasif.metodo, clasif.licencia)].filter(Boolean).join(" ")}
       >
         <div className="flex flex-col gap-4">
           {ladosConGuardiaSupuesta(fc).map((l) => (
