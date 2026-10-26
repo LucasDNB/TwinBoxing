@@ -855,3 +855,10 @@ PENDIENTE Y PROXIMO PASO
 3. Migracion al arrancar: la cuenta real quedo Entrenador con sus 12 sesiones y 5 peleadores
 4. verificar a ok, tambien por el Funnel. B de nuevo arriba en efcec23, sin cambios
 5. Version de prueba apagada; CV6 pendiente. Registro en despliegue/PRODUCCION.md
+
+26-10 Version de prueba encendida en la estacion
+
+1. Cuentas de prueba sin sesiones copiadas: ningun video de nadie expuesto (DV-9)
+2. Los cuatro botones por el Funnel, cada uno en su version y rol
+3. CV6 cumple: 0 fugas en 53 pedidos por perfil contra la cuenta real
+4. Mientras este encendida, la cuenta real no entra por la web. Apagar: BOXTWIN_DEMO vacia

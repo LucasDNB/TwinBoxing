@@ -90,6 +90,22 @@ y C6 se miden sobre `c936b0f` y no sobre `34e991d`. Va así a la tesis, con fech
 Sin hacer: CV6 y la versión de prueba (`BOXTWIN_DEMO` sigue vacía), y entrar con la cuenta real
 desde el navegador. Eso último lo verifica Lucas, porque la clave no la tiene el SDD.
 
+## Versión de prueba encendida (26-10, 16:50)
+
+Pedido de Lucas. `~/boxtwin/demo.yaml` sin sesiones copiadas (DV-9: ningún video de nadie
+expuesto); Atleta 1 y 2 en Entrenador, Atleta 3 a 5 en Gimnasio con su consentimiento de semilla.
+`produccion.sh demo sembrar`: 3 cuentas, 4 usuarios, 6 atletas, 3 consentimientos. Respaldo
+`/etc/boxtwin.env.antes-de-demo-*.bak`, `BOXTWIN_DEMO=1`, restart solo de `boxtwin-api` (cola vacía).
+
+- Por el Funnel, los cuatro botones disponibles; cada perfil entra a su versión y rol (4, 15, 50 y
+  50 h) y ve 0 sesiones.
+- **CV6 cumple**: con cada perfil, 53 pedidos contra las 12 sesiones y los 5 peleadores de la cuenta
+  real (`/jobs`, `/fightcards`, ticket de video, tramos, perfil): 0 fugas, todos 404.
+- Mientras esté encendida, la cuenta real no entra por la web (DV-10).
+
+Apagarla: `BOXTWIN_DEMO=` vacía en `/etc/boxtwin.env` y `sudo systemctl restart boxtwin-api`. Para
+dejar las cuentas de prueba como nuevas: `produccion.sh demo reiniciar`.
+
 ## Estado de la estación al 26-10 antes del despliegue (leído, sin tocar)
 
 - A: `boxtwin-api` y `boxtwin-worker` activos, `/salud` `34e991d`, `geometrico`. Sin las versiones.
