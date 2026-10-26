@@ -836,3 +836,14 @@ PENDIENTE Y PROXIMO PASO
 6. Hallazgo: el export HTML se rompia con una Fight-Card de bolsa (sin B). Arreglado
 7. B25 sin texto legal: no se invento uno (DV-5). La API contesta 409 hasta que se cargue
 8. Nada desplegado: la estacion sigue en main hasta que cierren las sesiones de prueba
+
+26-10 Rama produccion: todas las versiones juntas, listas para desplegar
+
+1. main + versiones-26-10 + cambios-academicos (PR #29 y los 4 commits locales de S1 a S8)
+2. A: Individual, Entrenador y Gimnasio en :8000. B: el modo academico E7 en :8001, tailnet
+3. Sin conflictos de codigo; la leyenda de SMPL solo sale con geometrico-e7
+4. Pruebas: API 308, anotador 766, detector 152, guantes 46, web 243, e2e 12 de 12
+5. Ensayo local de las dos instancias desde los ejemplos de entorno: verificar a y b en verde,
+   los cuatro botones de prueba entran a su version
+6. despliegue/PRODUCCION.md ordena el despliegue; produccion.sh hace los pasos sin sudo
+7. Nada desplegado: A sigue en 34e991d y B en efcec23

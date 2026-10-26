@@ -1,5 +1,9 @@
 # Poner el MVP online
 
+> Desde el 26-10, para desplegar todas las versiones (A con Individual, Entrenador y Gimnasio;
+> B con el modo académico E7) desde la rama `produccion`: **`PRODUCCION.md`**, con
+> `produccion.sh` para los pasos sin sudo.
+
 Dos cosas distintas se llaman "deploy" en este proyecto y conviene no mezclarlas:
 
 - **Servir el MVP a usuarios reales** (C4, C6). La GPU se queda en `desarrollo-lucas` y la
