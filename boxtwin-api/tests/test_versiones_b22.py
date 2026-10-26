@@ -130,3 +130,29 @@ def test_en_entrenador_nada_de_esto_cambia(cliente, registrado):
     assert cliente.put(f"/sesiones/{sid}/boxeadores",
                        json={"boxeador_a": b, "boxeador_b": c}).status_code == 200
     assert cliente.get(f"/rival?a={b}&b={c}").status_code == 200
+
+
+def test_CA_I05_1_el_export_usa_el_nombre_propio_y_compañero(cliente, entorno, individual):
+    t = individual["token"]
+    sid = subir(cliente, t, contexto="sparring").json()["job_id"]
+    fc = json.loads(json.dumps(FC_MINIMA))
+    for p in fc["peleadores"].values():
+        p.update({"izq": 0, "der": 0})
+        p["total"].update({"izq": 0, "der": 0})
+        p["por_round"] = [{"round": 1, "total": 1, "izq": 1, "der": 0, "por_minuto": 0.3}]
+    (entorno["cfg"].dir_sesion(sid) / "fightcard.json").write_text(json.dumps(fc))
+    poner(entorno, sid, estado="listo")
+    html = cliente.get(f"/fightcards/{sid}/export?formato=html", headers=H(t)).text
+    assert "Peleador B" not in html and "Peleador A" not in html
+    assert "Lucas" in html and "Compañero" in html
+
+
+def test_el_export_de_una_sesion_de_bolsa_no_se_rompe_sin_B(cliente, entorno, individual):
+    t = individual["token"]
+    sid = subir(cliente, t, contexto="bolsa").json()["job_id"]
+    fc = _fc_bolsa()
+    fc["peleadores"]["A"]["total"].update({"izq": 1, "der": 1})
+    (entorno["cfg"].dir_sesion(sid) / "fightcard.json").write_text(json.dumps(fc))
+    poner(entorno, sid, estado="listo")
+    r = cliente.get(f"/fightcards/{sid}/export?formato=html", headers=H(t))
+    assert r.status_code == 200 and "Compañero" not in r.text.split("<h2>Volumen")[1].split("</table>")[0]

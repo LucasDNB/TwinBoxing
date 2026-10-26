@@ -12,9 +12,11 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tansta
 import { z } from "zod";
 import { ErrorApi, pedir, pedirValidado } from "@/lib/api/cliente";
 import {
-  Boxeador, FightCard, ListaBoxeadores, ListaSesiones, Panel, Perfil, Producto, Rival, Sesion,
-  Token, Tramos, type EstadoSesion, type TipoCorreccion,
+  Boxeador, FightCard, HistoriaConsentimiento, ListaBoxeadores, ListaMiembros, ListaSesiones,
+  Panel, Perfil, Producto, Rival, Sesion, TextoConsentimiento, Token, Tramos,
+  type EstadoSesion, type TipoCorreccion,
 } from "@/lib/api/esquemas";
+import { CLAVE_CUENTA } from "@/lib/cuenta";
 import { normalizarFightCard, type FightCard as FC } from "@/lib/fightcard";
 
 export const claves = {
@@ -29,6 +31,10 @@ export const claves = {
   tramos: (id: string) => ["tramos", id] as const,
   ticket: (id: string) => ["ticket", id] as const,
   procesado: (id: string) => ["procesado", id] as const,
+  // Versiones 26-10
+  miembros: ["miembros"] as const,
+  consentimiento: (id: string) => ["consentimiento", id] as const,
+  textoConsentimiento: ["texto-consentimiento"] as const,
 };
 
 export const EN_CURSO: EstadoSesion[] = ["subida", "en_cola", "procesando", "completando"];
@@ -181,6 +187,14 @@ export function ingresar(email: string, clave: string) {
   });
 }
 
+/* B29: el boton de la version de prueba. Solo manda el perfil; la API resuelve la cuenta. */
+export function ingresarDemo(perfil: string) {
+  return pedirValidado(Token, "/auth/demo", {
+    method: "POST",
+    body: JSON.stringify({ perfil }),
+  });
+}
+
 export function registrarse(email: string, clave: string, invitacion: string) {
   return pedirValidado(Token, "/auth/registro", {
     method: "POST",
@@ -313,6 +327,56 @@ export function useCorregir(id: string) {
   });
 }
 
+/* -- Versiones 26-10: equipo y consentimiento por atleta (B24, B25) -------------------- */
+
+export function useMiembros(habilitada: boolean) {
+  return useQuery({
+    queryKey: claves.miembros,
+    queryFn: () => pedirValidado(ListaMiembros, "/cuenta/miembros"),
+    enabled: habilitada,
+  });
+}
+
+export function useConsentimiento(id: string | null, habilitada: boolean) {
+  return useQuery({
+    queryKey: claves.consentimiento(id ?? ""),
+    queryFn: () => pedirValidado(HistoriaConsentimiento, `/boxeadores/${id}/consentimiento`),
+    enabled: !!id && habilitada,
+  });
+}
+
+/* El texto vigente. Si Lucas no lo cargo, la API contesta 409 y la hoja lo dice (DV-5). */
+export function useTextoConsentimiento(habilitada: boolean) {
+  return useQuery({
+    queryKey: claves.textoConsentimiento,
+    queryFn: () => pedirValidado(TextoConsentimiento, "/cuenta/consentimiento"),
+    enabled: habilitada,
+    retry: false,
+  });
+}
+
+function alCambiarConsentimiento(qc: QueryClient, id: string) {
+  qc.invalidateQueries({ queryKey: claves.consentimiento(id) });
+  qc.invalidateQueries({ queryKey: claves.boxeadores });
+}
+
+export function useRegistrarConsentimiento(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (c: { texto_version: string; mayor_de_edad: boolean; nota: string | null }) =>
+      pedir(`/boxeadores/${id}/consentimiento`, { method: "POST", body: JSON.stringify(c) }),
+    onSuccess: () => alCambiarConsentimiento(qc, id),
+  });
+}
+
+export function useRevocarConsentimiento(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => pedir(`/boxeadores/${id}/consentimiento`, { method: "DELETE" }),
+    onSuccess: () => alCambiarConsentimiento(qc, id),
+  });
+}
+
 export function useGuardarBoxeador() {
   const qc = useQueryClient();
   return useMutation({
@@ -320,6 +384,7 @@ export function useGuardarBoxeador() {
       id?: string; nombre: string; guardia: "ortodoxa" | "zurda" | null; notas?: string | null;
       categoria?: string | null; altura_m?: number | null; envergadura_m?: number | null;
       distancia?: "larga" | "media" | "corta" | null; estilo?: "fajador" | "estilista" | null;
+      entrenador_id?: string | null;
     }) => {
       const { id, ...cuerpo } = b;
       const datos = await pedir(id ? `/boxeadores/${id}` : "/boxeadores", {
@@ -328,7 +393,11 @@ export function useGuardarBoxeador() {
       });
       return Boxeador.parse(datos);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: claves.boxeadores }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: claves.boxeadores });
+      // En Individual el peleador propio va en la cuenta (su nombre se ve en la navegacion).
+      qc.invalidateQueries({ queryKey: CLAVE_CUENTA });
+    },
   });
 }
 

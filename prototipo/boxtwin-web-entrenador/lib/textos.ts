@@ -150,6 +150,45 @@ export const textos = {
     "Las personas que aparecen en el video dieron su consentimiento por escrito y ninguna es menor de 18 años.",
   contextoLectura:
     "Cada contexto mide algo distinto: se compara cómo cambia él, no contra una línea de base común.",
+  /* -- Versiones 26-10 (specs/versiones-26-10, 03 §5) ---------------------------------- */
+  version: {
+    individual: (horas: number) => `Analizá tu bolsa, tu sombra y tus sparrings. ${horas} horas de video por mes.`,
+    entrenador: (horas: number) => `Tus peleadores y sus sesiones. ${horas} horas de video por mes.`,
+    gimnasio: (horas: number) => `Varios entrenadores y un plantel compartido. ${horas} horas de video por mes.`,
+  },
+  envivoNoIncluido: "El análisis en vivo no está incluido en esta versión.",
+  fueraDeVersion: (version: string) => `Esta función no está en la versión ${version}.`,
+  cupoUso: (usadas: number, incluidas: number, mes: string) =>
+    `${decimal(usadas, 1)} de ${decimal(incluidas, 0)} h usadas en ${mes}.`,
+  cupoExcedidoInformar: (incluidas: number) =>
+    `Te pasaste de las ${decimal(incluidas, 0)} h del mes. En este prototipo la sesión se procesa igual.`,
+  cupoExcedidoBloquear: (h: number, r: number) =>
+    `Esta sesión usaría ${decimal(h, 1)} h y quedan ${decimal(r, 1)} h este mes.`,
+  individualSinValidar:
+    "El sistema todavía no se midió en bolsa y sombra: los números pueden fallar más que en sparring.",
+  individualCompañero:
+    "Tu compañero no tiene perfil. Sus golpes sirven para separarlos a los dos y para ver qué te tiraron.",
+  consentimientoFalta: (nombre: string) => `Falta el consentimiento de ${nombre}.`,
+  invitacionUnaVez: (fecha: string) => `Este enlace se ve una sola vez y sirve para una persona. Vence el ${fecha}.`,
+  invitacionVencida: "Esta invitación venció o ya se usó. Pedile una nueva a quien te invitó.",
+  miembroBaja: (cuenta: string) => `Tu acceso a ${cuenta} fue dado de baja.`,
+  demoIngreso:
+    "Elegí cómo querés entrar. Son cuentas de prueba compartidas: lo que hagas lo ve el que entre después.",
+  demoRotulo: (perfil: string) => `Prueba · ${perfil}`,
+  demoSubirApagado: "En la versión de prueba la subida está apagada en este momento.",
+  demoEquipo: "En la versión de prueba el equipo viene cargado.",
+  /* I-02: el consentimiento de una sesion Individual, en dos casillas segun el contexto. */
+  consentimientoPropio: "Soy yo quien aparece en el video y tengo 18 años o más.",
+  consentimientoCompañero:
+    "La otra persona que aparece aceptó ser filmada y analizada, y tiene 18 años o más.",
+  /* I-01: con una sola sesion de un contexto no hay linea que comparar. */
+  dosSesiones: (contexto: string) => `Con dos sesiones de ${contexto} ya se puede comparar.`,
+  /* I-03: la marca de una persona, en segunda persona. */
+  individualVos: {
+    titulo: "¿Cuál sos vos?",
+    indicacion: "Tocá una vez tu figura. El resto del video se sigue por el color de tus guantes.",
+    compañero: "¿Y tu compañero?",
+  },
   motivoTramo: {
     color_insuficiente: "guante tapado o poca luz",
     sin_coexistencia: "cruce o cuerpo a cuerpo",

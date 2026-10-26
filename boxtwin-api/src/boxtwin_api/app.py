@@ -761,8 +761,15 @@ def exportar(
     if formato in ("html", "pdf"):
         # pdf devuelve la misma pagina: se imprime desde el navegador. Esta dicho en la
         # pagina y en el README, no es un fallback silencioso.
-        return HTMLResponse(a_html(fc))
+        return HTMLResponse(a_html(fc, _nombres_para_export(s, acceso)))
     raise HTTPException(422, "formato tiene que ser csv o html")
+
+
+def _nombres_para_export(s: Sesion, acceso: Acceso) -> dict:
+    """En Individual, el peleador propio y "Compañero" (CA-I05.1); si no, los asignados."""
+    if acceso.plan.peleadores == "propio":
+        return {"A": s.boxeador_a.nombre if s.boxeador_a else "Vos", "B": "Compañero"}
+    return {k: b.nombre for k, b in (("A", s.boxeador_a), ("B", s.boxeador_b)) if b is not None}
 
 
 @app.patch("/fightcards/{sesion_id}/golpes/{golpe}")

@@ -16,6 +16,7 @@
  */
 import { Desplazable } from "@/components/boxtwin/Desplazable";
 import Link from "next/link";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Encabezado } from "@/components/boxtwin/Encabezado";
 import { EstadoBloque, Estimado } from "@/components/boxtwin/EstadoBloque";
@@ -24,7 +25,10 @@ import { Rotulo } from "@/components/boxtwin/Rotulo";
 import { LineaEvolucion } from "@/components/boxtwin/graficos/LineaEvolucion";
 import { Button } from "@/components/animate-ui/components/buttons/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/animate-ui/components/radix/toggle-group";
-import { usePerfil, useProducto } from "@/lib/api/consultas";
+import { useBoxeadores, usePerfil, useProducto } from "@/lib/api/consultas";
+import { esIndividual, tiene, useCuenta } from "@/lib/cuenta";
+import { BloqueConsentimiento } from "@/components/pantallas/peleadores/Consentimiento";
+import { HojaPeleador } from "@/components/pantallas/peleadores/HojaPeleador";
 import { CONTEXTOS, TIPOS_GOLPE, type Perfil, type Producto } from "@/lib/api/esquemas";
 import { estadoDe } from "@/lib/banderas";
 import { decimal, nombreDeTipo, porcentajeAR } from "@/lib/formato";
@@ -58,6 +62,15 @@ export function PantallaPeleador() {
 
 function Contenido({ p, producto, contexto, onContexto }: { p: Perfil; producto?: Producto; contexto: string; onContexto: (v: string) => void }) {
   const b = p.boxeador;
+  // Versiones 26-10 (03 §I-06, §G-08): en Individual no hay Rival Fantasma y los datos propios
+  // se editan desde aca; en Gimnasio, el encabezado lleva el consentimiento del atleta.
+  const cuenta = useCuenta().data;
+  const vos = esIndividual(cuenta);
+  const conRival = tiene(cuenta, "rival") || !cuenta;
+  const porAtleta = cuenta?.funciones.consentimiento === "atleta";
+  const [editando, setEditando] = useState(false);
+  const lista = useBoxeadores();
+  const completo = lista.data?.find((x) => x.id === b.id) ?? null;
   const porCtx = p.sesiones_por_contexto ?? {};
   const total = Object.values(porCtx).reduce((a, n) => a + n, 0) || p.totales.sesiones;
   const preliminar = total < (producto?.dominio.perfil_preliminar_sesiones ?? 5);
@@ -74,11 +87,21 @@ function Contenido({ p, producto, contexto, onContexto }: { p: Perfil; producto?
         atras="/peleadores/"
         rotulo="Perfil táctico"
         titulo={b.nombre}
-        accion={<Button asChild variant="outline" className="min-h-11"><Link href={`/rival/?a=${b.id}`}>Comparar en Rival Fantasma</Link></Button>}
+        accion={
+          vos ? (
+            <Button variant="outline" className="min-h-11" disabled={!completo} onClick={() => setEditando(true)}>Editar mis datos</Button>
+          ) : conRival ? (
+            <Button asChild variant="outline" className="min-h-11"><Link href={`/rival/?a=${b.id}`}>Comparar en Rival Fantasma</Link></Button>
+          ) : undefined
+        }
       >
         <p className="text-texto-2">{datos || "sin datos cargados"}</p>
         <p className="rotulo">{p.totales.sesiones} {p.totales.sesiones === 1 ? "sesión" : "sesiones"} · {p.rounds_total ?? 0} rounds</p>
+        {porAtleta && <BloqueConsentimiento boxeador={b.id} nombre={b.nombre} />}
       </Encabezado>
+      {editando && completo && (
+        <HojaPeleador abierta inicial={completo} onCerrar={() => setEditando(false)} />
+      )}
 
       {preliminar && (
         <p className="mb-4 rounded-md border border-estimado-borde bg-estimado-fondo px-3 py-2 text-sm">
@@ -112,7 +135,7 @@ function Contenido({ p, producto, contexto, onContexto }: { p: Perfil; producto?
         <VolumenPorRound p={p} producto={producto} />
         <Combinaciones p={p} producto={producto} />
         <div className="lg:col-span-2">
-          <MapaExposicion p={p} producto={producto} contexto={contexto} />
+          <MapaExposicion p={p} producto={producto} contexto={contexto} vos={vos} />
         </div>
         <div className="flex flex-col gap-4">
           <AvatarPerfil p={p} producto={producto} />

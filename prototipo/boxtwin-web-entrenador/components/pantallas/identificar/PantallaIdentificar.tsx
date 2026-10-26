@@ -13,6 +13,10 @@
  * En bolsa y sombra (W19, ampliacion 02 §3) la pantalla elige el modo por el contexto: se
  * marca a una sola persona, con "Es él" y sin A, B ni rincones, y antes de confirmar avisa si
  * el elegido coexiste con otra figura de guantes parecidos (el espejo).
+ *
+ * En la version Individual (versiones 26-10, 03 §I-03, W30) la pantalla le habla al boxeador:
+ * "¿Cuál sos vos?" con "Soy yo", y en sparring y combate un segundo paso, "¿Y tu compañero?",
+ * sin A, B ni rincones. "Soy yo" es track_a.
  */
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -34,6 +38,7 @@ import { useFightCard, useSembrar, useSesion, useTicket } from "@/lib/api/consul
 import type { Candidato, Sesion } from "@/lib/api/esquemas";
 import { decimal, fechaCorta, mmss, nombreCorto } from "@/lib/formato";
 import { NOMBRE_CONTEXTO, textos } from "@/lib/textos";
+import { esIndividual as esCuentaIndividual, useCuenta } from "@/lib/cuenta";
 
 type Rol = "A" | "B" | "ninguno";
 
@@ -60,18 +65,22 @@ export function esIndividual(s: Sesion): boolean {
 
 function Identificar({ s }: { s: Sesion }) {
   const individual = esIndividual(s);
+  const vos = esCuentaIndividual(useCuenta().data);
+  const titulo = vos ? textos.individualVos.titulo : individual ? textos.individual.titulo : "¿Quién es quién?";
+  const indicacion = vos
+    ? individual ? textos.individualVos.indicacion : "Tocá primero tu figura y después la de tu compañero. El resto del video se sigue por el color de los guantes."
+    : individual
+      ? textos.individual.indicacion
+      : "Marcá una vez a cada peleador. El resto del video se sigue por altura y color de guante.";
   const encabezado = (
-    <Encabezado titulo={individual ? textos.individual.titulo : "¿Quién es quién?"} rotulo={titularDeSesion(s)} atras={`/sesion/?id=${s.id}`}>
-      {s.estado === "espera_siembra" && (
-        <p className="text-texto-2">
-          {individual
-            ? textos.individual.indicacion
-            : "Marcá una vez a cada peleador. El resto del video se sigue por altura y color de guante."}
-        </p>
-      )}
+    <Encabezado titulo={titulo} rotulo={titularDeSesion(s)} atras={`/sesion/?id=${s.id}`}>
+      {s.estado === "espera_siembra" && <p className="text-texto-2">{indicacion}</p>}
     </Encabezado>
   );
-  if (s.estado === "espera_siembra") return <>{encabezado}{individual ? <FaseMarcarUna s={s} /> : <FaseMarcar s={s} />}</>;
+  if (s.estado === "espera_siembra") {
+    const fase = individual ? <FaseMarcarUna s={s} vos={vos} /> : vos ? <FaseMarcarVos s={s} /> : <FaseMarcar s={s} />;
+    return <>{encabezado}{fase}</>;
+  }
   if (s.estado === "listo") return <>{encabezado}<FaseRevisarSiHace s={s} /></>;
   return <>{encabezado}<EsperaSesion s={s} /></>;
 }
@@ -225,7 +234,7 @@ export function ordenIndividual(cs: Candidato[]): Candidato[] {
   return [...cs].sort((a, b) => dur(b) - dur(a) || a.track - b.track);
 }
 
-function FaseMarcarUna({ s }: { s: Sesion }) {
+function FaseMarcarUna({ s, vos = false }: { s: Sesion; vos?: boolean }) {
   const sembrar = useSembrar(s.id);
   const ticket = useTicket(s.id);
   const [elegido, setElegido] = useState<number | null>(null);
@@ -274,7 +283,7 @@ function FaseMarcarUna({ s }: { s: Sesion }) {
               aria-label={`¿La persona ${i + 1} es el boxeador?`}
               className="mt-3 grid w-full grid-cols-1"
             >
-              <ToggleGroupItem value="el" className="min-h-11 border border-borde">Es él</ToggleGroupItem>
+              <ToggleGroupItem value="el" className="min-h-11 border border-borde">{vos ? "Soy yo" : "Es él"}</ToggleGroupItem>
             </ToggleGroup>
           </article>
         ))}
@@ -294,7 +303,7 @@ function FaseMarcarUna({ s }: { s: Sesion }) {
       <AlertDialog open={confirmar} onOpenChange={setConfirmar}>
         <AlertDialogContent className="bg-superficie">
           <AlertDialogHeader>
-            <AlertDialogTitle>{nombre ? `¿Este es ${nombre}?` : "¿Este es el boxeador?"}</AlertDialogTitle>
+            <AlertDialogTitle>{vos ? "¿Sos vos?" : nombre ? `¿Este es ${nombre}?` : "¿Este es el boxeador?"}</AlertDialogTitle>
             <AlertDialogDescription className="text-texto-2">
               {reflejos.length > 0 ? textos.individual.espejo : "El resto del video se sigue con esta persona. Si después ves que no era, se puede volver a marcar."}
             </AlertDialogDescription>
@@ -303,7 +312,7 @@ function FaseMarcarUna({ s }: { s: Sesion }) {
             <div className={`grid gap-3 ${reflejos.length ? "grid-cols-2" : "grid-cols-1 justify-items-center"}`}>
               <figure className="flex flex-col items-center gap-2">
                 <Recorte c={cand} ticket={ticket.data?.ticket} grande />
-                <figcaption className="text-sm">{reflejos.length ? "elegido" : nombre ?? "el boxeador"}</figcaption>
+                <figcaption className="text-sm">{reflejos.length ? "elegido" : vos ? "vos" : nombre ?? "el boxeador"}</figcaption>
               </figure>
               {reflejos.map((r) => (
                 <figure key={r.track} className="flex flex-col items-center gap-2">
@@ -313,6 +322,120 @@ function FaseMarcarUna({ s }: { s: Sesion }) {
               ))}
             </div>
           )}
+          <AlertDialogFooter>
+            <AlertDialogCancel className="min-h-11">Revisar</AlertDialogCancel>
+            <AlertDialogAction className="min-h-11" onClick={enviar}>Sí, completar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
+/*
+ * Individual en sparring y combate (03 §I-03): primero "¿Cuál sos vos?", despues "¿Y tu
+ * compañero?" sobre las tarjetas que quedan. El compañero no tiene perfil (DV-4), pero la
+ * siembra lo necesita para separar a los dos.
+ */
+function FaseMarcarVos({ s }: { s: Sesion }) {
+  const sembrar = useSembrar(s.id);
+  const ticket = useTicket(s.id);
+  const [yo, setYo] = useState<number | null>(null);
+  const [compañero, setCompañero] = useState<number | null>(null);
+  const [confirmar, setConfirmar] = useState(false);
+  const candidatos = useMemo(() => ordenIndividual(s.candidatos ?? []), [s.candidatos]);
+  const n = (track: number | null) => candidatos.findIndex((c) => c.track === track) + 1;
+  const candYo = candidatos.find((c) => c.track === yo);
+  const candComp = candidatos.find((c) => c.track === compañero);
+  const pregunta = candYo?.color_guante && candComp?.color_guante && candYo.color_guante.nombre !== candComp.color_guante.nombre
+    ? `¿Vos sos el de guantes ${candYo.color_guante.nombre} y tu compañero el de ${candComp.color_guante.nombre}?`
+    : `¿Vos sos la persona ${n(yo)} y tu compañero la persona ${n(compañero)}?`;
+
+  async function enviar() {
+    if (yo == null || compañero == null) return;
+    try {
+      await sembrar.mutateAsync({ track_a: yo, track_b: compañero });
+      toast.success("Listo. El análisis sigue con ustedes dos.");
+    } catch (e) {
+      toast.error(mensajeDeError(e));
+    }
+  }
+
+  if (candidatos.length < 2) {
+    return <ErrorConReintento titulo="No hay dos personas para marcar" error={new Error("El sistema no encontró a los dos en este video. Revisá que se vean de cuerpo entero.")} />;
+  }
+
+  const tarjetas = (paso: "yo" | "compañero") => (
+    <Fade className="grid gap-3 lg:grid-cols-3">
+      {candidatos.filter((c) => paso === "yo" || c.track !== yo).map((c) => {
+        const elegido = paso === "yo" ? yo === c.track : compañero === c.track;
+        return (
+          <article key={c.track} aria-label={`Persona ${n(c.track)}`} className={`rounded-md border bg-superficie p-3 ${elegido ? "border-a-trazo" : "border-borde"}`}>
+            <div className="flex gap-3 lg:flex-col lg:items-center">
+              <Recorte c={c} ticket={ticket.data?.ticket} />
+              <div className="min-w-0 flex-1 lg:w-full">
+                <h3 className="font-display text-lg font-semibold">Persona {n(c.track)}</h3>
+                <DatosCandidato c={c} />
+              </div>
+            </div>
+            <ToggleGroup
+              type="single"
+              value={elegido ? "si" : ""}
+              onValueChange={(v) => {
+                if (paso === "yo") {
+                  setYo(v ? c.track : null);
+                  if (v && compañero === c.track) setCompañero(null);
+                } else setCompañero(v ? c.track : null);
+              }}
+              aria-label={paso === "yo" ? `¿La persona ${n(c.track)} sos vos?` : `¿La persona ${n(c.track)} es tu compañero?`}
+              className="mt-3 grid w-full grid-cols-1"
+            >
+              <ToggleGroupItem value="si" className="min-h-11 border border-borde">{paso === "yo" ? "Soy yo" : "Es mi compañero"}</ToggleGroupItem>
+            </ToggleGroup>
+          </article>
+        );
+      })}
+    </Fade>
+  );
+
+  return (
+    <>
+      <h2 className="mb-3 font-display text-xl font-semibold lg:text-2xl">{textos.individualVos.titulo}</h2>
+      {tarjetas("yo")}
+      {yo != null && (
+        <>
+          <h2 className="mb-3 mt-6 font-display text-xl font-semibold lg:text-2xl">{textos.individualVos.compañero}</h2>
+          {tarjetas("compañero")}
+        </>
+      )}
+
+      <div
+        className="fixed inset-x-0 z-30 border-t border-borde-suave bg-fondo/95 px-4 py-3 backdrop-blur lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:p-0"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + 64px)" }}
+      >
+        <Button className="min-h-12 w-full text-base lg:w-auto lg:px-10" disabled={yo == null || compañero == null || sembrar.isPending} onClick={() => setConfirmar(true)}>
+          Completar análisis
+        </Button>
+        {(yo == null || compañero == null) && <p className="mt-1 text-xs text-texto-3">Marcate a vos y a tu compañero para seguir.</p>}
+      </div>
+      <div aria-hidden="true" className="h-28 lg:hidden" />
+
+      <AlertDialog open={confirmar} onOpenChange={setConfirmar}>
+        <AlertDialogContent className="bg-superficie">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{pregunta}</AlertDialogTitle>
+            <AlertDialogDescription className="text-texto-2">
+              El resto del video se sigue con ustedes dos. Si después ves que quedaron al revés, se puede volver a marcar.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            {[candYo, candComp].map((c, i) => c && (
+              <figure key={c.track} className="flex flex-col items-center gap-2">
+                <Recorte c={c} ticket={ticket.data?.ticket} grande />
+                <figcaption className="text-sm">{i === 0 ? "vos" : "tu compañero"}</figcaption>
+              </figure>
+            ))}
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel className="min-h-11">Revisar</AlertDialogCancel>
             <AlertDialogAction className="min-h-11" onClick={enviar}>Sí, completar</AlertDialogAction>

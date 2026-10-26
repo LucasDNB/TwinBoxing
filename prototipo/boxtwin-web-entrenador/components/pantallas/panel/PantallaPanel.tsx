@@ -8,8 +8,13 @@
  * cuatro, y debajo sesiones como tabla (1,6 fr) y peleadores (1 fr). Sin el bloque del plan.
  *
  * Ningun numero sale de una constante (CA-01.2): todo viene de /panel, /jobs y /boxeadores.
+ *
+ * En Gimnasio (versiones 26-10, 03 §G-01, W34): el nombre del gimnasio, quien subio cada
+ * pendiente con un filtro "Todas / Mías" (todas por defecto: el plantel es compartido, DV-3),
+ * un quinto indicador con las horas del mes y, solo para el titular, "El equipo este mes".
  */
 import Link from "next/link";
+import { useState } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { Encabezado } from "@/components/boxtwin/Encabezado";
 import { ErrorConReintento, Esqueleto, Vacio } from "@/components/boxtwin/Estados";
@@ -20,11 +25,14 @@ import { Button } from "@/components/animate-ui/components/buttons/button";
 import { FilaSesion, TarjetaSesion } from "@/components/pantallas/sesiones/TarjetaSesion";
 import { pedirValidado } from "@/lib/api/cliente";
 import { claves, useBoxeadores, usePanel, useProducto, useSesion, useSesiones, useSembrar } from "@/lib/api/consultas";
-import { Perfil, type Boxeador, type Panel, type Sesion } from "@/lib/api/esquemas";
+import { Perfil, type Boxeador, type Cuenta, type Panel, type Sesion } from "@/lib/api/esquemas";
 import { visible } from "@/lib/banderas";
-import { fechaCorta, fechaLarga, porcentajeAR } from "@/lib/formato";
+import { decimal, fechaCorta, fechaLarga, porcentajeAR } from "@/lib/formato";
 import { CONDICIONES_FILMACION } from "@/lib/subida";
 import { NOMBRE_CONTEXTO, textos } from "@/lib/textos";
+import { ToggleGroup, ToggleGroupItem } from "@/components/animate-ui/components/radix/toggle-group";
+import { Horas } from "@/components/boxtwin/Horas";
+import { esGimnasio, useCuenta } from "@/lib/cuenta";
 
 const MAX_PENDIENTES = 2;
 const RECIENTES = 6;
@@ -34,36 +42,46 @@ export function PantallaPanel() {
   const sesiones = useSesiones();
   const boxeadores = useBoxeadores();
   const producto = useProducto();
+  const cuenta = useCuenta().data ?? null;
 
   const cargando = panel.isPending || sesiones.isPending;
   const error = panel.error ?? sesiones.error;
 
   return (
     <>
-      <Encabezado titulo="Panel" rotulo={fechaLarga(new Date())} />
+      <Encabezado titulo={esGimnasio(cuenta) ? cuenta!.nombre : "Panel"} rotulo={fechaLarga(new Date())} />
       {cargando ? (
         <Esqueleto filas={4} />
       ) : error ? (
         <ErrorConReintento error={error} alReintentar={() => { panel.refetch(); sesiones.refetch(); }} />
       ) : (
-        <Contenido panel={panel.data!} sesiones={sesiones.data!} boxeadores={boxeadores.data ?? []} tendencia={visible("01.tendencia", producto.data)} />
+        <Contenido panel={panel.data!} sesiones={sesiones.data!} boxeadores={boxeadores.data ?? []} tendencia={visible("01.tendencia", producto.data)} cuenta={cuenta} />
       )}
     </>
   );
 }
 
-function Contenido({ panel, sesiones, boxeadores, tendencia }: { panel: Panel; sesiones: Sesion[]; boxeadores: Boxeador[]; tendencia: boolean }) {
+function Contenido({ panel, sesiones, boxeadores, tendencia, cuenta }: { panel: Panel; sesiones: Sesion[]; boxeadores: Boxeador[]; tendencia: boolean; cuenta: Cuenta | null }) {
+  const gimnasio = esGimnasio(cuenta);
+  const [solo, setSolo] = useState<"todas" | "mias">("todas");
   // Pendientes desde la lista de sesiones, que se sondea: asi un cambio de estado aparece
   // sin recargar (CA-01.1) aunque /panel no haya vuelto a pedirse.
-  const pendientes = sesiones.filter((s) => s.estado === "espera_siembra");
+  const pendientes = sesiones.filter((s) => s.estado === "espera_siembra"
+    && (solo === "todas" || s.subida_por?.id === cuenta?.usuario.id));
   const fallidas = sesiones.filter((s) => s.estado === "fallo");
   const sinSesiones = sesiones.length === 0;
 
   return (
     <div className="flex flex-col gap-6">
+      {gimnasio && sesiones.some((s) => s.estado === "espera_siembra") && (
+        <ToggleGroup type="single" value={solo} onValueChange={(v) => v && setSolo(v as "todas" | "mias")} aria-label="Pendientes de quién" className="flex w-max gap-1">
+          <ToggleGroupItem value="todas" className="min-h-11 border border-borde px-3">Todas</ToggleGroupItem>
+          <ToggleGroupItem value="mias" className="min-h-11 border border-borde px-3">Mías</ToggleGroupItem>
+        </ToggleGroup>
+      )}
       {(pendientes.length > 0 || fallidas.length > 0) && (
         <section aria-label="Pendientes" className="flex flex-col gap-3">
-          {pendientes.slice(0, MAX_PENDIENTES).map((s) => <AvisoPendiente key={s.id} s={s} />)}
+          {pendientes.slice(0, MAX_PENDIENTES).map((s) => <AvisoPendiente key={s.id} s={s} gimnasio={gimnasio} />)}
           {pendientes.length > MAX_PENDIENTES && (
             <Link href="/sesiones/?estado=espera_siembra" className="min-h-11 text-sm text-estimado underline underline-offset-4">
               Ver las {pendientes.length} pendientes
@@ -83,8 +101,12 @@ function Contenido({ panel, sesiones, boxeadores, tendencia }: { panel: Panel; s
           </ul>
         </Vacio>
       ) : (
-        <Indicadores panel={panel} />
+        <>
+          <Indicadores panel={panel} />
+          {gimnasio && (panel.horas ?? cuenta?.horas) && <Horas horas={(panel.horas ?? cuenta!.horas)!} />}
+        </>
       )}
+      {panel.por_entrenador && <EquipoDelMes filas={panel.por_entrenador} />}
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         {!sinSesiones && (
@@ -114,7 +136,7 @@ function Contenido({ panel, sesiones, boxeadores, tendencia }: { panel: Panel; s
 
         <section aria-labelledby="mis-peleadores">
           <div className="mb-3 flex items-end justify-between">
-            <h2 id="mis-peleadores" className="font-display text-xl font-semibold lg:text-2xl">Mis peleadores</h2>
+            <h2 id="mis-peleadores" className="font-display text-xl font-semibold lg:text-2xl">{gimnasio ? "Plantel" : "Mis peleadores"}</h2>
             <Link href="/peleadores/" className="min-h-11 content-center text-sm text-texto-2 underline underline-offset-4">Ver todos</Link>
           </div>
           {boxeadores.length === 0 ? (
@@ -128,7 +150,7 @@ function Contenido({ panel, sesiones, boxeadores, tendencia }: { panel: Panel; s
   );
 }
 
-function AvisoPendiente({ s }: { s: Sesion }) {
+function AvisoPendiente({ s, gimnasio = false }: { s: Sesion; gimnasio?: boolean }) {
   return (
     <Link
       href={`/sesion/identificar/?id=${s.id}`}
@@ -139,8 +161,39 @@ function AvisoPendiente({ s }: { s: Sesion }) {
         Marcá una vez a cada peleador {s.contexto === "combate" ? "del combate" : "del sparring"}
         {s.boxeadores?.A || s.boxeadores?.B ? ` de ${[s.boxeadores?.A?.nombre, s.boxeadores?.B?.nombre].filter(Boolean).join(" vs ")}` : ` "${s.nombre}"`}.
       </p>
+      {gimnasio && s.subida_por?.nombre && <p className="mt-1 text-xs text-texto-2">Subió {s.subida_por.nombre}</p>}
       <span className="mt-2 inline-block text-sm underline underline-offset-4">Marcar peleadores</span>
     </Link>
+  );
+}
+
+/* B24: solo el titular de un Gimnasio; la API se lo manda nulo a los demas (CA-G01.1). */
+function EquipoDelMes({ filas }: { filas: NonNullable<Panel["por_entrenador"]> }) {
+  return (
+    <section aria-labelledby="equipo-mes" className="rounded-md border border-borde bg-superficie p-4">
+      <h2 id="equipo-mes" className="font-display text-xl font-semibold lg:text-2xl">El equipo este mes</h2>
+      <div className="mt-3 overflow-x-auto" tabIndex={0} role="region" aria-label="Actividad por entrenador">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left">
+              {["Entrenador", "Sesiones", "Horas", "Pendientes"].map((h) => (
+                <th key={h} scope="col" className="rotulo py-2 pr-3 font-normal">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filas.map((f) => (
+              <tr key={f.usuario_id} className="border-t border-borde-suave">
+                <td className="py-2 pr-3">{f.nombre ?? "—"}</td>
+                <td className="dato py-2 pr-3">{f.sesiones_mes}</td>
+                <td className="dato py-2 pr-3">{decimal(f.horas_mes, 1)}</td>
+                <td className="dato py-2 pr-3">{f.pendientes}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 
@@ -149,7 +202,7 @@ function AvisoPendiente({ s }: { s: Sesion }) {
  * sembrar una sesion en fallo y reencola la segunda etapa). Si fallo antes, en la primera
  * etapa, no hay nada que reencolar sin el video: se ofrece subirlo de nuevo.
  */
-function AvisoFallo({ s }: { s: Sesion }) {
+export function AvisoFallo({ s }: { s: Sesion }) {
   const detalle = useSesion(s.id);
   const sembrar = useSembrar(s.id);
   const siembra = detalle.data?.siembra ?? s.siembra;

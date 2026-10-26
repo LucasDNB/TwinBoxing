@@ -62,10 +62,85 @@ export const Producto = z.object({
     combinacion: z.object({ patron: z.string(), separacion: z.string(), max_s: num, min_golpes: num.optional() }).nullable().optional(),
     perfil_preliminar_sesiones: num,
   }),
+  // Versiones 26-10 (B20, B29). Opcionales: una API anterior no los manda y la web sigue
+  // como antes, con el ingreso de email y clave.
+  cupo: z.enum(["informar", "bloquear"]).optional(),
+  demo: z.object({
+    activo: z.boolean(),
+    subir: z.boolean().optional(),
+    perfiles: z.array(z.object({
+      perfil: z.string(), nombre: z.string(), version: z.enum(["individual", "entrenador", "gimnasio"]),
+      rol: z.enum(["titular", "entrenador"]), descripcion: z.string(), disponible: z.boolean(),
+    })).optional(),
+  }).optional(),
+  versiones: z.record(z.string(), z.object({ horas_mes: num })).optional(),
 });
 export type Producto = z.infer<typeof Producto>;
 
-export const Token = z.object({ token: z.string(), tipo: z.string(), usuario: z.string() });
+export const Token = z.object({ token: z.string(), tipo: z.string(), usuario: z.string(), perfil: strN.optional() });
+
+// -- Cuenta (versiones 26-10, B19) ----------------------------------------------
+
+export const VERSIONES = ["individual", "entrenador", "gimnasio"] as const;
+export type Version = (typeof VERSIONES)[number];
+
+export const Horas = z.object({
+  mes: z.string(), incluidas: num, usadas: num, restantes: num, sin_duracion: num,
+  modo: z.enum(["informar", "bloquear"]),
+});
+export type Horas = z.infer<typeof Horas>;
+
+export const Funciones = z.object({
+  horas_mes: num,
+  miembros_max: numN,
+  peleadores: z.enum(["propio", "libre"]),
+  rival: z.boolean(),
+  invitaciones: z.boolean(),
+  plantel_compartido: z.boolean(),
+  consentimiento: z.enum(["sesion", "atleta"]),
+  en_vivo: z.boolean(),
+});
+export type Funciones = z.infer<typeof Funciones>;
+
+export const Cuenta = z.object({
+  id: z.string(),
+  nombre: z.string(),
+  version: z.enum(VERSIONES),
+  rol: z.enum(["titular", "entrenador"]),
+  usuario: z.object({ id: z.string().optional(), email: strN, nombre: strN }),
+  boxeador_propio: z.object({ id: z.string(), nombre: z.string() }).nullable(),
+  funciones: Funciones,
+  horas: Horas.nullable(),
+  demo: z.boolean(),
+  perfil_demo: z.object({ perfil: z.string(), nombre: z.string() }).nullable().optional(),
+});
+export type Cuenta = z.infer<typeof Cuenta>;
+
+export const Miembro = z.object({
+  usuario_id: z.string(), nombre: strN, rol: z.enum(["titular", "entrenador"]),
+  desde: strN, baja_en: strN, email: strN.optional(),
+});
+export const ListaMiembros = z.array(Miembro);
+export type Miembro = z.infer<typeof Miembro>;
+
+export const EstadoConsentimiento = z.object({
+  estado: z.enum(["vigente", "falta", "revocado"]),
+  desde: strN,
+});
+export type EstadoConsentimiento = z.infer<typeof EstadoConsentimiento>;
+
+export const HistoriaConsentimiento = EstadoConsentimiento.extend({
+  historia: z.array(z.object({
+    id: z.string(), texto_version: z.string(), mayor_de_edad: z.boolean(), nota: strN,
+    registrado_por: strN, registrado_en: z.string(), revocado_por: strN, revocado_en: strN,
+    semilla: z.boolean(),
+  })),
+});
+export type HistoriaConsentimiento = z.infer<typeof HistoriaConsentimiento>;
+
+export const TextoConsentimiento = z.object({ version: z.string(), texto: z.string() });
+
+const Persona = z.object({ id: z.string(), nombre: strN }).nullable();
 
 export const Progreso = z.object({
   etapa: z.string(),
@@ -128,6 +203,9 @@ export const Sesion = z.object({
   trabajos: z
     .array(z.object({ etapa: z.string(), estado: z.string(), intento: num, error: strN }))
     .optional(),
+  // B24 y B27 (versiones 26-10)
+  subida_por: Persona.optional(),
+  cola: z.object({ delante: num, espera_min: z.tuple([num, num]), sin_duracion: num.optional() }).optional(),
 });
 export type Sesion = z.infer<typeof Sesion>;
 export const ListaSesiones = z.array(Sesion);
@@ -147,6 +225,9 @@ export const Boxeador = z.object({
   estilo: z.enum(["fajador", "estilista"]).nullable().optional(),
   sesiones: num.optional(),
   ultima_sesion: strN.optional(),
+  // B24 y B25 (versiones 26-10): solo con sentido en Gimnasio; nulos en las otras.
+  entrenador: Persona.optional(),
+  consentimiento: EstadoConsentimiento.nullable().optional(),
 });
 export type Boxeador = z.infer<typeof Boxeador>;
 export const ListaBoxeadores = z.array(Boxeador);
@@ -314,6 +395,10 @@ export const FightCard = z.object({
         A: z.object({ id: z.string(), nombre: z.string(), guardia: strN.optional(), categoria: strN.optional() }).nullable(),
         B: z.object({ id: z.string(), nombre: z.string(), guardia: strN.optional(), categoria: strN.optional() }).nullable(),
       }),
+      // B24 (versiones 26-10): quien subio y quien corrigio cada golpe.
+      autoria: z.object({
+        subida_por: strN, correcciones: z.record(z.string(), strN),
+      }).optional(),
     })
     .optional(),
 }).superRefine((fc, ctx) => {
@@ -451,7 +536,15 @@ export const Panel = z.object({
   rounds_mes: z.object({ total: num }).catchall(num),
   golpes_detectados_mes: num,
   recall_detector: numN,
-  pendientes: z.array(z.object({ sesion_id: z.string(), estado: z.string(), titulo: z.string() })),
+  pendientes: z.array(z.object({
+    sesion_id: z.string(), estado: z.string(), titulo: z.string(), subida_por: Persona.optional(),
+  })),
+  // Versiones 26-10: B20 y B24.
+  horas: Horas.optional(),
+  por_entrenador: z.array(z.object({
+    usuario_id: z.string(), nombre: strN, rol: z.string().optional(), sesiones_mes: num,
+    horas_mes: num, pendientes: num,
+  })).nullable().optional(),
 });
 export type Panel = z.infer<typeof Panel>;
 
