@@ -1,0 +1,183 @@
+"""
+La propuesta de candidatos para la siembra.
+
+La invariante que importa: los dos que se le muestran al usuario tienen que estar en el
+MISMO cuadro y separados. Mostrarlos en cuadros distintos no le permite a nadie descartar
+que sean la misma persona dos veces, que es justo el error que la siembra existe para
+evitar.
+"""
+
+from __future__ import annotations
+
+from boxtwin.core.identidad_auto import ConfigIdentidadAuto, EvidenciaTrack, proponer
+from boxtwin.mvp.candidatos import elegir
+
+ROJO = (175.0, 200.0, 120.0)
+AZUL = (105.0, 200.0, 120.0)
+
+
+def _track(tid, color, frames, alto=0.9, x=100.0):
+    frames = list(frames)
+    return EvidenciaTrack(
+        track_id=tid,
+        primer_frame=frames[0] if frames else 0,
+        ultimo_frame=frames[-1] if frames else 0,
+        alto_max=alto,
+        recortes=max(len(frames), 20),
+        con_guante=max(len(frames), 20),
+        colores=[(f, color) for f in frames],
+        frames_con_guante=frames,
+        xs=[(f, x) for f in frames],
+    )
+
+
+def test_propone_el_par_que_mas_coexiste():
+    ev = {
+        1: _track(1, ROJO, range(0, 300, 5)),
+        2: _track(2, AZUL, range(0, 300, 5), x=500.0),
+        3: _track(3, ROJO, range(400, 430, 5), x=120.0),
+    }
+    pareja, cands = elegir(ev, [1, 2, 3])
+    assert pareja == (1, 2)
+    assert [c.track for c in cands[:2]] == [1, 2]
+
+
+def test_los_dos_sugeridos_salen_del_mismo_cuadro():
+    ev = {1: _track(1, ROJO, range(0, 300, 5)),
+          2: _track(2, AZUL, range(0, 300, 5), x=500.0)}
+    _, cands = elegir(ev, [1, 2])
+    assert cands[0].cuadro == cands[1].cuadro
+    assert cands[0].coexiste_con == 2 and cands[1].coexiste_con == 1
+
+
+def test_el_cuadro_elegido_no_es_el_primero():
+    # Al principio del video suele estar alguien entrando al plano, con medio cuerpo afuera.
+    ev = {1: _track(1, ROJO, range(0, 300, 5)),
+          2: _track(2, AZUL, range(0, 300, 5), x=500.0)}
+    _, cands = elegir(ev, [1, 2])
+    assert cands[0].cuadro > 0
+
+
+def test_sin_coexistencia_no_se_propone_pareja_pero_si_candidatos():
+    # El caso de "no pude separar dos: elegi vos" del flujo. Devolver una pareja igual
+    # seria afirmar que son dos personas sin tener con que.
+    ev = {1: _track(1, ROJO, range(0, 100, 5)),
+          2: _track(2, AZUL, range(200, 300, 5), x=500.0)}
+    pareja, cands = elegir(ev, [1, 2])
+    assert pareja is None
+    assert len(cands) == 2
+    assert all(c.coexiste_con is None for c in cands)
+
+
+def test_los_candidatos_se_ordenan_por_evidencia():
+    ev = {
+        1: _track(1, ROJO, range(0, 300, 5)),
+        2: _track(2, AZUL, range(0, 300, 5), x=500.0),
+        3: _track(3, ROJO, range(400, 420, 5)),
+        4: _track(4, AZUL, range(400, 500, 5), x=500.0),
+    }
+    _, cands = elegir(ev, [1, 2, 3, 4])
+    assert [c.track for c in cands] == [1, 2, 4, 3]
+
+
+def test_no_se_muestran_mas_de_los_pedidos():
+    ev = {i: _track(i, ROJO, range(0, 300, 5), x=100.0 * i) for i in range(1, 9)}
+    _, cands = elegir(ev, list(ev), maximo=4)
+    assert len(cands) == 4
+
+
+def test_la_propuesta_es_determinista():
+    ev = {
+        1: _track(1, ROJO, range(0, 300, 5)),
+        2: _track(2, AZUL, range(0, 300, 5), x=500.0),
+        3: _track(3, ROJO, range(0, 300, 5), x=700.0),
+    }
+    primera = elegir(ev, [1, 2, 3])
+    for _ in range(5):
+        assert elegir(ev, [3, 1, 2])[0] == primera[0]
+
+
+def test_los_candidatos_salen_del_mismo_nucleo_que_usa_la_identidad():
+    # Una sola definicion de peleador. Si la propuesta usara la suya, el usuario podria
+    # elegir como semilla un track que la asignacion despues descarta por no ser peleador.
+    ev = {
+        1: _track(1, ROJO, range(0, 300, 5)),
+        2: _track(2, AZUL, range(0, 300, 5), x=500.0),
+        9: _track(9, ROJO, range(0, 300, 5), alto=0.2, x=900.0),   # publico: muy bajo
+    }
+    prop = proponer(ev, ConfigIdentidadAuto(), total_frames=400, fps=30.0)
+    nucleo = prop.diagnostico["nucleo_tracks"]
+    assert 9 not in nucleo
+    _, cands = elegir(ev, nucleo)
+    assert 9 not in [c.track for c in cands]
+
+
+# -- B2 de la web entrenador: color, tramo y altura relativa ---------------------------
+
+
+def test_cada_candidato_trae_color_tramo_y_altura_relativa():
+    from boxtwin.mvp.candidatos import elegir
+
+    ev = {1: _track(1, ROJO, range(30, 300, 5), alto=0.9),
+          2: _track(2, AZUL, range(30, 300, 5), alto=0.81, x=500.0),
+          3: _track(3, ROJO, range(400, 430, 5), alto=0.99, x=120.0)}
+    _, cands = elegir(ev, [1, 2, 3], fps=30.0)
+    por = {c.track: c for c in cands}
+    assert por[1].color_guante["nombre"] == "rojos"
+    assert por[2].color_guante["nombre"] == "azules"
+    assert por[1].color_guante["hex"].startswith("#") and len(por[1].color_guante["hex"]) == 7
+    assert (por[1].t_desde, por[1].t_hasta) == (1.0, 9.83)
+    assert por[1].alto_relativo == 1.0, "la mediana de 0,81 0,9 0,99 es 0,9"
+    assert por[2].alto_relativo == 0.9
+    assert por[1].sugerido and por[2].sugerido and not por[3].sugerido
+
+
+def test_un_track_sin_cuadros_con_color_no_inventa_un_color():
+    from boxtwin.mvp.candidatos import elegir
+
+    ev = {1: _track(1, ROJO, range(0, 300, 5)),
+          2: _track(2, AZUL, range(0, 300, 5), x=500.0),
+          3: _track(3, ROJO, [])}
+    ev[3].primer_frame, ev[3].ultimo_frame = 10, 50
+    _, cands = elegir(ev, [1, 2, 3])
+    sin = next(c for c in cands if c.track == 3)
+    assert sin.cuadros_con_color == 0
+    assert sin.color_guante is None
+    assert sin.t_desde is None, "sin fps no se inventan segundos"
+
+
+def test_se_proponen_hasta_ocho():
+    from boxtwin.mvp.candidatos import elegir
+
+    ev = {t: _track(t, ROJO if t % 2 else AZUL, range(t * 10, t * 10 + 50, 5)) for t in range(1, 12)}
+    _, cands = elegir(ev, list(ev))
+    assert len(cands) == 8
+
+
+def test_nombre_del_color_por_tono():
+    from boxtwin.mvp.candidatos import color_para_pantalla
+
+    assert color_para_pantalla((0.0, 200.0, 150.0))["nombre"] == "rojos"
+    assert color_para_pantalla((105.0, 200.0, 150.0))["nombre"] == "azules"
+    assert color_para_pantalla((60.0, 200.0, 150.0))["nombre"] == "verdes"
+    assert color_para_pantalla((-1.0, 0.0, 30.0))["nombre"] == "negros"
+    assert color_para_pantalla((-1.0, 10.0, 230.0))["nombre"] == "blancos"
+
+
+def test_W19_el_reflejo_coexiste_con_los_mismos_guantes_y_queda_marcado():
+    # Sombra frente al espejo: 1 y 2 en cuadro a la vez con guantes rojos; 3 es azul y
+    # coexiste igual, pero no se confunde.
+    ev = {1: _track(1, ROJO, range(0, 300, 5)),
+          2: _track(2, ROJO, range(0, 300, 5), x=500.0),
+          3: _track(3, AZUL, range(0, 300, 5), x=900.0)}
+    _, cands = elegir(ev, [1, 2, 3])
+    por_track = {c.track: c for c in cands}
+    assert por_track[1].mismo_color_a_la_vez == [2]
+    assert por_track[2].mismo_color_a_la_vez == [1]
+    assert por_track[3].mismo_color_a_la_vez == []
+
+
+def test_W19_el_mismo_color_en_otro_momento_no_es_un_reflejo():
+    ev = {1: _track(1, ROJO, range(0, 100, 5)), 2: _track(2, ROJO, range(200, 300, 5))}
+    _, cands = elegir(ev, [1, 2])
+    assert all(c.mismo_color_a_la_vez == [] for c in cands)

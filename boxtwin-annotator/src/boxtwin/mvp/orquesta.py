@@ -1,0 +1,635 @@
+"""
+BoxTwin - De un video crudo a una Fight-Card, en dos tiempos.
+
+POR QUE EXISTE
+  Hasta ahora no habia forma de correr el sistema sobre un video sin armarle antes un
+  proyecto de anotacion: el detector entra por `Fuente`, que se construye desde un export, y
+  el export sale de un `annot.json` que alguien tiene que haber tocado. Todo el circuito
+  medido pasa por ahi. Para un producto eso no sirve, y para la tesis tampoco: el numero de
+  punta a punta sobre una sesion nueva no se puede tomar si tomarlo requiere anotarla.
+
+  Va en dos comandos y no en uno por una razon que no es de ingenieria. Entre la pose y el
+  detector hay una pregunta que el sistema puede contestar al reves para una fuente entera
+  y una persona no: cual de los dos cuerpos es cual. Con esa respuesta, la identidad midio
+  0,810 en C1 (20-10). Cuesta dos clicks y es la unica intervencion humana del producto.
+
+QUE HACE
+  procesar   pose, tracking, evidencia de guante y propuesta de los dos candidatos.
+  completar  identidad por color desde las semillas, detector, guardia y Fight-Card.
+
+  Las dos etapas dejan todo en el directorio de la sesion, que ademas es un proyecto de
+  anotacion valido: se puede abrir con el anotador y ver exactamente lo que vio el sistema.
+  Eso no es un lujo, es como se audita un resultado que salio sin que nadie mirara.
+
+USO
+  boxtwin-annotator procesar video.mp4 --out sesion/ --modelo-guantes guantes-v2.pt
+  boxtwin-annotator completar sesion/ --semilla-a 3 --semilla-b 7 --detector ens.pt
+"""
+
+from __future__ import annotations
+
+import json
+import time
+from pathlib import Path
+
+import numpy as np
+
+from boxtwin.core.identidad_auto import (
+    AsignarIdentidadAuto,
+    ConfigIdentidadAuto,
+    analizar,
+    cargar_evidencia,
+    guardar_evidencia,
+    proponer,
+)
+from boxtwin.core.posecache import PoseCache
+from boxtwin.core.project import ProjectPaths, cargar_o_crear, project_paths
+from boxtwin.mvp.candidatos import elegir, recortar
+from boxtwin.mvp.fightcard import construir
+from boxtwin.mvp.guardia import ConfigGuardia, medir
+from boxtwin.mvp.sesion import Progreso, Sesion
+from boxtwin.mvp.tramos import aplicar_manuales, listar_tramos
+from boxtwin.core.types import TrackRole
+
+__all__ = [
+    "CORRECCIONES",
+    "EVIDENCIA",
+    "FIGHTCARD",
+    "POSES",
+    "SEGMENTOS",
+    "TIPOS",
+    "aplicar_tipos_a_sesion",
+    "completar",
+    "leer_fightcard",
+    "procesar",
+    "registrar_correccion",
+    "series_por_peleador",
+]
+
+EVIDENCIA = "evidencia.json"
+POSES = "poses.npz"
+SEGMENTOS = "segmentos.json"
+FIGHTCARD = "fightcard.json"
+CANDIDATOS = "candidatos"
+TRAMOS = "tramos"
+
+
+class SesionEnEstadoEquivocado(RuntimeError):
+    """Se pidio una etapa que no corresponde al estado de la sesion."""
+
+
+# ---------------------------------------------------------------------------
+# Etapa 1
+# ---------------------------------------------------------------------------
+
+
+def procesar(
+    video: Path,
+    salida: Path,
+    modelo_guantes: Path,
+    round_s: float | None = None,
+    descanso_s: float = 60.0,
+    cfg_identidad: ConfigIdentidadAuto | None = None,
+    device: str = "0",
+    modelo_pose: str = "yolov8l-pose.pt",
+    imgsz: int = 640,
+    rehacer: bool = False,
+    progreso=None,
+) -> Sesion:
+    """
+    Pose, tracking y evidencia de identidad. Deja la sesion esperando la siembra.
+
+    Es reanudable en el punto que importa, que es el caro: el preproceso ya lo es por
+    shards, y la evidencia de guante se guarda apenas termina de recorrer el video. Volver a
+    correr el comando sobre una sesion que ya la tiene no vuelve a pasar el detector de
+    guantes por 30 minutos de video.
+    """
+    from boxtwin.core.deteccion_guantes import DetectorGuantes
+    from boxtwin.preprocess.runner import PreprocessConfig, default_tracker_path, preprocess
+
+    salida = Path(salida)
+    cfg_identidad = cfg_identidad or ConfigIdentidadAuto()
+    video_en_sesion = _ubicar_video(Path(video), salida)
+    paths = project_paths(video_en_sesion)
+
+    # -- pose y tracking ----------------------------------------------------
+    t0 = time.perf_counter()
+    cfg_pre = PreprocessConfig(
+        model=modelo_pose, imgsz=imgsz, device=device, tracker=default_tracker_path(),
+    )
+    # La barra de la consola y el archivo que lee la API son el mismo callback: el
+    # segundo encadena al primero, asi que la linea de comandos no pierde nada.
+    avance = Progreso(salida, "pose", encadena=progreso)
+    r = preprocess(video_en_sesion, salida, cfg_pre, on_progress=avance)
+    avance.terminar()
+    cache = PoseCache.open(paths.npz)
+    doc, _ = cargar_o_crear(paths, cache.meta)
+
+    ses = Sesion.nueva(
+        salida,
+        video={
+            "nombre": video_en_sesion.name,
+            "ruta": str(video_en_sesion),
+            "sha256": doc.video.sha256,
+            "fps": doc.video.fps,
+            "total_frames": doc.video.total_frames,
+            "duracion_s": doc.video.duration_s,
+            "ancho": doc.video.width,
+            "alto": doc.video.height,
+        },
+        round_s=round_s,
+        descanso_s=descanso_s,
+    )
+    ses.anotar_etapa("preproceso", time.perf_counter() - t0, cuadros=r.total_frames)
+    if r.suspected_vfr:
+        ses.avisos.append(
+            "el fps declarado no concuerda con el conteo real de cuadros: puede ser "
+            "framerate variable, y en ese caso los segundos de cada evento se corren"
+        )
+    if r.seams:
+        ses.avisos.append(
+            f"{len(r.seams)} costura(s) de reanudacion del tracker: ningun track cruza esos "
+            "cuadros, asi que la identidad se fragmenta ahi"
+        )
+
+    # -- evidencia de guante ------------------------------------------------
+    ruta_ev = salida / EVIDENCIA
+    t0 = time.perf_counter()
+    if ruta_ev.is_file() and not rehacer:
+        ev = cargar_evidencia(ruta_ev)
+        ses.anotar_etapa("evidencia", 0.0, reutilizada=True, tracks=len(ev))
+    else:
+        detector = DetectorGuantes(str(modelo_guantes), device=None if device == "0" else device)
+        avance = Progreso(salida, "guantes", encadena=progreso)
+        ev = analizar(
+            cache, video_en_sesion, detector, cfg_identidad,
+            alto_imagen=doc.video.height, fps=doc.video.fps,
+            total_frames=doc.video.total_frames, progreso=avance,
+        )
+        avance.terminar()
+        guardar_evidencia(ev, ruta_ev)
+        ses.anotar_etapa("evidencia", time.perf_counter() - t0, tracks=len(ev))
+
+    # -- filtros y candidatos -----------------------------------------------
+    prop = proponer(ev, cfg_identidad, doc.video.total_frames, doc.video.fps)
+    # Se aplica la propuesta automatica aunque despues la siembra la reemplace: lo que
+    # aporta son los descartes -publico, arbitro, entrenador- que la siembra no cambia y
+    # que quedan escritos para que el anotador no los tenga que repetir si abre la sesion.
+    if prop.roles:
+        AsignarIdentidadAuto(prop, annotator="boxtwin-procesar").do(doc)
+        from boxtwin.core.annotations import save as save_doc
+
+        save_doc(doc, paths.annot)
+
+    pareja, candidatos = elegir(
+        ev, prop.diagnostico.get("nucleo_tracks", []),
+        min_coexistencia=cfg_identidad.min_coexistencia,
+        fps=doc.video.fps,
+        separacion_minima=cfg_identidad.separacion_minima,
+    )
+    recortar(video_en_sesion, cache, candidatos, salida / CANDIDATOS)
+
+    ses.candidatos = [c.a_dict() for c in candidatos]
+    ses.identidad = {
+        "diagnostico_automatico": _jsonable(prop.diagnostico),
+        "avisos_automaticos": list(prop.avisos),
+        "pareja_sugerida": list(pareja) if pareja else None,
+    }
+    if pareja is None:
+        ses.avisos.append(
+            "ningun par de tracks coexiste lo suficiente como para afirmar que son dos "
+            "personas distintas: hay que elegir las dos semillas a mano entre los candidatos"
+        )
+    Progreso(salida, "").terminar()
+    ses.estado = "espera_siembra"
+    ses.guardar()
+    return ses
+
+
+def _ubicar_video(video: Path, salida: Path) -> Path:
+    """
+    Deja el video adentro de la sesion sin copiarlo si se puede.
+
+    El enlace simbolico alcanza y evita duplicar gigabytes por sesion. `project_paths` no
+    resuelve symlinks a proposito, asi que el proyecto queda en la sesion y no en el
+    directorio del video original, que es lo que uno esperaria y lo que evita escribir
+    resultados al lado del material de otra persona.
+    """
+    video = Path(video).absolute()
+    if not video.is_file():
+        raise FileNotFoundError(f"no existe el video {video}")
+    destino_dir = Path(salida) / "videos"
+    if video.parent == destino_dir:
+        return video
+    destino_dir.mkdir(parents=True, exist_ok=True)
+    destino = destino_dir / video.name
+    if not destino.exists():
+        try:
+            destino.symlink_to(video)
+        except OSError:
+            import shutil
+
+            shutil.copy2(video, destino)
+    return destino
+
+
+# ---------------------------------------------------------------------------
+# Etapa 2
+# ---------------------------------------------------------------------------
+
+
+def completar(
+    directorio: Path,
+    semilla_a: int,
+    semilla_b: int | None,
+    detector: Path,
+    umbral: float = 0.80,
+    cfg_identidad: ConfigIdentidadAuto | None = None,
+    cfg_guardia: ConfigGuardia | None = None,
+    device: str | None = None,
+    progreso=None,
+    manual: bool = False,
+) -> dict:
+    """
+    Identidad por color desde las semillas, detector, guardia y Fight-Card.
+
+    Devuelve la Fight-Card ya escrita en disco. El tipo de golpe NO se resuelve aca: lo pone
+    la etapa de clasificacion, que corre en el otro entorno conda y lee `segmentos.json`.
+
+    Con `manual` aplica ademas las asignaciones de tramos que hizo una persona en la web
+    (`identidad.asignaciones_manuales` de sesion.json), encima de la asignacion por color
+    (B3 de la web entrenador). No repite la pose: esta etapa nunca la corre, lee la cache.
+    """
+    import torch
+
+    from boxtwin.core.annotations import save as save_doc
+    from boxtwin_detector.ensamble import cargar
+    from boxtwin_detector.inferencia import carriles_de, detectar
+
+    directorio = Path(directorio)
+    ses = Sesion.cargar(directorio)
+    if ses.estado not in ("espera_siembra", "listo", "completando"):
+        raise SesionEnEstadoEquivocado(
+            f"la sesion esta en '{ses.estado}' y la siembra se aplica sobre "
+            "'espera_siembra'. Corre primero 'procesar'"
+        )
+    cfg_identidad = cfg_identidad or ConfigIdentidadAuto()
+    paths = _paths_de(ses, directorio)
+    cache = PoseCache.open(paths.npz)
+    doc, _ = cargar_o_crear(paths, cache.meta)
+    ev = cargar_evidencia(directorio / EVIDENCIA)
+
+    individual = semilla_b is None
+    ses.estado = "completando"
+    ses.siembra = {"track_a": int(semilla_a), "track_b": None if individual else int(semilla_b)}
+    ses.guardar()
+
+    # -- identidad con la siembra -------------------------------------------
+    t0 = time.perf_counter()
+    if individual:
+        # Bolsa o sombra (B8): una sola persona, una sola semilla. Sin medir todavia: la
+        # bandera sesiones_individuales esta apagada hasta pasar el criterio del spec.
+        from boxtwin.mvp.individual import proponer_individual
+
+        prop = proponer_individual(ev, cfg_identidad, doc.video.total_frames, doc.video.fps,
+                                   semilla=int(semilla_a))
+    else:
+        prop = proponer(
+            ev, cfg_identidad, doc.video.total_frames, doc.video.fps,
+            semillas=(int(semilla_a), int(semilla_b)),
+        )
+    if prop.diagnostico.get("semillas_en_conflicto"):
+        ses.estado = "espera_siembra"
+        ses.error = prop.avisos[-1] if prop.avisos else "semillas en conflicto"
+        ses.guardar()
+        raise ValueError(
+            "las dos semillas caen del mismo lado de la coexistencia: "
+            "o son la misma persona, o hay una coexistencia espuria. Elegi otro par"
+        )
+    # -- tramos: lo que quedo sin asignar y lo que asigno una persona (B3) -----
+    auto = sum(1 for r in prop.roles.values() if r in (TrackRole.A, TrackRole.B))
+    sin_asignar_auto = list(prop.sin_asignar)
+    manuales: dict[int, str] = {}
+    if manual:
+        manuales = {int(k): v for k, v in
+                    (ses.identidad.get("asignaciones_manuales") or {}).items()}
+        if individual and any(r == "B" for r in manuales.values()):
+            # La API ya lo rechaza (B8b); esto cuida que un sesion.json editado a mano no
+            # meta una segunda persona en una sesion de una.
+            raise ValueError("en una sesion de una sola persona un tramo es A o ninguno, no B")
+    asignados_manual = aplicar_manuales(prop, manuales) if manuales else 0
+
+    AsignarIdentidadAuto(prop, annotator="boxtwin-completar", forzar=True).do(doc)
+    save_doc(doc, paths.annot)
+    ses.anotar_etapa("identidad", time.perf_counter() - t0,
+                     asignados=prop.diagnostico.get("asignados_A", 0)
+                     + prop.diagnostico.get("asignados_B", 0),
+                     manual=bool(manual), asignados_manual=asignados_manual)
+    tramos = listar_tramos(ev, prop, cfg_identidad, doc.video.fps,
+                           sin_asignar=sin_asignar_auto, manuales=manuales)
+    _recortar_tramos(paths.video, ses, directorio, cache, tramos)
+    ses.identidad["tramos"] = tramos
+
+    # -- series por peleador -------------------------------------------------
+    t0 = time.perf_counter()
+    kp, sc, valid, cobertura = series_por_peleador(doc, cache)
+    np.savez_compressed(directorio / POSES, keypoints=kp, kp_score=sc, valid=valid)
+    ses.anotar_etapa("series", time.perf_counter() - t0)
+
+    # -- detector ------------------------------------------------------------
+    t0 = time.perf_counter()
+    dev = torch.device(device) if device else None
+    ens = cargar(Path(detector), dev)
+    carriles = carriles_de(kp, sc, valid, fps_origen=doc.video.fps)
+    golpes = detectar(ens, carriles, umbral=umbral, device=dev)
+    ses.anotar_etapa("detector", time.perf_counter() - t0, golpes=len(golpes))
+
+    # -- guardia -------------------------------------------------------------
+    t0 = time.perf_counter()
+    eventos = medir(kp, sc, golpes, fps=doc.video.fps, cfg=cfg_guardia or ConfigGuardia())
+    ses.anotar_etapa("guardia", time.perf_counter() - t0)
+
+    # -- salidas -------------------------------------------------------------
+    info_detector = {
+        "checkpoint": Path(detector).name,
+        "semillas_del_ensamble": list(getattr(ens, "semillas", [])),
+        "umbral": umbral,
+    }
+    (directorio / SEGMENTOS).write_text(
+        json.dumps(
+            {
+                "version": "0.1",
+                "video": ses.video,
+                "detector": info_detector,
+                "poses": POSES,
+                "segmentos": [g.a_dict() for g in golpes],
+            },
+            indent=2, ensure_ascii=False,
+        )
+        + "\n"
+    )
+
+    cobertura["separacion_de_perfiles"] = prop.diagnostico.get("separacion_de_perfiles")
+    cobertura["piso_de_separacion"] = cfg_identidad.separacion_minima
+    cobertura["tracks_sin_asignar"] = len(prop.sin_asignar)
+    # 0.2: cuantos tramos eran de peleador, cuantos asigno el sistema y cuantos una persona.
+    cobertura["tramos_total"] = auto + len(sin_asignar_auto)
+    cobertura["tramos_asignados_auto"] = auto
+    cobertura["tramos_asignados_manual"] = asignados_manual
+    cobertura["separacion_color"] = prop.diagnostico.get("separacion_de_perfiles")
+    ses.identidad.update({"diagnostico_con_siembra": _jsonable(prop.diagnostico),
+                          "avisos_con_siembra": list(prop.avisos)})
+    for a in prop.avisos:
+        if a not in ses.avisos:
+            ses.avisos.append(a)
+
+    fc = construir(ses, golpes, eventos, cobertura, detector=info_detector,
+                   lados=("A",) if individual else ("A", "B"))
+    (directorio / FIGHTCARD).write_text(json.dumps(fc, indent=2, ensure_ascii=False) + "\n")
+    ses.guardar()
+
+    # -- enriquecer (ampliacion del 13-10): altura del golpe, sin repetir nada -----
+    fc = enriquecer(directorio, forzar=True, ses=ses) or fc
+
+    ses.estado = "listo"
+    ses.error = None
+    ses.guardar()
+    return fc
+
+
+def enriquecer(directorio: Path, forzar: bool = False, ses: Sesion | None = None) -> dict | None:
+    """
+    Lo que la ampliacion del 13-10 suma a una Fight-Card ya hecha, sin correr pose, detector
+    ni clasificador (03 §3): la altura de cada golpe (B11), las combinaciones (B10) y el
+    contexto en que se midio el detector (B8b). Lee poses.npz y fightcard.json; corre sin GPU.
+
+    Reanudable: devuelve None y no toca nada si la Fight-Card ya es 0.3 con la misma regla de
+    altura, el mismo tau y la misma regla de combinaciones, salvo `forzar`. La de combinaciones
+    entra en la cuenta desde el 14-10: si no, las sesiones contadas con izq-der-izq quedaban
+    con la regla vieja. Las correcciones del entrenador se vuelven a aplicar encima,
+    asi que una altura corregida a mano no se pierde al reenriquecer. El tiempo queda en
+    sesion.json, porque cuenta para C5.
+    """
+    from boxtwin.mvp.fightcard import (
+        VERSION_FIGHTCARD, _combinaciones, aplicar_correcciones, completar_rounds,
+    )
+    from boxtwin.mvp.combinaciones import REGLA as REGLA_COMBINACION
+    from boxtwin.mvp.objetivo import REGLA, TAU, marcar_fightcard
+
+    directorio = Path(directorio)
+    fc = leer_fightcard(directorio)
+    previo = (fc.get("metodos") or {}).get("objetivo") or {}
+    combinaciones_al_dia = all(
+        (p.get("combinaciones") or {}).get("patron") == REGLA_COMBINACION["patron"]
+        for p in (fc.get("peleadores") or {}).values())
+    # Cambios del 14-10 (DC-5): una sesion sin rounds recibe segmentos de 3 minutos.
+    rounds_al_dia = bool((fc.get("video") or {}).get("rounds")) or not (fc.get("video") or {}).get("duracion_s")
+    if (not forzar and fc.get("version") == VERSION_FIGHTCARD
+            and previo.get("regla") == REGLA and previo.get("tau") == TAU
+            and combinaciones_al_dia and rounds_al_dia):
+        return None
+    ses = ses or Sesion.cargar(directorio)
+    t0 = time.perf_counter()
+    completar_rounds(fc)
+    z = np.load(directorio / POSES)
+    marcar_fightcard(fc, z["keypoints"], z["kp_score"], z["valid"], TAU)
+    fc["version"] = VERSION_FIGHTCARD
+    fc.setdefault("detector", {}).setdefault("medido_en", "sparring")
+    _combinaciones(fc)
+    fc = aplicar_correcciones(fc, leer_correcciones(directorio))
+    escribir_fightcard(directorio, fc)
+    ses.anotar_etapa("enriquecer", time.perf_counter() - t0, regla=REGLA, tau=TAU)
+    ses.guardar()
+    return fc
+
+
+def enriquecer_todas(raiz: Path) -> dict[str, str]:
+    """`enriquecer` sobre cada sesion lista de un directorio. Una que falla no frena a las demas."""
+    resultado: dict[str, str] = {}
+    for d in sorted(p for p in Path(raiz).iterdir() if (p / FIGHTCARD).is_file()):
+        if not (d / POSES).is_file():
+            resultado[d.name] = "sin poses.npz"
+            continue
+        try:
+            resultado[d.name] = "enriquecida" if enriquecer(d) is not None else "ya estaba"
+        except Exception as e:  # noqa: BLE001 - una sesion rota no puede frenar a las otras
+            resultado[d.name] = f"error: {e}"
+    return resultado
+
+
+def _recortar_tramos(video: Path, ses: Sesion, directorio: Path, cache, tramos: list[dict]) -> None:
+    """
+    Un recorte del cuadro central de cada tramo, con el mismo recortador de la siembra.
+
+    Si el video no se puede abrir el tramo queda sin recorte y se puede asignar igual desde
+    el reproductor: un recorte que falta no puede frenar la revision.
+    """
+    if not tramos:
+        return
+    from boxtwin.mvp.candidatos import Candidato
+
+    cands = [Candidato(track=t["track"], cuadro=t["cuadro"], alto=0.0, fraccion_guante=0.0,
+                       cuadros_con_color=0) for t in tramos]
+    try:
+        recortar(video, cache, cands, directorio / TRAMOS)
+    except Exception as e:  # noqa: BLE001 - cv2 y un video roto fallan de muchas formas
+        ses.avisos.append(f"no se pudieron recortar los tramos para revisar: {e}")
+        return
+    por_track = {c.track: c.recorte for c in cands}
+    for t in tramos:
+        t["recorte"] = por_track.get(t["track"])
+
+
+def _paths_de(ses: Sesion, directorio: Path) -> ProjectPaths:
+    ruta = ses.video.get("ruta")
+    video = Path(ruta) if ruta else (directorio / "videos" / str(ses.video.get("nombre")))
+    if not video.exists():
+        # La sesion se pudo haber movido de maquina, que es exactamente lo que pasa cuando
+        # el worker corre adentro de un contenedor y el directorio viene montado.
+        video = directorio / "videos" / Path(str(ses.video.get("nombre"))).name
+    return project_paths(video)
+
+
+def series_por_peleador(doc, cache) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict]:
+    """
+    De tracks a dos series de keypoints, una por peleador, y cuanto se cubrio de cada uno.
+
+    Es la misma resolucion que usa el export `sequence`, sin las etiquetas: un cuadro sin
+    identidad resuelta no es un cuadro sin golpe, es un cuadro sin dato, y sale en la
+    mascara para que el detector no pueda marcar nada ahi.
+
+    La cobertura se reporta porque RF5 lo pide: cuando el sistema se abstiene, el usuario
+    tiene que ver cuanto tiempo quedo sin mirar, no un conteo que parece completo.
+    """
+    from boxtwin.core.identity import IdentityResolver
+    from boxtwin.core.types import FighterId
+
+    T = int(doc.video.total_frames)
+    n_kp = 17
+    kp = np.zeros((2, T, n_kp, 2), np.float32)
+    sc = np.zeros((2, T, n_kp), np.float32)
+    valid = np.zeros((2, T), bool)
+
+    resolver = IdentityResolver(doc, cache)
+    peleadores = [FighterId.A, FighterId.B]
+    cuadros_con_sin_asignar = 0
+    for f in range(T):
+        porf = resolver.by_fighter(f)
+        for p, fid in enumerate(peleadores):
+            pose = porf.get(fid)
+            if pose is None:
+                continue
+            valid[p, f] = pose.reliable
+            kp[p, f] = pose.keypoints[:n_kp]
+            sc[p, f] = pose.kp_score[:n_kp]
+        dets = cache.detections(f)
+        if len(dets) and any(
+            resolver.role_of(f, int(dets.track_id[i])) is None for i in range(len(dets))
+        ):
+            cuadros_con_sin_asignar += 1
+
+    cobertura = {
+        "cobertura_A": round(float(valid[0].mean()), 4),
+        "cobertura_B": round(float(valid[1].mean()), 4),
+        "sin_asignar": round(cuadros_con_sin_asignar / T, 4) if T else 0.0,
+        "cuadros": T,
+    }
+    return kp, sc, valid, cobertura
+
+
+def _jsonable(d: dict) -> dict:
+    """El diagnostico trae tuplas y claves int, que json convierte a string sin avisar."""
+    salida = {}
+    for k, v in d.items():
+        if isinstance(v, dict):
+            salida[k] = {str(kk): list(vv) if isinstance(vv, tuple) else vv
+                         for kk, vv in v.items()}
+        elif isinstance(v, tuple):
+            salida[k] = list(v)
+        else:
+            salida[k] = v
+    return salida
+
+
+# ---------------------------------------------------------------------------
+# Tipos y correcciones
+# ---------------------------------------------------------------------------
+
+TIPOS = "tipos.json"
+CORRECCIONES = "correcciones.jsonl"
+
+
+def leer_fightcard(directorio: Path) -> dict:
+    ruta = Path(directorio) / FIGHTCARD
+    if not ruta.is_file():
+        raise FileNotFoundError(
+            f"no hay Fight-Card en {directorio}: corre primero 'completar'"
+        )
+    return json.loads(ruta.read_text())
+
+
+def escribir_fightcard(directorio: Path, fc: dict) -> Path:
+    ruta = Path(directorio) / FIGHTCARD
+    tmp = ruta.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(fc, indent=2, ensure_ascii=False) + "\n")
+    tmp.replace(ruta)
+    return ruta
+
+
+def leer_correcciones(directorio: Path) -> list[dict]:
+    ruta = Path(directorio) / CORRECCIONES
+    if not ruta.is_file():
+        return []
+    return [json.loads(l) for l in ruta.read_text().splitlines() if l.strip()]
+
+
+def aplicar_tipos_a_sesion(directorio: Path, exactitud: float | None = None) -> dict:
+    """
+    Pega tipos.json sobre la Fight-Card, y vuelve a aplicar las correcciones encima.
+
+    El orden importa y es el unico que tiene sentido: primero lo que dijo el modelo nuevo,
+    despues lo que dijo la persona. Al reves, publicar un checkpoint le borraria al
+    entrenador todas las correcciones que hizo, que son justo las etiquetas mas caras que
+    tiene el proyecto.
+    """
+    from boxtwin.mvp.fightcard import aplicar_correcciones, aplicar_tipos
+
+    directorio = Path(directorio)
+    d = json.loads((directorio / TIPOS).read_text())
+    fc = leer_fightcard(directorio)
+    # tipos.json 0.2 (tipo v2) trae su exactitud y los campos de metodo y guardia; 0.1 no,
+    # y ahi todo sigue como antes.
+    v2 = d.get("version") == "0.2"
+    if exactitud is None and v2:
+        exactitud = d.get("exactitud_familia_fuente_no_vista")
+    fc = aplicar_tipos(fc, d.get("tipos", {}), d.get("checkpoint", ""), exactitud,
+                       extra=d if v2 else None)
+    fc = aplicar_correcciones(fc, leer_correcciones(directorio))
+    escribir_fightcard(directorio, fc)
+    return fc
+
+
+def registrar_correccion(
+    directorio: Path, golpe: str, tipo: str | None = None, por: str | None = None,
+    objetivo: str | None = None,
+) -> dict:
+    """
+    Guarda la correccion del entrenador y la refleja en la Fight-Card. F14 y RF10.
+
+    Se appendea a un jsonl y no se pisa nada: cada correccion es una etiqueta nueva sobre
+    material que el modelo no vio, que es exactamente lo que le falta para generalizar. Un
+    registro que se sobrescribe deja de ser un dataset.
+    """
+    from boxtwin.mvp.fightcard import aplicar_correcciones, correccion, correccion_objetivo
+
+    directorio = Path(directorio)
+    fc = leer_fightcard(directorio)
+    if (tipo is None) == (objetivo is None):
+        raise ValueError("una correccion es de tipo o de altura (objetivo), no de las dos ni de ninguna")
+    c = (correccion(golpe, tipo, fc, por=por) if tipo is not None
+         else correccion_objetivo(golpe, objetivo, fc, por=por))
+    with (directorio / CORRECCIONES).open("a") as f:
+        f.write(json.dumps(c, ensure_ascii=False) + "\n")
+    fc = aplicar_correcciones(fc, leer_correcciones(directorio))
+    escribir_fightcard(directorio, fc)
+    return fc

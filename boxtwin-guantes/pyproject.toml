@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "boxtwin-guantes"
+description = "Detector de guantes de boxeo y filtro de identidad por guante"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [{ name = "Lucas Benitez" }]
+dynamic = ["version"]
+
+# boxtwin-annotator porque la evaluacion que decide si esto sirve se corre contra los
+# proyectos anotados: necesita PoseCache e IdentityResolver para saber que track es
+# peleador. numpy para todo lo demas. Bajar el dataset y armar los recortes no necesita
+# GPU, asi que torch y ultralytics van en extras.
+dependencies = [
+    "boxtwin-annotator",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+# ultralytics arrastra torch. Se separa de dev para que los tests corran sin GPU.
+train = ["ultralytics>=8.3", "opencv-python>=4.9"]
+
+[project.scripts]
+boxtwin-guantes = "boxtwin_guantes.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "boxtwin_guantes.version.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"

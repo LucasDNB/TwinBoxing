@@ -1,0 +1,1483 @@
+{
+  "exp": "E4a",
+  "faltan": [],
+  "completo": true,
+  "por_fold": {
+    "Sparring": {
+      "semillas": 5,
+      "golpes": 114,
+      "familia": {
+        "exactitud": 0.5439,
+        "wilson95": [
+          0.4525,
+          0.6324
+        ],
+        "balanceada": 0.3867,
+        "recall": {
+          "straight": {
+            "n": 64,
+            "aciertos": 33,
+            "recall": 0.5156,
+            "wilson95": [
+              0.3958,
+              0.6337
+            ]
+          },
+          "hook": {
+            "n": 45,
+            "aciertos": 29,
+            "recall": 0.6444,
+            "wilson95": [
+              0.4984,
+              0.7678
+            ]
+          },
+          "uppercut": {
+            "n": 5,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.4345
+            ]
+          }
+        }
+      },
+      "altura": {
+        "exactitud": 0.693,
+        "wilson95": [
+          0.6032,
+          0.7702
+        ],
+        "balanceada": 0.5687,
+        "recall": {
+          "head": {
+            "n": 99,
+            "aciertos": 73,
+            "recall": 0.7374,
+            "wilson95": [
+              0.643,
+              0.814
+            ]
+          },
+          "body": {
+            "n": 15,
+            "aciertos": 6,
+            "recall": 0.4,
+            "wilson95": [
+              0.1982,
+              0.6425
+            ]
+          }
+        },
+        "recall_cuerpo": 0.4,
+        "recall_cuerpo_wilson95": [
+          0.1982,
+          0.6425
+        ]
+      },
+      "ocho_clases": {
+        "exactitud": 0.4474,
+        "wilson95": [
+          0.3593,
+          0.5389
+        ],
+        "balanceada": 0.2967,
+        "recall": {
+          "jab-head": {
+            "n": 45,
+            "aciertos": 23,
+            "recall": 0.5111,
+            "wilson95": [
+              0.37,
+              0.6504
+            ]
+          },
+          "jab-body": {
+            "n": 2,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.6576
+            ]
+          },
+          "cross-head": {
+            "n": 17,
+            "aciertos": 6,
+            "recall": 0.3529,
+            "wilson95": [
+              0.1731,
+              0.587
+            ]
+          },
+          "cross-body": {
+            "n": 0,
+            "aciertos": 0,
+            "recall": null,
+            "wilson95": null
+          },
+          "hook-head": {
+            "n": 32,
+            "aciertos": 17,
+            "recall": 0.5312,
+            "wilson95": [
+              0.3645,
+              0.6913
+            ]
+          },
+          "hook-body": {
+            "n": 13,
+            "aciertos": 5,
+            "recall": 0.3846,
+            "wilson95": [
+              0.1771,
+              0.6448
+            ]
+          },
+          "uppercut-head": {
+            "n": 5,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.4345
+            ]
+          },
+          "uppercut-body": {
+            "n": 0,
+            "aciertos": 0,
+            "recall": null,
+            "wilson95": null
+          }
+        }
+      }
+    },
+    "01-sparring": {
+      "semillas": 5,
+      "golpes": 96,
+      "familia": {
+        "exactitud": 0.6354,
+        "wilson95": [
+          0.5357,
+          0.7248
+        ],
+        "balanceada": 0.5391,
+        "recall": {
+          "straight": {
+            "n": 66,
+            "aciertos": 49,
+            "recall": 0.7424,
+            "wilson95": [
+              0.6257,
+              0.8325
+            ]
+          },
+          "hook": {
+            "n": 24,
+            "aciertos": 9,
+            "recall": 0.375,
+            "wilson95": [
+              0.2116,
+              0.5729
+            ]
+          },
+          "uppercut": {
+            "n": 6,
+            "aciertos": 3,
+            "recall": 0.5,
+            "wilson95": [
+              0.1876,
+              0.8124
+            ]
+          }
+        }
+      },
+      "altura": {
+        "exactitud": 0.6667,
+        "wilson95": [
+          0.5676,
+          0.7529
+        ],
+        "balanceada": 0.5089,
+        "recall": {
+          "head": {
+            "n": 69,
+            "aciertos": 60,
+            "recall": 0.8696,
+            "wilson95": [
+              0.7703,
+              0.9298
+            ]
+          },
+          "body": {
+            "n": 27,
+            "aciertos": 4,
+            "recall": 0.1481,
+            "wilson95": [
+              0.0592,
+              0.3248
+            ]
+          }
+        },
+        "recall_cuerpo": 0.1481,
+        "recall_cuerpo_wilson95": [
+          0.0592,
+          0.3248
+        ]
+      },
+      "ocho_clases": {
+        "exactitud": 0.4375,
+        "wilson95": [
+          0.3426,
+          0.5372
+        ],
+        "balanceada": 0.3776,
+        "recall": {
+          "jab-head": {
+            "n": 32,
+            "aciertos": 24,
+            "recall": 0.75,
+            "wilson95": [
+              0.5789,
+              0.8675
+            ]
+          },
+          "jab-body": {
+            "n": 12,
+            "aciertos": 1,
+            "recall": 0.0833,
+            "wilson95": [
+              0.0149,
+              0.3539
+            ]
+          },
+          "cross-head": {
+            "n": 15,
+            "aciertos": 10,
+            "recall": 0.6667,
+            "wilson95": [
+              0.4171,
+              0.8482
+            ]
+          },
+          "cross-body": {
+            "n": 7,
+            "aciertos": 1,
+            "recall": 0.1429,
+            "wilson95": [
+              0.0257,
+              0.5131
+            ]
+          },
+          "hook-head": {
+            "n": 17,
+            "aciertos": 4,
+            "recall": 0.2353,
+            "wilson95": [
+              0.0956,
+              0.4726
+            ]
+          },
+          "hook-body": {
+            "n": 7,
+            "aciertos": 1,
+            "recall": 0.1429,
+            "wilson95": [
+              0.0257,
+              0.5131
+            ]
+          },
+          "uppercut-head": {
+            "n": 5,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.4345
+            ]
+          },
+          "uppercut-body": {
+            "n": 1,
+            "aciertos": 1,
+            "recall": 1.0,
+            "wilson95": [
+              0.2065,
+              1.0
+            ]
+          }
+        }
+      }
+    },
+    "02-sparring": {
+      "semillas": 5,
+      "golpes": 62,
+      "familia": {
+        "exactitud": 0.8548,
+        "wilson95": [
+          0.7466,
+          0.9217
+        ],
+        "balanceada": 0.7311,
+        "recall": {
+          "straight": {
+            "n": 53,
+            "aciertos": 50,
+            "recall": 0.9434,
+            "wilson95": [
+              0.8463,
+              0.9806
+            ]
+          },
+          "hook": {
+            "n": 8,
+            "aciertos": 2,
+            "recall": 0.25,
+            "wilson95": [
+              0.0715,
+              0.5907
+            ]
+          },
+          "uppercut": {
+            "n": 1,
+            "aciertos": 1,
+            "recall": 1.0,
+            "wilson95": [
+              0.2065,
+              1.0
+            ]
+          }
+        }
+      },
+      "altura": {
+        "exactitud": 0.8871,
+        "wilson95": [
+          0.7848,
+          0.9442
+        ],
+        "balanceada": 0.4661,
+        "recall": {
+          "head": {
+            "n": 59,
+            "aciertos": 55,
+            "recall": 0.9322,
+            "wilson95": [
+              0.8382,
+              0.9733
+            ]
+          },
+          "body": {
+            "n": 3,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.5615
+            ]
+          }
+        },
+        "recall_cuerpo": 0.0,
+        "recall_cuerpo_wilson95": [
+          0.0,
+          0.5615
+        ]
+      },
+      "ocho_clases": {
+        "exactitud": 0.7903,
+        "wilson95": [
+          0.6736,
+          0.8732
+        ],
+        "balanceada": 0.3241,
+        "recall": {
+          "jab-head": {
+            "n": 38,
+            "aciertos": 37,
+            "recall": 0.9737,
+            "wilson95": [
+              0.8651,
+              0.9953
+            ]
+          },
+          "jab-body": {
+            "n": 1,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.7935
+            ]
+          },
+          "cross-head": {
+            "n": 13,
+            "aciertos": 11,
+            "recall": 0.8462,
+            "wilson95": [
+              0.5777,
+              0.9567
+            ]
+          },
+          "cross-body": {
+            "n": 1,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.7935
+            ]
+          },
+          "hook-head": {
+            "n": 8,
+            "aciertos": 1,
+            "recall": 0.125,
+            "wilson95": [
+              0.0224,
+              0.4709
+            ]
+          },
+          "hook-body": {
+            "n": 0,
+            "aciertos": 0,
+            "recall": null,
+            "wilson95": null
+          },
+          "uppercut-head": {
+            "n": 0,
+            "aciertos": 0,
+            "recall": null,
+            "wilson95": null
+          },
+          "uppercut-body": {
+            "n": 1,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.7935
+            ]
+          }
+        }
+      }
+    },
+    "03-sparring": {
+      "semillas": 5,
+      "golpes": 129,
+      "familia": {
+        "exactitud": 0.7597,
+        "wilson95": [
+          0.6791,
+          0.8252
+        ],
+        "balanceada": 0.6995,
+        "recall": {
+          "straight": {
+            "n": 86,
+            "aciertos": 72,
+            "recall": 0.8372,
+            "wilson95": [
+              0.7451,
+              0.9005
+            ]
+          },
+          "hook": {
+            "n": 37,
+            "aciertos": 22,
+            "recall": 0.5946,
+            "wilson95": [
+              0.4349,
+              0.7365
+            ]
+          },
+          "uppercut": {
+            "n": 6,
+            "aciertos": 4,
+            "recall": 0.6667,
+            "wilson95": [
+              0.3,
+              0.9032
+            ]
+          }
+        }
+      },
+      "altura": {
+        "exactitud": 0.8527,
+        "wilson95": [
+          0.7814,
+          0.9036
+        ],
+        "balanceada": 0.6907,
+        "recall": {
+          "head": {
+            "n": 112,
+            "aciertos": 102,
+            "recall": 0.9107,
+            "wilson95": [
+              0.8434,
+              0.9508
+            ]
+          },
+          "body": {
+            "n": 17,
+            "aciertos": 8,
+            "recall": 0.4706,
+            "wilson95": [
+              0.2617,
+              0.6904
+            ]
+          }
+        },
+        "recall_cuerpo": 0.4706,
+        "recall_cuerpo_wilson95": [
+          0.2617,
+          0.6904
+        ]
+      },
+      "ocho_clases": {
+        "exactitud": 0.6822,
+        "wilson95": [
+          0.5975,
+          0.7563
+        ],
+        "balanceada": 0.5051,
+        "recall": {
+          "jab-head": {
+            "n": 54,
+            "aciertos": 42,
+            "recall": 0.7778,
+            "wilson95": [
+              0.6506,
+              0.868
+            ]
+          },
+          "jab-body": {
+            "n": 7,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              -0.0,
+              0.3543
+            ]
+          },
+          "cross-head": {
+            "n": 24,
+            "aciertos": 21,
+            "recall": 0.875,
+            "wilson95": [
+              0.69,
+              0.9566
+            ]
+          },
+          "cross-body": {
+            "n": 1,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.7935
+            ]
+          },
+          "hook-head": {
+            "n": 30,
+            "aciertos": 17,
+            "recall": 0.5667,
+            "wilson95": [
+              0.392,
+              0.7262
+            ]
+          },
+          "hook-body": {
+            "n": 7,
+            "aciertos": 4,
+            "recall": 0.5714,
+            "wilson95": [
+              0.2505,
+              0.8418
+            ]
+          },
+          "uppercut-head": {
+            "n": 4,
+            "aciertos": 3,
+            "recall": 0.75,
+            "wilson95": [
+              0.3006,
+              0.9544
+            ]
+          },
+          "uppercut-body": {
+            "n": 2,
+            "aciertos": 1,
+            "recall": 0.5,
+            "wilson95": [
+              0.0945,
+              0.9055
+            ]
+          }
+        }
+      }
+    },
+    "04-sparring": {
+      "semillas": 5,
+      "golpes": 120,
+      "familia": {
+        "exactitud": 0.825,
+        "wilson95": [
+          0.7472,
+          0.8826
+        ],
+        "balanceada": 0.7738,
+        "recall": {
+          "straight": {
+            "n": 70,
+            "aciertos": 64,
+            "recall": 0.9143,
+            "wilson95": [
+              0.8253,
+              0.9601
+            ]
+          },
+          "hook": {
+            "n": 26,
+            "aciertos": 16,
+            "recall": 0.6154,
+            "wilson95": [
+              0.4253,
+              0.7757
+            ]
+          },
+          "uppercut": {
+            "n": 24,
+            "aciertos": 19,
+            "recall": 0.7917,
+            "wilson95": [
+              0.5953,
+              0.9076
+            ]
+          }
+        }
+      },
+      "altura": {
+        "exactitud": 0.7833,
+        "wilson95": [
+          0.7015,
+          0.8476
+        ],
+        "balanceada": 0.6006,
+        "recall": {
+          "head": {
+            "n": 97,
+            "aciertos": 87,
+            "recall": 0.8969,
+            "wilson95": [
+              0.8205,
+              0.943
+            ]
+          },
+          "body": {
+            "n": 23,
+            "aciertos": 7,
+            "recall": 0.3043,
+            "wilson95": [
+              0.156,
+              0.5087
+            ]
+          }
+        },
+        "recall_cuerpo": 0.3043,
+        "recall_cuerpo_wilson95": [
+          0.156,
+          0.5087
+        ]
+      },
+      "ocho_clases": {
+        "exactitud": 0.6833,
+        "wilson95": [
+          0.5955,
+          0.7598
+        ],
+        "balanceada": 0.4847,
+        "recall": {
+          "jab-head": {
+            "n": 44,
+            "aciertos": 41,
+            "recall": 0.9318,
+            "wilson95": [
+              0.8177,
+              0.9765
+            ]
+          },
+          "jab-body": {
+            "n": 7,
+            "aciertos": 1,
+            "recall": 0.1429,
+            "wilson95": [
+              0.0257,
+              0.5131
+            ]
+          },
+          "cross-head": {
+            "n": 16,
+            "aciertos": 15,
+            "recall": 0.9375,
+            "wilson95": [
+              0.7167,
+              0.9889
+            ]
+          },
+          "cross-body": {
+            "n": 3,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.5615
+            ]
+          },
+          "hook-head": {
+            "n": 20,
+            "aciertos": 11,
+            "recall": 0.55,
+            "wilson95": [
+              0.3421,
+              0.7418
+            ]
+          },
+          "hook-body": {
+            "n": 6,
+            "aciertos": 3,
+            "recall": 0.5,
+            "wilson95": [
+              0.1876,
+              0.8124
+            ]
+          },
+          "uppercut-head": {
+            "n": 17,
+            "aciertos": 9,
+            "recall": 0.5294,
+            "wilson95": [
+              0.3096,
+              0.7383
+            ]
+          },
+          "uppercut-body": {
+            "n": 7,
+            "aciertos": 2,
+            "recall": 0.2857,
+            "wilson95": [
+              0.0822,
+              0.6411
+            ]
+          }
+        }
+      }
+    },
+    "sparring-3-rounds": {
+      "semillas": 5,
+      "golpes": 381,
+      "familia": {
+        "exactitud": 0.706,
+        "wilson95": [
+          0.6584,
+          0.7495
+        ],
+        "balanceada": 0.6139,
+        "recall": {
+          "straight": {
+            "n": 204,
+            "aciertos": 166,
+            "recall": 0.8137,
+            "wilson95": [
+              0.7547,
+              0.8612
+            ]
+          },
+          "hook": {
+            "n": 139,
+            "aciertos": 88,
+            "recall": 0.6331,
+            "wilson95": [
+              0.5504,
+              0.7086
+            ]
+          },
+          "uppercut": {
+            "n": 38,
+            "aciertos": 15,
+            "recall": 0.3947,
+            "wilson95": [
+              0.256,
+              0.5528
+            ]
+          }
+        }
+      },
+      "altura": {
+        "exactitud": 0.7454,
+        "wilson95": [
+          0.6994,
+          0.7865
+        ],
+        "balanceada": 0.6393,
+        "recall": {
+          "head": {
+            "n": 311,
+            "aciertos": 251,
+            "recall": 0.8071,
+            "wilson95": [
+              0.7596,
+              0.8471
+            ]
+          },
+          "body": {
+            "n": 70,
+            "aciertos": 33,
+            "recall": 0.4714,
+            "wilson95": [
+              0.359,
+              0.5868
+            ]
+          }
+        },
+        "recall_cuerpo": 0.4714,
+        "recall_cuerpo_wilson95": [
+          0.359,
+          0.5868
+        ]
+      },
+      "ocho_clases": {
+        "exactitud": 0.5459,
+        "wilson95": [
+          0.4957,
+          0.5952
+        ],
+        "balanceada": 0.4305,
+        "recall": {
+          "jab-head": {
+            "n": 127,
+            "aciertos": 106,
+            "recall": 0.8346,
+            "wilson95": [
+              0.7604,
+              0.8892
+            ]
+          },
+          "jab-body": {
+            "n": 17,
+            "aciertos": 5,
+            "recall": 0.2941,
+            "wilson95": [
+              0.1328,
+              0.5313
+            ]
+          },
+          "cross-head": {
+            "n": 55,
+            "aciertos": 35,
+            "recall": 0.6364,
+            "wilson95": [
+              0.5042,
+              0.7507
+            ]
+          },
+          "cross-body": {
+            "n": 5,
+            "aciertos": 3,
+            "recall": 0.6,
+            "wilson95": [
+              0.2307,
+              0.8824
+            ]
+          },
+          "hook-head": {
+            "n": 106,
+            "aciertos": 40,
+            "recall": 0.3774,
+            "wilson95": [
+              0.2909,
+              0.4724
+            ]
+          },
+          "hook-body": {
+            "n": 33,
+            "aciertos": 13,
+            "recall": 0.3939,
+            "wilson95": [
+              0.2468,
+              0.5632
+            ]
+          },
+          "uppercut-head": {
+            "n": 23,
+            "aciertos": 4,
+            "recall": 0.1739,
+            "wilson95": [
+              0.0698,
+              0.3714
+            ]
+          },
+          "uppercut-body": {
+            "n": 15,
+            "aciertos": 2,
+            "recall": 0.1333,
+            "wilson95": [
+              0.0374,
+              0.3788
+            ]
+          }
+        }
+      }
+    },
+    "pacquiao_margarito": {
+      "semillas": 5,
+      "golpes": 145,
+      "familia": {
+        "exactitud": 0.8,
+        "wilson95": [
+          0.7275,
+          0.857
+        ],
+        "balanceada": 0.5064,
+        "recall": {
+          "straight": {
+            "n": 119,
+            "aciertos": 106,
+            "recall": 0.8908,
+            "wilson95": [
+              0.822,
+              0.935
+            ]
+          },
+          "hook": {
+            "n": 21,
+            "aciertos": 9,
+            "recall": 0.4286,
+            "wilson95": [
+              0.2447,
+              0.6345
+            ]
+          },
+          "uppercut": {
+            "n": 5,
+            "aciertos": 1,
+            "recall": 0.2,
+            "wilson95": [
+              0.0362,
+              0.6245
+            ]
+          }
+        }
+      },
+      "altura": {
+        "exactitud": 0.8138,
+        "wilson95": [
+          0.7426,
+          0.8688
+        ],
+        "balanceada": 0.6553,
+        "recall": {
+          "head": {
+            "n": 127,
+            "aciertos": 110,
+            "recall": 0.8661,
+            "wilson95": [
+              0.7961,
+              0.9147
+            ]
+          },
+          "body": {
+            "n": 18,
+            "aciertos": 8,
+            "recall": 0.4444,
+            "wilson95": [
+              0.2456,
+              0.6628
+            ]
+          }
+        },
+        "recall_cuerpo": 0.4444,
+        "recall_cuerpo_wilson95": [
+          0.2456,
+          0.6628
+        ]
+      },
+      "ocho_clases": {
+        "exactitud": 0.669,
+        "wilson95": [
+          0.5889,
+          0.7403
+        ],
+        "balanceada": 0.4339,
+        "recall": {
+          "jab-head": {
+            "n": 87,
+            "aciertos": 68,
+            "recall": 0.7816,
+            "wilson95": [
+              0.6839,
+              0.8555
+            ]
+          },
+          "jab-body": {
+            "n": 1,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.7935
+            ]
+          },
+          "cross-head": {
+            "n": 26,
+            "aciertos": 21,
+            "recall": 0.8077,
+            "wilson95": [
+              0.6212,
+              0.9149
+            ]
+          },
+          "cross-body": {
+            "n": 5,
+            "aciertos": 2,
+            "recall": 0.4,
+            "wilson95": [
+              0.1176,
+              0.7693
+            ]
+          },
+          "hook-head": {
+            "n": 10,
+            "aciertos": 3,
+            "recall": 0.3,
+            "wilson95": [
+              0.1078,
+              0.6032
+            ]
+          },
+          "hook-body": {
+            "n": 11,
+            "aciertos": 2,
+            "recall": 0.1818,
+            "wilson95": [
+              0.0514,
+              0.477
+            ]
+          },
+          "uppercut-head": {
+            "n": 4,
+            "aciertos": 0,
+            "recall": 0.0,
+            "wilson95": [
+              0.0,
+              0.4899
+            ]
+          },
+          "uppercut-body": {
+            "n": 1,
+            "aciertos": 1,
+            "recall": 1.0,
+            "wilson95": [
+              0.2065,
+              1.0
+            ]
+          }
+        }
+      }
+    }
+  },
+  "ensamble_total": {
+    "golpes": 1047,
+    "familia": {
+      "exactitud": 0.724,
+      "wilson95": [
+        0.6961,
+        0.7502
+      ],
+      "balanceada": 0.635,
+      "recall": {
+        "straight": {
+          "n": 662,
+          "aciertos": 540,
+          "recall": 0.8157,
+          "wilson95": [
+            0.7844,
+            0.8434
+          ]
+        },
+        "hook": {
+          "n": 300,
+          "aciertos": 175,
+          "recall": 0.5833,
+          "wilson95": [
+            0.5268,
+            0.6377
+          ]
+        },
+        "uppercut": {
+          "n": 85,
+          "aciertos": 43,
+          "recall": 0.5059,
+          "wilson95": [
+            0.4017,
+            0.6096
+          ]
+        }
+      }
+    },
+    "altura": {
+      "exactitud": 0.7679,
+      "wilson95": [
+        0.7414,
+        0.7925
+      ],
+      "balanceada": 0.6129,
+      "recall": {
+        "head": {
+          "n": 874,
+          "aciertos": 738,
+          "recall": 0.8444,
+          "wilson95": [
+            0.8189,
+            0.8669
+          ]
+        },
+        "body": {
+          "n": 173,
+          "aciertos": 66,
+          "recall": 0.3815,
+          "wilson95": [
+            0.3124,
+            0.4557
+          ]
+        }
+      },
+      "recall_cuerpo": 0.3815,
+      "recall_cuerpo_wilson95": [
+        0.3124,
+        0.4557
+      ]
+    },
+    "ocho_clases": {
+      "exactitud": 0.5893,
+      "wilson95": [
+        0.5592,
+        0.6187
+      ],
+      "balanceada": 0.4066,
+      "recall": {
+        "jab-head": {
+          "n": 427,
+          "aciertos": 341,
+          "recall": 0.7986,
+          "wilson95": [
+            0.758,
+            0.8339
+          ]
+        },
+        "jab-body": {
+          "n": 47,
+          "aciertos": 7,
+          "recall": 0.1489,
+          "wilson95": [
+            0.0741,
+            0.2769
+          ]
+        },
+        "cross-head": {
+          "n": 166,
+          "aciertos": 119,
+          "recall": 0.7169,
+          "wilson95": [
+            0.644,
+            0.7799
+          ]
+        },
+        "cross-body": {
+          "n": 22,
+          "aciertos": 6,
+          "recall": 0.2727,
+          "wilson95": [
+            0.1315,
+            0.4815
+          ]
+        },
+        "hook-head": {
+          "n": 223,
+          "aciertos": 93,
+          "recall": 0.417,
+          "wilson95": [
+            0.3543,
+            0.4826
+          ]
+        },
+        "hook-body": {
+          "n": 77,
+          "aciertos": 28,
+          "recall": 0.3636,
+          "wilson95": [
+            0.2651,
+            0.4752
+          ]
+        },
+        "uppercut-head": {
+          "n": 58,
+          "aciertos": 16,
+          "recall": 0.2759,
+          "wilson95": [
+            0.1775,
+            0.402
+          ]
+        },
+        "uppercut-body": {
+          "n": 27,
+          "aciertos": 7,
+          "recall": 0.2593,
+          "wilson95": [
+            0.1317,
+            0.4468
+          ]
+        }
+      }
+    }
+  },
+  "ensamble_fuentes_c8": {
+    "golpes": 775,
+    "familia": {
+      "exactitud": 0.751,
+      "wilson95": [
+        0.7193,
+        0.7801
+      ],
+      "balanceada": 0.6638,
+      "recall": {
+        "straight": {
+          "n": 479,
+          "aciertos": 408,
+          "recall": 0.8518,
+          "wilson95": [
+            0.8172,
+            0.8808
+          ]
+        },
+        "hook": {
+          "n": 223,
+          "aciertos": 135,
+          "recall": 0.6054,
+          "wilson95": [
+            0.54,
+            0.6672
+          ]
+        },
+        "uppercut": {
+          "n": 73,
+          "aciertos": 39,
+          "recall": 0.5342,
+          "wilson95": [
+            0.421,
+            0.6441
+          ]
+        }
+      }
+    },
+    "altura": {
+      "exactitud": 0.7819,
+      "wilson95": [
+        0.7515,
+        0.8096
+      ],
+      "balanceada": 0.6438,
+      "recall": {
+        "head": {
+          "n": 647,
+          "aciertos": 550,
+          "recall": 0.8501,
+          "wilson95": [
+            0.8205,
+            0.8755
+          ]
+        },
+        "body": {
+          "n": 128,
+          "aciertos": 56,
+          "recall": 0.4375,
+          "wilson95": [
+            0.3546,
+            0.524
+          ]
+        }
+      },
+      "recall_cuerpo": 0.4375,
+      "recall_cuerpo_wilson95": [
+        0.3546,
+        0.524
+      ]
+    },
+    "ocho_clases": {
+      "exactitud": 0.6129,
+      "wilson95": [
+        0.5781,
+        0.6466
+      ],
+      "balanceada": 0.4395,
+      "recall": {
+        "jab-head": {
+          "n": 312,
+          "aciertos": 257,
+          "recall": 0.8237,
+          "wilson95": [
+            0.7776,
+            0.862
+          ]
+        },
+        "jab-body": {
+          "n": 32,
+          "aciertos": 6,
+          "recall": 0.1875,
+          "wilson95": [
+            0.0889,
+            0.3531
+          ]
+        },
+        "cross-head": {
+          "n": 121,
+          "aciertos": 92,
+          "recall": 0.7603,
+          "wilson95": [
+            0.677,
+            0.8276
+          ]
+        },
+        "cross-body": {
+          "n": 14,
+          "aciertos": 5,
+          "recall": 0.3571,
+          "wilson95": [
+            0.1634,
+            0.6124
+          ]
+        },
+        "hook-head": {
+          "n": 166,
+          "aciertos": 71,
+          "recall": 0.4277,
+          "wilson95": [
+            0.3549,
+            0.5038
+          ]
+        },
+        "hook-body": {
+          "n": 57,
+          "aciertos": 22,
+          "recall": 0.386,
+          "wilson95": [
+            0.2706,
+            0.5157
+          ]
+        },
+        "uppercut-head": {
+          "n": 48,
+          "aciertos": 16,
+          "recall": 0.3333,
+          "wilson95": [
+            0.2168,
+            0.4746
+          ]
+        },
+        "uppercut-body": {
+          "n": 25,
+          "aciertos": 6,
+          "recall": 0.24,
+          "wilson95": [
+            0.115,
+            0.4343
+          ]
+        }
+      }
+    }
+  },
+  "por_semilla_total": {
+    "s0": {
+      "familia": {
+        "exactitud": 0.6982,
+        "balanceada": 0.5631
+      },
+      "altura": {
+        "exactitud": 0.745,
+        "balanceada": 0.5899
+      },
+      "ocho_clases": {
+        "exactitud": 0.5492,
+        "balanceada": 0.3685
+      }
+    },
+    "s1": {
+      "familia": {
+        "exactitud": 0.7049,
+        "balanceada": 0.6317
+      },
+      "altura": {
+        "exactitud": 0.7813,
+        "balanceada": 0.6372
+      },
+      "ocho_clases": {
+        "exactitud": 0.575,
+        "balanceada": 0.3948
+      }
+    },
+    "s2": {
+      "familia": {
+        "exactitud": 0.7058,
+        "balanceada": 0.6073
+      },
+      "altura": {
+        "exactitud": 0.7612,
+        "balanceada": 0.602
+      },
+      "ocho_clases": {
+        "exactitud": 0.5606,
+        "balanceada": 0.3711
+      }
+    },
+    "s3": {
+      "familia": {
+        "exactitud": 0.6991,
+        "balanceada": 0.622
+      },
+      "altura": {
+        "exactitud": 0.7679,
+        "balanceada": 0.6315
+      },
+      "ocho_clases": {
+        "exactitud": 0.5559,
+        "balanceada": 0.3879
+      }
+    },
+    "s4": {
+      "familia": {
+        "exactitud": 0.7087,
+        "balanceada": 0.6289
+      },
+      "altura": {
+        "exactitud": 0.7517,
+        "balanceada": 0.6357
+      },
+      "ocho_clases": {
+        "exactitud": 0.5616,
+        "balanceada": 0.3954
+      }
+    }
+  },
+  "dispersion_entre_semillas": {
+    "familia_exactitud": {
+      "media": 0.7033,
+      "desvio": 0.0045
+    },
+    "altura_balanceada": {
+      "media": 0.6193,
+      "desvio": 0.0218
+    },
+    "ocho_clases_exactitud": {
+      "media": 0.5605,
+      "desvio": 0.0095
+    }
+  }
+}

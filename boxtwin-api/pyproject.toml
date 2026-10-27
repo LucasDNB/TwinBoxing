@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "boxtwin-api"
+description = "API y worker de BoxTwin: subida, cola, identidad sembrada y Fight-Card"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [{ name = "Lucas Benitez" }]
+dynamic = ["version"]
+
+# La cola vive en la base, asi que no hay Redis ni Celery. psycopg va como extra porque
+# sqlite alcanza para desarrollo y para los tests.
+dependencies = [
+    "fastapi>=0.110",
+    "pydantic[email]>=2.6",
+    "sqlalchemy>=2.0",
+    "python-multipart>=0.0.9",
+    "uvicorn[standard]>=0.27",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "httpx>=0.27"]
+postgres = ["psycopg[binary]>=3.1"]
+# El worker necesita el paquete del anotador, que es donde viven las dos etapas y el
+# contrato de la Fight-Card. La API sola arranca sin el: lo importa perezosamente y solo
+# la ruta de correccion lo necesita.
+worker = ["boxtwin-annotator"]
+
+[project.scripts]
+boxtwin-worker = "boxtwin_api.worker:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "boxtwin_api.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"

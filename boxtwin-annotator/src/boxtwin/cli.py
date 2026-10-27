@@ -15,6 +15,9 @@ QUE HACE
   export      genera el dataset en alguno de los cuatro formatos.
   reanno      sortea la muestra de reanotacion ciega y calcula el acuerdo.
   probe       muestra los metadatos reales del video sin procesar nada.
+  procesar    etapa 1 del producto: pose, identidad y candidatos para la siembra.
+  completar   etapa 2 del producto: identidad sembrada, detector y Fight-Card.
+  enriquecer  lleva una Fight-Card hecha a 0.3 (altura del golpe, combinaciones) sin GPU.
 
 USO
   boxtwin-annotator preprocess videos/spar.mp4 --project ./proyecto
@@ -245,6 +248,199 @@ def build_parser() -> argparse.ArgumentParser:
         help="cuenta los frames decodificando y reconcilia el fps. Tarda lo que tarde el video.",
     )
 
+    ia = sub.add_parser(
+        "identidad-auto",
+        help="asigna identidad a los tracks usando el detector de guantes",
+        description=(
+            "Tres filtros medidos: altura saca al publico, guante saca al arbitro y al "
+            "entrenador, y el color del guante decide A contra B. Lo que no se puede decidir "
+            "queda SIN ASIGNAR y lo resuelve el anotador, que es distinto de adivinarlo."
+        ),
+    )
+    ia.add_argument("video", type=Path)
+    ia.add_argument("--project", type=Path, default=None)
+    ia.add_argument("--modelo", type=Path, required=True,
+                    help="pesos del detector de guantes, entrenado sobre recortes de persona")
+    ia.add_argument("--segundos", type=float, default=5.0,
+                    help="de que parte del principio del video sale el grupo de referencia, "
+                         "el que define cual peleador es A. No recorta la evidencia: la "
+                         "particion usa el video entero")
+    ia.add_argument("--separacion-minima", type=float, default=0.55, dest="separacion_minima",
+                    help="separacion de color por debajo de la cual NO se asigna A ni B. Con "
+                         "0,449 el reparto salio 13 tracks a A contra 1 a B: una asignacion "
+                         "equivocada con cara de correcta")
+    ia.add_argument("--paso", type=int, default=5, help="se evalua un cuadro de cada N")
+    ia.add_argument("--umbral-guante", type=float, default=0.30, dest="umbral_guante",
+                    help="fraccion minima de recortes con guante para considerar peleador. "
+                         "Depende del detector y del material: en transmision conviene 0,40, "
+                         "que saca al arbitro sin perder nada")
+    ia.add_argument("--min-guantes-voto", type=int, default=5, dest="min_guantes_voto",
+                    help="guantes minimos para que un track vote su color. Los tracks de "
+                         "transmision son mucho mas cortos que los de gimnasio")
+    ia.add_argument("--fraccion-altura", type=float, default=0.55, dest="fraccion_altura",
+                    help="alto minimo relativo al track mas alto del video. Relativo y no "
+                         "absoluto porque un gimnasio y una transmision no comparten escala")
+    ia.add_argument("--dry-run", action="store_true", dest="dry_run",
+                    help="calcula y reporta sin escribir el archivo de anotacion")
+    ia.add_argument("--forzar", action="store_true",
+                    help="aplicar aunque el documento ya tenga correcciones manuales, que "
+                         "se descartan")
+    ia.add_argument("--device", default=None, help="device de torch, p.ej. 0 o cpu")
+    ia.add_argument("--guardar-evidencia", type=Path, default=None, dest="guardar_evidencia",
+                    help="volcar lo medido a un json. Recorrer el video cuesta minutos y "
+                         "elegir umbrales sobre lo ya medido cuesta milisegundos")
+    ia.add_argument("--evidencia", type=Path, default=None,
+                    help="usar una evidencia ya guardada en vez de recorrer el video")
+    ia.add_argument("--contra-anotacion", action="store_true", dest="contra_anotacion",
+                    help="puntuar la propuesta contra las asignaciones manuales del "
+                         "documento, sin escribir nada")
+
+    # -- procesar / completar ----------------------------------------------
+    # Las dos etapas del producto. Van separadas porque entre una y otra hay una pregunta
+    # que solo puede contestar una persona -cual cuerpo es cual- y que vale 17 puntos de
+    # acierto en la asignacion de identidad.
+    pc = sub.add_parser(
+        "procesar",
+        help="etapa 1: pose, tracking, evidencia de guante y candidatos para la siembra",
+        description=(
+            "Deja la sesion en espera_siembra con dos recortes para que el usuario diga "
+            "cual es cual. Es reanudable: la evidencia de guante se guarda apenas se "
+            "termina de recorrer el video y no se vuelve a calcular."
+        ),
+    )
+    pc.add_argument("video", type=Path)
+    pc.add_argument("--out", type=Path, required=True, help="directorio de la sesion")
+    pc.add_argument("--modelo-guantes", type=Path, required=True, dest="modelo_guantes")
+    pc.add_argument("--round", type=float, default=None, dest="round_s",
+                    help="duracion del round en segundos. Sin esto la Fight-Card se agrega "
+                         "por sesion y no por round")
+    pc.add_argument("--descanso", type=float, default=60.0, dest="descanso_s")
+    pc.add_argument("--modelo-pose", default="yolov8l-pose.pt", dest="modelo_pose")
+    pc.add_argument("--imgsz", type=int, default=640)
+    pc.add_argument("--device", default="0")
+    pc.add_argument("--rehacer", action="store_true",
+                    help="recalcula la evidencia de guante aunque ya este guardada")
+
+    cp = sub.add_parser(
+        "completar",
+        help="etapa 2: identidad desde las semillas, detector y Fight-Card",
+        description=(
+            "Escribe segmentos.json, poses.npz y fightcard.json. El tipo de golpe NO sale "
+            "de aca: lo agrega la etapa de clasificacion, que corre en boxtwin_mmaction."
+        ),
+    )
+    cp.add_argument("sesion", type=Path)
+    cp.add_argument("--semilla-a", type=int, required=True, dest="semilla_a",
+                    help="track del peleador A, elegido mirando los recortes")
+    cp.add_argument("--semilla-b", type=int, default=None, dest="semilla_b",
+                    help="track del peleador B. Sin ella, sesion de un solo peleador "
+                         "(bolsa o sombra), todavia sin medir")
+    cp.add_argument("--detector", type=Path, required=True,
+                    help="ensamble congelado del detector de golpes")
+    cp.add_argument("--umbral", type=float, default=0.80,
+                    help="punto de operacion del decodificador. Se declara y no se ajusta "
+                         "por video: moverlo aca hace incomparable la precision medida")
+    cp.add_argument("--retorno-lento-ms", type=float, default=None, dest="retorno_lento_ms",
+                    help="umbral del indicador de retorno. Sin calibrar todavia: sin este "
+                         "valor se reporta el tiempo medido y no se marca nada")
+    cp.add_argument("--device", default=None)
+    cp.add_argument("--manual", action="store_true",
+                    help="aplica las asignaciones de tramos hechas a mano en la web "
+                         "(identidad.asignaciones_manuales de sesion.json)")
+
+    en = sub.add_parser(
+        "enriquecer",
+        help="suma a una Fight-Card hecha la altura del golpe y las combinaciones (0.3)",
+        description=(
+            "Lee poses.npz y fightcard.json. No corre pose, detector ni clasificador: sirve "
+            "para llevar sesiones viejas a 0.3. Reanudable: saltea las que ya estan."
+        ),
+    )
+    en.add_argument("sesion", type=Path,
+                    help="directorio de la sesion, o con --todas el que contiene las sesiones")
+    en.add_argument("--todas", action="store_true",
+                    help="recorre todas las sesiones que hay adentro de SESION")
+    en.add_argument("--forzar", action="store_true",
+                    help="reenriquece aunque ya este en 0.3 con la misma regla")
+
+    tp = sub.add_parser(
+        "tipos",
+        help="aplica tipos.json sobre la Fight-Card, respetando las correcciones",
+        description=(
+            "La etapa de clasificacion corre en boxtwin_mmaction y deja tipos.json. Esto "
+            "lo pega a la Fight-Card. Es tambien la operacion de reclasificar una sesion "
+            "vieja con un checkpoint nuevo, sin repetir pose ni deteccion."
+        ),
+    )
+    tp.add_argument("sesion", type=Path)
+    tp.add_argument("--exactitud", type=float, default=None,
+                    help="exactitud de familia medida del checkpoint sobre fuente no "
+                         "vista. Va al documento para que el numero se lea con su margen")
+
+    cl = sub.add_parser(
+        "clasificar",
+        help="tipo de golpe v2: familia con el modelo geometrico (E4) y jab/cross por guardia",
+        description=(
+            "Lee segmentos.json y poses.npz y escribe tipos.json 0.2. Corre en este entorno, "
+            "sin boxtwin_mmaction. Despues va 'tipos', igual que con v1."
+        ),
+    )
+    cl.add_argument("sesion", type=Path)
+    cl.add_argument("--modelo", type=Path, default=Path("~/boxtwin/modelos/clasificador_geo_v1"),
+                    help="directorio con meta.json y las semillas")
+    for lado in ("a", "b"):
+        cl.add_argument(f"--guardia-{lado}", dest=f"guardia_{lado}", default="desconocida",
+                        choices=["ortodoxa", "zurda", "desconocida"],
+                        help="guardia del boxeador de ese lado. Desconocida: se supone ortodoxa "
+                             "y la Fight-Card lo dice")
+
+    rv = sub.add_parser(
+        "render",
+        help="escribe el video procesado: los dos peleadores marcados y una consola para cada uno",
+        description=(
+            "Se arma sobre fightcard.json y NO vuelve a correr el detector: esa es la "
+            "fuente que la interfaz muestra, con las correcciones ya aplicadas, y rehacer "
+            "la deteccion aca daria un video que no coincide con los numeros de al lado. "
+            "Se dibujan solo los dos peleadores: marcar al publico sugiere que el sistema "
+            "los esta contando."
+        ),
+    )
+    rv.add_argument("sesion", type=Path)
+    rv.add_argument("--out", type=Path, default=None,
+                    help="por defecto <sesion>/procesado.mp4")
+    rv.add_argument("--ancho-consola", type=int, default=300, dest="ancho_consola",
+                    help="ancho de cada consola en pixeles")
+    rv.add_argument("--desde", type=int, default=0)
+    rv.add_argument("--hasta", type=int, default=None)
+
+    me = sub.add_parser(
+        "medir",
+        help="mide una o varias sesiones contra su anotacion manual",
+        description=(
+            "Empareja los golpes de la Fight-Card contra los del annot.json con el mismo "
+            "criterio que el resto del proyecto, IoU 0,3, y separa lo que el detector no "
+            "marco de lo que no pudo ver porque no habia identidad resuelta. Sin esa "
+            "separacion, un recall bajo se le atribuye al detector y se trabaja sobre el "
+            "modelo equivocado."
+        ),
+    )
+    me.add_argument("sesiones", type=Path, nargs="+")
+    me.add_argument("--anotaciones", type=Path, nargs="+", required=True,
+                    dest="anotaciones",
+                    help="directorios donde buscar los annot.json. Se indexan por nombre "
+                         "de archivo de video")
+    me.add_argument("--json", type=Path, default=None,
+                    help="ademas del reporte, volcar los numeros a un archivo")
+
+    co = sub.add_parser(
+        "corregir",
+        help="corrige el tipo de un golpe y lo guarda como etiqueta nueva",
+    )
+    co.add_argument("sesion", type=Path)
+    co.add_argument("golpe", help="id del golpe, como sale en la Fight-Card")
+    co.add_argument("tipo", choices=["jab", "cross", "hook", "uppercut"])
+    co.add_argument("--por", default=None, help="quien corrige")
+
     return p
 
 
@@ -326,6 +522,361 @@ def _cmd_preprocess(args: argparse.Namespace) -> int:
             "  mitad, asi que puede ser cualquiera de las dos. Verificar con\n"
             "  'boxtwin-annotator probe <video> --count' antes de anotar sobre este cache."
         )
+    return 0
+
+
+def _cmd_identidad_auto(args: argparse.Namespace) -> int:
+    from boxtwin.core.annotations import save as save_doc
+    from boxtwin.core.deteccion_guantes import DetectorGuantes
+    from boxtwin.core.identidad_auto import (
+        AsignarIdentidadAuto, ConfigIdentidadAuto, analizar, cargar_evidencia,
+        guardar_evidencia, proponer, puntuar_contra,
+    )
+    from boxtwin.core.posecache import PoseCache
+    from boxtwin.core.project import cargar_o_crear, project_paths
+
+    paths = project_paths(args.video)
+    if not paths.npz.is_file():
+        print(f"error: falta el cache de pose ({paths.npz.name}). Corre primero preprocess",
+              file=sys.stderr)
+        return 1
+    if not Path(args.modelo).is_file():
+        print(f"error: no existe el modelo {args.modelo}", file=sys.stderr)
+        return 1
+
+    cache = PoseCache.open(paths.npz)
+    # Si el video nunca se abrio en el anotador no tiene documento, y este comando existe
+    # justamente para correr sin que nadie lo abra. Se crea vacio desde el meta del
+    # preproceso, que es de donde lo sacaria la GUI.
+    nuevo = not paths.annot.is_file()
+    doc, _ = cargar_o_crear(paths, cache.meta)
+    if nuevo:
+        print(f"no habia anotacion: se creo {paths.annot.name}", file=sys.stderr)
+    cfg = ConfigIdentidadAuto(
+        segundos_ancla=args.segundos, separacion_minima=args.separacion_minima,
+        paso=args.paso, min_guantes_voto=args.min_guantes_voto,
+        umbral_guante=args.umbral_guante, fraccion_altura=args.fraccion_altura,
+    )
+    detector = DetectorGuantes(str(args.modelo), device=args.device)
+
+    def progreso(f: int, fin: int) -> None:
+        print(f"  cuadro {f}/{fin}", file=sys.stderr)
+
+    if args.evidencia:
+        ev = cargar_evidencia(args.evidencia)
+    else:
+        ev = analizar(
+            cache, paths.video, detector, cfg,
+            alto_imagen=doc.video.height, fps=doc.video.fps,
+            total_frames=doc.video.total_frames, progreso=progreso,
+        )
+        if args.guardar_evidencia:
+            guardar_evidencia(ev, args.guardar_evidencia)
+            print(f"evidencia guardada en {args.guardar_evidencia}", file=sys.stderr)
+    prop = proponer(ev, cfg, doc.video.total_frames, doc.video.fps)
+    d = prop.diagnostico
+
+    print(f"\n{d.get('tracks', 0)} tracks en el cache")
+    print(f"  pasan el filtro de altura (>= {d.get('umbral_altura', 0):.3f}): "
+          f"{d.get('pasan_altura', 0)}")
+    print(f"  pasan el filtro de guante (>= {d.get('umbral_guante', 0):.2f}): "
+          f"{d.get('nucleo', 0)}"
+          f"   (+{d.get('rescatables', 0)} fragmentos cortos rescatables)")
+    if prop.semillas:
+        print(f"\nparticion: {d.get('tracks_por_coexistencia', 0)} tracks resueltos por "
+              f"coexistencia en {d.get('componentes_con_dos_lados', 0)} grupo/s"
+              + ("" if d.get("ancla_del_principio")
+                 else f"  [el grupo de referencia NO aparece en los primeros "
+                      f"{cfg.segundos_ancla:g} s]"))
+        if d.get("componentes_sin_orientar"):
+            print(f"  {d['componentes_sin_orientar']} grupo/s sin orientar: el color no "
+                  "distinguia entre las dos posibilidades")
+        for rol, tid in prop.semillas.items():
+            t, sat, val = prop.perfiles[rol]
+            tono = "sin color" if t < 0 else f"tono {t:.1f}"
+            print(f"  {rol}: track {tid}  ({tono}, sat {sat:.0f}, val {val:.0f})")
+        print(f"  separacion entre perfiles: {d.get('separacion_de_perfiles', 0):.3f}")
+    print(f"\nasignados: {d.get('asignados_A', 0)} tracks a A, "
+          f"{d.get('asignados_B', 0)} a B")
+    print(f"sin asignar, para que los resuelva el anotador: {len(prop.sin_asignar)}"
+          + (f"  {prop.sin_asignar[:12]}" if prop.sin_asignar else ""))
+    for aviso in prop.avisos:
+        print(f"\nATENCION: {aviso}")
+
+    if args.contra_anotacion:
+        pt = puntuar_contra(prop, doc)
+        print("\ncontra las asignaciones manuales del documento:")
+        if not pt.get("evaluables"):
+            print("  el documento no tiene tracks de peleador que la propuesta haya decidido")
+        else:
+            print(f"  tracks evaluables: {pt['evaluables']}")
+            print(f"  acierto de la particion: {pt['aciertos']}/{pt['evaluables']} = "
+                  f"{pt['acierto']:.1%}"
+                  + ("   [las etiquetas A y B salieron invertidas, que no es un error: "
+                     "la propuesta las asigna por posicion]" if pt["etiquetas_invertidas"]
+                     else ""))
+            print(f"  peleadores que los filtros descartaron: "
+                  f"{pt['peleadores_descartados_por_los_filtros']} de "
+                  f"{pt['peleadores_en_la_verdad']}")
+            print(f"  peleadores que quedaron sin decidir: {pt['peleadores_sin_decidir']}")
+        return 0
+
+    if args.dry_run:
+        print("\n--dry-run: no se escribio nada")
+        return 0
+    if not prop.semillas:
+        # Igual se aplican los filtros de descarte: sacan la mayoria de los tracks y eso es
+        # trabajo que el anotador no tiene que repetir, aunque A y B queden sin decidir.
+        if not prop.roles:
+            print("\nno hay nada que aplicar", file=sys.stderr)
+            return 1
+        print("\nno se pudo decidir A contra B, pero los descartes si se aplican")
+
+    cmd = AsignarIdentidadAuto(prop, annotator="identidad-auto", forzar=args.forzar)
+    try:
+        cmd.do(doc)
+    except ValueError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    save_doc(doc, paths.annot)
+    print(f"\n{cmd.aplicados} asignaciones escritas en {paths.annot.name}")
+    print("Revisalo en el anotador: los tracks sin asignar salen en su propio color.")
+    return 0
+
+
+def _cmd_procesar(args: argparse.Namespace) -> int:
+    from boxtwin.mvp.orquesta import procesar
+
+    barra = _progress_bar()
+    print(f"video   : {args.video}")
+    print(f"sesion  : {args.out}")
+    ses = procesar(
+        args.video, args.out, args.modelo_guantes,
+        round_s=args.round_s, descanso_s=args.descanso_s,
+        device=args.device, modelo_pose=args.modelo_pose, imgsz=args.imgsz,
+        rehacer=args.rehacer, progreso=barra,
+    )
+    barra(None, None)
+
+    print(f"\nestado: {ses.estado}")
+    for e in ses.etapas:
+        print(f"  {e['etapa']:12s} {e['segundos']:8.1f} s")
+    print(f"  {'total':12s} {ses.segundos_de_maquina:8.1f} s"
+          f"  ({ses.factor_tiempo_real}x la duracion del video)")
+
+    par = (ses.identidad or {}).get("pareja_sugerida")
+    print(f"\ncandidatos ({len(ses.candidatos)}):")
+    for c in ses.candidatos:
+        marca = " <- sugerido" if par and c["track"] in par else ""
+        print(f"  track {c['track']:4d}  cuadro {c['cuadro']:6d}  "
+              f"guante {c['fraccion_guante']:.2f}  {c['recorte'] or 'sin recorte'}{marca}")
+    if par:
+        print(f"\nlos dos sugeridos coexisten en "
+              f"{ses.candidatos[0]['cuadros_de_coexistencia']} cuadros aislados, "
+              "asi que son dos personas distintas")
+    for a in ses.avisos:
+        print(f"\nATENCION: {a}")
+    print(f"\nmira los recortes y corre:\n"
+          f"  boxtwin-annotator completar {args.out} --semilla-a <track> "
+          f"--semilla-b <track> --detector <ensamble.pt>")
+    return 0
+
+
+def _cmd_completar(args: argparse.Namespace) -> int:
+    from boxtwin.mvp.guardia import ConfigGuardia
+    from boxtwin.mvp.orquesta import completar
+    from boxtwin.mvp.sesion import Sesion
+
+    fc = completar(
+        args.sesion, args.semilla_a, args.semilla_b, args.detector,
+        umbral=args.umbral, device=args.device,
+        cfg_guardia=ConfigGuardia(retorno_lento_ms=args.retorno_lento_ms),
+        manual=args.manual,
+    )
+    ses = Sesion.cargar(args.sesion)
+
+    ident = fc["identidad"]
+    print(f"identidad: A {ident['cobertura_A']:.1%} del video, "
+          f"B {ident['cobertura_B']:.1%}, sin asignar {ident['sin_asignar']:.1%}")
+    print(f"\ngolpes DETECTADOS (precision {fc['detector']['precision_medida']}, "
+          f"recall {fc['detector']['recall_medido']})")
+    for p in fc["peleadores"]:
+        t = fc["peleadores"][p]["total"]
+        print(f"  {p}  {t['total']:4d}   izq {t['izq']:4d}  der {t['der']:4d}")
+    for p in fc["peleadores"]:
+        for r in fc["peleadores"][p]["por_round"]:
+            print(f"  {p} round {r['round']}: {r['total']:4d}  "
+                  f"({r['por_minuto']:.1f} por minuto)")
+    print(f"\n  el recall medido es {fc['detector']['recall_medido']}: el conteo esta por "
+          "debajo del real y lo que se sostiene es la comparacion adentro de la sesion")
+    print(f"\ntiempo de maquina: {ses.segundos_de_maquina:.1f} s "
+          f"({ses.factor_tiempo_real}x la duracion del video)")
+    print(f"\n  -> {Path(args.sesion) / 'fightcard.json'}")
+    print("  el tipo de golpe lo agrega la etapa de clasificacion, en boxtwin_mmaction")
+    return 0
+
+
+def _cmd_enriquecer(args: argparse.Namespace) -> int:
+    from boxtwin.mvp.orquesta import enriquecer, enriquecer_todas
+
+    if args.todas:
+        r = enriquecer_todas(args.sesion)
+        for nombre, estado in r.items():
+            print(f"  {nombre}  {estado}")
+        errores = sum(1 for e in r.values() if e.startswith("error"))
+        print(f"{len(r)} sesiones, {errores} con error")
+        return 1 if errores else 0
+    fc = enriquecer(args.sesion, forzar=args.forzar)
+    print("ya estaba en 0.3 con la misma regla" if fc is None else f"-> {Path(args.sesion) / 'fightcard.json'} (0.3)")
+    return 0
+
+
+def _cmd_tipos(args: argparse.Namespace) -> int:
+    from boxtwin.mvp.orquesta import aplicar_tipos_a_sesion
+
+    fc = aplicar_tipos_a_sesion(args.sesion, exactitud=args.exactitud)
+    con_tipo = sum(
+        1 for p in fc["peleadores"].values() for g in p["golpes"] if g["tipo"]
+    )
+    total = sum(len(p["golpes"]) for p in fc["peleadores"].values())
+    corregidos = sum(
+        1 for p in fc["peleadores"].values() for g in p["golpes"] if g["corregido"]
+    )
+    print(f"checkpoint {fc['clasificador']['checkpoint']}")
+    print(f"  {con_tipo} de {total} golpes con tipo estimado")
+    if corregidos:
+        print(f"  {corregidos} correcciones del entrenador conservadas")
+    print("\n  El tipo es una ESTIMACION y esta rotulado como tal: el clasificador no")
+    print("  generaliza a fuentes nuevas.")
+    return 0
+
+
+def _cmd_clasificar(args: argparse.Namespace) -> int:
+    import time
+
+    from boxtwin.mvp.clasificador_geo import clasificar_sesion
+
+    t0 = time.perf_counter()
+    d = clasificar_sesion(
+        args.sesion, args.modelo.expanduser(),
+        None if args.guardia_a == "desconocida" else args.guardia_a,
+        None if args.guardia_b == "desconocida" else args.guardia_b,
+    )
+    print(f"{len(d['tipos'])} segmentos clasificados, {d['segmentos_sin_clasificar']} sin pasos "
+          f"usables ({time.perf_counter() - t0:.2f} s, {d['checkpoint']})")
+    supuestas = [lado for lado, s in d["guardia_supuesta"].items() if s]
+    if supuestas:
+        print(f"  guardia supuesta ortodoxa en {', '.join(supuestas)}: jab y cross pueden estar invertidos")
+    print(f"  -> {Path(args.sesion) / 'tipos.json'}")
+    return 0
+
+
+def _cmd_corregir(args: argparse.Namespace) -> int:
+    from boxtwin.mvp.orquesta import registrar_correccion
+
+    fc = registrar_correccion(args.sesion, args.golpe, args.tipo, por=args.por)
+    for p in fc["peleadores"].values():
+        for g in p["golpes"]:
+            if g["id"] == args.golpe:
+                c = g["corregido"]
+                print(f"{args.golpe}: {c['tipo_original']} -> {c['tipo']}")
+                print("  guardada como etiqueta nueva, sin pisar la original")
+                return 0
+    return 1
+
+
+def _cmd_render(args: argparse.Namespace) -> int:
+    from boxtwin.mvp.render import renderizar
+    from boxtwin.mvp.sesion import Progreso
+
+    directorio = Path(args.sesion)
+    prog = Progreso(directorio, "render")
+    try:
+        destino = renderizar(
+            directorio, salida=args.out, ancho_consola=args.ancho_consola,
+            desde=args.desde, hasta=args.hasta, progreso=prog,
+        )
+    finally:
+        prog.terminar()
+    print(f"video procesado en {destino}")
+    return 0
+
+
+def _cmd_medir(args: argparse.Namespace) -> int:
+    import json
+
+    import numpy as np
+
+    from boxtwin.mvp.medicion import medir_sesion
+
+    # Los annot.json se indexan por el nombre del video, que es lo unico que comparten con
+    # la sesion. Se saltean los .bak y los de reanotacion, que no son la anotacion vigente.
+    anotaciones = {}
+    for base in args.anotaciones:
+        for f in sorted(Path(base).rglob("*.annot.json")):
+            if any(x in f.name for x in (".bak", "reanno", "medido")):
+                continue
+            try:
+                d = json.loads(f.read_text())
+            except json.JSONDecodeError:
+                continue
+            if d.get("events"):
+                anotaciones[Path(d["video"]["path"]).name] = d
+
+    if not anotaciones:
+        print("error: no encontre ninguna anotacion con eventos", file=sys.stderr)
+        return 1
+
+    print(f"{'fuente':24s} {'anot':>5s} {'marcas':>7s} {'empar':>6s} {'recall':>7s} "
+          f"{'prec':>6s} {'sin id':>7s} {'rec.vis':>8s}")
+    print("-" * 80)
+    filas, salida = [], {}
+    for ses in args.sesiones:
+        ruta = Path(ses) / "fightcard.json"
+        if not ruta.is_file():
+            print(f"{Path(ses).name:24s}  sin fightcard.json, salteada", file=sys.stderr)
+            continue
+        fc = json.loads(ruta.read_text())
+        nombre = fc["video"]["nombre"]
+        if nombre not in anotaciones:
+            print(f"{nombre:24s}  sin anotacion manual, salteada", file=sys.stderr)
+            continue
+        poses = Path(ses) / "poses.npz"
+        valid = np.load(poses)["valid"] if poses.is_file() else None
+
+        r = medir_sesion(fc, anotaciones[nombre], valid)
+        salida[nombre] = r.a_dict()
+        filas.append(r)
+        print(f"{nombre:24s} {r.anotados:5d} {r.marcas:7d} {r.emparejados:6d} "
+              f"{r.recall:7.3f} {r.precision:6.3f} "
+              f"{r.sin_identidad / r.anotados if r.anotados else 0:6.0%} "
+              f"{r.recall_sobre_visible:8.3f}")
+
+    if not filas:
+        return 1
+    tot_a = sum(r.anotados for r in filas)
+    tot_m = sum(r.marcas for r in filas)
+    tot_e = sum(r.emparejados for r in filas)
+    tot_si = sum(r.sin_identidad for r in filas)
+    tot_v = sum(r.visibles for r in filas)
+    tot_ev = sum(r.encontrados_visibles for r in filas)
+    print("-" * 80)
+    print(f"{'TOTAL':24s} {tot_a:5d} {tot_m:7d} {tot_e:6d} {tot_e / tot_a:7.3f} "
+          f"{tot_e / tot_m if tot_m else 0:6.3f} {tot_si / tot_a:6.0%} "
+          f"{tot_ev / tot_v if tot_v else 0:8.3f}")
+    print(f"\n  El {tot_si / tot_a:.0%} de los golpes anotados cae en cuadros sin identidad")
+    print("  resuelta: ahi no hay detector que valga. Lo que queda es del detector.")
+
+    if args.json:
+        args.json.write_text(json.dumps(
+            {"por_fuente": salida,
+             "total": {"anotados": tot_a, "marcas": tot_m, "emparejados": tot_e,
+                       "recall": round(tot_e / tot_a, 4),
+                       "precision": round(tot_e / tot_m, 4) if tot_m else None,
+                       "fraccion_sin_identidad": round(tot_si / tot_a, 4),
+                       "recall_sobre_visible": round(tot_ev / tot_v, 4) if tot_v else None}},
+            indent=2, ensure_ascii=False) + "\n")
+        print(f"\n  -> {args.json}")
     return 0
 
 
@@ -604,6 +1155,24 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_bundle(args)
         if args.comando == "probe":
             return _cmd_probe(args)
+        if args.comando == "identidad-auto":
+            return _cmd_identidad_auto(args)
+        if args.comando == "procesar":
+            return _cmd_procesar(args)
+        if args.comando == "completar":
+            return _cmd_completar(args)
+        if args.comando == "tipos":
+            return _cmd_tipos(args)
+        if args.comando == "clasificar":
+            return _cmd_clasificar(args)
+        if args.comando == "enriquecer":
+            return _cmd_enriquecer(args)
+        if args.comando == "corregir":
+            return _cmd_corregir(args)
+        if args.comando == "medir":
+            return _cmd_medir(args)
+        if args.comando == "render":
+            return _cmd_render(args)
     except KeyboardInterrupt:
         print("\ninterrumpido. El trabajo hecho quedo persistido: volve a correr el "
               "mismo comando para reanudar.", file=sys.stderr)

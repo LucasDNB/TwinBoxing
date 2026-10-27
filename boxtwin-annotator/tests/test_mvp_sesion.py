@@ -1,0 +1,203 @@
+"""
+El estado de una sesion y las ventanas de round.
+
+Lo que se fija aca es lo que la API lee mientras el worker escribe, y el denominador de
+"golpes por minuto", que si se toma nominal miente sobre el ultimo round.
+"""
+
+from __future__ import annotations
+
+import json
+
+import pytest
+
+from boxtwin.mvp.sesion import ESTADOS, Sesion, segmentos, ventanas_de_round
+
+VIDEO = {"nombre": "spar.mp4", "fps": 30.0, "duracion_s": 600.0, "total_frames": 18000}
+
+
+# -- ventanas de round ------------------------------------------------------
+
+
+def test_tres_rounds_de_tres_minutos_con_un_minuto_de_descanso():
+    v = ventanas_de_round(duracion_s=660.0, round_s=180.0, descanso_s=60.0)
+    assert [r["round"] for r in v] == [1, 2, 3]
+    assert (v[0]["inicio_s"], v[0]["fin_s"]) == (0.0, 180.0)
+    assert (v[1]["inicio_s"], v[1]["fin_s"]) == (240.0, 420.0), "arranca tras el descanso"
+
+
+def test_el_ultimo_round_se_recorta_a_lo_que_dura_el_video():
+    # Si la sesion corto a mitad de round, darle el largo nominal le pone al denominador de
+    # golpes por minuto un tiempo que no existio y el round parece mas flojo de lo que fue.
+    v = ventanas_de_round(duracion_s=300.0, round_s=180.0, descanso_s=60.0)
+    assert len(v) == 2
+    assert v[1]["inicio_s"] == 240.0
+    assert v[1]["fin_s"] == 300.0, "un minuto de round, no tres"
+
+
+def test_un_video_que_termina_en_el_descanso_no_agrega_un_round_vacio():
+    v = ventanas_de_round(duracion_s=200.0, round_s=180.0, descanso_s=60.0)
+    assert len(v) == 1
+
+
+def test_sin_rounds_declarados_no_se_inventan():
+    assert ventanas_de_round(600.0, None, 60.0) == []
+    assert ventanas_de_round(600.0, 0.0, 60.0) == []
+
+
+def test_sin_descanso_los_rounds_son_contiguos():
+    v = ventanas_de_round(300.0, 100.0, 0.0)
+    assert [(r["inicio_s"], r["fin_s"]) for r in v] == [
+        (0.0, 100.0), (100.0, 200.0), (200.0, 300.0)
+    ]
+
+
+# -- estado -----------------------------------------------------------------
+
+
+def test_una_sesion_nueva_arranca_procesando(tmp_path):
+    s = Sesion.nueva(tmp_path, VIDEO, round_s=180.0, descanso_s=60.0)
+    assert s.estado == "procesando"
+    assert len(s.ventanas) == 3
+
+
+def test_la_sesion_sobrevive_la_ida_y_vuelta_a_disco(tmp_path):
+    s = Sesion.nueva(tmp_path, VIDEO, round_s=180.0, descanso_s=60.0)
+    s.estado = "espera_siembra"
+    s.candidatos = [{"track": 3}, {"track": 7}]
+    s.anotar_etapa("preproceso", 12.5, cuadros=18000)
+    s.guardar()
+
+    v = Sesion.cargar(tmp_path)
+    assert v.estado == "espera_siembra"
+    assert [c["track"] for c in v.candidatos] == [3, 7]
+    assert v.etapas[0]["etapa"] == "preproceso"
+
+
+def test_un_estado_que_no_existe_no_se_escribe(tmp_path):
+    s = Sesion.nueva(tmp_path, VIDEO, None, 60.0)
+    s.estado = "casi_listo"
+    with pytest.raises(ValueError, match="estado desconocido"):
+        s.guardar()
+
+
+def test_el_archivo_nunca_queda_a_medias(tmp_path):
+    # La API lee este archivo mientras el worker lo escribe. Un json truncado es un estado
+    # que no existe, y el que lo lee no tiene forma de distinguirlo de uno corrupto.
+    s = Sesion.nueva(tmp_path, VIDEO, None, 60.0)
+    s.guardar()
+    assert json.loads(Sesion.ruta_de(tmp_path).read_text())["estado"] == "procesando"
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_cargar_una_sesion_que_no_existe_dice_que_hacer(tmp_path):
+    with pytest.raises(FileNotFoundError, match="procesar"):
+        Sesion.cargar(tmp_path)
+
+
+# -- tiempo -----------------------------------------------------------------
+
+
+def test_el_tiempo_de_maquina_no_cuenta_la_espera_humana(tmp_path):
+    # RNF1 es sobre el procesamiento y no sobre el reloj de pared: entre las dos etapas la
+    # sesion puede quedar horas esperando que alguien mire dos recortes.
+    s = Sesion.nueva(tmp_path, VIDEO, None, 60.0)
+    s.anotar_etapa("preproceso", 300.0)
+    s.anotar_etapa("detector", 120.0)
+    assert s.segundos_de_maquina == 420.0
+    assert s.factor_tiempo_real == 0.7
+
+
+def test_sin_duracion_no_hay_factor(tmp_path):
+    s = Sesion.nueva(tmp_path, {"nombre": "x.mp4"}, None, 60.0)
+    s.anotar_etapa("preproceso", 10.0)
+    assert s.factor_tiempo_real is None
+
+
+def test_los_estados_son_los_del_flujo():
+    assert ESTADOS.index("espera_siembra") < ESTADOS.index("listo")
+
+
+# -- avance de una etapa larga ----------------------------------------------
+
+
+def test_el_avance_se_escribe_y_se_lee(tmp_path):
+    from boxtwin.mvp.sesion import Progreso, leer_progreso
+
+    p = Progreso(tmp_path, "pose", cada_s=0.0)
+    p(1400, 3741)
+    d = leer_progreso(tmp_path)
+    assert d["etapa"] == "pose"
+    assert (d["hecho"], d["total"]) == (1400, 3741)
+    assert d["fraccion"] == pytest.approx(0.3742, abs=1e-4)
+
+
+def test_el_avance_no_toca_el_disco_en_cada_cuadro(tmp_path):
+    # El callback de pose se llama a 150 cuadros por segundo. Escribir a esa frecuencia es
+    # tocar el disco 150 veces para mover una barra que el ojo no distingue.
+    from boxtwin.mvp.sesion import Progreso, leer_progreso
+
+    p = Progreso(tmp_path, "pose", cada_s=60.0)
+    p(100, 1000)
+    p(200, 1000)
+    p(300, 1000)
+    assert leer_progreso(tmp_path)["hecho"] == 100, "solo la primera escribio"
+
+
+def test_al_terminar_el_avance_desaparece(tmp_path):
+    # Si quedara, la pantalla mostraria un 100% viejo de una etapa que ya no corre.
+    from boxtwin.mvp.sesion import Progreso, leer_progreso
+
+    p = Progreso(tmp_path, "pose", cada_s=0.0)
+    p(500, 1000)
+    p(None, None)
+    assert leer_progreso(tmp_path) is None
+
+
+def test_el_avance_encadena_la_barra_de_la_consola(tmp_path):
+    # La linea de comandos no puede perder su barra por agregar el archivo.
+    from boxtwin.mvp.sesion import Progreso
+
+    vistos = []
+    p = Progreso(tmp_path, "pose", cada_s=0.0, encadena=lambda h, t: vistos.append((h, t)))
+    p(10, 100)
+    p(20, 100)
+    assert vistos == [(10, 100), (20, 100)]
+
+
+def test_sin_archivo_no_hay_avance(tmp_path):
+    from boxtwin.mvp.sesion import leer_progreso
+
+    assert leer_progreso(tmp_path) is None
+
+
+# -- Cambios del 14-10 (prototipo/specs/cambios-14-10/01 §1): segmentos de 3 minutos --------
+
+def _cortes(v):
+    return [(r["inicio_s"], r["fin_s"]) for r in v]
+
+
+def test_B15_1_seiscientos_segundos_son_tres_de_180_y_uno_de_60():
+    v, origen = segmentos(600.0, None, 0.0)
+    assert _cortes(v) == [(0.0, 180.0), (180.0, 360.0), (360.0, 540.0), (540.0, 600.0)]
+    assert origen == "segmentos_180s"
+
+
+def test_B15_2_un_resto_de_menos_de_un_minuto_se_suma_al_anterior():
+    v, _ = segmentos(590.0, None, 0.0)
+    assert _cortes(v) == [(0.0, 180.0), (180.0, 360.0), (360.0, 590.0)]
+
+
+def test_B15_3_un_video_corto_es_un_solo_segmento():
+    v, _ = segmentos(45.0, None, 0.0)
+    assert _cortes(v) == [(0.0, 45.0)]
+
+
+def test_B15_4_con_rounds_declarados_se_usan_los_declarados():
+    v, origen = segmentos(400.0, 120.0, 30.0)
+    assert v == ventanas_de_round(400.0, 120.0, 30.0)
+    assert origen == "declarados"
+
+
+def test_sin_duracion_no_hay_ventanas():
+    assert segmentos(0.0, None, 0.0) == ([], None)

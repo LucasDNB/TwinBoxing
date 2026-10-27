@@ -1,0 +1,63 @@
+# Un nodo, como declara RNF4: la estacion de desarrollo.
+#
+# La API no necesita GPU ni los entornos conda, asi que va en una imagen chica de python.
+# El worker es el que pide la placa y es la misma imagen que se usa en el PoC de nube.
+
+services:
+  base:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: boxtwin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?hace falta definirla}
+      POSTGRES_DB: boxtwin
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U boxtwin"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ..
+      dockerfile: despliegue/Dockerfile.api
+    environment:
+      BOXTWIN_DB: postgresql+psycopg://boxtwin:${POSTGRES_PASSWORD}@base/boxtwin
+      BOXTWIN_DATOS: /datos
+      # Sin esto el servidor genera un secreto al arrancar y todas las sesiones abiertas se
+      # caen en cada reinicio. GET /salud lo dice.
+      BOXTWIN_SECRETO: ${BOXTWIN_SECRETO:?hace falta definirlo}
+    volumes:
+      - ${BOXTWIN_DATOS:-./datos}:/datos
+    ports:
+      - "8000:8000"
+    depends_on:
+      base:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ..
+      dockerfile: despliegue/Dockerfile.worker
+    environment:
+      BOXTWIN_DB: postgresql+psycopg://boxtwin:${POSTGRES_PASSWORD}@base/boxtwin
+      BOXTWIN_DEVICE: "0"
+    volumes:
+      - ${BOXTWIN_DATOS:-./datos}:/datos
+      - ${BOXTWIN_MODELOS:-../modelos}:/modelos:ro
+    # Uno solo: hay una sola GPU de 8 GB y dos procesos de pose compitiendo terminan los
+    # dos mas lento que uno.
+    deploy:
+      replicas: 1
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    depends_on:
+      base:
+        condition: service_healthy
+
+volumes:
+  pgdata:

@@ -30,7 +30,7 @@ from boxtwin.core.annotations import load as load_doc
 from boxtwin.core.annotations import save as save_doc
 from boxtwin.core.identity import IdentityResolver
 from boxtwin.core.posecache import PoseCache
-from boxtwin.core.project import ProjectPaths, project_paths
+from boxtwin.core.project import ProjectPaths, cargar_o_crear, project_paths
 from boxtwin.core.metrics import new_session_metrics
 from boxtwin.core.schema import (
     AnnotationDoc,
@@ -170,46 +170,9 @@ class Session:
 
     @staticmethod
     def _load_or_create(paths: ProjectPaths, meta: dict) -> tuple[AnnotationDoc, list[int]]:
-        if paths.annot.is_file():
-            return load_doc(paths.annot)
-
-        video_meta = meta["video"]
-        ahora = datetime.now().astimezone()
-        doc = new_document(
-            app_version=__version__,
-            now=ahora,
-            video=VideoInfo(
-                path=str(paths.video),
-                sha256=video_meta["sha256"],
-                size_bytes=int(video_meta["size_bytes"]),
-                mtime=datetime.fromisoformat(video_meta["mtime"]),
-                fps=float(video_meta["fps"]),
-                fps_declared=video_meta.get("fps_declared"),
-                fps_source=FpsSource(video_meta["fps_source"]),
-                width=int(video_meta["width"]),
-                height=int(video_meta["height"]),
-                total_frames=int(video_meta["total_frames"]),
-                total_frames_declared=video_meta.get("total_frames_declared"),
-                duration_s=float(video_meta["duration_s"]),
-                codec=str(video_meta["codec"]),
-            ),
-            pose=PoseRef(
-                npz_path=str(paths.npz),
-                meta_path=str(paths.meta),
-                meta_sha256=sha256_file(paths.meta) if paths.meta.is_file() else "0" * 64,
-                keypoint_format=KeypointFormat(meta.get("keypoint_format", "coco17")),
-                keypoint_sources={"0-16": "yolov8l-pose"},
-            ),
-            # Punto de partida, no un dato: se elige ortodoxa porque es lo mas frecuente,
-            # no porque se sepa. La real la fija el anotador desde el panel de identidad
-            # cuando ve pegar unos golpes, y al cambiarla se le ofrece reescribir los
-            # eventos ya anotados. Dejar esto sin interfaz costo tres correcciones a mano
-            # sobre 175 eventos.
-            guard_a=Guard.ORTHODOX,
-            guard_b=Guard.ORTHODOX,
-        )
-        save_doc(doc, paths.annot)
-        return doc, []
+        # La logica vive en core: el CLI la necesita igual, y tenerla solo aca hacia que un
+        # video sin abrir en la GUI no tuviera documento con que trabajar.
+        return cargar_o_crear(paths, meta)
 
     @staticmethod
     def _check_correspondence(doc: AnnotationDoc, meta: dict, paths: ProjectPaths) -> None:

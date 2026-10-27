@@ -529,14 +529,274 @@ Reanotar sobre segmentacion existente cuesta 2.5 s por clip, segmentar desde cer
      heuristica, y el clasificador de siete fuentes. Verificado que la TCN cruza de
      torch 2.6 a 2.1, asi que queda autocontenida sin tocar el entorno pinneado
 
+22-09 El MVP: de video crudo a Fight-Card, con un solo paso humano
+
+  1. La pieza que faltaba no era un modelo sino un camino: el detector entraba por
+     Fuente, que sale de un export, que sale de un annot.json que alguien toco. No
+     habia forma de correr el sistema sobre un video sin anotarlo antes, ni para el
+     producto ni para medir de punta a punta sobre una sesion nueva
+  2. boxtwin procesar y boxtwin completar cierran ese camino. Van en dos comandos y no
+     en uno por una razon que no es de ingenieria: entre la pose y el detector hay una
+     pregunta que el sistema contesta bien el 82,4% de las veces y una persona el
+     99,1%, que es cual de los dos cuerpos es cual
+  3. La siembra humana entra en la identidad como parametro opcional. Fija el grupo de
+     referencia, orienta los grupos que el color no puede orientar -que es lo unico que
+     la coexistencia no puede hacer, porque por definicion no comparten un cuadro- y
+     decide quien es A. El camino automatico no cambia y hay un test que lo fija
+  4. EL REMUESTREO NO ERA OPCIONAL. demo_vivo.py corria el detector sobre los keypoints
+     tal cual, y andaba porque sus tres fuentes eran de 30 fps. El campo receptivo del
+     modelo esta en cuadros: un video de celular a 60 fps le duplica la escala temporal
+     de todo lo que vio. boxtwin_detector.inferencia remuestrea antes de las features,
+     que es el mismo orden que usa el armado del dataset
+  5. La Fight-Card declara adentro del documento las tres cosas que no dice: conectados,
+     puntuacion y veredicto. Y el conteo viaja siempre con el recall medido al lado,
+     porque con 0,484 esta por debajo del real y lo que la medicion sostiene es la
+     comparacion adentro de la sesion, no el numero absoluto
+  6. Los indicadores de guardia tienen tres estados y no dos. "La mano esta abajo" y "no
+     se ve la mano" no son lo mismo, y tratarlos igual convierte una oclusion en un
+     descuido tactico. El umbral de retorno lento queda SIN CALIBRAR a proposito: sale
+     de C3, y hasta entonces el indicador reporta el tiempo y no marca nada
+  7. La cola es una tabla con SELECT ... FOR UPDATE SKIP LOCKED y no Redis con Celery.
+     Una pieza menos, y encolar el trabajo y crear la sesion pasan en el mismo commit,
+     asi que no existe el estado "hay sesion y no hay trabajo"
+  8. El worker llama a subprocesos porque los dos entornos conda no se mezclan, y el
+     estado de la sesion lo lee del archivo que escribio el comando y no del codigo de
+     salida: un proceso que termina en 0 y dejo la sesion a medias es un caso real
+  9. Un <video> no puede mandar un header, asi que la API emite un ticket de media hora
+     valido para un solo video. Poner el token de sesion en la query hubiera sido lo
+     peor de los dos mundos: dura dias, sirve para todo y queda en los logs
+ 10. 142 tests nuevos entre los cuatro paquetes, 799 en total, y el circuito verificado
+     de punta a punta contra un servidor HTTP real: registro, subida, candidatos,
+     siembra, Fight-Card, correccion de tipo y export
+ 11. Y CORRIO SOBRE VIDEO REAL, sobre amateur_estatico, que el sistema nunca vio: 120 s
+     de boxeo de competencia con camara lejana y 18,4 px de ancho de hombros mediano
+     contra 132 en sparring-3. 131,9 s de maquina sobre 120,1 s de video, o sea 1,098x,
+     con el criterio en 2x. El 99,6% de ese tiempo es pose y guantes: todo lo que el MVP
+     agrego -identidad, features, detector, indicadores- suma 0,54 s
+ 12. LA SIEMBRA HACE LO QUE SE ESPERABA Y NO POR EL MOTIVO QUE SE CREIA. Sobre la misma
+     evidencia, el camino automatico se abstiene con separacion de color 0,097 contra un
+     piso de 0,55 y deja 15 de 20 tracks sin asignar; con las dos semillas la separacion
+     da 1,375 y quedan 7 sin asignar. La diferencia no es el color de los guantes, que es
+     lo que decia el riesgo 1 del spec, sino cual componente de coexistencia se usa de
+     ancla: el automatico elegia uno con los dos lados contaminados
+ 13. EL INDICADOR DE GUARDIA NO MIDE LO QUE DICE MEDIR, y se vio antes de C3. Con el
+     umbral pre-registrado de 0,6 anchos de hombro marca la mano opuesta caida en 40 de
+     41 golpes, que leido como tactica diria que dos amateurs pelean dos minutos con la
+     guardia abajo. Sobre 3127 cuadros con pose confiable la muneca esta a 1,4-1,75
+     anchos de la nariz de mediana y solo el 2-6% cae bajo 0,6: el 0,6 no describe "mano
+     arriba" sino "mano tocandose la cara". El default NO se cambio, porque moverlo
+     mirando estos datos seria elegir el criterio despues de ver el resultado
+ 14. Lo que la corrida no prueba: no hay anotacion de ese video, asi que no se midio ni
+     precision ni recall sobre el, y los 46 golpes no se compararon contra nada. El tipo
+     de golpe no se estimo. La imagen del worker sigue escrita y sin construir
+ 15. PUESTA ONLINE por systemd y no por Docker: la imagen del worker lleva mmcv compilado
+     contra CUDA 11.8 y no le ahorra nada al primer despliegue, porque la GPU y los pesos
+     van montados igual. Dos units, un archivo de entorno y tailscale funnel, que ya esta
+     instalado en la estacion. El Docker queda para el PoC de nube, que es donde hace
+     falta de verdad
+ 16. Dos cosas que el deploy obligo a arreglar y que eran agujeros: el registro estaba
+     ABIERTO -cualquiera con la URL se creaba cuenta y le mandaba videos a la GPU- y ahora
+     esta cerrado por default, con codigo de invitacion; y la API no servia el frontend,
+     asi que hacian falta dos tuneles y CORS. Verificado en modo produccion que la pagina
+     toca UN solo origen. El modelo de pose tambien paso a ruta explicita: dependia del
+     directorio de trabajo, que en un servicio no es el que uno cree, y eso ya habia
+     costado una corrida
+
+22-09 El producto medido contra la anotacion manual, y el cuello de botella cambio de lugar
+
+  1. Cinco sesiones subidas por la web y procesadas enteras por el circuito del producto,
+     emparejadas contra el annot.json del mismo video -verificado por sha256- con el mismo
+     emparejador de siempre, IoU 0,3. Son 546 golpes anotados a mano
+  2. De punta a punta: recall 0,432 y precision 0,805. El sistema no inventa golpes, y
+     sobre Sparring las 27 marcas caen TODAS a menos de medio segundo de un golpe anotado
+  3. LAS CINCO FUENTES ESTAN ADENTRO DEL ENTRENAMIENTO del detector, asi que esto mide el
+     comportamiento del producto en distribucion y no generaliza nada. Ningun numero de acá
+     se compara con los 0,885 / 0,484 de la spec, que se midieron sobre fuente no vista
+  4. EL 18% DE LOS GOLPES CAE EN CUADROS SIN IDENTIDAD RESUELTA: 98 de 546 que ningun
+     detector podria encontrar porque el carril de ese peleador esta en cero. Esa perdida
+     no aparecia en ninguna medicion anterior, porque en los folds la identidad venia
+     resuelta a mano. Es enteramente de la identidad automatica
+  5. Descontandola, el detector encuentra 0,528 de lo que si pudo ver, que es la forma
+     comparable con el 0,484 de fuente no vista y esta apenas arriba, como corresponde a
+     material en distribucion
+  6. Sparring es el caso que ordena todo: recall 0,160, tres veces abajo del resto, con el
+     peleador A identificado el 26,8% del video y 47% de los golpes invisibles. De 453
+     tracks el nucleo son 30 y la coexistencia resolvio 22
+  7. Y NO ES LA CONVENCION DE FRONTERAS, que era la explicacion que el proyecto tenia a
+     mano para Sparring. Relajando el IoU de 0,30 a 0,05 el recall va de 0,160 a 0,184: el
+     problema no es que las marcas fallen el solapamiento sino que hay 27 marcas para 125
+     golpes. La separacion de color dio 0,354 contra un piso de 0,55, asi que el color se
+     abstuvo bien, y sin color lo unico que reparte es la coexistencia
+  8. El cuello de botella del producto es la COBERTURA de identidad, no el detector. Donde
+     la identidad cubre bien -02-sparring, 97% y 89%- el recall llega a 0,597 con 1% de
+     golpes invisibles
+  9. boxtwin-annotator medir deja la medicion reproducible, y la separacion entre "no lo
+     marco" y "no lo pudo ver" esta en boxtwin.mvp.medicion con sus tests
+ 10. Tres arreglos de la interfaz que salieron de usarla: el reproductor ya no va pegado
+     arriba tapando las lecturas, el video con marcas dejo de decir "se esta armando"
+     cuando no hay nadie armandolo -no existia forma de encolar esa etapa para una sesion
+     vieja- y el 404 de los perfiles era el servicio corriendo codigo viejo
+
 PENDIENTE Y PROXIMO PASO
 
-  Queda a medio camino la prueba sobre un video que el sistema no conoce:
-  anotacion-amateur/ tiene el video preprocesado -boxeo amateur de competencia, camara
-  lejana, arbitro adentro del ring- y le falta solo la asignacion de identidad, que son
-  unos minutos. Es el test mas duro que hay disponible: el ancho de hombros mediano es
-  de 22 px contra 132 en sparring-3, asi que pone a prueba la invariancia a escala de
-  las features, que nunca se probo a ese tamano.
+  Medir C1, que es la unica de las tres mediciones pre-registradas que quedo sin poder
+  tomarse: cuantos tracks quedan bien asignados con siembra humana, sobre las seis
+  fuentes de gimnasio, umbral 95%. Sobre el amateur no se pudo porque su annot.json no
+  tiene identidad anotada, y las seis que si la tienen necesitan una pasada del detector
+  de guantes cada una, del orden de 25 s por cada 2 minutos de video. Ya existe
+  puntuar_contra, asi que lo unico que falta es esa pasada.
+
+  Antes de C3 hay que corregir el radio de la zona de guardia, que es decision de
+  dominio y no de codigo: el p10 medido anda entre 0,75 y 1,09 anchos de hombro, contra
+  el 0,6 pre-registrado.
+
+  Detalle en docs/PROXIMOS_PASOS.md y en
+  docs/experiments/2026-09-22-mvp-sobre-video-real.md.
+
+13-10 Web entrenador: el prototipo final por SDD, en prototipo/
+
+1. Specs del 12-10 en prototipo/specs; registro de cada tarea con su evidencia en
+   prototipo/TAREAS.md
+2. Next 16 exportado y servido por la API: las nueve pantallas sobre datos reales, sin
+   datos de demostracion en el build
+3. API: B0 a B8. Consentimiento obligatorio al subir, panel, tramos asignados a mano,
+   "no fue un golpe", perfil extendido. Sesiones de un peleador escritas pero apagadas
+4. Fight-Card 0.2 con JSON Schema que validan el worker y la web
+5. 149 pruebas de la web, 166 de la API; e2e 6 de 6 en Chromium con axe limpio
+6. El e2e encontro un bug de la API: con un completar en cola, GET /jobs/{id} hacia
+   retroceder la sesion a espera_siembra y la pantalla quedaba clavada
+7. El presupuesto de 200 KB de JS por ruta no se cumple con Animate UI: 281 a 360 KB
+   medidos. Decision abierta
+
+13-10 Ampliacion de la web entrenador por SDD: tanda 1, y C8 no pasa
+
+1. Specs de los siete pedidos en prototipo/specs/ampliacion-13-10; registro en
+   prototipo/TAREAS.md
+2. Combinaciones: solo izq-der-izq con menos de 0,5 s de inicio a inicio, por brazo.
+   La regla vive en el anotador y da 28 sobre lo anotado, como la tabla del spec
+3. Fight-Card 0.3: combinaciones, detector.medido_en y altura del golpe. Etapa nueva
+   enriquecer que lleva sesiones viejas a 0.3 sin correr pose
+4. Una persona en bolsa y sombra: identificacion con "Es el", aviso de espejo calculado
+   en Python, tramos sin B. La bandera sigue apagada: falta la medicion con dos videos
+5. C8 medido sobre 806 golpes con la regla de altura: balanceada 0,726 contra 0,75,
+   recall de cuerpo 0,818. No pasa: la tanda 2 (mapa de exposicion y cruces) no se
+   construye. Detalle en docs/experiments/2026-10-13-cabeza-cuerpo.md
+6. El avatar 3D queda bloqueado por la regla de corte: C1 y C5 sin medir
+7. 689 pruebas del anotador, 180 de la API, 173 de la web; e2e 6 de 6 en Chromium
+
+14-10 Combinaciones abiertas y altura del golpe como estimacion
+
+1. Combinacion es cualquier secuencia de 2 o mas golpes con menos de 0,5 s de inicio
+   a inicio, sin importar la mano; una serie larga cuenta una. Sobre lo anotado da 179
+   contra las 28 izq-der-izq de la regla anterior
+2. Cabeza y cuerpo se muestran en la Fight-Card y en el analisis por decision de
+   producto, rotulados como estimacion con la exactitud medida (0,726). C8 sigue
+   rechazado; la bandera es BOXTWIN_OBJETIVO_ESTIMADO
+3. 689 pruebas del anotador, 181 de la API, 180 de la web
+
+14-10 Perfil tactico y Rival Fantasma por SDD (prototipo/specs/cambios-14-10)
+
+1. Rounds de 3 minutos: sin rounds declarados el video se corta en segmentos de 180 s
+   y un resto de menos de 60 s se suma al anterior. Visibles por decision de producto,
+   rotulados como sin validar; C2 sigue pendiente
+2. Distribucion por mano (medido) y altura (estimacion), y mapa de exposicion con los
+   golpes dirigidos por el rival, por altura y mano del rival. Corregido por el sesgo del
+   detector: 0,512 a la cabeza contra 0,348 al cuerpo
+3. Distancia de trabajo y estilo cargados a mano en el peleador
+4. Avatar 3D ilustrativo con three.js en chunk aparte; en el Rival, dos maniquies con
+   los brazos que se estiran y el alcance escrito
+5. Rival: oportunidades, amenazas y cruce de zonas en un solo bloque, con las reglas
+   en la API (GET /rival)
+6. 696 pruebas del anotador, 206 de la API, 196 de la web; e2e 6 de 6 en Chromium
+
+
+14-10 Piloto del etiquetador a ciegas (E0): no pasa
+
+1. 150 golpes de las siete fuentes, tiras a ciegas en seis tandas de 25, spec
+   pre-registrado en d359247
+2. Familia 0,400 (Wilson 0,325-0,480) contra 0,85; altura balanceada 0,644 contra 0,80
+3. En familia no se separa del azar: balanceada 0,315, kappa 0,11. Hook leido como
+   recto 19 de 46, uppercut como hook 11 de 26
+4. Auditoria en verde, cegado sin intentos sobre la clave. No se habilita el
+   preetiquetado (E5)
+
+15-10 Clasificador por tipo y altura, una fuente afuera (E1 a E3)
+
+1. Solo semilla 0 por decision de Lucas: la corrida cronometrada midio 4472 s, unas
+   75 h para las 63. El benchmark de perfiles paso a correrse despues
+2. P2: familia de E1 fuera de distribucion 0,656 (Wilson 0,627-0,684) contra 0,746 en
+   distribucion; siempre recto da 0,632
+3. P3: E2 no mejora la familia (0,641) y C8b no pasa (balanceada 0,541, recall de
+   cuerpo 0,133 en las fuentes de C8)
+4. P4: el rival mejora la altura segun la regla (0,557 a 0,605, 5 de 7 folds), sin
+   llegar a C8b
+5. Sub-hipotesis 1: ocho clases 0,526 y 0,522, debajo de 0,80. No se entrena modelo final
+6. Auditoria en verde en la segunda pasada
+
+16-10 Tipo v2 para bolsa y sombra, y scripts para encenderlo en la estacion
+
+1. Bolsa y sombra se clasifican con el modelo de E4a (sin las 6 features del rival):
+   familia 0,724 con una fuente afuera contra 0,727 de E4. Con E4 el rival entraba en cero
+2. El worker elige el modelo por contexto; /salud dice si el modelo individual esta
+3. despliegue/encender_v2.sh: entrena en CPU lo que falte, prueba, escribe el env y verifica
+4. despliegue/medir_bolsa_sombra.sh: medicion de B8 con la cadena del worker; la bandera se
+   enciende solo si pasan los dos videos (95%, pre-registrado)
+5. 225 pruebas de la API, 660 del anotador y 58 de scripts/clasificador_geo, en verde
+
+20-10 C1, identidad con siembra humana: no pasa
+
+1. 85 de 105 tracks evaluables, 0,810 (Wilson 0,724-0,873) contra 0,95, pre-registrado
+   en 2e8fa17. Entra el plan B: correccion manual por track en la web
+2. La siembra arregla la polaridad (Sparring 0/8 a 8/8, 03-sparring 4/20 a 16/20) pero no
+   las asignaciones: en 04-sparring y sparring-3-rounds el puntaje no cambia
+3. sparring-3-rounds aporta 13 de los 20 errores; las otras cinco dan 57/64
+4. Cobertura de tracks 0,460, de cuadros 0,793. Guantes del mismo color en 01 y 03
+5. El 99,1% de la spec no es la misma medicion: era color con perfiles de oraculo,
+   track por track. Sobre los mismos tracks, el oraculo da 93/96 y el producto 79/96
+6. 18 de los 20 errores caen en seis componentes de coexistencia que tienen un track
+   mixto (cambio de persona del tracker) y una coexistencia espuria. Ninguno de los
+   13 componentes sin arista espuria tiene error. La causa es la geometria, no el color
+7. Fix de ruta de Sparring en medir_c1.py (6555213) antes de medir nada
+8. Documentado en docs/experiments/2026-10-20-c1-identidad-con-siembra.md
+
+20-10 C3, indicador de guardia contra 100 golpes marcados a mano: no pasa
+
+1. Volvio a la guardia 51/88, 0,580 (Wilson 0,475-0,677), kappa -0,01; mano opuesta
+   caida 31/86, 0,360 (Wilson 0,267-0,466), kappa 0,09. Umbral 0,80 en cada uno
+2. F5 sale del MVP y queda como linea futura (BOXTWIN_C3=rechazado)
+3. La mano opuesta sale caida en 71 de 86 golpes contra 16 de Lucas: el radio 1,0 no
+   arreglo lo que el 0,6 ya mostraba el 22-09
+4. Muestra: 100 de los 381 golpes anotados completos de sparring-3, semilla 20102026,
+   pre-registrada antes de sortear. Marcado a ciegas, indicador corrido despues de
+   congelar las marcas
+5. Dos bugs de la pagina de marcado (Enter de a dos, respuestas pisadas) arreglados
+   antes de terminar; Lucas reviso los 100 y cambio 10 de 107 respuestas previas
+6. Documentado en docs/experiments/2026-10-20-c3-guardia.md
+
+20-10 C5, ensayo del tiempo: la evidencia de guante saltaba en el video
+
+1. Pre-registro de C5 antes de tocar nada: reloj hasta la Fight-Card desde la tabla de
+   trabajos. Se mide sobre las sesiones de prueba del 27-10; este ensayo no cuenta
+2. Ensayo sobre las sesiones de la estacion: mediana 2,741, seis de ocho entre 2,3x y
+   3,0x. El 1,098x del 22-09 era un video corto con 20 tracks
+3. La mitad del tiempo era la evidencia de guante: un salto CAP_PROP_POS_FRAMES cada 5
+   cuadros decodifica desde el keyframe. 61,3 s contra 3,2 s en orden sobre 50 s
+4. Lectura en orden con grab(): guantes 260 a 66 s y 251 a 51 s, con evidencia identica
+   track por track (401 y 351). C1 no cambia
+5. Proyeccion sin medir: 1,74x a 1,86x. El plan B (YOLOv8m) no habria tocado esto
+6. Documentado en docs/experiments/2026-10-20-c5-ensayo-tiempo.md
+
+21-10 Bolsa y sombra entran al MVP por decision de producto, sin medir B8
+
+1. BOXTWIN_SESIONES_INDIVIDUALES se enciende sin la medicion pre-registrada (>= 95% de
+   saltos de 2 s con la persona asignada, sobre dos videos propios). El criterio no se toca:
+   queda sin medir, no aprobado
+2. Motivo: cierre del proyecto, sin tiempo para grabar y revisar los dos videos
+3. El piloto del 16-10 (canelo, heavy, loma-sombra) tiene las tres planillas vacias y no son
+   videos propios. No cuenta como evidencia
+4. Lo que la Fight-Card ya declara en estas sesiones: margen del detector medido en sparring,
+   tipo como estimacion. La identidad se corrige a mano por tramos
+5. Mismo camino que PoseConv3D en el MVP. En la tesis va como funcion sin validar
 
   Y el proximo paso del proyecto es RESOLVER LA IDENTIDAD DE FORMA AUTOMATICA. Es la
   pieza que sigue siendo enteramente manual y la que se lleva el 73% del tiempo de

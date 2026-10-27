@@ -34,6 +34,7 @@ El anotador es el instrumento, y los experimentos que se corrieron con el estan 
 | Fecha | Que | Resultado |
 |---|---|---|
 | [18-08](docs/experiments/2026-08-18-reid.md) | ¿El ReID de BoT-SORT reduce los cambios de identidad? | No, a esta resolucion |
+| [22-09](docs/experiments/2026-09-22-identidad-sobre-transmision.md) | ¿La identidad automática transfiere a transmisión? | Sí: 95,7%, el mejor de todas las fuentes |
 | [19-08](docs/experiments/2026-08-19-baseline-bhargav.md) | El baseline publico de 84,51% | No mide generalizacion: comparte el 96% de los sujetos |
 | [19-08](docs/experiments/2026-08-19-hook-vs-straight.md) | Hook contra straight con descriptores 2D | Negativo, mejor AUC 0,64 sobre cinco probados |
 | [19-08](docs/experiments/2026-08-19-protocolo-reanotacion.md) | El protocolo de reanotacion ciega | Media su propia ambiguedad; rehecho |

@@ -1,0 +1,23 @@
+# BoxTwin - La API.
+#
+# No necesita GPU, ni torch, ni los dos entornos conda: sube archivos, mueve filas y sirve
+# json. Va en una imagen chica para que reiniciarla no dependa de la del worker, que pesa
+# varios gigabytes y tarda minutos en construirse.
+#
+# Lleva el paquete del anotador igual, pero solo por sus modulos puros: la correccion de
+# tipo usa el contrato de la Fight-Card, y tenerlo repetido aca lo desincronizaria.
+
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
+
+COPY boxtwin-api /app/boxtwin-api
+COPY boxtwin-annotator /app/boxtwin-annotator
+
+RUN pip install --no-cache-dir -e /app/boxtwin-api[postgres] \
+    && pip install --no-cache-dir --no-deps -e /app/boxtwin-annotator \
+    && pip install --no-cache-dir "pydantic>=2.6" numpy
+
+EXPOSE 8000
+CMD ["uvicorn", "boxtwin_api.app:app", "--host", "0.0.0.0", "--port", "8000"]

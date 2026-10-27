@@ -1,0 +1,2340 @@
+{
+  "exp": "E6",
+  "que": "rol = arm_role(guardia anotada, brazo del detector) contra el clasificador",
+  "clasificador": "E1 (configuracion de produccion con la fuente afuera, s0, 15-10): las Fight-Cards de C8 nivel 2 no traen tipo (1285 golpes con tipo None)",
+  "advertencia": "el detector de produccion se entreno con estas fuentes: el acuerdo de brazo es optimista",
+  "iou": 0.3,
+  "total": {
+    "acuerdo_brazo": {
+      "n": 390,
+      "aciertos": 382,
+      "exactitud": 0.9795,
+      "wilson95": [
+        0.9601,
+        0.9896
+      ]
+    },
+    "rectos": 259,
+    "rol_regla": {
+      "n": 259,
+      "aciertos": 255,
+      "exactitud": 0.9846,
+      "wilson95": [
+        0.961,
+        0.994
+      ]
+    },
+    "rol_todos_ortodoxos": {
+      "n": 259,
+      "aciertos": 210,
+      "exactitud": 0.8108,
+      "wilson95": [
+        0.7587,
+        0.8538
+      ]
+    },
+    "rol_clasificador": {
+      "n": 259,
+      "aciertos": 188,
+      "exactitud": 0.7259,
+      "wilson95": [
+        0.6685,
+        0.7766
+      ]
+    },
+    "siempre_adelantada": {
+      "n": 259,
+      "aciertos": 181,
+      "exactitud": 0.6988,
+      "wilson95": [
+        0.6404,
+        0.7515
+      ]
+    }
+  },
+  "por_fuente": {
+    "03-sparring": {
+      "roles_invertidos": false,
+      "golpes_fightcard": 83,
+      "pares": 62,
+      "acuerdo_brazo": {
+        "n": 62,
+        "aciertos": 59,
+        "exactitud": 0.9516,
+        "wilson95": [
+          0.8671,
+          0.9834
+        ]
+      },
+      "rectos": 43,
+      "rol_regla": {
+        "n": 43,
+        "aciertos": 42,
+        "exactitud": 0.9767,
+        "wilson95": [
+          0.8794,
+          0.9959
+        ]
+      },
+      "rol_todos_ortodoxos": {
+        "n": 43,
+        "aciertos": 42,
+        "exactitud": 0.9767,
+        "wilson95": [
+          0.8794,
+          0.9959
+        ]
+      },
+      "rol_clasificador": {
+        "n": 43,
+        "aciertos": 27,
+        "exactitud": 0.6279,
+        "wilson95": [
+          0.4786,
+          0.7562
+        ]
+      },
+      "siempre_adelantada": {
+        "n": 43,
+        "aciertos": 29,
+        "exactitud": 0.6744,
+        "wilson95": [
+          0.5252,
+          0.7951
+        ]
+      }
+    },
+    "04-sparring": {
+      "roles_invertidos": false,
+      "golpes_fightcard": 75,
+      "pares": 58,
+      "acuerdo_brazo": {
+        "n": 58,
+        "aciertos": 56,
+        "exactitud": 0.9655,
+        "wilson95": [
+          0.8827,
+          0.9905
+        ]
+      },
+      "rectos": 36,
+      "rol_regla": {
+        "n": 36,
+        "aciertos": 35,
+        "exactitud": 0.9722,
+        "wilson95": [
+          0.8583,
+          0.9951
+        ]
+      },
+      "rol_todos_ortodoxos": {
+        "n": 36,
+        "aciertos": 15,
+        "exactitud": 0.4167,
+        "wilson95": [
+          0.2714,
+          0.578
+        ]
+      },
+      "rol_clasificador": {
+        "n": 36,
+        "aciertos": 25,
+        "exactitud": 0.6944,
+        "wilson95": [
+          0.5314,
+          0.82
+        ]
+      },
+      "siempre_adelantada": {
+        "n": 36,
+        "aciertos": 26,
+        "exactitud": 0.7222,
+        "wilson95": [
+          0.5601,
+          0.8415
+        ]
+      }
+    },
+    "sparring-3-rounds": {
+      "roles_invertidos": false,
+      "golpes_fightcard": 244,
+      "pares": 199,
+      "acuerdo_brazo": {
+        "n": 199,
+        "aciertos": 196,
+        "exactitud": 0.9849,
+        "wilson95": [
+          0.9566,
+          0.9949
+        ]
+      },
+      "rectos": 120,
+      "rol_regla": {
+        "n": 120,
+        "aciertos": 118,
+        "exactitud": 0.9833,
+        "wilson95": [
+          0.9413,
+          0.9954
+        ]
+      },
+      "rol_todos_ortodoxos": {
+        "n": 120,
+        "aciertos": 118,
+        "exactitud": 0.9833,
+        "wilson95": [
+          0.9413,
+          0.9954
+        ]
+      },
+      "rol_clasificador": {
+        "n": 120,
+        "aciertos": 86,
+        "exactitud": 0.7167,
+        "wilson95": [
+          0.6303,
+          0.7896
+        ]
+      },
+      "siempre_adelantada": {
+        "n": 120,
+        "aciertos": 80,
+        "exactitud": 0.6667,
+        "wilson95": [
+          0.5783,
+          0.7447
+        ]
+      }
+    },
+    "pacquiao_margarito": {
+      "roles_invertidos": true,
+      "golpes_fightcard": 883,
+      "pares": 71,
+      "acuerdo_brazo": {
+        "n": 71,
+        "aciertos": 71,
+        "exactitud": 1.0,
+        "wilson95": [
+          0.9487,
+          1.0
+        ]
+      },
+      "rectos": 60,
+      "rol_regla": {
+        "n": 60,
+        "aciertos": 60,
+        "exactitud": 1.0,
+        "wilson95": [
+          0.9398,
+          1.0
+        ]
+      },
+      "rol_todos_ortodoxos": {
+        "n": 60,
+        "aciertos": 35,
+        "exactitud": 0.5833,
+        "wilson95": [
+          0.4573,
+          0.6994
+        ]
+      },
+      "rol_clasificador": {
+        "n": 60,
+        "aciertos": 50,
+        "exactitud": 0.8333,
+        "wilson95": [
+          0.7197,
+          0.9069
+        ]
+      },
+      "siempre_adelantada": {
+        "n": 60,
+        "aciertos": 46,
+        "exactitud": 0.7667,
+        "wilson95": [
+          0.6456,
+          0.8556
+        ]
+      }
+    }
+  },
+  "P7": {
+    "veredicto": "mejora",
+    "diferencia": 0.2587,
+    "minimo": 0.05
+  },
+  "filas": [
+    {
+      "frame_dir": "03-sparring_ev_0007",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0016",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0098",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0104",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0109",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0111",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0117",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0120",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0124",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0108",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0008",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0037",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0118",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": null,
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0002",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0004",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0011",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0019",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0103",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0006",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0012",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0021",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0105",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0110",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0014",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": null,
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0020",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0027",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0119",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0123",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": null,
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0107",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0121",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0078",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0086",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0017",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0010",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0058",
+      "verdad": "rear",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": false
+    },
+    {
+      "frame_dir": "03-sparring_ev_0029",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": null,
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0034",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0096",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": null,
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0030",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0106",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0130",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0080",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "03-sparring_ev_0024",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0019",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0023",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0024",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0035",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0069",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0074",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0119",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0016",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0026",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0108",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0012",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0013",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0034",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0115",
+      "verdad": "lead",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": false
+    },
+    {
+      "frame_dir": "04-sparring_ev_0116",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": null,
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0124",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0080",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0038",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0122",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0022",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0071",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0043",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0031",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0066",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0082",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0088",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0075",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0083",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0123",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0018",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0100",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0089",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0098",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0126",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0028",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "04-sparring_ev_0073",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0042",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0132",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0135",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0145",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0148",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0364",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0375",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0041",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0215",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": null,
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0243",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0014",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0016",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0068",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0146",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0038",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0065",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0136",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0137",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0149",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0210",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0095",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0030",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0034",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0096",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0393",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0036",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0037",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0072",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0078",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0117",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0144",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0211",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0057",
+      "verdad": "lead",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": false
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0125",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0222",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0325",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0333",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0392",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0204",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0060",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0118",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0326",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0012",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0082",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0151",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0174",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0123",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0046",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0380",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0059",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0074",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0394",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0004",
+      "verdad": "lead",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": false
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0088",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0109",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0218",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0297",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0334",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0020",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0104",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0241",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0300",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0318",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0400",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0019",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0044",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0071",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0102",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0122",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0143",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0287",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0294",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0404",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0031",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0035",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0113",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0186",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0188",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0247",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0286",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0383",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0389",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0402",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0403",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0066",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0377",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0085",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0127",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0203",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0208",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0225",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0259",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0267",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0361",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0015",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0131",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0248",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0272",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0273",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0388",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0091",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0105",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0197",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0285",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0299",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0307",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0147",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0205",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0084",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0289",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0399",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0391",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0067",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0011",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0191",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0232",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": null,
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0182",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0340",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0007",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "sparring-3-rounds_ev_0185",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0087",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0103",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0053",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0010",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0118",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0138",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0027",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0038",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0102",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0011",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0015",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0058",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0137",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0117",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0057",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0147",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0054",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0150",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0100",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0034",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0090",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": null,
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0007",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0126",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0040",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0002",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0144",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0088",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0119",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0142",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": null,
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0055",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0041",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0089",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0105",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0136",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0070",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0071",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0146",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0037",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0099",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0139",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0024",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0135",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0091",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0039",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0101",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0049",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0067",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0056",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0125",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0148",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0014",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0046",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0009",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0104",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0023",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0044",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0065",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0048",
+      "verdad": "rear",
+      "regla": "rear",
+      "ortodoxos": "rear",
+      "clasificador": "rear",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0050",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    },
+    {
+      "frame_dir": "pacquiao_margarito_ev_0047",
+      "verdad": "lead",
+      "regla": "lead",
+      "ortodoxos": "lead",
+      "clasificador": "lead",
+      "brazo_ok": true
+    }
+  ]
+}
