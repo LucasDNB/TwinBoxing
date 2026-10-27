@@ -89,3 +89,12 @@ DC-1 y DC-2 tomadas por Lucas el 14-10; DC-3 a DC-9 en `specs/cambios-14-10/00-R
 | W26 | Bloque unificado del Rival | `cambios-14-10/02` §2 | hecha | "Ataque contra exposición"; `rival.test.tsx` (CA-26.1, 26.2 y lecturas a cada lado). Desvío del spec, anotado en él: dos siluetas iguales en lugar de flechas. Se borraron `lib/rival.ts`, `tests/unit/rival.test.ts` y el bloque "Oportunidades y amenazas". Los textos de las tres reglas los valida Lucas |
 | W25 | Avatares 3D del Rival | `cambios-14-10/02` §3 | hecha | Dos maniquíes enfrentados, controles 0 a 100% por brazo con el alcance escrito; `rival.test.tsx` (CA-25.1); `/rival/` en 322,6 KB (CA-25.2). Se borró `Siluetas.tsx`. Si falta una medida se dice cuál |
 | B18b | Cruce sin circularidad y umbral de zona coincidente | `cambios-14-10/02` §1 (DC-10, DC-11) | hecha | Al validar los textos del Rival, medido sobre producción (Lucas y Daniel, 7 sesiones de pelea cada uno, todas entre ellos): ataque igual a exposición en las ocho filas y cuatro lecturas que comparaban a cada uno consigo mismo. La exposición del receptor ahora se calcula sin las sesiones contra el atacante (`excluir_rival`, `base.{lado}.excluidas`), y la zona coincidente pide 35% en lugar de 25%. Sobre producción da 0 lecturas y la pantalla dice que hacen falta otros rivales. `test_cambios_14_10_b18.py` (2b, dos casos; umbral 35/34,9/25) y `rival.test.tsx`. Los textos de las tres reglas siguen pendientes de Lucas. Abierto, sin tocar: el cuerpo puede estar inflado (regla de altura más corrección de DC-4) |
+
+## Avatar MPFB2 y calor sobre la piel (`specs/cambios-27-10/01-avatar-mpfb2.md`)
+
+Decisión de producto de Lucas, 27-10: impacto visual por encima de la precisión que sugiere la imagen.
+
+| Id | Tarea | Spec | Estado | Evidencia / notas |
+|---|---|---|---|---|
+| W27 | Malla MPFB2 con rig, posada en guardia | `cambios-27-10/01` §1 a §4 | hecha sin asset | `lib/avatar/solverRig.ts`, `components/boxtwin/avatar/escena.ts`; `avatar-calor.test.ts` (solver sobre rig en T). Sin `public/models/boxer_mpfb2.glb` cae al maniquí. `scripts/validar-glb.mjs` revisa el contrato. Falta que Lucas exporte el GLB |
+| W28 | Calor de golpes dirigidos sobre la piel | `cambios-27-10/01` §5 | hecha | `lib/avatar/shaderCalor.ts`, `lib/avatar/exposicion.ts`, `LeyendaCalor.tsx`; mismo dato que W22, solo con `06.exposicion` visible. `avatar-calor.test.ts` y `perfil-tactico.test.tsx`. `/peleador/` en 318,5 KB y `/rival/` en 323,5 KB de JS inicial (CA-23.1). Compilado y visto en Chromium con SwiftShader |

@@ -12,12 +12,15 @@
  * Los numeros salen todos de la API (B15 a B17); aca solo se dibujan con su estado.
  */
 import Link from "next/link";
-import { Avatar3D } from "@/components/boxtwin/avatar/Avatar3D";
+import { useState } from "react";
+import { AJUSTES_CALOR, Avatar3D } from "@/components/boxtwin/avatar/Avatar3D";
+import { LeyendaCalor } from "@/components/boxtwin/avatar/LeyendaCalor";
 import { EstadoBloque, Estimado } from "@/components/boxtwin/EstadoBloque";
 import { Rotulo } from "@/components/boxtwin/Rotulo";
 import { NOMBRE_ZONA, SiluetaZonas } from "@/components/boxtwin/graficos/SiluetaZonas";
 import { TIPOS_GOLPE, ZONAS, type Perfil, type Producto, type Zona } from "@/lib/api/esquemas";
 import { estadoDe, visible } from "@/lib/banderas";
+import { intensidades } from "@/lib/avatar/exposicion";
 import { decimal, entero, nombreDeTipo, porcentajeAR } from "@/lib/formato";
 import { medidasDe } from "@/lib/maniqui";
 import { textos } from "@/lib/textos";
@@ -250,6 +253,10 @@ export function AvatarPerfil({ p, producto }: { p: Perfil; producto?: Producto }
   const medidas = m.aEscala
     ? `${decimal(m.altura, 2)} m de altura y ${decimal(m.envergadura, 2)} m de envergadura`
     : "proporciones estándar";
+  // El calor es el mismo dato que el mapa de exposicion (W22): si ese bloque no se ve, no se pinta.
+  const zonas = visible("06.exposicion", producto) ? p.exposicion?.zonas : null;
+  const calor = intensidades(zonas);
+  const [ajustes, setAjustes] = useState(AJUSTES_CALOR);
   return (
     <EstadoBloque
       estado={estadoDe("06.avatar", producto)}
@@ -257,11 +264,22 @@ export function AvatarPerfil({ p, producto }: { p: Perfil; producto?: Producto }
       accion={<Rotulo className="text-estimado">{textos.avatarIlustrativo}</Rotulo>}
     >
       <Avatar3D
-        figuras={[{ medidas: m, guardia, lado: "A", extension: { adelantada: 0.15, atrasada: 0 }, x: 0, mira: 1 }]}
-        etiqueta={`Maniquí en guardia ${guardia ?? "sin guardia cargada"}, ${medidas}`}
+        figuras={[{ medidas: m, guardia, lado: "A", extension: { adelantada: 0.15, atrasada: 0 }, x: 0, mira: 1, calor }]}
+        etiqueta={`Avatar en guardia ${guardia ?? "sin guardia cargada"}, ${medidas}${calor ? ", con el mapa de golpes dirigidos sobre el cuerpo" : ""}`}
         alternativa={`En guardia ${guardia ?? "(sin guardia cargada)"}, ${medidas}.`}
-        alto={280}
+        alto={340}
+        ajustes={ajustes}
       />
+      {calor && zonas && (
+        <div className="mt-3">
+          <LeyendaCalor
+            id="calor-perfil"
+            ajustes={ajustes}
+            onCambio={setAjustes}
+            fracciones={Object.fromEntries(ZONAS.map((z) => [z, zonas[z]?.fraccion_corregida ?? null])) as Record<Zona, number | null>}
+          />
+        </div>
+      )}
       {!m.aEscala && <p className="mt-2 text-xs text-texto-3">{textos.avatarSinMedidas}</p>}
       <p className="mt-1 text-xs text-texto-3">Arrastrá para girarlo.</p>
     </EstadoBloque>
