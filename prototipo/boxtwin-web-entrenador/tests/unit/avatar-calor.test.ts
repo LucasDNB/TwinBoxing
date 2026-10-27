@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { intensidades, zonasCalor } from "@/lib/avatar/exposicion";
 import { cargarZonas, inyectarCalor, uniformesCalor } from "@/lib/avatar/shaderCalor";
-import { HUESOS, anclasDe, faltantes, huesoDe, orientar, posar } from "@/lib/avatar/solverRig";
+import { HUESOS, MENTON_GRADOS, anclasDe, faltantes, frenteDeCabeza, huesoDe, orientar, posar } from "@/lib/avatar/solverRig";
 import { esqueleto, medidasDe } from "@/lib/maniqui";
 // @ts-expect-error modulo js sin tipos
 import { HUESOS as HUESOS_VALIDADOR, validarGlb } from "../../scripts/validar-glb.mjs";
@@ -137,7 +137,13 @@ describe("solver del rig (lib/avatar/solverRig.ts)", () => {
     expect(caja.max.y - caja.min.y).toBeCloseTo(1.8, 5);
 
     const e = esqueleto(m, "ortodoxa", { adelantada: 0.3, atrasada: 0 });
+    const qReposo = huesoDe(raiz, "head")!.getWorldQuaternion(new THREE.Quaternion());
     posar(raiz, e);
+    // Menton metido: la cara mira al rival (+x) y baja MENTON_GRADOS, sin irse al costado.
+    const frente = frenteDeCabeza(raiz, qReposo)!;
+    expect(frente.x).toBeGreaterThan(0.9);
+    expect(Math.asin(-frente.y) * 180 / Math.PI).toBeCloseTo(MENTON_GRADOS, 3);
+    expect(Math.abs(frente.z)).toBeLessThan(1e-6);
     const dir = (a: THREE.Vector3, b: THREE.Vector3) => b.clone().sub(a).normalize();
     const v = (p: [number, number, number]) => new THREE.Vector3(...p);
     for (const [hueso, fin, desde, hasta] of [

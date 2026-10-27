@@ -109,6 +109,17 @@ export function posar(raiz: THREE.Object3D, e: Esqueleto): void {
   const qPadre = new THREE.Quaternion();
   const qHueso = new THREE.Quaternion();
   const giro = new THREE.Quaternion();
+  // Girar `hueso` en el mundo: el giro se pasa al espacio de su padre.
+  const girarEnMundo = (hueso: THREE.Object3D, g: THREE.Quaternion) => {
+    hueso.getWorldQuaternion(qHueso);
+    if (hueso.parent) hueso.parent.getWorldQuaternion(qPadre);
+    else qPadre.identity();
+    hueso.quaternion.copy(qPadre.invert().multiply(g).multiply(qHueso));
+    hueso.updateMatrixWorld(true);
+  };
+  const cabeza = huesoDe(raiz, "head");
+  // La cara en reposo mira a +x de la figura (orientar la dejo asi): se guarda como arranca.
+  const qCabezaReposo = cabeza ? cabeza.getWorldQuaternion(new THREE.Quaternion()) : null;
   for (const a of APUNTES) {
     const hueso = huesoDe(raiz, a.hueso), fin = huesoDe(raiz, a.fin);
     if (!hueso || !fin) continue;
@@ -117,13 +128,32 @@ export function posar(raiz: THREE.Object3D, e: Esqueleto): void {
     const buscada = mundo(a.hasta(e)).sub(mundo(a.desde(e)));
     if (actual.lengthSq() < 1e-12 || buscada.lengthSq() < 1e-12) continue;
     giro.setFromUnitVectors(actual.normalize(), buscada.normalize());
-    // El giro esta en el mundo: se pasa al espacio del padre del hueso.
-    hueso.getWorldQuaternion(qHueso);
-    if (hueso.parent) hueso.parent.getWorldQuaternion(qPadre);
-    else qPadre.identity();
-    hueso.quaternion.copy(qPadre.invert().multiply(giro).multiply(qHueso));
-    hueso.updateMatrixWorld(true);
+    girarEnMundo(hueso, giro);
   }
+  // Menton metido: apuntar cuello y columna deja la cabeza como venga, y en el rig de MPFB2
+  // queda mirando para arriba. Se gira la cabeza para que la cara mire al rival, hacia abajo.
+  if (cabeza && qCabezaReposo) {
+    const qFigura = padre ? padre.getWorldQuaternion(new THREE.Quaternion()) : new THREE.Quaternion();
+    const frenteReposo = new THREE.Vector3(1, 0, 0).applyQuaternion(qFigura);
+    const ahora = cabeza.getWorldQuaternion(new THREE.Quaternion());
+    const frente = frenteReposo.applyQuaternion(ahora.multiply(qCabezaReposo.clone().invert()));
+    const t = (MENTON_GRADOS * Math.PI) / 180;
+    const buscado = new THREE.Vector3(Math.cos(t), -Math.sin(t), 0).applyQuaternion(qFigura);
+    girarEnMundo(cabeza, giro.setFromUnitVectors(frente.normalize(), buscado));
+  }
+}
+
+/* Cuanto baja la cara en guardia: el menton contra el pecho, los ojos arriba mirando al rival. */
+export const MENTON_GRADOS = 15;
+
+/* Hacia donde mira la cara del modelo posado, en coordenadas de la figura. Para las pruebas. */
+export function frenteDeCabeza(raiz: THREE.Object3D, qReposo: THREE.Quaternion): THREE.Vector3 | null {
+  const cabeza = huesoDe(raiz, "head");
+  if (!cabeza) return null;
+  const padre = raiz.parent;
+  const qFigura = padre ? padre.getWorldQuaternion(new THREE.Quaternion()) : new THREE.Quaternion();
+  const ahora = cabeza.getWorldQuaternion(new THREE.Quaternion()).multiply(qReposo.clone().invert());
+  return new THREE.Vector3(1, 0, 0).applyQuaternion(qFigura).applyQuaternion(ahora).applyQuaternion(qFigura.invert());
 }
 
 /* Cabeza: un poco arriba del hueso `head`, que en MPFB2 nace en la base del craneo. */
