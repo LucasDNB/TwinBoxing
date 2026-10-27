@@ -106,6 +106,21 @@ expuesto); Atleta 1 y 2 en Entrenador, Atleta 3 a 5 en Gimnasio con su consentim
 Apagarla: `BOXTWIN_DEMO=` vacía en `/etc/boxtwin.env` y `sudo systemctl restart boxtwin-api`. Para
 dejar las cuentas de prueba como nuevas: `produccion.sh demo reiniciar`.
 
+## Avatar MPFB2 desplegado en A (27-10, 02:51)
+
+PR #30 (avatar MPFB2 y calor sobre la piel, `prototipo/specs/cambios-27-10/`) mergeado a
+`produccion` como `1058d5e`. Cambio solo de web: sin migración, sin tocar B ni el worker.
+
+- Copia principal de `c936b0f` a `1058d5e` (`git checkout --detach origin/produccion`),
+  `produccion.sh web`: presupuesto en verde, `/peleador/` 340,9 KB, la más pesada
+  `/sesion/identificar/` 371,1 KB; `sin-demo` limpio.
+- La web nueva sale de disco: `/peleador/` 200 y `/models/boxer_mpfb2.glb` 200, `model/gltf-binary`,
+  idéntico byte a byte al del repo.
+- `sudo systemctl restart boxtwin-api` (Lucas, 02:51:22). `produccion.sh verificar a`: commit
+  `1058d5e`, secreto fijo, invitación, web y `geometrico` ok. Avisa la versión de prueba encendida,
+  que sigue así a pedido de Lucas (ventana de ensayo).
+- Vuelta atrás: `git checkout --detach c936b0f`, `produccion.sh web` y restart de la API.
+
 ## Estado de la estación al 26-10 antes del despliegue (leído, sin tocar)
 
 - A: `boxtwin-api` y `boxtwin-worker` activos, `/salud` `34e991d`, `geometrico`. Sin las versiones.
@@ -207,4 +222,4 @@ sudo systemctl stop boxtwin-academico-worker boxtwin-academico-api        # B ap
 - CV3 a CV6 de las versiones, en la estación.
 - Next 16.4.0 avisa de una vulnerabilidad conocida al hacer el build. No se actualizó: es un
   cambio de dependencia y pide el OK de Lucas.
-- La rama no está en GitHub ni tiene PR.
+- La rama está en GitHub desde el 27-10 (PR #30 la usó de base).
