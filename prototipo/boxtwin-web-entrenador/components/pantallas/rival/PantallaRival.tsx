@@ -20,13 +20,15 @@ import { EstadoBloque, Estimado } from "@/components/boxtwin/EstadoBloque";
 import { ErrorConReintento, Esqueleto, Vacio } from "@/components/boxtwin/Estados";
 import { Rotulo } from "@/components/boxtwin/Rotulo";
 import { SelectNativo } from "@/components/boxtwin/Controles";
-import { Avatar3D } from "@/components/boxtwin/avatar/Avatar3D";
+import { AJUSTES_CALOR, Avatar3D } from "@/components/boxtwin/avatar/Avatar3D";
+import { LeyendaCalor } from "@/components/boxtwin/avatar/LeyendaCalor";
 import { NOMBRE_ZONA_ATAQUE, SiluetaZonas } from "@/components/boxtwin/graficos/SiluetaZonas";
 import { NOMBRE_DISTANCIA, NOMBRE_ESTILO } from "@/components/pantallas/peleador/BloquesTacticos";
 import { ToggleGroup, ToggleGroupItem } from "@/components/animate-ui/components/radix/toggle-group";
 import { useBoxeadores, usePerfil, useProducto, useRival } from "@/lib/api/consultas";
 import { ZONAS, type Perfil, type Producto, type Rival, type Zona } from "@/lib/api/esquemas";
-import { estadoDe } from "@/lib/banderas";
+import { intensidades } from "@/lib/avatar/exposicion";
+import { estadoDe, visible } from "@/lib/banderas";
 import { decimal, porcentajeAR } from "@/lib/formato";
 import { alcance, medidasDe } from "@/lib/maniqui";
 import { textos } from "@/lib/textos";
@@ -171,7 +173,7 @@ function Comparacion({ pa, pb, producto, superpuestas, onSuperpuestas }: { pa: P
           </ToggleGroup>
         }
       >
-        <Dimensiones pa={pa} pb={pb} superpuestas={superpuestas === "encima"} />
+        <Dimensiones pa={pa} pb={pb} superpuestas={superpuestas === "encima"} producto={producto} />
       </EstadoBloque>
 
       <EstadoBloque estado={estadoDe("07.frente", producto)} titulo="Frente a frente" nota="Solo sesiones de sparring y combate de cada perfil.">
@@ -213,7 +215,11 @@ function Comparacion({ pa, pb, producto, superpuestas, onSuperpuestas }: { pa: P
 
 type Extension = { adelantada: number; atrasada: number };
 
-function Dimensiones({ pa, pb, superpuestas }: { pa: Perfil; pb: Perfil; superpuestas: boolean }) {
+function Dimensiones({ pa, pb, superpuestas, producto }: { pa: Perfil; pb: Perfil; superpuestas: boolean; producto?: Producto }) {
+  const [ajustes, setAjustes] = useState(AJUSTES_CALOR);
+  // Cada uno con los golpes que le dirigen sus rivales: el mismo dato que el perfil (W22).
+  const conCalor = visible("06.exposicion", producto);
+  const calor = { A: conCalor ? intensidades(pa.exposicion?.zonas) : null, B: conCalor ? intensidades(pb.exposicion?.zonas) : null };
   const [ext, setExt] = useState<Record<"A" | "B", Extension>>({
     A: { adelantada: 0, atrasada: 0 },
     B: { adelantada: 0, atrasada: 0 },
@@ -236,13 +242,15 @@ function Dimensiones({ pa, pb, superpuestas }: { pa: Perfil; pb: Perfil; superpu
       </div>
       <Avatar3D
         figuras={[
-          { medidas: medidas.A, guardia: guardia(pa), lado: "A", extension: ext.A, x: 0, mira: 1, opacidad: superpuestas ? 0.6 : 1 },
-          { medidas: medidas.B, guardia: guardia(pb), lado: "B", extension: ext.B, x: superpuestas ? 0 : separacion, mira: superpuestas ? 1 : -1, opacidad: superpuestas ? 0.6 : 1 },
+          { medidas: medidas.A, guardia: guardia(pa), lado: "A", extension: ext.A, x: 0, mira: 1, opacidad: superpuestas ? 0.6 : 1, calor: calor.A },
+          { medidas: medidas.B, guardia: guardia(pb), lado: "B", extension: ext.B, x: superpuestas ? 0 : separacion, mira: superpuestas ? 1 : -1, opacidad: superpuestas ? 0.6 : 1, calor: calor.B },
         ]}
+        ajustes={ajustes}
         etiqueta={`Dos maniquíes en guardia, ${superpuestas ? "superpuestos" : "enfrentados"}. ${descripcion("A")}. ${descripcion("B")}.`}
         alternativa={`${descripcion("A")}. ${descripcion("B")}.`}
         alto={300}
       />
+      {(calor.A || calor.B) && <LeyendaCalor id="calor-rival" ajustes={ajustes} onCambio={setAjustes} />}
       <div className="grid gap-4 md:grid-cols-2">
         {(["A", "B"] as const).map((l) => (
           <fieldset key={l} className="flex flex-col gap-3 rounded-md border border-borde p-3">

@@ -24,6 +24,11 @@ QUE HACE
     que casi no vio al entrenar. Para esas sesiones el worker pasa el modelo de E4a (solo las
     20 del brazo, familia 0,724 con una fuente afuera contra 0,727 de E4) y ClasificadorGeo
     recorta las columnas segun el n_features de su meta.json.
+  - Modo academico E7 (25-10, docs/specs/2026-10-25-e7-modo-academico): un modelo de 42
+    features (las 26 de hoy y 16 3D de HMR2). features_3d es copia de
+    scripts/clasificador_geo/features3d.py y el 3D sale de pose3d_hmr2.npz, que escribe
+    tools/elevar_hmr2_sesion.py en boxtwin_4dhumans. Sin ese archivo, clasificar_sesion falla
+    con un modelo E7: no cae a E4 sin decirlo. Depende de SMPL, licencia de investigacion.
 
 USO
   from boxtwin.mvp.clasificador_geo import clasificar_sesion
@@ -40,6 +45,9 @@ import numpy as np
 
 __all__ = [
     "FAMILIAS",
+    "N_3D",
+    "features_3d",
+    "features_3d_golpe",
     "MODELO_POR_DEFECTO",
     "ClasificadorGeo",
     "clasificar_sesion",
@@ -59,6 +67,8 @@ MARGEN = 8
 PASOS = 32
 # Columnas de features_golpe: 20 del brazo (detector) y 6 del rival. E4 usa las 26, E4a las 20.
 N_BRAZO, N_RIVAL = 20, 6
+# E7: las 16 features 3D de scripts/clasificador_geo/features3d.py van despues de las 26.
+N_3D = 16
 
 # De scripts/clasificador_geo/features2d.py, sin cambios.
 MIN_SCORE = 0.3
@@ -190,6 +200,70 @@ def features_golpe(kp, sc, valid, p: int, brazo: str, inicio: int, fin: int,
 # Ensamble
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Features 3D del modo academico E7: copia exacta de scripts/clasificador_geo/features3d.py.
+# CA-E7a verifica la igualdad, tambien sobre los 1047 golpes con el 3D de E7.
+# ---------------------------------------------------------------------------
+
+_PELVIS, _CAD_DER, _CAD_IZQ, _TORAX = 0, 1, 4, 8
+_HOMBRO, _CODO, _MUNECA = 11, 12, 13           # brazo izquierdo, H36M
+_PARES_LR_H36M = [(1, 4), (2, 5), (3, 6), (11, 14), (12, 15), (13, 16)]
+_EPS = 1e-6
+
+
+def _espejar_3d(P: np.ndarray) -> np.ndarray:
+    Q = np.array(P, copy=True)
+    Q[..., 0] = -Q[..., 0]
+    for a, b in _PARES_LR_H36M:
+        Q[..., [a, b], :] = Q[..., [b, a], :]
+    return Q
+
+
+def _marco_cuerpo(P: np.ndarray) -> np.ndarray:
+    arriba = P[:, _TORAX] - P[:, _PELVIS]
+    escala = np.linalg.norm(arriba, axis=-1)
+    y = arriba / np.maximum(escala, _EPS)[:, None]
+    cad = P[:, _CAD_IZQ] - P[:, _CAD_DER]
+    cad = cad - (cad * y).sum(-1, keepdims=True) * y
+    x = cad / np.maximum(np.linalg.norm(cad, axis=-1), _EPS)[:, None]
+    z = np.cross(x, y)
+    R = np.stack([x, y, z], 1)
+    rel = (P - P[:, _TORAX][:, None]) / np.maximum(escala, _EPS)[:, None, None]
+    return np.einsum("tij,tkj->tki", R, rel)
+
+
+def features_3d(P: np.ndarray, side: str, duracion_s: float) -> np.ndarray:
+    """features3d.features_de: P (T, 17, 3) H36M del atacante -> (T, 16)."""
+    if side == "right":
+        P = _espejar_3d(P)
+    B = _marco_cuerpo(np.asarray(P, np.float64))
+    m, c, h = B[:, _MUNECA], B[:, _CODO], B[:, _HOMBRO]
+    a, b = c - h, m - c
+    cos = (a * b).sum(-1) / np.maximum(np.linalg.norm(a, axis=-1) * np.linalg.norm(b, axis=-1), _EPS)
+    angulo_codo = np.arccos(np.clip(cos, -1, 1))
+    elev = np.arccos(np.clip(-a[:, 1] / np.maximum(np.linalg.norm(a, axis=-1), _EPS), -1, 1))
+    v = m - h
+    hz = np.linalg.norm(v[:, [0, 2]], axis=-1)
+    az_cos = np.where(hz > _EPS, v[:, 0] / np.maximum(hz, _EPS), 0.0)
+    az_sin = np.where(hz > _EPS, v[:, 2] / np.maximum(hz, _EPS), 0.0)
+    T = len(B)
+    dt = max(duracion_s, _EPS) / max(T - 1, 1)
+    d = (lambda s: np.gradient(s, dt, axis=0)) if T > 1 else (lambda s: np.zeros_like(s))
+    vm = d(m)
+    v_h = np.linalg.norm(vm[:, [0, 2]], axis=-1)
+    v_v = vm[:, 1]
+    v_az = d(np.unwrap(np.arctan2(az_sin, az_cos)))
+    f = np.concatenate([m, c, h, np.stack([angulo_codo, elev, az_cos, az_sin, v_h, v_v, v_az], -1)], -1)
+    return np.nan_to_num(f, nan=0.0, posinf=0.0, neginf=0.0).astype(np.float32)
+
+
+def features_3d_golpe(P: np.ndarray, M: np.ndarray, side: str, ini: int, fin: int, fps: float) -> np.ndarray:
+    """features3d.construir para un golpe: duracion de la ventana [ini, fin] y ceros sin 3D."""
+    f = features_3d(P, side, (fin - ini) / fps)
+    f[~np.asarray(M, bool)] = 0.0
+    return f
+
+
 def _sha256(p: Path) -> str:
     h = hashlib.sha256()
     with Path(p).open("rb") as fh:
@@ -237,6 +311,11 @@ class ClasificadorGeo:
     def sin_rival(self) -> bool:
         """El modelo de E4a (solo las 20 del brazo): el de bolsa y sombra, donde no hay rival."""
         return self.n_features == N_BRAZO
+
+    @property
+    def con_3d(self) -> bool:
+        """El modelo de E7 (26 + 16 features 3D de HMR2): necesita pose3d_hmr2.npz."""
+        return self.n_features == N_BRAZO + N_RIVAL + N_3D
 
     def familia(self, X: np.ndarray, M: np.ndarray) -> np.ndarray:
         """(n, 3): promedio de las probabilidades de familia de las semillas."""
@@ -289,12 +368,17 @@ def _guardia_efectiva(g: str | None) -> tuple[str, bool]:
 
 
 def clasificar_sesion(directorio: Path, modelo: Path = MODELO_POR_DEFECTO, guardia_a: str | None = None,
-                      guardia_b: str | None = None, clasificador: ClasificadorGeo | None = None) -> dict:
+                      guardia_b: str | None = None, clasificador: ClasificadorGeo | None = None,
+                      pose3d: Path | None = None) -> dict:
     """
     Lee segmentos.json y poses.npz, clasifica cada segmento y escribe tipos.json 0.2.
 
     El id del golpe es el de tools/clasificar_sesion.py y fightcard.id_de_golpe, para que
     aplicar_tipos lo encuentre igual que con v1.
+
+    Con un modelo E7 (modo academico) hace falta `pose3d`, el pose3d_hmr2.npz de
+    tools/elevar_hmr2_sesion.py. Un segmento que no esta en ese archivo entra con el 3D en
+    cero, como un golpe sin 3D en E7, y se cuenta.
     """
     directorio = Path(directorio)
     d = json.loads((directorio / "segmentos.json").read_text())
@@ -302,6 +386,14 @@ def clasificar_sesion(directorio: Path, modelo: Path = MODELO_POR_DEFECTO, guard
     kp, sc = z["keypoints"], z["kp_score"]
     valid = z["valid"] if "valid" in z.files else np.ones(kp.shape[:2], bool)
     clf = clasificador or ClasificadorGeo.cargar(modelo)
+    tres_d = None
+    if clf.con_3d:
+        if pose3d is None or not Path(pose3d).is_file():
+            raise ValueError("el modelo de E7 necesita el 3D de la sesion (pose3d_hmr2.npz); correr "
+                             "tools/elevar_hmr2_sesion.py en boxtwin_4dhumans y pasar --pose3d")
+        with np.load(pose3d) as z3:
+            tres_d = {str(g): (P, M) for g, P, M in zip(z3["gid"], z3["P3"], z3["M3"])}
+    fps = float((d.get("video") or {}).get("fps") or 30.0)
 
     guardia, supuesta = {}, {}
     for lado, g in (("A", guardia_a), ("B", guardia_b)):
@@ -310,7 +402,7 @@ def clasificar_sesion(directorio: Path, modelo: Path = MODELO_POR_DEFECTO, guard
     indices = {"A": 0, "B": 1}
     series: dict = {}
     claves, Xs, Ms = [], [], []
-    saltados = 0
+    saltados = sin_3d = 0
     for s in d["segmentos"]:
         p = indices.get(s["peleador"])
         if p is None or p >= kp.shape[0]:
@@ -324,6 +416,14 @@ def clasificar_sesion(directorio: Path, modelo: Path = MODELO_POR_DEFECTO, guard
         if not M.any():
             saltados += 1
             continue
+        if tres_d is not None:
+            gid3 = f"{s['peleador']}-{BRAZO_ID[brazo]}-{s['inicio']}"
+            ini, fin = ventana(s["inicio"], s["fin"], kp.shape[1])
+            if gid3 in tres_d:
+                X3 = features_3d_golpe(*tres_d[gid3], brazo, ini, fin, fps)
+            else:
+                X3, sin_3d = np.zeros((PASOS, N_3D), np.float32), sin_3d + 1
+            X = np.concatenate([X, X3], -1)
         claves.append((s, brazo))
         Xs.append(X)
         Ms.append(M)
@@ -342,7 +442,7 @@ def clasificar_sesion(directorio: Path, modelo: Path = MODELO_POR_DEFECTO, guard
     met = clf.meta.get("metricas_e4") or {}
     salida = {
         "version": VERSION_TIPOS,
-        "metodo": METODO,
+        "metodo": clf.meta.get("metodo") or METODO,
         "checkpoint": clf.meta.get("nombre", Path(modelo).name),
         "exactitud_familia_fuente_no_vista": met.get("familia_fuente_no_vista"),
         "referencia": met.get("referencia"),
@@ -354,5 +454,9 @@ def clasificar_sesion(directorio: Path, modelo: Path = MODELO_POR_DEFECTO, guard
         "segmentos_sin_clasificar": saltados,
         "tipos": tipos,
     }
+    if clf.meta.get("licencia"):
+        salida["licencia"] = clf.meta["licencia"]
+    if tres_d is not None:
+        salida["segmentos_sin_3d"] = sin_3d
     (directorio / "tipos.json").write_text(json.dumps(salida, indent=2, ensure_ascii=False) + "\n")
     return salida

@@ -42,9 +42,14 @@ import numpy as np
 
 from boxtwin.core.types import FighterId, TrackRole
 
-__all__ = ["ANCHO_CONSOLA", "PROCESADO", "renderizar", "dibujar_consola", "componer"]
+__all__ = ["ANCHO_CONSOLA", "LEYENDA_E7", "PROCESADO", "renderizar", "dibujar_consola", "componer", "leyenda_pie"]
 
 PROCESADO = "procesado.mp4"
+# Modo academico E7 (25-10, docs/specs/2026-10-25-e7-modo-academico): el 3D sale de SMPL, cuya
+# licencia (SMPLify, Max-Planck-Gesellschaft) solo permite uso no comercial y sin fines de
+# lucro. El video procesado viaja solo, asi que lo dice en su pie. Sin tildes: la fuente de
+# opencv no las dibuja.
+LEYENDA_E7 = "modo academico: uso no comercial y sin fines de lucro (SMPL)"
 ANCHO_CONSOLA = 300
 
 # El codec del video procesado, y no es un detalle de implementacion. mp4v es MPEG-4 Parte 2
@@ -149,6 +154,11 @@ def dibujar_consola(lienzo, x0, ancho, peleador, conteo, eventos, total_golpes,
                     0.38, (115, 115, 115), 1)
 
 
+def leyenda_pie(clasificador: dict | None) -> str | None:
+    """La leyenda del pie segun el metodo del tipo de golpe: solo el modo academico E7 lleva."""
+    return LEYENDA_E7 if (clasificador or {}).get("metodo") == "geometrico-e7" else None
+
+
 def componer(img, estado, ancho_consola=ANCHO_CONSOLA):
     """El cuadro final: consola de A, el video, consola de B."""
     import cv2
@@ -162,7 +172,8 @@ def componer(img, estado, ancho_consola=ANCHO_CONSOLA):
     dibujar_consola(lienzo, ancho_consola + ancho, ancho_consola, "B", estado["B"]["conteo"],
                     estado["B"]["eventos"], estado["B"]["total"], exactitud)
     f = cv2.FONT_HERSHEY_SIMPLEX
-    cv2.putText(lienzo, estado["pie"], (ancho_consola + 14, alto - 14), f, 0.5,
+    pie = estado["pie"] + (f"  |  {estado['leyenda']}" if estado.get("leyenda") else "")
+    cv2.putText(lienzo, pie, (ancho_consola + 14, alto - 14), f, 0.5,
                 (210, 210, 210), 1)
     return lienzo
 
@@ -277,6 +288,7 @@ def renderizar(
     estado["exactitud"] = (fc.get("clasificador") or {}).get(
         "exactitud_familia_fuente_no_vista"
     )
+    estado["leyenda"] = leyenda_pie(fc.get("clasificador"))
     if desde:
         cap.set(cv2.CAP_PROP_POS_FRAMES, desde)
 

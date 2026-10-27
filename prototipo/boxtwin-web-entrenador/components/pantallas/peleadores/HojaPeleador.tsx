@@ -11,7 +11,10 @@ import { Button } from "@/components/animate-ui/components/buttons/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectNativo } from "@/components/boxtwin/Controles";
-import { useGuardarBoxeador } from "@/lib/api/consultas";
+import { useGuardarBoxeador, useMiembros } from "@/lib/api/consultas";
+import { Casilla } from "@/components/boxtwin/Controles";
+import { HojaConsentimiento } from "@/components/pantallas/peleadores/Consentimiento";
+import { useCuenta } from "@/lib/cuenta";
 import type { Boxeador } from "@/lib/api/esquemas";
 import { mensajeDeError } from "@/components/boxtwin/Estados";
 
@@ -23,15 +26,27 @@ function numeroODecimal(t: string): number | null {
 }
 
 export function HojaPeleador({
-  abierta, onCerrar, inicial, corta = false, onGuardado,
+  abierta, onCerrar, inicial, corta = false, onGuardado, gimnasio = false,
 }: {
   abierta: boolean;
   onCerrar: () => void;
   inicial?: Boxeador | null;
   corta?: boolean;
   onGuardado?: (b: Boxeador) => void;
+  /* G-07: entrenador a cargo y "Registrar el consentimiento ahora". */
+  gimnasio?: boolean;
 }) {
   const guardar = useGuardarBoxeador();
+  const cuenta = useCuenta().data;
+  // Los miembros los lista solo el titular (B24); un entrenador se ofrece a si mismo.
+  const miembros = useMiembros(gimnasio && cuenta?.rol === "titular");
+  const opciones = gimnasio
+    ? (miembros.data?.filter((m) => !m.baja_en).map((m) => ({ id: m.usuario_id, nombre: m.nombre ?? "—" }))
+      ?? (cuenta?.usuario.id ? [{ id: cuenta.usuario.id, nombre: cuenta.usuario.nombre ?? "Yo" }] : []))
+    : [];
+  const [entrenador, setEntrenador] = useState<string>(inicial?.entrenador?.id ?? "");
+  const [consentirAhora, setConsentirAhora] = useState(!inicial);
+  const [paraConsentir, setParaConsentir] = useState<Boxeador | null>(null);
   const [nombre, setNombre] = useState(inicial?.nombre ?? "");
   const [categoria, setCategoria] = useState(inicial?.categoria ?? "");
   const [guardia, setGuardia] = useState<string>(inicial?.guardia ?? "");
@@ -62,9 +77,14 @@ export function HojaPeleador({
         envergadura_m: v,
         distancia: distancia === "larga" || distancia === "media" || distancia === "corta" ? distancia : null,
         estilo: estilo === "fajador" || estilo === "estilista" ? estilo : null,
+        ...(gimnasio ? { entrenador_id: entrenador || null } : {}),
       });
       toast.success(inicial ? "Peleador guardado." : `${b.nombre} agregado.`);
       onGuardado?.(b);
+      if (gimnasio && !inicial && consentirAhora) {
+        setParaConsentir(b);
+        return;
+      }
       onCerrar();
     } catch (err) {
       setError(mensajeDeError(err));
@@ -72,7 +92,8 @@ export function HojaPeleador({
   }
 
   return (
-    <Sheet open={abierta} onOpenChange={(o) => !o && onCerrar()}>
+    <>
+    <Sheet open={abierta && !paraConsentir} onOpenChange={(o) => !o && onCerrar()}>
       <SheetContent side="bottom" className="h-auto max-h-[90dvh] overflow-y-auto bg-superficie lg:mx-auto lg:max-w-lg lg:rounded-t-lg">
         <SheetHeader>
           <SheetTitle className="font-display text-2xl">{inicial ? "Editar peleador" : "Agregar peleador"}</SheetTitle>
@@ -136,6 +157,20 @@ export function HojaPeleador({
               </div>
             </>
           )}
+          {gimnasio && (
+            <>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="p-entrenador">Entrenador a cargo</Label>
+                <SelectNativo id="p-entrenador" value={entrenador} onChange={(e) => setEntrenador(e.target.value)}>
+                  <option value="">Sin entrenador a cargo</option>
+                  {opciones.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}
+                </SelectNativo>
+              </div>
+              {!inicial && (
+                <Casilla checked={consentirAhora} onChange={setConsentirAhora}>Registrar el consentimiento ahora</Casilla>
+              )}
+            </>
+          )}
           {error && <p role="alert" className="text-sm text-error">{error}</p>}
           <Button type="submit" disabled={guardar.isPending} className="min-h-11 text-base">
             {guardar.isPending ? "Guardando…" : "Guardar"}
@@ -143,5 +178,9 @@ export function HojaPeleador({
         </form>
       </SheetContent>
     </Sheet>
+    {paraConsentir && (
+      <HojaConsentimiento abierta boxeador={paraConsentir.id} nombre={paraConsentir.nombre} onCerrar={() => { setParaConsentir(null); onCerrar(); }} />
+    )}
+    </>
   );
 }

@@ -23,11 +23,18 @@ import type { Sesion } from "@/lib/api/esquemas";
 import type { FightCard } from "@/lib/fightcard";
 import { fechaCorta } from "@/lib/formato";
 import { NOMBRE_CONTEXTO } from "@/lib/textos";
+import type { Cuenta } from "@/lib/api/esquemas";
+import { tiene, useCuenta } from "@/lib/cuenta";
 
 const VISTAS = ["video", "fightcard", "perfiles"] as const;
 type Vista = (typeof VISTAS)[number];
 
-export function nombresDe(s: Sesion, fc?: FightCard | null) {
+/*
+ * Versiones 26-10 (03 §I-04): en Individual las columnas se llaman "Vos" y "Compañero", y el
+ * compañero no tiene perfil. "Peleador B" no aparece nunca en esa version (CA-I05.1).
+ */
+export function nombresDe(s: Sesion, fc?: FightCard | null, cuenta?: Cuenta | null) {
+  if (cuenta?.version === "individual") return { A: "Vos", B: "Compañero" };
   return {
     A: fc?.sesion?.boxeadores?.A?.nombre ?? s.boxeadores?.A?.nombre ?? null,
     B: fc?.sesion?.boxeadores?.B?.nombre ?? s.boxeadores?.B?.nombre ?? null,
@@ -63,13 +70,16 @@ export function PantallaSesion() {
 }
 
 function Cabecera({ s, fc }: { s: Sesion; fc?: FightCard }) {
-  const n = nombresDe(s, fc);
+  const cuenta = useCuenta().data;
+  const n = nombresDe(s, fc, cuenta);
+  // B24: en Gimnasio la cabecera dice quien subio la sesion (03 §4, W34).
+  const subio = tiene(cuenta, "plantel_compartido") ? (fc?.sesion?.autoria?.subida_por ?? s.subida_por?.nombre) : null;
   const deDos = !!fc?.peleadores.B || (s.contexto !== "bolsa" && s.contexto !== "sombra");
   const rondas = fc?.video.rounds.length ?? s.rounds.cantidad ?? 0;
   return (
     <Encabezado
       atras="/sesiones/"
-      rotulo={[NOMBRE_CONTEXTO[s.contexto ?? "sparring"], fechaCorta(s.creada), rondas ? `${rondas} ${rondas === 1 ? "round" : "rounds"}` : "sin rounds"].join(" · ")}
+      rotulo={[NOMBRE_CONTEXTO[s.contexto ?? "sparring"], fechaCorta(s.creada), rondas ? `${rondas} ${rondas === 1 ? "round" : "rounds"}` : "sin rounds", subio ? `Subió ${subio} · ${fechaCorta(s.creada)}` : null].filter(Boolean).join(" · ")}
       titulo={
         <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[26px] lg:text-[40px]">
           <NombreEsquina lado="A" nombre={n.A} />

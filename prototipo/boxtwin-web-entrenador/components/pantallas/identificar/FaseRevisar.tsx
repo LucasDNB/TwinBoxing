@@ -14,6 +14,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/animate-ui/components/buttons/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/animate-ui/components/radix/toggle-group";
+import { esIndividual as esCuentaIndividual, useCuenta } from "@/lib/cuenta";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/animate-ui/components/radix/sheet";
 import { AutoHeight } from "@/components/animate-ui/primitives/effects/auto-height";
 import { ErrorConReintento, Esqueleto, mensajeDeError } from "@/components/boxtwin/Estados";
@@ -87,6 +88,10 @@ function Revision({ s, datos }: { s: Sesion; datos: Tramos }) {
   const cambios = datos.tramos.filter((t) => decisiones[t.track] && decisiones[t.track] !== (t.asignado ?? ""));
   // W19: en bolsa y sombra hay una sola persona; el tramo es ella o se ignora.
   const individual = s.contexto === "bolsa" || s.contexto === "sombra";
+  // Versiones 26-10 (03 §I-03): en la version Individual la revision le habla al boxeador.
+  const vos = esCuentaIndividual(useCuenta().data);
+  const nombreRol = (r: string) =>
+    r === "ninguno" ? "ignorado" : vos ? (r === "A" ? "soy yo" : "mi compañero") : individual ? "es él" : r;
 
   async function enviar() {
     try {
@@ -120,7 +125,7 @@ function Revision({ s, datos }: { s: Sesion; datos: Tramos }) {
                 </button>
                 <p className="text-sm text-texto-2">{textos.motivoTramo[t.motivo]}</p>
                 <p className="text-xs text-texto-3">{decimal(t.t_hasta - t.t_desde, 1)} s</p>
-                {t.asignado && <Rotulo className="text-ok">asignado a mano: {t.asignado === "ninguno" ? "ignorado" : individual ? "es él" : t.asignado}</Rotulo>}
+                {t.asignado && <Rotulo className="text-ok">asignado a mano: {nombreRol(t.asignado)}</Rotulo>}
               </div>
             </div>
             {escritorio && (
@@ -138,7 +143,12 @@ function Revision({ s, datos }: { s: Sesion; datos: Tramos }) {
               className={`mt-3 grid w-full gap-1 ${individual ? "grid-cols-2" : "grid-cols-3"}`}
             >
               {individual ? (
-                <ToggleGroupItem value="A" className="min-h-11 border border-borde">Es él</ToggleGroupItem>
+                <ToggleGroupItem value="A" className="min-h-11 border border-borde">{vos ? "Soy yo" : "Es él"}</ToggleGroupItem>
+              ) : vos ? (
+                <>
+                  <ToggleGroupItem value="A" className="min-h-11 border border-borde">Soy yo</ToggleGroupItem>
+                  <ToggleGroupItem value="B" className="min-h-11 border border-borde">Es mi compañero</ToggleGroupItem>
+                </>
               ) : (
                 <>
                   <ToggleGroupItem value="A" className="min-h-11 border border-borde">A</ToggleGroupItem>

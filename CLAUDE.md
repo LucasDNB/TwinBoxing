@@ -67,8 +67,10 @@ Si escribís prosa o código que contradiga esto, está mal.
 - **Frontend:** desde el 13-10, la web entrenador en Next 16.4 con exportación estática
   (`out/`), servida por la FastAPI vía `BOXTWIN_WEB`. Tailwind 4, componentes de Animate
   UI con `motion` fijado en 12.43.0. Three.js 0.170 (fijado) solo para el avatar 3D
-  estático del perfil y del rival, desde el 14-10: un maniquí de primitivas en un chunk
-  aparte, sin profundidad medida. `boxtwin-web` (React + Vite) queda de respaldo.
+  estático del perfil y del rival, en un chunk aparte y sin profundidad medida: desde el
+  14-10 un maniquí de primitivas, desde el 27-10 un boxeador MPFB2 con rig
+  (`public/models/boxer_mpfb2.glb`, armado por `scripts/avatar_mpfb2.py` en Blender) con el
+  calor de los golpes dirigidos sobre la piel. Sin el GLB cae al maniquí. `boxtwin-web` (React + Vite) queda de respaldo.
 - **Hardware:** desktop `desarrollo-lucas` con NVIDIA RTX 2080 Super (8 GB VRAM),
   Ubuntu, más una notebook. El límite de 8 GB de VRAM es real: verificalo antes
   de proponer batch sizes o modelos grandes.
@@ -329,6 +331,17 @@ Qué sigue y en qué orden, al 20-10: `docs/tareas/2026-10-20-proxima-sesion.md`
 Están pre-registrados en la sección 7 de la spec, escritos antes de medir. No se
 tocan después de ver los resultados.
 
+## 5quinquies. Versiones Individual y Gimnasio (desde el 26-10)
+
+Specs SDD en `prototipo/specs/versiones-26-10/`, registro en `prototipo/TAREAS.md`. Una versión es
+el plan de la cuenta (`cuentas`, `miembros`): toda ruta con datos recibe `acceso_actual` y filtra
+por `cuenta_id`, nunca por `usuario_id`; `tests/test_acceso_estructural.py` falla si alguien
+vuelve a comparar por usuario. Ingreso de prueba con un botón por versión detrás de
+`BOXTWIN_DEMO` (apagada por defecto), cuentas de prueba con `python -m boxtwin_api.demo
+sembrar|reiniciar`. Construido en la rama `versiones-26-10`, **sin desplegar**: se despliega
+después de las sesiones de prueba, con la base respaldada (`despliegue/README.md`). El texto del
+consentimiento por atleta (B25) no está: lo carga Lucas en `boxtwin_api/textos/`.
+
 ## 5quater. Fight-Card, tipo de golpe v2 (desde el 16-10)
 
 Specs SDD en `docs/specs/2026-10-16-fightcard-tipo-v2/`, registro en
@@ -403,8 +416,10 @@ Argparse con defaults sensatos. Todo lo que produzca datos, reanudable.
 ### Git
 
 Ramas con PR contra `main`; commits con mensaje fechado. `testeoDS` está mergeada y
-borrada (20-10). La estación corre `main` desde `~/Proyectos/TwinBoxing`, y
-`GET /salud` dice el commit que está corriendo.
+borrada (20-10). Desde el 26-10 la estación corre la rama `produccion` (desacoplada,
+`1058d5e` al 27-10) desde `~/Proyectos/TwinBoxing`, con las versiones; lo que va a
+producción se hace con PR contra `produccion`, no contra `main`; la instancia académica B sigue en
+`efcec23` (`despliegue/PRODUCCION.md`). `GET /salud` dice el commit que está corriendo.
 
 ### Documentación de experimentos
 

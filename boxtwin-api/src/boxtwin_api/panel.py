@@ -17,7 +17,7 @@ QUE HACE
 
 USO
   from boxtwin_api.panel import construir_panel
-  construir_panel(usuario, db, cfg.dir_sesion, cfg.perfil_preliminar_sesiones)
+  construir_panel(acceso, db, cfg.dir_sesion, cfg.perfil_preliminar_sesiones)
 """
 
 from __future__ import annotations
@@ -73,13 +73,14 @@ def _utc(d: datetime | None) -> datetime | None:
     return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
 
 
-def construir_panel(usuario, db, dir_sesion, preliminar: int, ahora: datetime | None = None) -> dict:
+def construir_panel(acceso, db, dir_sesion, preliminar: int, ahora: datetime | None = None) -> dict:
+    """Lo de la cuenta (versiones 26-10, B19). En Gimnasio, de todos sus miembros."""
     ahora = ahora or datetime.now(timezone.utc)
     inicio_mes = ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     desde_activo = ahora - timedelta(days=DIAS_ACTIVO)
 
     sesiones = db.scalars(
-        select(Sesion).where(Sesion.usuario_id == usuario.id).order_by(Sesion.creada.desc())
+        select(Sesion).where(Sesion.cuenta_id == acceso.cuenta.id).order_by(Sesion.creada.desc())
     ).all()
 
     # -- peleadores ----------------------------------------------------------------
@@ -90,7 +91,7 @@ def construir_panel(usuario, db, dir_sesion, preliminar: int, ahora: datetime | 
             cantidad[bid] = cantidad.get(bid, 0) + 1
             if _utc(s.creada) >= desde_activo:
                 activos.add(bid)
-    propios = set(db.scalars(select(Boxeador.id).where(Boxeador.usuario_id == usuario.id)).all())
+    propios = set(db.scalars(select(Boxeador.id).where(Boxeador.cuenta_id == acceso.cuenta.id)).all())
     activos &= propios
 
     # -- sesiones, rounds y golpes del mes ---------------------------------------------
@@ -123,8 +124,14 @@ def construir_panel(usuario, db, dir_sesion, preliminar: int, ahora: datetime | 
                 recall = r["recall"]
                 break
 
+    # B24: en Gimnasio cada pendiente dice quien lo subio; cualquier miembro lo resuelve.
+    # Solo ahi: en las otras versiones hay un miembro y el pendiente queda como antes.
+    compartido = acceso.plan.plantel_compartido
+    nombres = _nombres(db, {s.usuario_id for s in sesiones}) if compartido else {}
     pendientes = [
-        {"sesion_id": s.id, "estado": s.estado, "titulo": s.nombre}
+        {"sesion_id": s.id, "estado": s.estado, "titulo": s.nombre,
+         **({"subida_por": {"id": s.usuario_id, "nombre": nombres.get(s.usuario_id)}}
+            if compartido else {})}
         for s in sesiones if s.estado == "espera_siembra"
     ]
 
@@ -136,4 +143,57 @@ def construir_panel(usuario, db, dir_sesion, preliminar: int, ahora: datetime | 
         "golpes_detectados_mes": golpes,
         "recall_detector": recall,
         "pendientes": pendientes,
+        # B24: solo el titular de un Gimnasio; nulo para todos los demas (CA-G01.1).
+        "por_entrenador": (
+            _por_entrenador(acceso, db, sesiones)
+            if acceso.plan.plantel_compartido and acceso.rol == "titular" else None
+        ),
     }
+
+
+def _nombres(db, ids: set) -> dict:
+    from boxtwin_api.modelos import Usuario
+
+    if not ids:
+        return {}
+    return {u.id: (u.nombre or u.email)
+            for u in db.scalars(select(Usuario).where(Usuario.id.in_(ids))).all()}
+
+
+def _por_entrenador(acceso, db, sesiones) -> list[dict]:
+    """
+    Sesiones, horas y pendientes del mes por miembro activo, en el orden en que entraron.
+    El mes es el del cupo, cortado en Buenos Aires, para que las horas sumen lo mismo que
+    GET /cuenta.
+    """
+    from collections import defaultdict
+
+    from boxtwin_api.cupo import inicio_de_mes
+    from boxtwin_api.modelos import Miembro
+
+    desde, hasta, _ = inicio_de_mes(datetime.now(timezone.utc))
+    por_usuario: dict[str, list] = defaultdict(list)
+    for s in sesiones:
+        por_usuario[s.usuario_id].append(s)
+    miembros = db.scalars(
+        select(Miembro).where(Miembro.cuenta_id == acceso.cuenta.id, Miembro.baja_en.is_(None))
+        .order_by(Miembro.desde)
+    ).all()
+    nombres = _nombres(db, {m.usuario_id for m in miembros})
+    filas = []
+    for m in miembros:
+        suyas = por_usuario.get(m.usuario_id, [])
+        del_mes = [s for s in suyas if desde <= _utc(s.creada) < hasta]
+        segundos = sum(
+            (s.duracion_s if s.duracion_s is not None else (s.duracion_declarada_s or 0.0))
+            for s in del_mes if s.estado != "fallo"
+        )
+        filas.append({
+            "usuario_id": m.usuario_id,
+            "nombre": nombres.get(m.usuario_id),
+            "rol": m.rol,
+            "sesiones_mes": len(del_mes),
+            "horas_mes": round(segundos / 3600, 2),
+            "pendientes": sum(1 for s in suyas if s.estado == "espera_siembra"),
+        })
+    return filas

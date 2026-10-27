@@ -28,6 +28,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     DateTime,
     Float,
     ForeignKey,
@@ -42,7 +43,10 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 __all__ = [
     "AsignacionManual",
     "Base",
+    "Consentimiento",
     "Correccion",
+    "Cuenta",
+    "Miembro",
     "ESTADOS_SESION",
     "ESTADOS_TRABAJO",
     "ETAPAS",
@@ -81,9 +85,50 @@ class Usuario(Base):
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=nuevo_id)
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True)
     hash_clave: Mapped[str] = mapped_column(String(255))
+    # B29 (versiones 26-10): el nombre que se muestra en la autoria (B24). Nulo en las cuentas
+    # anteriores: la web muestra el email.
+    nombre: Mapped[str | None] = mapped_column(String(80), nullable=True)
     creado: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
 
     sesiones: Mapped[list[Sesion]] = relationship(back_populates="usuario")
+
+
+class Cuenta(Base):
+    """
+    Quien tiene el plan (versiones 26-10, B19). Una version es un campo de la cuenta y no
+    otra aplicacion: Individual, Entrenador o Gimnasio, con lo que tiene cada una en planes.py.
+
+    `boxeador_propio_id` sin FK declarada: boxeadores ya apunta a cuentas y una referencia
+    circular pide ALTER TABLE para la restriccion, que sqlite no tiene. Se valida en codigo.
+    """
+
+    __tablename__ = "cuentas"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=nuevo_id)
+    nombre: Mapped[str] = mapped_column(String(120))
+    version: Mapped[str] = mapped_column(String(16), index=True, default="entrenador")
+    boxeador_propio_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    # B29: las cuentas de la version de prueba. Los botones del ingreso solo llegan aca.
+    demo: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
+
+
+class Miembro(Base):
+    """
+    Un usuario en una cuenta, con su rol. Un usuario pertenece a UNA cuenta (usuario_id
+    unico): restriccion deliberada del PFI, con ella la cuenta sale del usuario y no hay que
+    elegirla en cada pedido. Una baja no borra la fila: queda quien lo dio de baja y cuando.
+    """
+
+    __tablename__ = "miembros"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=nuevo_id)
+    cuenta_id: Mapped[str] = mapped_column(ForeignKey("cuentas.id"), index=True)
+    usuario_id: Mapped[str] = mapped_column(ForeignKey("usuarios.id"), unique=True)
+    rol: Mapped[str] = mapped_column(String(16), default="titular")
+    desde: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
+    baja_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    baja_por: Mapped[str | None] = mapped_column(String(32), nullable=True)
 
 
 class Sesion(Base):
@@ -92,7 +137,12 @@ class Sesion(Base):
     __tablename__ = "sesiones"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=nuevo_id)
+    # Quien la subio. La duena es la cuenta (B19): todo lo que decide quien la ve compara
+    # cuenta_id, nunca esto.
     usuario_id: Mapped[str] = mapped_column(ForeignKey("usuarios.id"), index=True)
+    cuenta_id: Mapped[str | None] = mapped_column(
+        ForeignKey("cuentas.id"), nullable=True, index=True
+    )
     nombre: Mapped[str] = mapped_column(String(255))
     estado: Mapped[str] = mapped_column(String(32), default="subida", index=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -100,6 +150,9 @@ class Sesion(Base):
     video_nombre: Mapped[str] = mapped_column(String(255))
     duracion_s: Mapped[float | None] = mapped_column(Float, nullable=True)
     fps: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # B20: lo que declaro la web al subir. Cuenta para el cupo mientras no hay duracion_s,
+    # que la copia el worker de sesion.json al terminar procesar.
+    duracion_declarada_s: Mapped[float | None] = mapped_column(Float, nullable=True)
     round_s: Mapped[float | None] = mapped_column(Float, nullable=True)
     descanso_s: Mapped[float] = mapped_column(Float, default=60.0)
 
@@ -162,10 +215,20 @@ class Boxeador(Base):
     """
 
     __tablename__ = "boxeadores"
-    __table_args__ = (UniqueConstraint("usuario_id", "nombre", name="uq_boxeador_nombre"),)
+    __table_args__ = (
+        UniqueConstraint("usuario_id", "nombre", name="uq_boxeador_nombre"),
+        # B19: el nombre es unico por cuenta. En una base anterior lo crea completar_cuentas.
+        Index("uq_boxeador_cuenta_nombre", "cuenta_id", "nombre", unique=True),
+    )
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=nuevo_id)
+    # Quien lo cargo. El dueno es la cuenta (B19).
     usuario_id: Mapped[str] = mapped_column(ForeignKey("usuarios.id"), index=True)
+    cuenta_id: Mapped[str | None] = mapped_column(
+        ForeignKey("cuentas.id"), nullable=True, index=True
+    )
+    # B24: el entrenador a cargo, en Gimnasio. Un miembro activo de la cuenta.
+    entrenador_id: Mapped[str | None] = mapped_column(ForeignKey("usuarios.id"), nullable=True)
     nombre: Mapped[str] = mapped_column(String(120))
     guardia: Mapped[str | None] = mapped_column(String(16), nullable=True)
     notas: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -237,6 +300,8 @@ class Correccion(Base):
     tipo_original: Mapped[str | None] = mapped_column(String(32), nullable=True)
     checkpoint: Mapped[str | None] = mapped_column(String(255), nullable=True)
     datos: Mapped[dict] = mapped_column(JSON, default=dict)
+    # B24: quien corrigio. Nulo en las filas anteriores a las cuentas.
+    usuario_id: Mapped[str | None] = mapped_column(ForeignKey("usuarios.id"), nullable=True)
     creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
 
 
@@ -257,3 +322,27 @@ class AsignacionManual(Base):
     rol: Mapped[str] = mapped_column(String(8))
     usuario_id: Mapped[str] = mapped_column(ForeignKey("usuarios.id"))
     creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
+
+
+class Consentimiento(Base):
+    """
+    El consentimiento de un atleta del plantel, en Gimnasio (B25, DV-5).
+
+    Uno por atleta y no uno por sesion, porque en un gimnasio se filma a los mismos todas las
+    semanas. Revocar no borra la fila: es la constancia de que existio y de quien lo cargo.
+    `semilla` marca los que carga la version de prueba, que no se revocan.
+    """
+
+    __tablename__ = "consentimientos"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=nuevo_id)
+    cuenta_id: Mapped[str] = mapped_column(ForeignKey("cuentas.id"), index=True)
+    boxeador_id: Mapped[str] = mapped_column(ForeignKey("boxeadores.id"), index=True)
+    texto_version: Mapped[str] = mapped_column(String(40))
+    mayor_de_edad: Mapped[bool] = mapped_column(Boolean, default=True)
+    nota: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    registrado_por: Mapped[str] = mapped_column(ForeignKey("usuarios.id"))
+    registrado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
+    revocado_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revocado_por: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    semilla: Mapped[bool] = mapped_column(Boolean, default=False)

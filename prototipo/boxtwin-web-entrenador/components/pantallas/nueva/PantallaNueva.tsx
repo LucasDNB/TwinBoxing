@@ -9,6 +9,11 @@
  *
  * La subida va con XHR (progreso real) y se puede cancelar. Mientras sube, salir de la
  * pagina pide confirmacion (beforeunload).
+ *
+ * Versiones 26-10 (03 §I-02, §G-02): en Individual no hay paso de peleadores (la API pone al
+ * propio como A) y el consentimiento son dos casillas segun el contexto; en Gimnasio cada
+ * atleta lleva su consentimiento y sin uno vigente no se lo puede elegir. En todas, las horas
+ * que quedan en el mes y la duracion declarada para el cupo (B20).
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -28,12 +33,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { HojaPeleador } from "@/components/pantallas/peleadores/HojaPeleador";
+import { HojaConsentimiento } from "@/components/pantallas/peleadores/Consentimiento";
+import { CONDICIONES_UNA_PERSONA } from "@/components/pantallas/progreso/PantallaProgreso";
+import { esIndividual, useCuenta } from "@/lib/cuenta";
 import { AvisoEnConstruccion } from "@/components/boxtwin/EnConstruccion";
 import { ErrorApi, subirConProgreso, type Subida } from "@/lib/api/cliente";
 import { asignarBoxeadores, claves, useBoxeadores, useProducto } from "@/lib/api/consultas";
 import { CONTEXTOS, PRACTICAS, type Contexto } from "@/lib/api/esquemas";
 import { estadoDe } from "@/lib/banderas";
-import { megabytes, mmss, nombreCorto, porcentaje } from "@/lib/formato";
+import { decimal, megabytes, mmss, nombreCorto, porcentaje } from "@/lib/formato";
 import {
   CONDICIONES_FILMACION, avisoDeCalidad, estimacion, leerMetadatos, mmssASegundos,
   validarArchivo, validarDuracion, type Metadatos,
@@ -54,6 +62,11 @@ export function PantallaNueva() {
   const qc = useQueryClient();
   const producto = useProducto();
   const boxeadores = useBoxeadores();
+  const cuenta = useCuenta().data;
+  const individual = esIndividual(cuenta);
+  const porAtleta = cuenta?.funciones.consentimiento === "atleta";
+  const [consentimientoCompañero, setConsentimientoCompañero] = useState(false);
+  const [consentirA, setConsentirA] = useState<{ id: string; nombre: string } | null>(null);
 
   // 1. Video
   const [archivo, setArchivo] = useState<File | null>(null);
@@ -85,6 +98,12 @@ export function PantallaNueva() {
   const p = producto.data;
   const individuales = estadoDe("02.individuales", p) === "medido";
   const deDos = DE_DOS.includes(contexto);
+  const unaPersona = individual && !deDos;
+  // La checklist de una persona en bolsa y sombra de Individual (03 §I-02).
+  const condicionesFilmacion = unaPersona
+    ? CONDICIONES_UNA_PERSONA.map((texto, i) => ({ id: `una-${i}`, texto }))
+    : CONDICIONES_FILMACION;
+  const subidaApagada = !!cuenta?.demo && p?.demo?.subir === false;
 
   // beforeunload mientras sube: no se abandona sin confirmar (04 §02).
   useEffect(() => {
@@ -132,19 +151,30 @@ export function PantallaNueva() {
   const completos = {
     1: !!archivo,
     2: contexto !== "sombra" || !!practica,
-    3: !deDos || pelA !== pelB || pelA === SIN_PERFIL,
+    3: individual || !deDos || pelA !== pelB || pelA === SIN_PERFIL,
     4: rondasValidas,
   };
-  const mismoPeleador = deDos && pelA !== SIN_PERFIL && pelA === pelB;
-  const faltanCondiciones = CONDICIONES_FILMACION.some((c) => !condiciones[c.id]);
-  const listo = completos[1] && completos[2] && completos[3] && completos[4] && consentimiento && !mismoPeleador;
+  const mismoPeleador = !individual && deDos && pelA !== SIN_PERFIL && pelA === pelB;
+  const faltanCondiciones = condicionesFilmacion.some((c) => !condiciones[c.id]);
+  // En Individual, "soy yo" siempre y, con dos personas, la del compañero (CA-I02.2).
+  const consentido = consentimiento && (!individual || !deDos || consentimientoCompañero);
+
+  // Horas del mes (B20): lo que usaria esta sesion contra lo que queda.
+  const horas = cuenta?.horas ?? null;
+  const usaria = meta ? meta.duracion_s / 3600 : null;
+  const sinHoras = !!horas && usaria != null && usaria > horas.restantes;
+  const bloqueaHoras = sinHoras && horas!.modo === "bloquear";
+  const listo = completos[1] && completos[2] && completos[3] && completos[4] && consentido && !mismoPeleador
+    && !bloqueaHoras && !subidaApagada;
 
   function porQueNo(): string | null {
     if (!archivo) return "Falta elegir el video.";
     if (!completos[2]) return "Falta decir qué se practicó.";
     if (mismoPeleador) return "El mismo peleador no puede estar en los dos rincones.";
     if (!rondasValidas) return "Revisá los rounds: cantidad, duración y descanso en mm:ss.";
-    if (!consentimiento) return "Falta confirmar el consentimiento de las personas filmadas.";
+    if (!consentido) return "Falta confirmar el consentimiento de las personas filmadas.";
+    if (bloqueaHoras) return textos.cupoExcedidoBloquear(usaria!, horas!.restantes);
+    if (subidaApagada) return textos.demoSubirApagado;
     return null;
   }
 
@@ -153,6 +183,10 @@ export function PantallaNueva() {
   const nombreDe = (id: string) => lista.find((b) => b.id === id)?.nombre ?? null;
 
   function tituloDeSesion() {
+    if (individual) {
+      const yo = cuenta?.boxeador_propio?.nombre;
+      return yo ? `${NOMBRE_CONTEXTO[contexto]} · ${nombreCorto(yo)}` : NOMBRE_CONTEXTO[contexto];
+    }
     const a = nombreDe(pelA);
     const b = deDos ? nombreDe(pelB) : null;
     const quien = a && b ? `${nombreCorto(a)} vs ${nombreCorto(b)}` : a ? nombreCorto(a) : b ? nombreCorto(b) : null;
@@ -168,6 +202,7 @@ export function PantallaNueva() {
     datos.append("contexto", contexto);
     if (contexto === "sombra" && practica) datos.append("practica", practica);
     datos.append("consentimiento", "true");
+    if (meta) datos.append("duracion_declarada_s", String(Math.round(meta.duracion_s)));
     if (!sinRounds) {
       datos.append("rounds", String(Number(cantidad)));
       datos.append("round_s", String(mmssASegundos(duracionRound)));
@@ -179,8 +214,9 @@ export function PantallaNueva() {
     try {
       const r = await s.promesa;
       enCurso.current = null;
-      const a = pelA !== SIN_PERFIL ? pelA : null;
-      const b = deDos && pelB !== SIN_PERFIL ? pelB : null;
+      // En Individual la API ya puso al propio como A (B22): no se asigna nada.
+      const a = !individual && pelA !== SIN_PERFIL ? pelA : null;
+      const b = !individual && deDos && pelB !== SIN_PERFIL ? pelB : null;
       if (a || b) {
         try {
           await asignarBoxeadores(r.job_id, a, b);
@@ -215,7 +251,7 @@ export function PantallaNueva() {
       <section aria-labelledby="paso-5" className="rounded-md border border-borde bg-superficie p-4">
         <h2 id="paso-5" className="font-display text-xl font-semibold lg:text-2xl">Para que el análisis salga bien</h2>
         <div className="mt-3 flex flex-col">
-          {CONDICIONES_FILMACION.map((c) => (
+          {condicionesFilmacion.map((c) => (
             <Casilla key={c.id} checked={!!condiciones[c.id]} onChange={(v) => setCondiciones((x) => ({ ...x, [c.id]: v }))}>
               {c.texto}
             </Casilla>
@@ -225,9 +261,22 @@ export function PantallaNueva() {
 
       <section aria-labelledby="paso-6" className="rounded-md border border-borde bg-superficie p-4">
         <h2 id="paso-6" className="font-display text-xl font-semibold lg:text-2xl">Consentimiento</h2>
-        <Casilla className="mt-2" checked={consentimiento} onChange={setConsentimiento}>
-          {textos.consentimiento}
-        </Casilla>
+        {individual ? (
+          <>
+            <Casilla className="mt-2" checked={consentimiento} onChange={setConsentimiento}>
+              {textos.consentimientoPropio}
+            </Casilla>
+            {deDos && (
+              <Casilla checked={consentimientoCompañero} onChange={setConsentimientoCompañero}>
+                {textos.consentimientoCompañero}
+              </Casilla>
+            )}
+          </>
+        ) : (
+          <Casilla className="mt-2" checked={consentimiento} onChange={setConsentimiento}>
+            {textos.consentimiento}
+          </Casilla>
+        )}
       </section>
 
       <section aria-labelledby="paso-7" className="rounded-md border border-borde bg-superficie p-4">
@@ -237,6 +286,21 @@ export function PantallaNueva() {
           <dd>{tituloDeSesion()}</dd>
           <dt className="text-tenue">Rounds</dt>
           <dd>{sinRounds ? "sin rounds" : `${cantidad} de ${duracionRound}, descanso ${descanso}`}</dd>
+          {horas && (
+            <>
+              <dt className="text-tenue">Horas</dt>
+              <dd data-testid="horas-sesion">
+                {usaria != null
+                  ? `Esta sesión usa unos ${Math.max(1, Math.round(usaria * 60))} min de las ${decimal(horas.restantes, 1)} h que ${individual ? "te quedan" : "le quedan al mes"}.`
+                  : `Quedan ${decimal(horas.restantes, 1)} h de ${decimal(horas.incluidas, 0)} este mes.`}
+                {sinHoras && (
+                  <span role={bloqueaHoras ? "alert" : undefined} className={`block text-xs ${bloqueaHoras ? "text-error" : "text-estimado"}`}>
+                    {bloqueaHoras ? textos.cupoExcedidoBloquear(usaria!, horas.restantes) : textos.cupoExcedidoInformar(horas.incluidas)}
+                  </span>
+                )}
+              </dd>
+            </>
+          )}
           {est && (
             <>
               <dt className="text-tenue">Tiempo</dt>
@@ -259,6 +323,11 @@ export function PantallaNueva() {
   return (
     <>
       <Encabezado titulo="Nueva sesión" rotulo="Subir" />
+      {subidaApagada && (
+        <p role="status" className="mb-4 rounded-md border border-estimado-borde bg-estimado-fondo px-3 py-2 text-sm">
+          {textos.demoSubirApagado}
+        </p>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr] lg:gap-6">
         <div className="flex flex-col gap-4">
@@ -320,6 +389,12 @@ export function PantallaNueva() {
                 );
               })}
             </ToggleGroup>
+            {unaPersona && (
+              <p className="mt-3 rounded-md border border-estimado-borde bg-estimado-fondo px-3 py-2 text-sm text-estimado">
+                <span className="rotulo mr-2">función sin validar</span>
+                {textos.individualSinValidar}
+              </p>
+            )}
             {contexto === "sombra" && (
               <fieldset className="mt-4">
                 <legend className="mb-2 text-sm text-texto-2">Qué se practicó</legend>
@@ -334,7 +409,13 @@ export function PantallaNueva() {
             )}
           </Paso>
 
-          {/* 3. Peleadores */}
+          {/* 3. Peleadores. En Individual no existe: la sesion es del peleador propio. */}
+          {individual ? (
+            <p className="rounded-md border border-borde bg-superficie px-4 py-3 text-sm" data-testid="aparece-como">
+              Vas a aparecer como {cuenta?.boxeador_propio?.nombre ?? "vos"}
+              {deDos ? "; tu compañero no tiene perfil." : "."}
+            </p>
+          ) : (
           <Paso
             numero={3}
             titulo="Peleadores"
@@ -364,11 +445,15 @@ export function PantallaNueva() {
                       }}
                     >
                       <option value={SIN_PERFIL}>Rival sin perfil (no se guarda)</option>
-                      {lista.map((b) => (
-                        <option key={b.id} value={b.id} disabled={deDos && b.id === otro}>
-                          {b.nombre}{b.categoria ? ` · ${b.categoria}` : ""}
-                        </option>
-                      ))}
+                      {lista.map((b) => {
+                        // G-02: sin consentimiento vigente no se elige (la API da 422 igual).
+                        const sinConsentimiento = porAtleta && b.consentimiento?.estado !== "vigente";
+                        return (
+                          <option key={b.id} value={b.id} disabled={(deDos && b.id === otro) || sinConsentimiento}>
+                            {b.nombre}{b.categoria ? ` · ${b.categoria}` : ""}{sinConsentimiento ? " · Falta el consentimiento" : ""}
+                          </option>
+                        );
+                      })}
                       <option value={AGREGAR}>+ Agregar peleador</option>
                     </SelectNativo>
                   </div>
@@ -376,7 +461,20 @@ export function PantallaNueva() {
               })}
             </div>
             {mismoPeleador && <p role="alert" className="mt-2 text-sm text-error">El mismo peleador no puede estar en los dos rincones.</p>}
+            {porAtleta && lista.some((b) => b.consentimiento?.estado !== "vigente") && (
+              <ul className="mt-3 flex flex-col gap-1 text-sm text-texto-2" aria-label="Atletas sin consentimiento">
+                {lista.filter((b) => b.consentimiento?.estado !== "vigente").map((b) => (
+                  <li key={b.id} className="flex flex-wrap items-center gap-2">
+                    {textos.consentimientoFalta(b.nombre)}
+                    <button type="button" className="min-h-11 underline underline-offset-4" onClick={() => setConsentirA({ id: b.id, nombre: b.nombre })}>
+                      Registrarlo
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Paso>
+          )}
 
           {/* 4. Rounds */}
           <Paso
@@ -462,6 +560,10 @@ export function PantallaNueva() {
       </AlertDialog>
 
       <AvisoEnConstruccion abierto={enConstruccion} onCerrar={() => setEnConstruccion(false)} texto={textos.enConstruccion.individuales} />
+
+      {consentirA && (
+        <HojaConsentimiento abierta onCerrar={() => setConsentirA(null)} boxeador={consentirA.id} nombre={consentirA.nombre} />
+      )}
 
       {hojaPara && (
         <HojaPeleador

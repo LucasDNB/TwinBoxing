@@ -12,12 +12,15 @@
  * Los numeros salen todos de la API (B15 a B17); aca solo se dibujan con su estado.
  */
 import Link from "next/link";
-import { Avatar3D } from "@/components/boxtwin/avatar/Avatar3D";
+import { useState } from "react";
+import { AJUSTES_CALOR, Avatar3D } from "@/components/boxtwin/avatar/Avatar3D";
+import { LeyendaCalor } from "@/components/boxtwin/avatar/LeyendaCalor";
 import { EstadoBloque, Estimado } from "@/components/boxtwin/EstadoBloque";
 import { Rotulo } from "@/components/boxtwin/Rotulo";
 import { NOMBRE_ZONA, SiluetaZonas } from "@/components/boxtwin/graficos/SiluetaZonas";
 import { TIPOS_GOLPE, ZONAS, type Perfil, type Producto, type Zona } from "@/lib/api/esquemas";
 import { estadoDe, visible } from "@/lib/banderas";
+import { intensidades } from "@/lib/avatar/exposicion";
 import { decimal, entero, nombreDeTipo, porcentajeAR } from "@/lib/formato";
 import { medidasDe } from "@/lib/maniqui";
 import { textos } from "@/lib/textos";
@@ -165,7 +168,7 @@ export function VolumenPorRound({ p, producto }: { p: Perfil; producto?: Product
 
 // -- W22 ---------------------------------------------------------------------------------
 
-export function MapaExposicion({ p, producto, contexto }: { p: Perfil; producto?: Producto; contexto: string }) {
+export function MapaExposicion({ p, producto, contexto, vos = false }: { p: Perfil; producto?: Producto; contexto: string; vos?: boolean }) {
   const e = p.exposicion;
   const estado = estadoDe("06.exposicion", producto);
   if (estado !== "estimacion") {
@@ -175,20 +178,20 @@ export function MapaExposicion({ p, producto, contexto }: { p: Perfil; producto?
   return (
     <EstadoBloque
       estado="estimacion"
-      titulo="Hacia dónde le tiran"
+      titulo={vos ? "Lo que te tiraron tus compañeros" : "Hacia dónde le tiran"}
       nota={e?.sesgo_detector.corregido ? textos.exposicionCorregida(e.sesgo_detector.recall_cuerpo, e.sesgo_detector.recall_cabeza) : undefined}
     >
       <p className="mb-3 text-sm text-texto-2">{textos.exposicionSubtitulo}</p>
       {sinRival || !e ? (
         <p className="text-sm text-texto-3">{sinRival ? textos.exposicionSinRival : "Todavía no hay sesiones de sparring o combate."}</p>
       ) : (
-        <ContenidoMapa e={e} />
+        <ContenidoMapa e={e} vos={vos} />
       )}
     </EstadoBloque>
   );
 }
 
-function ContenidoMapa({ e }: { e: NonNullable<Perfil["exposicion"]> }) {
+function ContenidoMapa({ e, vos = false }: { e: NonNullable<Perfil["exposicion"]>; vos?: boolean }) {
   const conDato = e.con_dato ?? 0;
   const colorear = conDato >= MINIMO_MAPA;
   const fr = Object.fromEntries(ZONAS.map((z) => [z, e.zonas?.[z]?.fraccion_corregida ?? null])) as Record<Zona, number | null>;
@@ -230,7 +233,7 @@ function ContenidoMapa({ e }: { e: NonNullable<Perfil["exposicion"]> }) {
             <p className="text-sm">Rivales que aportan</p>
             <ul className="mt-1 text-sm text-texto-2">
               {e.por_rival.map((r) => (
-                <li key={r.boxeador_id ?? "sin"} className="flex justify-between"><span>{r.nombre}</span><span className="dato">{r.total}</span></li>
+                <li key={r.boxeador_id ?? "sin"} className="flex justify-between"><span>{vos && !r.boxeador_id ? "sin perfil" : r.nombre}</span><span className="dato">{r.total}</span></li>
               ))}
             </ul>
             {dominante && <p className="mt-2 text-sm text-estimado">{textos.exposicionDominante(dominante.nombre)}</p>}
@@ -250,6 +253,10 @@ export function AvatarPerfil({ p, producto }: { p: Perfil; producto?: Producto }
   const medidas = m.aEscala
     ? `${decimal(m.altura, 2)} m de altura y ${decimal(m.envergadura, 2)} m de envergadura`
     : "proporciones estándar";
+  // El calor es el mismo dato que el mapa de exposicion (W22): si ese bloque no se ve, no se pinta.
+  const zonas = visible("06.exposicion", producto) ? p.exposicion?.zonas : null;
+  const calor = intensidades(zonas);
+  const [ajustes, setAjustes] = useState(AJUSTES_CALOR);
   return (
     <EstadoBloque
       estado={estadoDe("06.avatar", producto)}
@@ -257,11 +264,22 @@ export function AvatarPerfil({ p, producto }: { p: Perfil; producto?: Producto }
       accion={<Rotulo className="text-estimado">{textos.avatarIlustrativo}</Rotulo>}
     >
       <Avatar3D
-        figuras={[{ medidas: m, guardia, lado: "A", extension: { adelantada: 0.15, atrasada: 0 }, x: 0, mira: 1 }]}
-        etiqueta={`Maniquí en guardia ${guardia ?? "sin guardia cargada"}, ${medidas}`}
+        figuras={[{ medidas: m, guardia, lado: "A", extension: { adelantada: 0.15, atrasada: 0 }, x: 0, mira: 1, calor }]}
+        etiqueta={`Avatar en guardia ${guardia ?? "sin guardia cargada"}, ${medidas}${calor ? ", con el mapa de golpes dirigidos sobre el cuerpo" : ""}`}
         alternativa={`En guardia ${guardia ?? "(sin guardia cargada)"}, ${medidas}.`}
-        alto={280}
+        alto={340}
+        ajustes={ajustes}
       />
+      {calor && zonas && (
+        <div className="mt-3">
+          <LeyendaCalor
+            id="calor-perfil"
+            ajustes={ajustes}
+            onCambio={setAjustes}
+            fracciones={Object.fromEntries(ZONAS.map((z) => [z, zonas[z]?.fraccion_corregida ?? null])) as Record<Zona, number | null>}
+          />
+        </div>
+      )}
       {!m.aEscala && <p className="mt-2 text-xs text-texto-3">{textos.avatarSinMedidas}</p>}
       <p className="mt-1 text-xs text-texto-3">Arrastrá para girarlo.</p>
     </EstadoBloque>

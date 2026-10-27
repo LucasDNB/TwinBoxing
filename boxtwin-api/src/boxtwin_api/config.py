@@ -114,6 +114,11 @@ class Config:
     cmd_clasificador: list[str] = field(
         default_factory=lambda: _lista("BOXTWIN_CMD_CLASIFICADOR", "")
     )
+    # Modo academico E7 (25-10, docs/specs/2026-10-25-e7-modo-academico): la elevacion con
+    # HMR2 corre en boxtwin_4dhumans (tools/elevar_hmr2_sesion.py). Vacio = el modo no corre.
+    cmd_hmr2: list[str] = field(
+        default_factory=lambda: _lista("BOXTWIN_CMD_HMR2", "")
+    )
     modelo_guantes: Path = field(
         default_factory=lambda: _ruta("BOXTWIN_MODELO_GUANTES", "modelos/guantes-v2.pt")
     )
@@ -135,15 +140,19 @@ class Config:
     # Tipo de golpe v2 (docs/specs/2026-10-16-fightcard-tipo-v2): "geometrico" clasifica la
     # familia con el modelo de E4 en el entorno del anotador, sin boxtwin_mmaction. Por
     # defecto "poseconv3d", el comportamiento de antes; lo enciende Lucas. Un valor mal
-    # escrito cuenta como el de antes.
+    # escrito cuenta como el de antes. "e7" (25-10) es el modo academico: E4 mas el 3D de
+    # HMR2, con SMPL bajo licencia de investigacion. Nunca para usuarios (enmienda, 2 y 3).
     clasificador: str = field(
         default_factory=lambda: (
-            "geometrico" if os.environ.get("BOXTWIN_CLASIFICADOR", "").strip().lower() == "geometrico"
+            v if (v := os.environ.get("BOXTWIN_CLASIFICADOR", "").strip().lower()) in ("geometrico", "e7")
             else "poseconv3d"
         )
     )
     modelo_clasificador_geo: Path = field(
         default_factory=lambda: _ruta("BOXTWIN_MODELO_CLASIFICADOR_GEO", "~/boxtwin/modelos/clasificador_geo_v1")
+    )
+    modelo_clasificador_e7: Path = field(
+        default_factory=lambda: _ruta("BOXTWIN_MODELO_CLASIFICADOR_E7", "~/boxtwin/modelos/clasificador_e7_v1")
     )
     # Bolsa y sombra (16-10): el modelo de E4a, sin las 6 features del rival. Con el de E4 una
     # sesion de una sola persona entraria con el rival en cero todo el golpe.
@@ -218,6 +227,36 @@ class Config:
         default_factory=lambda: int(os.environ.get("BOXTWIN_PERFIL_PRELIMINAR", "5"))
     )
 
+    # -- Versiones (prototipo/specs/versiones-26-10) ----------------------------------------
+    #
+    # Cupo de horas (DV-2): "informar" deja subir y avisa; "bloquear" rechaza con 409. Un valor
+    # mal escrito cuenta como informar. En las cuentas de prueba bloquea siempre (RNF-D3).
+    cupo: str = field(
+        default_factory=lambda: (
+            "bloquear" if os.environ.get("BOXTWIN_CUPO", "").strip().lower() == "bloquear"
+            else "informar"
+        )
+    )
+    # Version de prueba (B29). Apagada por defecto: apagada, POST /auth/demo ni se registra.
+    # Se enciende solo en las ventanas de ensayo y presentacion (DV-10).
+    demo: bool = field(
+        default_factory=lambda: os.environ.get("BOXTWIN_DEMO", "").strip().lower() in ("1", "si")
+    )
+    # Cortar la subida en las cuentas de prueba sin apagar el resto (DV-11). Encendida por
+    # defecto: solo "0" o "no" la apagan.
+    demo_subir: bool = field(
+        default_factory=lambda: os.environ.get("BOXTWIN_DEMO_SUBIR", "1").strip().lower()
+        not in ("0", "no")
+    )
+    # El texto del consentimiento por atleta (B25) vive en archivos versionados. Si falta, la
+    # API no lo inventa: GET /cuenta/consentimiento contesta 409 y dice donde cargarlo (DV-5).
+    # El texto se versiona con el codigo. BOXTWIN_TEXTOS es SOLO para las pruebas de punta a
+    # punta, que necesitan un texto de prueba sin meterlo en el paquete; en la estacion no se
+    # setea (02 §8 dice que las variables nuevas son tres: esta es un desvio declarado).
+    textos: Path = field(
+        default_factory=lambda: _ruta("BOXTWIN_TEXTOS", str(Path(__file__).resolve().parent / "textos"))
+    )
+
     @property
     def modo_registro(self) -> str:
         if not self.invitacion:
@@ -225,9 +264,14 @@ class Config:
         return "abierto" if self.invitacion == "abierto" else "invitacion"
 
     @property
+    def tipo_v2(self) -> bool:
+        """El tipo sale del modelo geometrico (E4, o E7 en modo academico): la guardia cuenta."""
+        return self.clasificador in ("geometrico", "e7")
+
+    @property
     def hay_clasificador(self) -> bool:
         """Si la etapa clasificar se puede correr: v2 no necesita BOXTWIN_CMD_CLASIFICADOR."""
-        return self.clasificador == "geometrico" or bool(self.cmd_clasificador)
+        return self.tipo_v2 or bool(self.cmd_clasificador)
 
     def dir_sesion(self, sesion_id: str) -> Path:
         return self.datos / "sesiones" / sesion_id

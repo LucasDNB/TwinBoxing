@@ -30,6 +30,8 @@ import comun  # noqa: E402
 
 # Directorio de trabajo de esta campana. Nada pesado entra a git.
 TRABAJO = Path(os.environ.get("BOXTWIN_CLASIFICADOR_GEO", "~/boxtwin/clasificador-geo-2026-10")).expanduser()
+# Trabajo de E7 (4D-Humans, 24-10): aparte, para no tocar el de E4 y E5 (pre-registro E7, 5.2).
+TRABAJO_E7 = Path(os.environ.get("BOXTWIN_E7", "~/boxtwin/e7-4dhumans")).expanduser()
 # Datos de la campana anterior (folds de E1, pred.pkl de E3, huellas). Solo lectura.
 TRABAJO_E1E3 = comun.TRABAJO
 

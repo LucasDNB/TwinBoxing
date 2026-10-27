@@ -6,7 +6,7 @@
  *   tabla es la de 01 §4 escrita una vez; cada pantalla pregunta `estadoDe(bloque, producto)`
  *   y dibuja lo que corresponde con <EstadoBloque>.
  */
-import type { Producto } from "@/lib/api/esquemas";
+import type { Cuenta, Producto, Version } from "@/lib/api/esquemas";
 
 // "en_construccion" (13-10, decision de Lucas): la funcion se ve en el prototipo pero todavia
 // no se puede usar. Distinto de "no_disponible", que es una pieza que no existe.
@@ -83,7 +83,23 @@ export type Bloque = keyof typeof BLOQUES;
  * Sin /producto todavia, un bloque condicionado queda apagado: es preferible no mostrar un
  * numero un segundo que mostrar uno que despues desaparece.
  */
-export function estadoDe(bloque: Bloque, producto: Producto | null | undefined): EstadoBloque {
+/*
+ * Segundo eje (versiones 26-10, 03 §1): un bloque que no es de la version vuelve "fuera" y no
+ * se dibuja. No es "no disponible": en esa version no existe. La matriz es la de 01 §4.
+ */
+const FUERA_POR_VERSION: Partial<Record<Version, readonly Bloque[]>> = {
+  individual: ["07.seleccion", "07.dimensiones", "07.frente", "07.frente_guardia", "07.frente_r3", "07.cruces"],
+};
+/* D4 se revierte en parte: las horas vuelven, medidas, cuando la cuenta las trae (B20). */
+const CON_HORAS: readonly Bloque[] = ["01.plan", "02.consumo"];
+
+export function estadoDe(
+  bloque: Bloque,
+  producto: Producto | null | undefined,
+  cuenta?: Cuenta | null,
+): EstadoBloque {
+  if (cuenta && FUERA_POR_VERSION[cuenta.version]?.includes(bloque)) return "fuera";
+  if (CON_HORAS.includes(bloque)) return cuenta?.horas ? "medido" : "fuera";
   const f: Fila = BLOQUES[bloque];
   if (f.base === "fuera" || f.base === "no_disponible" || f.base === "en_construccion") return f.base;
   if (f.bandera) {
@@ -93,7 +109,7 @@ export function estadoDe(bloque: Bloque, producto: Producto | null | undefined):
   return f.base;
 }
 
-export function visible(bloque: Bloque, producto: Producto | null | undefined): boolean {
-  const e = estadoDe(bloque, producto);
+export function visible(bloque: Bloque, producto: Producto | null | undefined, cuenta?: Cuenta | null): boolean {
+  const e = estadoDe(bloque, producto, cuenta);
   return e === "medido" || e === "estimacion";
 }

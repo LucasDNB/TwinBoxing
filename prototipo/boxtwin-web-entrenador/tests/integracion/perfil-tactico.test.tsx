@@ -117,7 +117,15 @@ describe("W23 y W24 · avatar y distancia", () => {
     montar(<PantallaPeleador />);
     const bloque = await screen.findByRole("region", { name: "Avatar 3D" });
     expect(within(bloque).getByText("ilustrativo, no reconstruido del video")).toBeInTheDocument();
-    expect(within(bloque).getByRole("img", { name: /Maniquí en guardia ortodoxa, 1,75 m de altura y 1,80 m de envergadura/ })).toBeInTheDocument();
+    expect(within(bloque).getByRole("img", { name: /Avatar en guardia ortodoxa, 1,75 m de altura y 1,80 m de envergadura/ })).toBeInTheDocument();
+  });
+
+  it("con la exposicion encendida, el avatar lleva el calor y su leyenda con el porcentaje por zona", async () => {
+    montar(<PantallaPeleador />);
+    const bloque = await screen.findByRole("region", { name: "Avatar 3D" });
+    expect(within(bloque).getByRole("img", { name: /con el mapa de golpes dirigidos sobre el cuerpo/ })).toBeInTheDocument();
+    expect(within(bloque).getByRole("checkbox", { name: "Mapa de calor" })).toBeChecked();
+    expect(within(bloque).getByText("Cabeza, mano izquierda del rival")).toBeInTheDocument();
   });
 
   it("CA-24.1: distancia y estilo cargados a mano se ven en el bloque y en el encabezado", async () => {

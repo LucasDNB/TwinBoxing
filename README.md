@@ -797,3 +797,68 @@ PENDIENTE Y PROXIMO PASO
 4. Lo que la Fight-Card ya declara en estas sesiones: margen del detector medido en sparring,
    tipo como estimacion. La identidad se corrige a mano por tramos
 5. Mismo camino que PoseConv3D en el MVP. En la tesis va como funcion sin validar
+
+23-10 BM: prueba academica con el modelo de BoxMind (exploratoria)
+
+1. V0 no valida: BM-0b 0,478 de F1 de tecnica en BoxingWeb contra piso 0,642;
+   el train.py publicado tampoco llega (0,617 contra 0,692 del paper)
+2. BM-1b contra E4 en familia: 0,672 contra 0,727, no demostrada
+3. Sumar 5668 golpes de BoxingWeb: 0,678 contra 0,672, no demostrada; curva plana
+4. Propuesta de dataset propio: no respaldada, la linea futura principal es la segunda camara
+5. Analisis de BoxingWeb (24-10): la ventana anotada mide lo mismo en cuadros y no en
+   tiempo (500 ms a 24 fps, 183 a 60); la mano es tan consistente como en BoxTwin; 7 de
+   18 peleadores de test estan en train
+6. Nada de BoxingWeb entra a git ni al producto: no tiene licencia
+7. Documentado en docs/experiments/2026-10-23-boxmind-prueba.md
+
+24-10 E7: 3D de 4D-Humans (HMR2.0b) en lugar de MotionBERT
+
+1. Mismas 16 features 3D de E5, mismos 1047 golpes y siete folds; solo cambia el estimador
+2. Familia 0,777 contra 0,738 de E5 y 0,727 de E4: mejora contra los dos, 5 de 7 folds
+3. Recall de hook 0,683 contra 0,590 de E5; ocho clases 0,673, lectura a
+4. Pasa justo: un empate exacto en cada comparacion y 3 de 5 semillas contra E5
+5. Auditoria independiente: 11 de 11 items pasan
+6. Solo investigacion: SMPL no tiene licencia comercial, nada va al producto
+7. Documentado en docs/experiments/2026-10-24-e7-4dhumans.md
+
+26-10 Versiones Individual y Gimnasio, por SDD sobre prototipo/specs/versiones-26-10
+
+1. Una version es el plan de la cuenta: tablas cuentas y miembros, y todas las rutas pasan
+   por acceso_actual. Ninguna compara usuario_id; lo verifica una prueba estructural
+2. Construido B19, B20, B22, B24, B25, B27, B29 y W27, W29 a W35, W38. Quedan especificados
+   y sin construir B21, B23, B26, B28, W28, W36 y W37, como dicen los specs
+3. Paridad: las 230 pruebas de la API y las 207 de la web pasan sin cambios. Nuevas: 65 en
+   la API (I1 a I5 y estructural) y 34 en la web; e2e 12 de 12, con WebKit por primera vez
+4. Ingreso de prueba con un boton por version detras de BOXTWIN_DEMO, apagado por defecto.
+   demo.py siembra y reinicia; reiniciar deja las cuentas reales identicas, probado
+5. Hallazgo: FastAPI 0.141 no aplana los routers incluidos en app.routes, y una prueba que
+   enumera rutas se salteaba las de cuentas.py sin avisar. Arreglado en las pruebas
+6. Hallazgo: el export HTML se rompia con una Fight-Card de bolsa (sin B). Arreglado
+7. B25 sin texto legal: no se invento uno (DV-5). La API contesta 409 hasta que se cargue
+8. Nada desplegado: la estacion sigue en main hasta que cierren las sesiones de prueba
+
+26-10 Rama produccion: todas las versiones juntas, listas para desplegar
+
+1. main + versiones-26-10 + cambios-academicos (PR #29 y los 4 commits locales de S1 a S8)
+2. A: Individual, Entrenador y Gimnasio en :8000. B: el modo academico E7 en :8001, tailnet
+3. Sin conflictos de codigo; la leyenda de SMPL solo sale con geometrico-e7
+4. Pruebas: API 308, anotador 766, detector 152, guantes 46, web 243, e2e 12 de 12
+5. Ensayo local de las dos instancias desde los ejemplos de entorno: verificar a y b en verde,
+   los cuatro botones de prueba entran a su version
+6. despliegue/PRODUCCION.md ordena el despliegue; produccion.sh hace los pasos sin sudo
+7. Nada desplegado: A sigue en 34e991d y B en efcec23
+
+26-10 Despliegue de produccion en la estacion (A), antes de las sesiones de prueba
+
+1. Decision de Lucas: desvio de versiones-26-10/06 §1. C4 a C6 se miden sobre c936b0f
+2. Respaldos de la base (12 sesiones) y de /etc/boxtwin.env; B apagada durante el despliegue
+3. Migracion al arrancar: la cuenta real quedo Entrenador con sus 12 sesiones y 5 peleadores
+4. verificar a ok, tambien por el Funnel. B de nuevo arriba en efcec23, sin cambios
+5. Version de prueba apagada; CV6 pendiente. Registro en despliegue/PRODUCCION.md
+
+26-10 Version de prueba encendida en la estacion
+
+1. Cuentas de prueba sin sesiones copiadas: ningun video de nadie expuesto (DV-9)
+2. Los cuatro botones por el Funnel, cada uno en su version y rol
+3. CV6 cumple: 0 fugas en 53 pedidos por perfil contra la cuenta real
+4. Mientras este encendida, la cuenta real no entra por la web. Apagar: BOXTWIN_DEMO vacia

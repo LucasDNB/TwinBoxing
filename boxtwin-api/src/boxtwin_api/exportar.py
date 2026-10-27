@@ -54,26 +54,35 @@ def a_csv(fc: dict) -> str:
     return salida.getvalue()
 
 
-def a_html(fc: dict) -> str:
-    """Una carilla imprimible. Sin javascript ni recursos externos: se guarda y se manda."""
+def a_html(fc: dict, nombres: dict | None = None) -> str:
+    """
+    Una carilla imprimible. Sin javascript ni recursos externos: se guarda y se manda.
+
+    `nombres` (versiones 26-10, CA-I05.1): como se llama cada lado. En Individual son el
+    peleador propio y "Compañero"; sin nombres, "Peleador A" y "Peleador B" como antes. Una
+    Fight-Card de bolsa o sombra trae solo A (B8): se recorren los lados que estan.
+    """
+    nombres = nombres or {}
+    lados = [p for p in ("A", "B") if p in fc.get("peleadores", {})]
+    nombre = {p: nombres.get(p) or f"Peleador {p}" for p in lados}
     v = fc.get("video", {})
     det = fc.get("detector", {})
     ident = fc.get("identidad", {})
     e = html.escape
 
     filas_round = []
-    for p in ("A", "B"):
+    for p in lados:
         for r in fc["peleadores"][p].get("por_round", []):
             filas_round.append(
-                f"<tr><td>{p}</td><td>{r['round']}</td><td>{r['total']}</td>"
+                f"<tr><td>{e(nombre[p])}</td><td>{r['round']}</td><td>{r['total']}</td>"
                 f"<td>{r['izq']}</td><td>{r['der']}</td><td>{r['por_minuto']}</td></tr>"
             )
 
     totales = []
-    for p in ("A", "B"):
+    for p in lados:
         t = fc["peleadores"][p]["total"]
         totales.append(
-            f"<tr><td>Peleador {p}</td><td class='n'>{t['total']}</td>"
+            f"<tr><td>{e(nombre[p])}</td><td class='n'>{t['total']}</td>"
             f"<td class='n'>{t['izq']}</td><td class='n'>{t['der']}</td></tr>"
         )
 
@@ -114,7 +123,7 @@ def a_html(fc: dict) -> str:
  + ''.join(filas_round) + '</table>' if filas_round else ''}
 
 <h2>Identidad</h2>
-<p>Cobertura A {ident.get('cobertura_A', 0):.1%}, B {ident.get('cobertura_B', 0):.1%}.
+<p>{', '.join(f"Cobertura {e(nombre[p])} {ident.get('cobertura_' + p, 0):.1%}" for p in lados)}.
    Sin asignar {ident.get('sin_asignar', 0):.1%} del tiempo.</p>
 
 <h2>Tipo de golpe</h2>

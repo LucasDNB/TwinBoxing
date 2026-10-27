@@ -4,6 +4,9 @@
  * Lo que se ve cuando la sesion no esta lista (04 §04): en cola, procesando con etapa y
  * porcentaje, espera de siembra con el boton a la identificacion, completando, o fallo con
  * el error y "Reintentar". El sondeo lo hace useSesion; aca solo se dibuja.
+ *
+ * En cola, con B27 (versiones 26-10, W35): cuantas sesiones van antes, de todas las cuentas,
+ * y una espera aproximada con el factor de procesamiento medido. No dice de quien son.
  */
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
@@ -15,9 +18,18 @@ import { useSembrar } from "@/lib/api/consultas";
 import type { Sesion } from "@/lib/api/esquemas";
 import { porcentaje } from "@/lib/formato";
 import { NOMBRE_ESTADO, NOMBRE_ETAPA } from "@/lib/textos";
+import { esIndividual, useCuenta } from "@/lib/cuenta";
+
+export function textoDeCola(c: NonNullable<Sesion["cola"]>): string {
+  const antes = c.delante === 1 ? "Hay 1 sesión antes que la tuya." : `Hay ${c.delante} sesiones antes que la tuya.`;
+  const [min, max] = c.espera_min;
+  if (max <= 0) return antes;
+  return `${antes} Unos ${min} a ${max} minutos para empezar.`;
+}
 
 export function EsperaSesion({ s }: { s: Sesion }) {
   const sembrar = useSembrar(s.id);
+  const vos = esIndividual(useCuenta().data);
   const p = s.progreso;
   return (
     <AnimatePresence mode="wait">
@@ -33,9 +45,9 @@ export function EsperaSesion({ s }: { s: Sesion }) {
         <Rotulo as="p">{NOMBRE_ESTADO[s.estado]}</Rotulo>
         {s.estado === "espera_siembra" ? (
           <>
-            <p className="mt-2 text-lg">Falta un paso: marcá una vez a cada peleador.</p>
+            <p className="mt-2 text-lg">{vos ? "Falta un paso: marcate una vez." : "Falta un paso: marcá una vez a cada peleador."}</p>
             <Button asChild className="mt-4 min-h-11">
-              <Link href={`/sesion/identificar/?id=${s.id}`}>Marcar peleadores</Link>
+              <Link href={`/sesion/identificar/?id=${s.id}`}>{vos ? "Marcarme" : "Marcar peleadores"}</Link>
             </Button>
           </>
         ) : s.estado === "fallo" ? (
@@ -55,7 +67,7 @@ export function EsperaSesion({ s }: { s: Sesion }) {
           <>
             <p className="mt-2 flex items-center gap-2 text-lg">
               <LoaderCircle animate loop size={20} aria-hidden="true" />
-              {s.estado === "en_cola" && "Esperando su turno en la estación."}
+              {s.estado === "en_cola" && (s.cola && s.cola.delante > 0 ? textoDeCola(s.cola) : "Esperando su turno en la estación.")}
               {s.estado === "subida" && "Recibiendo el video."}
               {s.estado === "procesando" && "Buscando a las personas y su pose."}
               {s.estado === "completando" && "Siguiendo a cada peleador y contando golpes."}

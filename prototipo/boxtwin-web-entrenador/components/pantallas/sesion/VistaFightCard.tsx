@@ -23,6 +23,7 @@ import { Rotulo } from "@/components/boxtwin/Rotulo";
 import { BarrasPorRound } from "@/components/boxtwin/graficos/BarrasPorRound";
 import { mensajeDeError } from "@/components/boxtwin/Estados";
 import { nombresDe } from "@/components/pantallas/sesion/PantallaSesion";
+import { esIndividual, useCuenta } from "@/lib/cuenta";
 import { pedir } from "@/lib/api/cliente";
 import { leerToken } from "@/lib/sesion-usuario";
 import { useProducto } from "@/lib/api/consultas";
@@ -52,7 +53,8 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
   const producto = useProducto();
   const p = producto.data;
   const lados = ladosDe(fc);
-  const nombres = nombresDe(s, fc);
+  const cuenta = useCuenta().data;
+  const nombres = nombresDe(s, fc, cuenta);
   const nombreDe: Record<Lado, string> = { A: nombres.A ?? "Peleador A", B: nombres.B ?? "Peleador B" };
   const conRounds = estadoDe("05.rounds", p) === "medido";
   const rondas = fc.video.rounds;
@@ -83,7 +85,11 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
           return (
             <div key={l} className="rounded-md border border-borde bg-superficie p-3">
               <p className="flex items-center gap-2 font-display text-lg font-semibold lg:text-xl"><Esquina lado={l} /> <span className="truncate">{nombreDe[l]}</span></p>
-              <p className="mt-0.5 text-xs text-texto-3">{[b?.categoria, b?.guardia].filter(Boolean).join(" · ") || "sin perfil asignado"}</p>
+              <p className="mt-0.5 text-xs text-texto-3">
+                {esIndividual(cuenta) && l === "B"
+                  ? textos.individualCompañero
+                  : [b?.categoria, b?.guardia].filter(Boolean).join(" · ") || "sin perfil asignado"}
+              </p>
             </div>
           );
         })}
@@ -106,7 +112,8 @@ export function VistaFightCard({ s, fc }: { s: Sesion; fc: FightCard }) {
       <EstadoBloque
         estado={estadoDe("05.distribucion", p)}
         titulo="Tipo de golpe"
-        nota={textos.estimacionTipo(clasif.checkpoint, clasif.exactitud_familia_fuente_no_vista)}
+        nota={[textos.estimacionTipo(clasif.checkpoint, clasif.exactitud_familia_fuente_no_vista),
+          textos.modoAcademico(clasif.metodo, clasif.licencia)].filter(Boolean).join(" ")}
       >
         <div className="flex flex-col gap-4">
           {ladosConGuardiaSupuesta(fc).map((l) => (
