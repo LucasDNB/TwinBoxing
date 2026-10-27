@@ -57,7 +57,8 @@
         "checkpoint": { "type": ["string", "null"] },
         "exactitud_familia_fuente_no_vista": { "type": ["number", "null"] },
         "estimado": { "const": true },
-        "metodo": { "enum": ["poseconv3d", "geometrico-v1"], "description": "tipo v2 (16-10). Ausente: poseconv3d" },
+        "metodo": { "enum": ["poseconv3d", "geometrico-v1", "geometrico-e7"], "description": "tipo v2 (16-10). Ausente: poseconv3d. geometrico-e7: modo academico (25-10)" },
+        "licencia": { "type": ["string", "null"], "description": "modo academico E7 (25-10): leyenda de la licencia del modelo 3D. Ausente con los demas metodos" },
         "referencia": { "type": ["string", "null"] },
         "guardia_supuesta": {
           "type": "object",

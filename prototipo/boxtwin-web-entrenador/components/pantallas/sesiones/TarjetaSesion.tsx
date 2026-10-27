@@ -13,6 +13,7 @@ import { InsigniaEstado } from "@/components/boxtwin/Insignia";
 import { Progress } from "@/components/animate-ui/components/radix/progress";
 import { fechaCorta, mmss, porcentaje } from "@/lib/formato";
 import { NOMBRE_CONTEXTO, NOMBRE_ESTADO, NOMBRE_ETAPA } from "@/lib/textos";
+import { esIndividual, tiene, useCuenta } from "@/lib/cuenta";
 
 export function destinoDeSesion(s: Pick<Sesion, "id" | "estado">): string {
   if (s.estado === "espera_siembra") return `/sesion/identificar/?id=${s.id}`;
@@ -35,8 +36,10 @@ export function textoDeProgreso(s: Sesion): string {
 }
 
 function Quienes({ s }: { s: Sesion }) {
+  // En Individual el compañero no tiene perfil y no se lo llama "B" (CA-I05.1).
+  const individual = esIndividual(useCuenta().data);
   const a = s.boxeadores?.A?.nombre;
-  const b = s.boxeadores?.B?.nombre;
+  const b = s.boxeadores?.B?.nombre ?? (individual ? "Compañero" : undefined);
   const deDos = s.contexto !== "bolsa" && s.contexto !== "sombra";
   return (
     <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
@@ -49,6 +52,13 @@ function Quienes({ s }: { s: Sesion }) {
       )}
     </span>
   );
+}
+
+/* B24: en Gimnasio cada sesion dice quien la subio (CA-G01.2). */
+function SubidaPor({ s }: { s: Sesion }) {
+  const compartido = tiene(useCuenta().data, "plantel_compartido");
+  if (!compartido || !s.subida_por?.nombre) return null;
+  return <p className="mt-0.5 text-xs text-texto-3">Subió {s.subida_por.nombre}</p>;
 }
 
 export function TarjetaSesion({ s }: { s: Sesion }) {
@@ -67,6 +77,7 @@ export function TarjetaSesion({ s }: { s: Sesion }) {
           </p>
           <p className="mt-1 font-medium"><Quienes s={s} /></p>
           <p className="mt-0.5 truncate text-sm text-texto-3">{s.nombre}</p>
+          <SubidaPor s={s} />
         </div>
         <InsigniaEstado estado={s.estado} />
       </div>
@@ -87,7 +98,7 @@ export function FilaSesion({ s }: { s: Sesion }) {
   return (
     <tr className="border-t border-borde-suave">
       <td className="dato py-3 pr-3 text-texto-2">{fechaCorta(s.creada)}</td>
-      <td className="py-3 pr-3"><Quienes s={s} /></td>
+      <td className="py-3 pr-3"><Quienes s={s} /><SubidaPor s={s} /></td>
       <td className="py-3 pr-3 text-texto-2">{NOMBRE_CONTEXTO[s.contexto ?? "sparring"]}</td>
       <td className="dato py-3 pr-3 text-texto-2">{s.duracion_s ? mmss(s.duracion_s) : "—"}</td>
       <td className="py-3 pr-3">

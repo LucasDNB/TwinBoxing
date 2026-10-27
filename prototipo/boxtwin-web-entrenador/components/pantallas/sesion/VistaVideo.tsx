@@ -24,6 +24,7 @@ import { mensajeDeError } from "@/components/boxtwin/Estados";
 import { Correccion } from "@/components/pantallas/sesion/Correccion";
 import { LineaTiempo, type Ventana } from "@/components/pantallas/sesion/LineaTiempo";
 import { nombresDe } from "@/components/pantallas/sesion/PantallaSesion";
+import { tiene, useCuenta } from "@/lib/cuenta";
 import { useProcesado, useProducto, useRender, useTicket } from "@/lib/api/consultas";
 import type { Golpe, Sesion } from "@/lib/api/esquemas";
 import { visible } from "@/lib/banderas";
@@ -58,7 +59,8 @@ export function VistaVideo({ s, fc }: { s: Sesion; fc: FightCard }) {
   const [seleccionado, setSeleccionado] = useState<{ lado: Lado; id: string } | null>(null);
   const [zoom, setZoom] = useState<"sesion" | "round">("sesion");
 
-  const nombres = nombresDe(s, fc);
+  const cuenta = useCuenta().data;
+  const nombres = nombresDe(s, fc, cuenta);
   const nombreDe = { A: nombres.A ?? "Peleador A", B: nombres.B ?? "Peleador B" };
   const lados = ladosDe(fc);
   const conGuardia = visible("04.guardia", producto.data);
@@ -186,6 +188,12 @@ export function VistaVideo({ s, fc }: { s: Sesion; fc: FightCard }) {
   const nota = (
     <p className="mt-4 rounded-md border border-borde bg-superficie-2 p-3 text-xs text-texto-3">
       {textos.notaCorreccion(fc.clasificador.checkpoint)} &quot;No fue un golpe&quot; tampoco cambia el conteo de detectados: se cuenta aparte como descartados por el entrenador.
+      {/* Modo académico E7 (25-10): la licencia de SMPL, también al pie del video. */}
+      {textos.modoAcademico(fc.clasificador.metodo, fc.clasificador.licencia) && (
+        <span role="note" data-modo-academico className="mt-2 block text-texto-2">
+          {textos.modoAcademico(fc.clasificador.metodo, fc.clasificador.licencia)}
+        </span>
+      )}
       {ladosConGuardiaSupuesta(fc).map((l) => (
         <span key={l} role="note" data-aviso-guardia={l} className="mt-2 block text-texto-2">
           {textos.avisoGuardiaSupuesta(nombres[l] ?? l)}
@@ -240,6 +248,12 @@ function Consola({
   const guardia = useMemo(() => (p ? guardiaPorGolpe(p) : new Map()), [p]);
   const secuencia = useMemo(() => secuenciaPorGolpe(fc, lado), [fc, lado]);
   const lista = useRef<HTMLOListElement>(null);
+  // B24: en Gimnasio un golpe corregido dice quien lo corrigio (03 §4, W34).
+  const compartido = tiene(useCuenta().data, "plantel_compartido");
+  const corregidoPor = (id: string) => {
+    const quien = compartido ? fc.sesion?.autoria?.correcciones?.[id] : null;
+    return quien ? `corregido por ${quien}` : "corregido";
+  };
   const actual = useMemo(() => {
     let k = -1;
     for (let i = 0; i < golpes.length; i++) if (golpes[i].t_inicio <= tiempo + ANTES_DEL_GOLPE_S) k = i;
@@ -274,11 +288,11 @@ function Consola({
                   <span className="dato w-12 shrink-0 text-texto-2">{mmss(g.t_inicio)}</span>
                   <span className="min-w-0 flex-1">
                     {g.descartado ? (
-                      <span className="text-ok">no fue un golpe <Rotulo className="ml-1 text-ok">corregido</Rotulo></span>
+                      <span className="text-ok">no fue un golpe <Rotulo className="ml-1 text-ok">{corregidoPor(g.id)}</Rotulo></span>
                     ) : g.corregido ? (
                       <span>
                         <span className="text-ok">{nombreDeTipo(t, fc.nomenclatura)}</span>
-                        <Rotulo className="ml-1 text-ok">corregido</Rotulo>
+                        <Rotulo className="ml-1 text-ok">{corregidoPor(g.id)}</Rotulo>
                         {g.corregido.tipo_original && <s className="ml-2 text-texto-3">{nombreDeTipo(g.corregido.tipo_original, fc.nomenclatura)}</s>}
                       </span>
                     ) : t ? (

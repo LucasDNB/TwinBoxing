@@ -99,6 +99,12 @@ def crear_tablas() -> None:
             Path(ruta).parent.mkdir(parents=True, exist_ok=True)
     agregadas = _columnas_faltantes()
     Base.metadata.create_all(engine)
+    # Versiones 26-10 (B19, 02 §8): indice unico por cuenta y relleno de cuentas, idempotente.
+    # Va despues de create_all porque necesita las tablas nuevas.
+    from boxtwin_api.acceso import migrar
+
+    with hacer_sesion() as s:
+        migrar(s)
     if agregadas:
         import logging
 

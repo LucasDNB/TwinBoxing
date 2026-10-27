@@ -3,6 +3,13 @@
 Cada versión es compatible hacia atrás: una Fight-Card vieja se sigue leyendo, y un cliente que
 no conoce los campos nuevos los ignora. Lo que se rompe se dice acá.
 
+## 0.3 · modo académico E7 del 25-10 (`docs/specs/2026-10-25-e7-modo-academico/`)
+
+- `clasificador.metodo` suma `geometrico-e7`: el tipo sale de E4 más el 3D de HMR2 (4D-Humans).
+  Es un modo académico, apagado por defecto, que depende de SMPL bajo licencia de investigación.
+- `clasificador.licencia` (opcional): la leyenda de esa licencia. Viene solo con `geometrico-e7`;
+  volver a E4 la saca. Una Fight-Card sin los dos campos sigue validando igual.
+
 ## 0.3 · regla de combinaciones del 14-10
 
 - `peleadores.X.combinaciones` cambia de regla sin cambiar de versión, porque la regla viaja

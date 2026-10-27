@@ -7,10 +7,11 @@ POR QUE EXISTE
   se consulta, y cuando el sistema llega al punto de siembra el usuario contesta y el
   trabajo sigue.
 
-  Todo lo que sirve un archivo filtra por usuario (RNF3). No hay una capa de permisos
-  porque no hace falta una: hay un dueno por sesion y se compara en cada ruta. Lo que si
-  hay es una sola funcion que resuelve la sesion del usuario, para que no exista una ruta
-  que se olvide de comparar.
+  Todo lo que sirve un archivo filtra por cuenta (RNF-V1, versiones 26-10). El dueno de una
+  sesion es la cuenta, y en Gimnasio la ven todos sus miembros. Hay una sola dependencia que
+  resuelve de que cuenta es el pedido (`acceso.py`) y una sola funcion que resuelve la sesion
+  de la cuenta, para que no exista una ruta que se olvide de comparar. Una prueba
+  estructural lo verifica (tests/test_acceso_estructural.py).
 
 QUE HACE
   Registro y login, subida de video, estado, siembra, Fight-Card, correccion de tipo,
@@ -36,13 +37,26 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from boxtwin_api.cola import encolar
+from boxtwin_api.acceso import (
+    Acceso,
+    acceso_actual,
+    acceso_de_usuario,
+    acceso_por_ticket,
+    boxeador_de_la_cuenta,
+    es_de_prueba,
+    exigir_funcion,
+    miembro_activo,
+    sesion_de_la_cuenta,
+)
+from boxtwin_api.cola import encolar, posicion_en_cola
 from boxtwin_api.config import cfg
+from boxtwin_api.cupo import horas_del_mes, texto_horas
 from boxtwin_api.db import crear_tablas, obtener_sesion
 from boxtwin_api.esquemas import (
     CONTEXTOS,
     PRACTICAS,
     AsignarBoxeadores,
+    EntradaDemo,
     EntradaTramos,
     Credenciales,
     EntradaBoxeador,
@@ -54,12 +68,11 @@ from boxtwin_api.esquemas import (
 from boxtwin_api.exportar import a_csv, a_html
 from boxtwin_api.modelos import AsignacionManual, Boxeador, Correccion, Sesion, Trabajo, Usuario
 from boxtwin_api.perfil import regla_de_combinacion
+from boxtwin_api.planes import PERFILES_DEMO, PLANES, email_demo
 from boxtwin_api.seguridad import (
     emitir_ticket,
     emitir_token,
     hashear,
-    leer_ticket,
-    leer_token,
     verificar,
 )
 
@@ -72,16 +85,29 @@ __all__ = ["app"]
 ARRANCADO = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def _commit() -> str | None:
-    """El commit del checkout donde vive el paquete, leido del archivo, sin subprocesos."""
+def _commit(checkout: Path | None = None) -> str | None:
+    """El commit del checkout donde vive el paquete, leido del archivo, sin subprocesos.
+
+    En un worktree `.git` es un archivo con `gitdir:`; HEAD se lee ahi y las referencias en el
+    directorio comun que indica `commondir` (docs/specs/2026-10-25-dos-instancias, T1).
+    """
     try:
-        raiz = Path(__file__).resolve().parents[3] / ".git"
+        raiz = (checkout or Path(__file__).resolve().parents[3]) / ".git"
+        comun = raiz
+        if raiz.is_file():
+            texto = raiz.read_text().strip()
+            if not texto.startswith("gitdir: "):
+                return None
+            raiz = Path(texto[8:])
+            comun = raiz
+            if (raiz / "commondir").is_file():
+                comun = raiz / (raiz / "commondir").read_text().strip()
         cabeza = (raiz / "HEAD").read_text().strip()
         if cabeza.startswith("ref: "):
-            ref = raiz / cabeza[5:]
+            ref = comun / cabeza[5:]
             if not ref.is_file():          # empaquetado en packed-refs
                 nombre = cabeza[5:]
-                for linea in (raiz / "packed-refs").read_text().splitlines():
+                for linea in (comun / "packed-refs").read_text().splitlines():
                     if linea.endswith(" " + nombre):
                         return linea.split()[0][:7]
                 return None
@@ -131,30 +157,8 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 
 
-def usuario_actual(
-    authorization: str = Header(default=""), db: Session = Depends(obtener_sesion)
-) -> Usuario:
-    token = authorization[7:] if authorization.lower().startswith("bearer ") else ""
-    uid = leer_token(token, cfg.secreto) if token else None
-    if not uid:
-        raise HTTPException(401, "hace falta iniciar sesion")
-    u = db.get(Usuario, uid)
-    if u is None:
-        raise HTTPException(401, "la cuenta ya no existe")
-    return u
-
-
-def sesion_del_usuario(sesion_id: str, usuario: Usuario, db: Session) -> Sesion:
-    """
-    La sesion, si es de este usuario. RNF3 pasa por aca y por ningun otro lado.
-
-    Devuelve 404 y no 403 cuando es de otro: contestar "existe pero no es tuya" le dice a
-    cualquiera que adivine un id que ese id existe.
-    """
-    s = db.get(Sesion, sesion_id)
-    if s is None or s.usuario_id != usuario.id:
-        raise HTTPException(404, "no hay una sesion con ese id")
-    return s
+# El acceso de cada pedido (usuario, cuenta, rol y plan) lo resuelve acceso.py: una sola
+# dependencia para todas las rutas con datos, y otra para las que entran con ticket.
 
 
 def _puede_registrarse(codigo: str) -> None:
@@ -181,29 +185,6 @@ def _puede_registrarse(codigo: str) -> None:
         raise HTTPException(403, "el codigo de invitacion no es correcto")
 
 
-def usuario_por_ticket_o_header(
-    sesion_id: str, t: str, authorization: str, db: Session
-) -> Usuario:
-    """
-    El usuario, entrando por el header o por un ticket de esta sesion.
-
-    Existe porque hay dos elementos del navegador que NO pueden mandar headers, y los dos
-    son centrales en este producto: el <video> de la linea de tiempo y el <img> de los
-    recortes de siembra. El ticket es lo unico que pueden llevar, va en la URL, dura media
-    hora y sirve para una sola sesion.
-    """
-    uid = leer_ticket(t, sesion_id, cfg.secreto) if t else None
-    if uid is None:
-        token = authorization[7:] if authorization.lower().startswith("bearer ") else ""
-        uid = leer_token(token, cfg.secreto) if token else None
-    if uid is None:
-        raise HTTPException(401, "hace falta iniciar sesion")
-    u = db.get(Usuario, uid)
-    if u is None:
-        raise HTTPException(401, "la cuenta ya no existe")
-    return u
-
-
 @app.post("/auth/registro", response_model=Token)
 def registro(c: Credenciales, db: Session = Depends(obtener_sesion)) -> Token:
     _puede_registrarse(c.invitacion)
@@ -221,9 +202,57 @@ def login(c: Credenciales, db: Session = Depends(obtener_sesion)) -> Token:
     u = db.scalar(select(Usuario).where(Usuario.email == c.email.lower().strip()))
     # El mismo mensaje para email inexistente y clave equivocada: distinguirlos le dice a
     # cualquiera cuales emails tienen cuenta.
-    if u is None or not verificar(c.clave, u.hash_clave):
+    # Los usuarios de la version de prueba entran solo por su boton (02 §11), nunca por clave.
+    if u is None or not verificar(c.clave, u.hash_clave) or es_de_prueba(u, db):
         raise HTTPException(401, "email o clave incorrectos")
     return Token(token=emitir_token(u.id, cfg.secreto, cfg.horas_de_sesion), usuario=u.email)
+
+
+# ---------------------------------------------------------------------------
+# Version de prueba (versiones 26-10, B29; 02 §11)
+# ---------------------------------------------------------------------------
+#
+# Con BOXTWIN_DEMO apagada, que es el valor por defecto, la ruta ni se registra: responde el
+# 404 de una ruta que no existe. Encender o apagar es cambiar el env y reiniciar.
+
+
+def _token_de_prueba(entrada: EntradaDemo, db: Session) -> Token:
+    """
+    El token de un perfil de prueba. Busca el usuario por el perfil, que es un nombre fijo:
+    no recibe ids ni emails, asi que no hay nada que cambiar en el pedido para llegar a otra
+    cuenta. Y antes de emitir verifica que la cuenta este marcada como de prueba.
+    """
+    import logging
+
+    perfil = PERFILES_DEMO.get(entrada.perfil)
+    if perfil is None:
+        raise HTTPException(422, f"perfil tiene que ser uno de {', '.join(PERFILES_DEMO)}")
+    if not perfil.disponible:
+        raise HTTPException(409, "en construcción")
+    u = db.scalar(select(Usuario).where(Usuario.email == email_demo(perfil.perfil)))
+    if u is None:
+        raise HTTPException(
+            409, "faltan las cuentas de prueba: correr `python -m boxtwin_api.demo sembrar`"
+        )
+    acceso = acceso_de_usuario(u, db)
+    cuenta = acceso.cuenta
+    if not cuenta.demo or acceso.rol != perfil.rol or cuenta.version != perfil.version:
+        # Un error de integridad, no algo que el pedido pueda provocar: el usuario del perfil
+        # quedo en una cuenta que no es de prueba. No se emite nada.
+        logging.getLogger(__name__).error(
+            "ingreso de prueba: el perfil %s apunta a la cuenta %s, que no es de prueba o no "
+            "es de su version y rol", perfil.perfil, cuenta.id)
+        raise HTTPException(500, "las cuentas de prueba no estan bien cargadas")
+    return Token(token=emitir_token(u.id, cfg.secreto, HORAS_DEMO), usuario=perfil.nombre,
+                 perfil=perfil.perfil)
+
+
+HORAS_DEMO = 8
+
+if cfg.demo:
+    @app.post("/auth/demo", response_model=Token)
+    def ingreso_de_prueba(entrada: EntradaDemo, db: Session = Depends(obtener_sesion)) -> Token:
+        return _token_de_prueba(entrada, db)
 
 
 # ---------------------------------------------------------------------------
@@ -241,7 +270,8 @@ def subir(
     practica: str = Form(default=""),
     rounds: str = Form(default=""),
     consentimiento: str = Form(default=""),
-    usuario: Usuario = Depends(usuario_actual),
+    duracion_declarada_s: str = Form(default=""),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """
@@ -252,8 +282,12 @@ def subir(
 
     Los campos de contexto y el consentimiento son de B1 (web entrenador). El
     consentimiento se valida ANTES de leer el archivo: no tiene sentido recibir un gigabyte
-    para rechazarlo despues.
+    para rechazarlo despues. Lo mismo el cupo de horas (B20): con `bloquear`, una subida que
+    pasa lo que queda se rechaza con 409 antes de recibir un byte del video.
     """
+    usuario, cuenta = acceso.usuario, acceso.cuenta
+    if cuenta.demo and not cfg.demo_subir:
+        raise HTTPException(403, "la subida está apagada en la versión de prueba")
     if consentimiento.strip().lower() != "true":
         raise HTTPException(422, "falta el consentimiento de las personas filmadas")
     if contexto not in CONTEXTOS:
@@ -280,9 +314,31 @@ def subir(
         )
     if round_s is not None and round_s <= 0:
         raise HTTPException(422, "la duracion del round tiene que ser mayor que cero")
+    declarada = None
+    if duracion_declarada_s.strip():
+        try:
+            declarada = float(duracion_declarada_s)
+        except ValueError:
+            raise HTTPException(422, "duracion_declarada_s tiene que ser un numero") from None
+        if declarada < 0:
+            raise HTTPException(422, "duracion_declarada_s no puede ser negativa")
+
+    horas = horas_del_mes(cuenta, db)
+    pedido_h = (declarada or 0.0) / 3600
+    excedido = declarada is not None and pedido_h > horas["restantes"]
+    if excedido and horas["modo"] == "bloquear":
+        raise HTTPException(
+            409, f"esta sesión usaría {texto_horas(pedido_h)} h y quedan "
+                 f"{texto_horas(horas['restantes'])} h en el mes"
+        )
 
     ses = Sesion(
         usuario_id=usuario.id,
+        cuenta_id=cuenta.id,
+        duracion_declarada_s=declarada,
+        # B22: en Individual la sesion es del peleador propio, sin elegirlo (RF-I2).
+        boxeador_a_id=(cuenta.boxeador_propio_id if acceso.plan.peleadores == "propio"
+                       else None),
         nombre=(nombre or Path(archivo.filename or "sesion").stem)[:255],
         video_nombre=_nombre_seguro(archivo.filename or "video.mp4"),
         round_s=round_s,
@@ -315,7 +371,8 @@ def subir(
     # La sesion y su primer trabajo, en el mismo commit: no existe el estado intermedio.
     encolar(db, ses.id, "procesar", round_s=round_s, descanso_s=descanso_s)
     db.commit()
-    return {"job_id": ses.id, "estado": ses.estado, "bytes": escritos}
+    return {"job_id": ses.id, "estado": ses.estado, "bytes": escritos,
+            "cupo": {"excedido": excedido, "restantes_h": horas["restantes"]}}
 
 
 def _nombre_seguro(nombre: str) -> str:
@@ -328,7 +385,7 @@ def _nombre_seguro(nombre: str) -> str:
 @app.get("/jobs/{sesion_id}")
 def estado(
     sesion_id: str,
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """
@@ -338,7 +395,7 @@ def estado(
     fuente de verdad de lo que paso adentro del proceso. La base guarda el estado para
     poder listarlo sin tocar disco, pero cuando los dos difieren manda el archivo.
     """
-    s = sesion_del_usuario(sesion_id, usuario, db)
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     d = _sesion_en_disco(s.id)
     trabajos = db.scalars(
         select(Trabajo).where(Trabajo.sesion_id == s.id).order_by(Trabajo.creado)
@@ -376,43 +433,65 @@ def estado(
         {"etapa": t.etapa, "estado": t.estado, "intento": t.intento, "error": t.error}
         for t in trabajos
     ]
+    # B27: cuantos trabajos de todas las cuentas van antes, sin decir de quien son.
+    if s.estado == "en_cola":
+        extra["cola"] = posicion_en_cola(db, s.id, cfg.factor_min, cfg.factor_max)
+    extra["subida_por"] = _subida_por(s, db)
     return sesion_a_dict(s, extra)
+
+
+def _nombre_de(u: Usuario | None) -> str | None:
+    if u is None:
+        return None
+    return u.nombre or u.email
+
+
+def _subida_por(s: Sesion, db: Session) -> dict | None:
+    """B24: quien subio la sesion. En Gimnasio es lo que distingue el trabajo de cada uno."""
+    u = db.get(Usuario, s.usuario_id)
+    return {"id": u.id, "nombre": _nombre_de(u)} if u is not None else None
 
 
 @app.get("/jobs")
 def listar(
-    usuario: Usuario = Depends(usuario_actual), db: Session = Depends(obtener_sesion)
+    acceso: Acceso = Depends(acceso_actual), db: Session = Depends(obtener_sesion)
 ) -> list[dict]:
-    """El historial del usuario (F8). Solo el suyo."""
+    """El historial de la cuenta (F8). Solo el suyo; en Gimnasio, el de todos sus miembros."""
     filas = db.scalars(
-        select(Sesion).where(Sesion.usuario_id == usuario.id).order_by(Sesion.creada.desc())
+        select(Sesion).where(Sesion.cuenta_id == acceso.cuenta.id).order_by(Sesion.creada.desc())
     ).all()
+    nombres = {u.id: _nombre_de(u) for u in db.scalars(
+        select(Usuario).where(Usuario.id.in_({s.usuario_id for s in filas}))).all()}
     # B5: el progreso de las que estan en curso, para que la lista muestre "pose · 64%"
     # sin un pedido por sesion. Solo esas: leer disco para las listas no aporta nada.
     from boxtwin_api.panel import EN_CURSO
 
     return [
-        sesion_a_dict(s, {"progreso": _progreso_en_disco(s.id)} if s.estado in EN_CURSO else None)
+        sesion_a_dict(s, {
+            **({"progreso": _progreso_en_disco(s.id)} if s.estado in EN_CURSO else {}),
+            "subida_por": {"id": s.usuario_id, "nombre": nombres.get(s.usuario_id)},
+        })
         for s in filas
     ]
 
 
 @app.get("/panel")
 def panel(
-    usuario: Usuario = Depends(usuario_actual), db: Session = Depends(obtener_sesion)
+    acceso: Acceso = Depends(acceso_actual), db: Session = Depends(obtener_sesion)
 ) -> dict:
-    """Los indicadores y lo pendiente de la pantalla 01 (B5). Solo del usuario."""
+    """Los indicadores y lo pendiente de la pantalla 01 (B5). Solo de la cuenta."""
     from boxtwin_api.panel import construir_panel
 
-    return construir_panel(usuario, db, cfg.dir_sesion, cfg.perfil_preliminar_sesiones)
+    d = construir_panel(acceso, db, cfg.dir_sesion, cfg.perfil_preliminar_sesiones)
+    d["horas"] = horas_del_mes(acceso.cuenta, db)   # B20
+    return d
 
 
 @app.get("/jobs/{sesion_id}/candidatos/{track}")
 def recorte(
     track: int,
     sesion_id: str,
-    t: str = "",
-    authorization: str = Header(default=""),
+    acceso: Acceso = Depends(acceso_por_ticket),
     db: Session = Depends(obtener_sesion),
 ) -> FileResponse:
     """
@@ -422,8 +501,7 @@ def recorte(
     token, recibe 401 y dibuja el icono roto: la pantalla de siembra queda inusable
     justo donde el usuario tiene que mirar dos fotos y elegir.
     """
-    usuario = usuario_por_ticket_o_header(sesion_id, t, authorization, db)
-    s = sesion_del_usuario(sesion_id, usuario, db)
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     ruta = cfg.dir_sesion(s.id) / "candidatos" / f"track_{int(track)}.jpg"
     if not ruta.is_file():
         raise HTTPException(404, "no hay recorte para ese track")
@@ -434,7 +512,7 @@ def recorte(
 def siembra(
     sesion_id: str,
     s_in: Siembra,
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """
@@ -444,7 +522,7 @@ def siembra(
     el sistema le puso los nombres al reves, cambiar la respuesta y volver a correr la
     segunda etapa cuesta minutos y no requiere volver a subir el video.
     """
-    s = sesion_del_usuario(sesion_id, usuario, db)
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     if s.estado not in ("espera_siembra", "listo", "fallo"):
         raise HTTPException(
             409, f"la sesion esta en '{s.estado}' y todavia no hay candidatos que elegir"
@@ -505,7 +583,7 @@ def _tramos_en_disco(s: Sesion) -> tuple[dict, list[dict]]:
 @app.get("/jobs/{sesion_id}/tramos")
 def tramos(
     sesion_id: str,
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """
@@ -514,7 +592,7 @@ def tramos(
     Cada tramo viaja con su motivo y, si ya lo asigno alguien, con esa asignacion: la
     lista no se achica al asignar, para que una decision se pueda cambiar.
     """
-    s = sesion_del_usuario(sesion_id, usuario, db)
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     disco, lista = _tramos_en_disco(s)
     manuales = (disco.get("identidad") or {}).get("asignaciones_manuales") or {}
     ident = _fightcard(s.id).get("identidad") or {}
@@ -545,13 +623,11 @@ def tramos(
 def recorte_de_tramo(
     track: int,
     sesion_id: str,
-    t: str = "",
-    authorization: str = Header(default=""),
+    acceso: Acceso = Depends(acceso_por_ticket),
     db: Session = Depends(obtener_sesion),
 ) -> FileResponse:
     """El cuadro central de un tramo. Entra con ticket, igual que los recortes de siembra."""
-    usuario = usuario_por_ticket_o_header(sesion_id, t, authorization, db)
-    s = sesion_del_usuario(sesion_id, usuario, db)
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     ruta = cfg.dir_sesion(s.id) / "tramos" / f"track_{int(track)}.jpg"
     if not ruta.is_file():
         raise HTTPException(404, "no hay recorte para ese tramo")
@@ -562,7 +638,7 @@ def recorte_de_tramo(
 def asignar_tramos(
     sesion_id: str,
     entrada: EntradaTramos,
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """
@@ -572,7 +648,7 @@ def asignar_tramos(
     fuerza las manuales encima y vuelve a correr detector, guardia y clasificacion. Cuesta
     segundos, no los minutos de la pose.
     """
-    s = sesion_del_usuario(sesion_id, usuario, db)
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     disco, lista = _tramos_en_disco(s)
     if _es_individual(s) and any(a.rol == "B" for a in entrada.asignaciones):
         raise HTTPException(422, "en bolsa y sombra hay una sola persona: un tramo es A o ninguno")
@@ -587,7 +663,8 @@ def asignar_tramos(
     manuales = dict(ident.get("asignaciones_manuales") or {})
     for a in entrada.asignaciones:
         manuales[str(a.track)] = a.rol
-        db.add(AsignacionManual(sesion_id=s.id, track=a.track, rol=a.rol, usuario_id=usuario.id))
+        db.add(AsignacionManual(sesion_id=s.id, track=a.track, rol=a.rol,
+                                usuario_id=acceso.usuario.id))
     ident["asignaciones_manuales"] = manuales
     _escribir_sesion_en_disco(s.id, disco)
 
@@ -641,10 +718,10 @@ def _fightcard(sesion_id: str) -> dict:
 @app.get("/fightcards/{sesion_id}")
 def fightcard(
     sesion_id: str,
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> JSONResponse:
-    s = sesion_del_usuario(sesion_id, usuario, db)
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     fc = _fightcard(s.id)
     # 05 §4: lo que sale de la base y puede cambiar despues del procesamiento va al
     # responder y no se guarda en el archivo. Asignar un peleador no reescribe la Fight-Card.
@@ -652,8 +729,25 @@ def fightcard(
         "contexto": s.contexto or "sparring",
         "practica": s.practica,
         "boxeadores": {"A": _boxeador_de_sesion(s.boxeador_a), "B": _boxeador_de_sesion(s.boxeador_b)},
+        # B24: quien subio y quien corrigio cada golpe. El contrato 0.3 no cambia: esto no
+        # se guarda en el archivo.
+        "autoria": _autoria(s, db),
     }
     return JSONResponse(fc)
+
+
+def _autoria(s: Sesion, db: Session) -> dict:
+    subida = _subida_por(s, db)
+    correcciones: dict[str, str | None] = {}
+    filas = db.scalars(
+        select(Correccion).where(Correccion.sesion_id == s.id).order_by(Correccion.creada)
+    ).all()
+    quienes = {u.id: _nombre_de(u) for u in db.scalars(select(Usuario).where(
+        Usuario.id.in_({c.usuario_id for c in filas if c.usuario_id}))).all()}
+    for c in filas:
+        # La ultima correccion de cada golpe; las anteriores a las cuentas quedan sin nombre.
+        correcciones[c.golpe] = quienes.get(c.usuario_id) if c.usuario_id else None
+    return {"subida_por": subida["nombre"] if subida else None, "correcciones": correcciones}
 
 
 def _boxeador_de_sesion(b) -> dict | None:
@@ -666,10 +760,10 @@ def _boxeador_de_sesion(b) -> dict | None:
 def exportar(
     sesion_id: str,
     formato: str = "csv",
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ):
-    s = sesion_del_usuario(sesion_id, usuario, db)
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     fc = _fightcard(s.id)
     if formato == "csv":
         return Response(
@@ -680,8 +774,15 @@ def exportar(
     if formato in ("html", "pdf"):
         # pdf devuelve la misma pagina: se imprime desde el navegador. Esta dicho en la
         # pagina y en el README, no es un fallback silencioso.
-        return HTMLResponse(a_html(fc))
+        return HTMLResponse(a_html(fc, _nombres_para_export(s, acceso)))
     raise HTTPException(422, "formato tiene que ser csv o html")
+
+
+def _nombres_para_export(s: Sesion, acceso: Acceso) -> dict:
+    """En Individual, el peleador propio y "Compañero" (CA-I05.1); si no, los asignados."""
+    if acceso.plan.peleadores == "propio":
+        return {"A": s.boxeador_a.nombre if s.boxeador_a else "Vos", "B": "Compañero"}
+    return {k: b.nombre for k, b in (("A", s.boxeador_a), ("B", s.boxeador_b)) if b is not None}
 
 
 @app.patch("/fightcards/{sesion_id}/golpes/{golpe}")
@@ -689,7 +790,7 @@ def corregir(
     sesion_id: str,
     golpe: str,
     entrada: EntradaCorreccion,
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """
@@ -700,7 +801,7 @@ def corregir(
     el id de un golpe sale de su carril y su cuadro y solo es unico adentro de su sesion.
     Un id global pediria un contador, y un contador se rompe al reclasificar.
     """
-    s = sesion_del_usuario(sesion_id, usuario, db)
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     try:
         from boxtwin.mvp.orquesta import registrar_correccion
     except ImportError as e:  # pragma: no cover - depende del entorno
@@ -710,8 +811,8 @@ def corregir(
         ) from e
 
     try:
-        fc = registrar_correccion(cfg.dir_sesion(s.id), golpe, entrada.tipo, por=usuario.email,
-                                  objetivo=entrada.objetivo)
+        fc = registrar_correccion(cfg.dir_sesion(s.id), golpe, entrada.tipo,
+                                  por=acceso.usuario.email, objetivo=entrada.objetivo)
     except FileNotFoundError as e:
         raise HTTPException(409, str(e)) from e
     except ValueError as e:
@@ -731,7 +832,8 @@ def corregir(
             sesion_id=s.id, golpe=golpe, tipo=valor, campo=campo,
             tipo_original=original,
             checkpoint=fc.get("clasificador", {}).get("checkpoint"),
-            datos={"t_inicio": (ev or {}).get("t_inicio"), "por": usuario.email},
+            datos={"t_inicio": (ev or {}).get("t_inicio"), "por": acceso.usuario.email},
+            usuario_id=acceso.usuario.id,
         )
     )
     db.commit()
@@ -748,12 +850,12 @@ _TROZO = 1024 * 1024
 @app.get("/videos/{sesion_id}/ticket")
 def ticket(
     sesion_id: str,
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """Un permiso corto para reproducir ESTE video, que es lo que el <video> puede llevar."""
-    s = sesion_del_usuario(sesion_id, usuario, db)
-    return {"ticket": emitir_ticket(usuario.id, s.id, cfg.secreto), "minutos": 30}
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
+    return {"ticket": emitir_ticket(acceso.usuario.id, s.id, cfg.secreto), "minutos": 30}
 
 
 def _servir_con_rangos(ruta: Path, range: str):
@@ -804,14 +906,12 @@ def _servir_con_rangos(ruta: Path, range: str):
 @app.get("/videos/{sesion_id}/stream")
 def stream(
     sesion_id: str,
-    t: str = "",
     range: str = Header(default=""),
-    authorization: str = Header(default=""),
+    acceso: Acceso = Depends(acceso_por_ticket),
     db: Session = Depends(obtener_sesion),
 ):
     """El video original de la sesion."""
-    u = usuario_por_ticket_o_header(sesion_id, t, authorization, db)
-    s = sesion_del_usuario(sesion_id, u, db)
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     ruta = cfg.dir_sesion(s.id) / "videos" / s.video_nombre
     if not ruta.is_file():
         raise HTTPException(404, "no esta el video de esta sesion")
@@ -824,9 +924,8 @@ def stream(
 @app.api_route("/videos/{sesion_id}/procesado", methods=["GET", "HEAD"])
 def procesado(
     sesion_id: str,
-    t: str = "",
     range: str = Header(default=""),
-    authorization: str = Header(default=""),
+    acceso: Acceso = Depends(acceso_por_ticket),
     db: Session = Depends(obtener_sesion),
 ):
     """
@@ -836,8 +935,7 @@ def procesado(
     esta lista. El 404 es entonces un estado normal y no un error: la interfaz muestra el
     original mientras tanto.
     """
-    u = usuario_por_ticket_o_header(sesion_id, t, authorization, db)
-    s = sesion_del_usuario(sesion_id, u, db)
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     ruta = cfg.dir_sesion(s.id) / "procesado.mp4"
     if not ruta.is_file():
         raise HTTPException(404, "el video procesado todavia no esta")
@@ -847,7 +945,7 @@ def procesado(
 @app.post("/jobs/{sesion_id}/render", status_code=202)
 def pedir_render(
     sesion_id: str,
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """
@@ -861,7 +959,7 @@ def pedir_render(
     Se niega si ya hay uno esperando, que es lo que evita que tocar dos veces el boton
     encole dos renders del mismo video sobre la unica GPU que hay.
     """
-    s = sesion_del_usuario(sesion_id, usuario, db)
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     if s.estado != "listo":
         raise HTTPException(
             409, f"la sesion esta en '{s.estado}': el video con marcas se arma sobre la "
@@ -885,16 +983,7 @@ def pedir_render(
 # Boxeadores y perfiles
 
 
-def _boxeador_del_usuario(bid: str, usuario, db) -> "Boxeador":
-    b = db.get(Boxeador, bid)
-    # El mismo 404 para inexistente y ajeno: distinguirlos le dice a un desconocido cuales
-    # ids existen, igual que en el login.
-    if b is None or b.usuario_id != usuario.id:
-        raise HTTPException(404, "no existe ese boxeador")
-    return b
-
-
-def _boxeador_a_dict(b, uso: dict | None = None) -> dict:
+def _boxeador_a_dict(b, uso: dict | None = None, extra: dict | None = None) -> dict:
     d = {"id": b.id, "nombre": b.nombre, "guardia": b.guardia, "notas": b.notas,
          "creado": b.creado.isoformat(),
          # B6
@@ -908,10 +997,29 @@ def _boxeador_a_dict(b, uso: dict | None = None) -> dict:
         n, ultima = uso.get(b.id, (0, None))
         d["sesiones"] = n
         d["ultima_sesion"] = ultima.isoformat() if ultima else None
+    if extra is not None:
+        d.update(extra.get(b.id, {}))
     return d
 
 
-def _uso_de_boxeadores(usuario, db) -> dict:
+def _plantel(acceso: Acceso, bs, db: Session) -> dict:
+    """B24 y B25: entrenador a cargo y consentimiento de cada atleta. Nulos fuera de Gimnasio."""
+    from boxtwin_api.cuentas import estado_consentimiento
+
+    gimnasio = acceso.plan.consentimiento == "atleta"
+    entrenadores = {u.id: u for u in db.scalars(select(Usuario).where(
+        Usuario.id.in_({b.entrenador_id for b in bs if b.entrenador_id}))).all()}
+    out = {}
+    for b in bs:
+        u = entrenadores.get(b.entrenador_id) if b.entrenador_id else None
+        out[b.id] = {
+            "entrenador": {"id": u.id, "nombre": _nombre_de(u)} if u is not None else None,
+            "consentimiento": estado_consentimiento(b, db) if gimnasio else None,
+        }
+    return out
+
+
+def _uso_de_boxeadores(acceso: Acceso, db) -> dict:
     """
     Cuantas sesiones tiene cada boxeador, como A o como B, y la ultima (B5b, B6).
 
@@ -924,7 +1032,7 @@ def _uso_de_boxeadores(usuario, db) -> dict:
     for col in (Sesion.boxeador_a_id, Sesion.boxeador_b_id):
         filas = db.execute(
             select(col, func.count(Sesion.id), func.max(Sesion.creada))
-            .where(Sesion.usuario_id == usuario.id, col.is_not(None))
+            .where(Sesion.cuenta_id == acceso.cuenta.id, col.is_not(None))
             .group_by(col)
         ).all()
         for bid, n, ultima in filas:
@@ -933,53 +1041,68 @@ def _uso_de_boxeadores(usuario, db) -> dict:
     return uso
 
 
+def _entrenador_valido(acceso: Acceso, uid: str | None, db: Session) -> str | None:
+    """B24: el entrenador a cargo tiene que ser un miembro activo de la cuenta, y solo en Gimnasio."""
+    if uid is None:
+        return None
+    exigir_funcion(acceso, acceso.plan.plantel_compartido)
+    if miembro_activo(db, acceso.cuenta.id, uid) is None:
+        raise HTTPException(422, "el entrenador a cargo tiene que ser un miembro activo del gimnasio")
+    return uid
+
+
 @app.post("/boxeadores", status_code=201)
 def crear_boxeador(
     entrada: EntradaBoxeador,
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
-    """Da de alta un boxeador. El nombre es unico por usuario, no global."""
+    """Da de alta un boxeador. El nombre es unico por cuenta, no global."""
+    # B22: en Individual la cuenta tiene un solo peleador, el propio.
+    exigir_funcion(acceso, acceso.plan.peleadores == "libre")
     nombre = entrada.nombre.strip()
     ya = (
         db.query(Boxeador)
-        .filter(Boxeador.usuario_id == usuario.id, Boxeador.nombre == nombre)
+        .filter(Boxeador.cuenta_id == acceso.cuenta.id, Boxeador.nombre == nombre)
         .first()
     )
     if ya is not None:
         raise HTTPException(409, f"ya tenes un boxeador que se llama {nombre}")
-    b = Boxeador(usuario_id=usuario.id, nombre=nombre, guardia=entrada.guardia,
+    entrenador = _entrenador_valido(acceso, entrada.entrenador_id, db)
+    b = Boxeador(usuario_id=acceso.usuario.id, cuenta_id=acceso.cuenta.id, nombre=nombre,
+                 guardia=entrada.guardia,
                  notas=entrada.notas, categoria=entrada.categoria,
                  altura_m=entrada.altura_m, envergadura_m=entrada.envergadura_m,
-                 distancia=entrada.distancia, estilo=entrada.estilo)
+                 distancia=entrada.distancia, estilo=entrada.estilo, entrenador_id=entrenador)
     db.add(b)
     db.commit()
-    return _boxeador_a_dict(b, {})
+    return _boxeador_a_dict(b, {}, _plantel(acceso, [b], db))
 
 
 @app.get("/boxeadores")
 def listar_boxeadores(
-    usuario: Usuario = Depends(usuario_actual),
+    a_cargo: str = "",
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> list[dict]:
-    bs = (
-        db.query(Boxeador)
-        .filter(Boxeador.usuario_id == usuario.id)
-        .order_by(Boxeador.nombre)
-        .all()
-    )
-    uso = _uso_de_boxeadores(usuario, db)
-    return [_boxeador_a_dict(b, uso) for b in bs]
+    q = db.query(Boxeador).filter(Boxeador.cuenta_id == acceso.cuenta.id)
+    if a_cargo == "yo":
+        # B24: el filtro "a mi cargo" del plantel.
+        q = q.filter(Boxeador.entrenador_id == acceso.usuario.id)
+    bs = q.order_by(Boxeador.nombre).all()
+    uso = _uso_de_boxeadores(acceso, db)
+    extra = _plantel(acceso, bs, db)
+    return [_boxeador_a_dict(b, uso, extra) for b in bs]
 
 
 @app.patch("/boxeadores/{boxeador_id}")
 def editar_boxeador(
     boxeador_id: str,
     entrada: EntradaBoxeador,
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
-    b = _boxeador_del_usuario(boxeador_id, usuario, db)
+    b = boxeador_de_la_cuenta(boxeador_id, acceso, db)
     guardia_previa = b.guardia
     b.nombre = entrada.nombre.strip()
     b.guardia = entrada.guardia
@@ -993,8 +1116,12 @@ def editar_boxeador(
     b.envergadura_m = entrada.envergadura_m
     b.distancia = entrada.distancia
     b.estilo = entrada.estilo
+    # B24: solo si viene en el pedido. La hoja de edicion de las otras versiones no lo manda
+    # y no lo tiene que borrar.
+    if "entrenador_id" in entrada.model_fields_set:
+        b.entrenador_id = _entrenador_valido(acceso, entrada.entrenador_id, db)
     db.commit()
-    return _boxeador_a_dict(b, _uso_de_boxeadores(usuario, db))
+    return _boxeador_a_dict(b, _uso_de_boxeadores(acceso, db), _plantel(acceso, [b], db))
 
 
 def _reclasificar(db: Session, sesiones) -> list[str]:
@@ -1002,7 +1129,7 @@ def _reclasificar(db: Session, sesiones) -> list[str]:
     Encola `clasificar` en las sesiones listas, solo con el tipo v2 encendido (RT8). Con v1
     la guardia no interviene en el tipo y no hay nada que recalcular. No commitea.
     """
-    if cfg.clasificador != "geometrico":
+    if not cfg.tipo_v2:
         return []
     encoladas = []
     for s in sesiones:
@@ -1020,7 +1147,7 @@ def _reclasificar(db: Session, sesiones) -> list[str]:
 def asignar_boxeadores(
     sesion_id: str,
     entrada: AsignarBoxeadores,
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """
@@ -1030,13 +1157,27 @@ def asignar_boxeadores(
     persona: A y B se asignan por posicion en pantalla y no significan nada entre videos.
     Se puede cambiar despues, y cambiarlo solo reescribe esta relacion: ni la Fight-Card ni
     los golpes se tocan.
+
+    Versiones: en Individual el compañero no tiene perfil (B22, DV-4); en Gimnasio no se
+    asigna un atleta sin consentimiento vigente (B25). Desasignar siempre se puede.
     """
-    s = sesion_del_usuario(sesion_id, usuario, db)
+    from boxtwin_api.cuentas import estado_consentimiento
+
+    s = sesion_de_la_cuenta(sesion_id, acceso, db)
     previa = (s.boxeador_a_id, s.boxeador_b_id)
+    elegidos = {}
     for campo, valor in (("boxeador_a_id", entrada.boxeador_a),
                          ("boxeador_b_id", entrada.boxeador_b)):
         if valor is not None:
-            _boxeador_del_usuario(valor, usuario, db)
+            elegidos[campo] = boxeador_de_la_cuenta(valor, acceso, db)
+    if acceso.plan.peleadores == "propio" and entrada.boxeador_b is not None:
+        raise HTTPException(403, "en la versión Individual el compañero no tiene perfil")
+    if acceso.plan.consentimiento == "atleta":
+        for campo, b in elegidos.items():
+            if getattr(s, campo) != b.id and estado_consentimiento(b, db)["estado"] != "vigente":
+                raise HTTPException(422, f"Falta el consentimiento de {b.nombre}")
+    for campo, valor in (("boxeador_a_id", entrada.boxeador_a),
+                         ("boxeador_b_id", entrada.boxeador_b)):
         setattr(s, campo, valor)
     if (s.boxeador_a_id, s.boxeador_b_id) != previa:
         # RT8 del tipo v2: con otro boxeador cambia la guardia de la que salen jab y cross.
@@ -1049,11 +1190,12 @@ def asignar_boxeadores(
 def perfil_de_boxeador(
     boxeador_id: str,
     contexto: str = "todas",
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """
-    El perfil: las sesiones de este boxeador puestas una al lado de la otra.
+    El perfil: las sesiones de este boxeador puestas una al lado de la otra. En Gimnasio,
+    todas las de la cuenta, sin importar quien las subio (CA-G04.1).
 
     Se arma leyendo las Fight-Cards de disco en cada pedido y no se cachea. Son pocas por
     boxeador y el entrenador corrige tipos: un perfil cacheado mostraria la version anterior
@@ -1061,15 +1203,15 @@ def perfil_de_boxeador(
     """
     if contexto != "todas" and contexto not in CONTEXTOS:
         raise HTTPException(422, f"contexto tiene que ser todas o uno de {', '.join(CONTEXTOS)}")
-    return _perfil(_boxeador_del_usuario(boxeador_id, usuario, db), usuario, db, contexto)
+    return _perfil(boxeador_de_la_cuenta(boxeador_id, acceso, db), acceso, db, contexto)
 
 
-def _perfil(b, usuario, db, contexto: str = "todas", solo_pelea: bool = False,
+def _perfil(b, acceso: Acceso, db, contexto: str = "todas", solo_pelea: bool = False,
             excluir_rival: str | None = None) -> dict:
     from boxtwin_api.perfil import construir_perfil
 
     sesiones = []
-    for s in db.query(Sesion).filter(Sesion.usuario_id == usuario.id).all():
+    for s in db.query(Sesion).filter(Sesion.cuenta_id == acceso.cuenta.id).all():
         if s.boxeador_a_id == b.id:
             sesiones.append((s, "A"))
         if s.boxeador_b_id == b.id:
@@ -1084,7 +1226,7 @@ def _perfil(b, usuario, db, contexto: str = "todas", solo_pelea: bool = False,
 def rival(
     a: str,
     b: str,
-    usuario: Usuario = Depends(usuario_actual),
+    acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """
@@ -1093,11 +1235,13 @@ def rival(
     """
     from boxtwin_api.rival import cruzar
 
+    # B22: la funcion entera no esta en Individual; no hay recurso que filtrar antes.
+    exigir_funcion(acceso, acceso.plan.rival)
     if a == b:
         raise HTTPException(422, "elegi dos peleadores distintos")
     # DC-10: la exposicion de cada uno, sin las sesiones contra el otro.
-    pa = _perfil(_boxeador_del_usuario(a, usuario, db), usuario, db, solo_pelea=True, excluir_rival=b)
-    pb = _perfil(_boxeador_del_usuario(b, usuario, db), usuario, db, solo_pelea=True, excluir_rival=a)
+    pa = _perfil(boxeador_de_la_cuenta(a, acceso, db), acceso, db, solo_pelea=True, excluir_rival=b)
+    pb = _perfil(boxeador_de_la_cuenta(b, acceso, db), acceso, db, solo_pelea=True, excluir_rival=a)
     return cruzar(pa, pb)
 
 
@@ -1149,6 +1293,24 @@ def producto() -> dict:
             "combinacion": regla_de_combinacion(),
             "perfil_preliminar_sesiones": cfg.perfil_preliminar_sesiones,
         },
+        # Versiones 26-10 (B20, B29). Nada de esto es de nadie: modos, perfiles fijos y horas.
+        "cupo": cfg.cupo,
+        "demo": _demo_en_producto(),
+        "versiones": {v: {"horas_mes": p.horas_mes} for v, p in PLANES.items()},
+    }
+
+
+def _demo_en_producto() -> dict:
+    if not cfg.demo:
+        return {"activo": False}
+    return {
+        "activo": True,
+        "subir": cfg.demo_subir,
+        "perfiles": [
+            {"perfil": p.perfil, "nombre": p.nombre, "version": p.version, "rol": p.rol,
+             "descripcion": p.descripcion, "disponible": p.disponible}
+            for p in PERFILES_DEMO.values()
+        ],
     }
 
 
@@ -1178,7 +1340,10 @@ def salud() -> dict:
         # Bolsa y sombra (B8): si la bandera esta encendida y con que modelo se clasifican.
         "sesiones_individuales": cfg.sesiones_individuales,
         "modelo_individual": (cfg.modelo_clasificador_geo_individual / "meta.json").is_file()
-        if cfg.clasificador == "geometrico" else None,
+        if cfg.tipo_v2 else None,
+        # Modo academico E7 (25-10): si esta el modelo de 42 features. Solo con e7.
+        "modelo_e7": (cfg.modelo_clasificador_e7 / "meta.json").is_file()
+        if cfg.clasificador == "e7" else None,
     }
 
 
@@ -1212,6 +1377,12 @@ def _cabeceras_web(ruta: str, respuesta) -> None:
     elif respuesta.headers.get("content-type", "").startswith("text/html"):
         respuesta.headers["Cache-Control"] = "no-cache"
 
+
+# Versiones 26-10: /cuenta y el consentimiento por atleta. Antes del montaje de la web, que
+# tapa todo lo que se registre despues.
+from boxtwin_api.cuentas import router as _router_cuentas  # noqa: E402
+
+app.include_router(_router_cuentas)
 
 if cfg.web and (cfg.web / "index.html").is_file():
     from fastapi.staticfiles import StaticFiles

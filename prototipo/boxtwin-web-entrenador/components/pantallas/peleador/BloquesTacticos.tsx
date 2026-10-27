@@ -168,7 +168,7 @@ export function VolumenPorRound({ p, producto }: { p: Perfil; producto?: Product
 
 // -- W22 ---------------------------------------------------------------------------------
 
-export function MapaExposicion({ p, producto, contexto }: { p: Perfil; producto?: Producto; contexto: string }) {
+export function MapaExposicion({ p, producto, contexto, vos = false }: { p: Perfil; producto?: Producto; contexto: string; vos?: boolean }) {
   const e = p.exposicion;
   const estado = estadoDe("06.exposicion", producto);
   if (estado !== "estimacion") {
@@ -178,20 +178,20 @@ export function MapaExposicion({ p, producto, contexto }: { p: Perfil; producto?
   return (
     <EstadoBloque
       estado="estimacion"
-      titulo="Hacia dónde le tiran"
+      titulo={vos ? "Lo que te tiraron tus compañeros" : "Hacia dónde le tiran"}
       nota={e?.sesgo_detector.corregido ? textos.exposicionCorregida(e.sesgo_detector.recall_cuerpo, e.sesgo_detector.recall_cabeza) : undefined}
     >
       <p className="mb-3 text-sm text-texto-2">{textos.exposicionSubtitulo}</p>
       {sinRival || !e ? (
         <p className="text-sm text-texto-3">{sinRival ? textos.exposicionSinRival : "Todavía no hay sesiones de sparring o combate."}</p>
       ) : (
-        <ContenidoMapa e={e} />
+        <ContenidoMapa e={e} vos={vos} />
       )}
     </EstadoBloque>
   );
 }
 
-function ContenidoMapa({ e }: { e: NonNullable<Perfil["exposicion"]> }) {
+function ContenidoMapa({ e, vos = false }: { e: NonNullable<Perfil["exposicion"]>; vos?: boolean }) {
   const conDato = e.con_dato ?? 0;
   const colorear = conDato >= MINIMO_MAPA;
   const fr = Object.fromEntries(ZONAS.map((z) => [z, e.zonas?.[z]?.fraccion_corregida ?? null])) as Record<Zona, number | null>;
@@ -233,7 +233,7 @@ function ContenidoMapa({ e }: { e: NonNullable<Perfil["exposicion"]> }) {
             <p className="text-sm">Rivales que aportan</p>
             <ul className="mt-1 text-sm text-texto-2">
               {e.por_rival.map((r) => (
-                <li key={r.boxeador_id ?? "sin"} className="flex justify-between"><span>{r.nombre}</span><span className="dato">{r.total}</span></li>
+                <li key={r.boxeador_id ?? "sin"} className="flex justify-between"><span>{vos && !r.boxeador_id ? "sin perfil" : r.nombre}</span><span className="dato">{r.total}</span></li>
               ))}
             </ul>
             {dominante && <p className="mt-2 text-sm text-estimado">{textos.exposicionDominante(dominante.nombre)}</p>}

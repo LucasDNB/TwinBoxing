@@ -5,6 +5,10 @@
  * tiene peleador asignado se puede asignar aca: A y B se asignan por posicion en pantalla y
  * no significan nada entre videos, asi que sin esto la sesion no suma a ningun perfil.
  * Asignar no toca la Fight-Card.
+ *
+ * En Individual (versiones 26-10, 03 §I-04) no hay nada que asignar: vos sos el peleador
+ * propio y tu compañero no tiene perfil. En Gimnasio solo se elige un atleta con
+ * consentimiento vigente (B25).
  */
 import { useState } from "react";
 import Link from "next/link";
@@ -17,8 +21,36 @@ import { mensajeDeError } from "@/components/boxtwin/Estados";
 import { asignarBoxeadores, claves, useBoxeadores } from "@/lib/api/consultas";
 import type { Sesion } from "@/lib/api/esquemas";
 import { lados as ladosDe, type FightCard, type Lado } from "@/lib/fightcard";
+import { esIndividual, useCuenta } from "@/lib/cuenta";
+import { textos } from "@/lib/textos";
 
 export function VistaPerfiles({ s, fc }: { s: Sesion; fc: FightCard }) {
+  const cuenta = useCuenta().data;
+  if (esIndividual(cuenta)) {
+    const propio = cuenta?.boxeador_propio;
+    return (
+      <div className="grid gap-3 md:grid-cols-2">
+        <section aria-label="Vos" className="rounded-md border border-borde bg-superficie p-4">
+          <p className="font-display text-lg font-semibold">Vos</p>
+          {propio && (
+            <Link href={`/peleador/?id=${propio.id}`} className="mt-2 inline-flex min-h-11 items-center text-[15px] underline underline-offset-4">
+              Ver mi perfil
+            </Link>
+          )}
+        </section>
+        {ladosDe(fc).includes("B") && (
+          <section aria-label="Compañero" className="rounded-md border border-borde bg-superficie p-4">
+            <p className="font-display text-lg font-semibold">Compañero</p>
+            <p className="mt-2 text-sm text-texto-3">{textos.individualCompañero}</p>
+          </section>
+        )}
+      </div>
+    );
+  }
+  return <Asignar s={s} fc={fc} porAtleta={cuenta?.funciones.consentimiento === "atleta"} />;
+}
+
+function Asignar({ s, fc, porAtleta }: { s: Sesion; fc: FightCard; porAtleta: boolean }) {
   const qc = useQueryClient();
   const boxeadores = useBoxeadores();
   const lados = ladosDe(fc);
@@ -67,7 +99,10 @@ export function VistaPerfiles({ s, fc }: { s: Sesion; fc: FightCard }) {
               <label htmlFor={`asignar-${l}`} className="mt-3 block text-sm text-texto-2">Asignar</label>
               <SelectNativo id={`asignar-${l}`} className="mt-1" value={elegidos[l]} onChange={(e) => setElegidos((x) => ({ ...x, [l]: e.target.value }))}>
                 <option value="">Sin perfil</option>
-                {(boxeadores.data ?? []).map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
+                {(boxeadores.data ?? []).map((b) => {
+                  const falta = porAtleta && b.consentimiento?.estado !== "vigente" && b.id !== actual[l];
+                  return <option key={b.id} value={b.id} disabled={falta}>{b.nombre}{falta ? " · Falta el consentimiento" : ""}</option>;
+                })}
               </SelectNativo>
             </section>
           );

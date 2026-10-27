@@ -96,3 +96,53 @@ Orden: G0 primero. Después G1 a G6 en orden. G7 y G8 son la parte 3D y pueden q
 
 Sub-hipótesis 1: Lucas sigue intentando hasta el corte del 31-10, con las mediciones primero
 (C1 y benchmark R-11 esta semana) y el clasificador después en la GPU.
+
+## E7 · 3D de 4D-Humans (desde el 24-10)
+
+Spec: `docs/specs/2026-10-24-e7-4dhumans/` (00 a 02), pre-registro aprobado en `083dc70`. Trabajo
+en `~/boxtwin/e7-4dhumans/`. Pasos manuales en el 00-README (Q1 a Q4).
+
+| Id | Tarea | Spec | Depende de | Estado | Evidencia / notas |
+|---|---|---|---|---|---|
+| Q1 | Pre-registro aprobado | 00 | — | hecha | `083dc70`, 24-10 |
+| Q2 | Modelo SMPL neutral en `~/boxtwin/e7-4dhumans/smpl/` (Lucas) | 00 | — | hecha | 24-10, 39 MB, sha256 `98e65c74ad9b998783132f00880d1025a8d64b158e040e6ef13a557e5098bc42`; `~/.cache/4DHumans/data/smpl/SMPL_NEUTRAL.pkl` es un enlace a él |
+| Q3 | Entorno `boxtwin_4dhumans` | 02 §1 | — | hecha | Ver abajo |
+| Q4 | GPU libre la noche de la corrida | 00 | — | hecha | 24-10 23:19, sin procesos de cómputo; Lucas lanzó E7-3 a E7-6 |
+| E7-0 | Commit del pre-registro aprobado | 02 §3 | Q1 | hecha | `083dc70` |
+| E7-1 | Prueba de humo: un golpe, VRAM, velocidad, claves de salida | 02 §3 | Q2, Q3 | hecha | `humo_hmr2.py`, `~/boxtwin/e7-4dhumans/humo.json`: `02-sparring_ev_0001`, 21 cuadros, 21 recortes, ninguno sin caja; VRAM pico 2756 MB con lote 8 (de 7786); 0,048 s por recorte con lote 1 y 0,033 con lote 8; carga 6,7 s. Salidas: `pred_smpl_params` (global_orient 1×3×3, body_pose 23×3×3, betas 10), `pred_keypoints_3d` 44 (orden OpenPose más extras, no se usa); el forward de `smplx.SMPL` da 45 articulaciones, las primeras 24 son las de SMPL. Ancho de hombros SMPL mediano 0,329 m. E7 es viable; con 33,5 mil recortes, unos 19 min de GPU más la lectura de video |
+| E7-2 | Pruebas en verde | 02 §2 | E7-1 | hecha | `tests/test_e7.py`, 8 pruebas de los cinco puntos del diseño §2, escritas antes del código y en rojo; `python -m pytest scripts/clasificador_geo/tests`: 69 pasadas, 1 salteada (la de mmpose, como antes). Código: `elevar_hmr2.py`, `geo.TRABAJO_E7`, `features3d.py --trabajo`, `entrenar.py --exp E7` (3D y corridas en el trabajo de E7), `evaluar.py --e7`. Integración sobre 02-sparring en un directorio temporal: 62 golpes, todos los pasos con 3D, 180 s (los 1047 serían unos 50 min) |
+| E7-3 | `elevar_hmr2.py` sobre las siete fuentes | 02 §2 | E7-2, Q4 | hecha | 24-10 23:19 a 23:59, `~/boxtwin/e7-4dhumans/datos/pose3d.npz`: 1047 golpes, pasos con 3D 0,997 (por fuente de 0,995 a 1,000), 2352 s |
+| E7-4 | `features3d.py --trabajo ~/boxtwin/e7-4dhumans` | 02 §2 | E7-3 | hecha | X3 (1047, 32, 16), pasos con 3D 0,997 |
+| E7-5 | `entrenar.py --exp E7` | 02 §2 | E7-4 | hecha | 35 corridas en `cuda`, unos 3 s cada una, en `~/boxtwin/e7-4dhumans/corridas/E7/`; completo |
+| E7-6 | `evaluar.py` contra el pre-registro | 02 §2 | E7-5 | hecha | `~/boxtwin/e7-4dhumans/resultados/{E7,veredictos}.json`. Familia 0,777 (814 de 1047; Wilson 0,751–0,802; el commit 06fe4b5 decía 0,778 por redondear un valor ya redondeado), recall de hook 0,683 (0,629–0,733). P11a mejora: +0,039 contra E5, 5 de 7, desvío 0,013. P11b mejora: +0,051 contra E4, 5 de 7. Sub-hipótesis 1: a (ocho clases 0,673). D9: ninguno. Sin umbral: altura balanceada en C8 0,751 (E4 0,719, E5 0,713); vibración de la muñeca de 1,9 a 3,0 veces la de E5 según la fuente |
+| E7-7 | Documento y entrada del README preparada | 02 §3 | E7-6 | hecha | `docs/experiments/2026-10-24-e7-4dhumans.md`, con la auditoría independiente del 25-10 (11 de 11 pasan) en §6 y la entrada del README en §7, sin aplicar |
+
+### Entorno (Q3, 24-10)
+
+- Clon `~/externos/4D-Humans`, commit `efe18deff163b29dff87ddbd575fa29b716a356c` (7-2-2026).
+- `boxtwin_4dhumans`: Python 3.10, torch 2.4.1+cu121, torchvision 0.19.1+cu121, numpy 1.23.5,
+  smplx 0.1.28, chumpy 0.71, pytorch-lightning 2.6.6, timm 1.0.30, opencv-python 4.11.0.86,
+  `hmr2` editable desde el clon. 85 paquetes. Sin detectron2: `import hmr2.models` y
+  `hmr2.datasets.vitdet_dataset` no lo cargan (verificado).
+- Decisiones de instalación: numpy fijo en 1.23.5 porque `chumpy` importa alias de numpy
+  borrados en 1.24; `chumpy` y el `-e` de 4D-Humans con `--no-build-isolation`, porque el
+  `setup.py` de `chumpy` hace `import pip`.
+- Pesos HMR2.0b de `download_models()` en `~/.cache/4DHumans` (5,1 GB con el tar):
+  `epoch=35-step=1000000.ckpt`, sha256 `c9ea09c834161468638c9de7a782c614e300c622709bf52967274c543ec72fcf`.
+- `twinboxing_env` y `boxtwin_mmaction` sin cambios: `pip freeze` idéntico antes y después.
+- 24-10 (E7-2): la caja de los cuadros interpolados sale de interpolar la caja de los
+  vecinos con `elevar3d.rellenar_huecos`, no de keypoints interpolados con score inventado. Así
+  la máscara queda igual que en E5 (pre-registro E2 y E4: relleno de huecos de hasta 10).
+- 24-10 (E7-2), observación: en 02-sparring, con el tórax ← cuello de SMPL, los hombros quedan
+  0,14 (en escala pelvis-tórax) debajo del origen del marco del cuerpo; con MotionBERT, a 0,01.
+  El cuello de SMPL está más arriba que el tórax de H36M y el pre-registro (E3) lo daba a la
+  altura de los hombros. El mapeo no se cambia: queda declarado para el documento. Lateralidad y
+  orientación coinciden con E5 (hombro izquierdo en +x, muñeca adelante en +z en los dos).
+- 24-10 (E7-1): el checkpoint de HMR2 guarda objetos de `omegaconf`, que `setup.py` no
+  declara. Se instaló `omegaconf` 2.4.0 en `boxtwin_4dhumans` con el resto de las versiones
+  fijas (torch y numpy no cambiaron).
+- 24-10: el modelo neutral `basicModel_neutral_lbs_10_207_0_v1.0.0.pkl` se distribuye con
+  SMPLify (`smplify.is.tue.mpg.de`, README de 4D-Humans), no en el sitio de SMPL que cita el
+  pre-registro §2. La licencia que vale es la que Lucas acepta al bajarlo; se anota acá cuando
+  la confirme. El pre-registro no se edita: la condición de uso (solo investigación, nada al
+  producto) no cambia.

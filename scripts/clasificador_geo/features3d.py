@@ -20,6 +20,8 @@ QUE HACE
 
 USO
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/features3d.py
+  ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/features3d.py --trabajo ~/boxtwin/e7-4dhumans
+    (E7, 24-10: golpes.csv sigue saliendo del trabajo de E4)
 """
 
 from __future__ import annotations
@@ -32,7 +34,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from geo import PASOS, TRABAJO  # noqa: E402
+from geo import PASOS, TRABAJO, TRABAJO_E7  # noqa: E402
 
 PELVIS, CAD_DER, CAD_IZQ, TORAX = 0, 1, 4, 8
 HOMBRO, CODO, MUNECA = 11, 12, 13           # brazo izquierdo
@@ -111,9 +113,11 @@ def construir(golpes: list[dict], P3: np.ndarray, M3: np.ndarray) -> np.ndarray:
 def main(argv=None) -> int:
     from datos import leer_csv
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.parse_args(argv)
-    d = TRABAJO / "datos"
-    por_fd = {g["frame_dir"]: g for g in leer_csv(d / "golpes.csv")}
+    ap.add_argument("--trabajo", type=Path, default=TRABAJO,
+                    help="de donde se lee pose3d.npz y donde se escribe features3d.npz (E7: %s)" % TRABAJO_E7)
+    args = ap.parse_args(argv)
+    por_fd = {g["frame_dir"]: g for g in leer_csv(TRABAJO / "datos" / "golpes.csv")}
+    d = args.trabajo / "datos"
     with np.load(d / "pose3d.npz") as z:
         fd, P3, M3 = z["frame_dir"], z["P3"], z["M3"]
     golpes = [por_fd[n] for n in fd]

@@ -76,3 +76,26 @@ def test_metricas_reales_de_e4a():
     m = ef.metricas_e4(ef.VARIANTES["E4a"]["metricas"])
     assert m["golpes"] == 1047 and round(m["familia_fuente_no_vista"], 3) == 0.724
 
+
+
+def test_variante_e7_modo_academico(trabajo):
+    """25-10 (docs/specs/2026-10-25-e7-modo-academico): 42 features, metodo geometrico-e7 y licencia."""
+    import entrenar_final as ef
+    d = _datos(f=42)
+    out = ef.entrenar_final(d, trabajo / "m", None, semillas=(0,), epocas=1, metricas={}, exp="E7")
+    meta = json.loads((out / "meta.json").read_text())
+    assert meta["exp"] == "E7" and meta["nombre"] == "clasificador_e7_v1"
+    assert meta["metodo"] == "geometrico-e7" and meta["n_features"] == 42
+    assert "SMPL" in meta["licencia"] and "no comercial y sin fines de lucro" in meta["licencia"]
+    assert ef.VARIANTES["E7"]["salida"].name == "clasificador_e7_v1"
+    # E4 sigue sin licencia y con su metodo
+    meta4 = json.loads((ef.entrenar_final(_datos(), trabajo / "n", None, semillas=(0,), epocas=1,
+                                          metricas={}) / "meta.json").read_text())
+    assert meta4["metodo"] == "geometrico-v1" and "licencia" not in meta4
+
+
+def test_metricas_reales_de_e7():
+    import entrenar_final as ef
+    m = ef.metricas_e4(ef.VARIANTES["E7"]["metricas"], ef.VARIANTES["E7"]["referencia"])
+    assert m["golpes"] == 1047 and round(m["familia_fuente_no_vista"], 4) == 0.7775
+    assert m["referencia"].endswith("2026-10-24-e7-4dhumans.md")

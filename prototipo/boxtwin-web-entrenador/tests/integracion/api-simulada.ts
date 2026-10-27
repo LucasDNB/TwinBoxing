@@ -13,6 +13,7 @@ import jobEspera from "../fixtures/sesion-real/job-espera_siembra.json";
 import jobCompletando from "../fixtures/sesion-real/job-completando.json";
 import jobListo from "../fixtures/sesion-real/job-listo.json";
 import jobFallo from "../fixtures/sesion-real/job-fallo.json";
+import { cuentaEntrenador, type CuentaDePrueba } from "../fixtures/cuentas";
 
 export const ID = jobListo.id;
 export const JOBS = {
@@ -46,6 +47,11 @@ export interface Mundo {
   perfiles: Record<string, Record<string, unknown>>;
   /* GET /rival (B18): lo que devuelve la API, armado a mano en cada prueba. */
   rival: Record<string, unknown> | null;
+  /* Versiones 26-10: GET /cuenta. Por defecto Entrenador, que es la web de antes. */
+  cuenta: CuentaDePrueba;
+  miembros: Record<string, unknown>[];
+  consentimientos: Record<string, Record<string, unknown>>;
+  textoConsentimiento: { version: string; texto: string } | null;
 }
 
 /* Como el servidor con {"objetivo"} (B11): pisa la altura y recuenta cabeza y cuerpo. */
@@ -83,6 +89,10 @@ export function mundoNuevo(): Mundo {
     tokenValido: "token-bueno",
     perfiles: {},
     rival: null,
+    cuenta: cuentaEntrenador(),
+    miembros: [],
+    consentimientos: {},
+    textoConsentimiento: { version: "2026-10-08", texto: "Texto de prueba del consentimiento." },
     tramos: {
       cobertura: { A: 0.7948, B: 0.9339, sin_asignar: 0.8554 },
       separacion_color: 1.375,
@@ -121,6 +131,53 @@ export const servidor = setupServer(
     registrar(request, c);
     if (c.clave !== "sparring2026") return HttpResponse.json({ detail: "email o clave incorrectos" }, { status: 401 });
     return HttpResponse.json({ token: mundo.tokenValido, tipo: "bearer", usuario: c.email });
+  }),
+  http.get("*/cuenta", ({ request }) => {
+    registrar(request);
+    if (!autorizado(request)) return no401();
+    return HttpResponse.json(mundo.cuenta);
+  }),
+  http.get("*/cuenta/miembros", ({ request }) => {
+    registrar(request);
+    if (!autorizado(request)) return no401();
+    if (mundo.cuenta.rol !== "titular") return HttpResponse.json({ detail: "solo el titular de la cuenta puede hacer esto" }, { status: 403 });
+    return HttpResponse.json(mundo.miembros);
+  }),
+  http.get("*/cuenta/consentimiento", ({ request }) => {
+    registrar(request);
+    if (!mundo.textoConsentimiento) {
+      return HttpResponse.json({ detail: "falta el texto del consentimiento: cargalo en boxtwin_api/textos/consentimiento-<version>.md (DV-5)" }, { status: 409 });
+    }
+    return HttpResponse.json(mundo.textoConsentimiento);
+  }),
+  http.get("*/boxeadores/:id/consentimiento", ({ request, params }) => {
+    registrar(request);
+    return HttpResponse.json(mundo.consentimientos[String(params.id)] ?? { estado: "falta", desde: null, historia: [] });
+  }),
+  http.post("*/boxeadores/:id/consentimiento", async ({ request, params }) => {
+    const c = await request.json();
+    registrar(request, c);
+    const id = String(params.id);
+    const h = { id: `c${id}`, texto_version: "2026-10-08", mayor_de_edad: true, nota: null, registrado_por: mundo.cuenta.usuario.nombre, registrado_en: "2026-10-26T10:00:00", revocado_por: null, revocado_en: null, semilla: false };
+    mundo.consentimientos[id] = { estado: "vigente", desde: h.registrado_en, historia: [...((mundo.consentimientos[id]?.historia as unknown[]) ?? []), h] };
+    const b = mundo.boxeadores.find((x) => x.id === id);
+    if (b) b.consentimiento = { estado: "vigente", desde: h.registrado_en };
+    return HttpResponse.json(mundo.consentimientos[id], { status: 201 });
+  }),
+  http.delete("*/boxeadores/:id/consentimiento", ({ request, params }) => {
+    registrar(request);
+    const id = String(params.id);
+    const actual = mundo.consentimientos[id];
+    const historia = ((actual?.historia as Record<string, unknown>[]) ?? []).map((h) => (h.revocado_en ? h : { ...h, revocado_en: "2026-10-30T10:00:00", revocado_por: mundo.cuenta.usuario.nombre }));
+    mundo.consentimientos[id] = { estado: "revocado", desde: "2026-10-30T10:00:00", historia };
+    const b = mundo.boxeadores.find((x) => x.id === id);
+    if (b) b.consentimiento = { estado: "revocado", desde: "2026-10-30T10:00:00" };
+    return new HttpResponse(null, { status: 204 });
+  }),
+  http.post("*/auth/demo", async ({ request }) => {
+    const c = (await request.json()) as { perfil: string };
+    registrar(request, c);
+    return HttpResponse.json({ token: mundo.tokenValido, tipo: "bearer", usuario: c.perfil, perfil: c.perfil });
   }),
   http.post("*/auth/registro", async ({ request }) => {
     const c = await request.json();

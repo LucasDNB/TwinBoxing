@@ -388,6 +388,9 @@ def build_parser() -> argparse.ArgumentParser:
     cl.add_argument("sesion", type=Path)
     cl.add_argument("--modelo", type=Path, default=Path("~/boxtwin/modelos/clasificador_geo_v1"),
                     help="directorio con meta.json y las semillas")
+    cl.add_argument("--pose3d", type=Path, default=None,
+                    help="modo academico E7: pose3d_hmr2.npz de tools/elevar_hmr2_sesion.py. "
+                         "Obligatorio con un modelo de E7, ignorado con E4")
     for lado in ("a", "b"):
         cl.add_argument(f"--guardia-{lado}", dest=f"guardia_{lado}", default="desconocida",
                         choices=["ortodoxa", "zurda", "desconocida"],
@@ -761,12 +764,15 @@ def _cmd_clasificar(args: argparse.Namespace) -> int:
         args.sesion, args.modelo.expanduser(),
         None if args.guardia_a == "desconocida" else args.guardia_a,
         None if args.guardia_b == "desconocida" else args.guardia_b,
+        pose3d=args.pose3d.expanduser() if args.pose3d else None,
     )
     print(f"{len(d['tipos'])} segmentos clasificados, {d['segmentos_sin_clasificar']} sin pasos "
           f"usables ({time.perf_counter() - t0:.2f} s, {d['checkpoint']})")
     supuestas = [lado for lado, s in d["guardia_supuesta"].items() if s]
     if supuestas:
         print(f"  guardia supuesta ortodoxa en {', '.join(supuestas)}: jab y cross pueden estar invertidos")
+    if d.get("licencia"):
+        print(f"  {d['licencia']}; {d.get('segmentos_sin_3d', 0)} segmentos sin 3D")
     print(f"  -> {Path(args.sesion) / 'tipos.json'}")
     return 0
 

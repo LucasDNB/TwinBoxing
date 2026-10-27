@@ -3,6 +3,10 @@
 /*
  * 00 · Ingreso (04 §00). Una columna de 400 px maximo. "Tengo una invitacion" despliega el
  * codigo y cambia el boton a "Crear cuenta". Ningun error dice cual de los dos campos fallo.
+ *
+ * Versiones 26-10 (03 §2, W38): con la version de prueba encendida en la API, la pagina no
+ * tiene ningun campo: un boton por version y rol, con los textos y el orden que manda
+ * /producto. Apagada, es la de siempre.
  */
 import { Suspense, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -11,7 +15,10 @@ import { Button } from "@/components/animate-ui/components/buttons/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ErrorApi } from "@/lib/api/cliente";
-import { ingresar, registrarse, useProducto } from "@/lib/api/consultas";
+import { ingresar, ingresarDemo, registrarse, useProducto } from "@/lib/api/consultas";
+import type { Producto } from "@/lib/api/esquemas";
+import { decimal } from "@/lib/formato";
+import { textos } from "@/lib/textos";
 import { guardarSesion } from "@/lib/sesion-usuario";
 import { destinoSeguro } from "@/lib/navegacion";
 
@@ -27,6 +34,8 @@ function Formulario() {
   const [enviando, setEnviando] = useState(false);
 
   const registro = producto.data?.registro;
+
+  if (producto.data?.demo?.activo) return <IngresoDePrueba producto={producto.data} />;
 
   async function enviar(e: FormEvent) {
     e.preventDefault();
@@ -89,6 +98,63 @@ function Formulario() {
           {creando ? "Ya tengo cuenta" : registro === "invitacion" ? "Tengo una invitación" : "Crear una cuenta"}
         </button>
       )}
+    </main>
+  );
+}
+
+function IngresoDePrueba({ producto }: { producto: Producto }) {
+  const router = useRouter();
+  const [entrando, setEntrando] = useState<string | null>(null);
+  const [error, setError] = useState<{ perfil: string; mensaje: string } | null>(null);
+  const perfiles = producto.demo?.perfiles ?? [];
+
+  async function entrar(perfil: string) {
+    setError(null);
+    setEntrando(perfil);
+    try {
+      const t = await ingresarDemo(perfil);
+      guardarSesion(t.token, t.usuario);
+      router.replace("/");
+    } catch (err) {
+      setError({ perfil, mensaje: err instanceof Error ? err.message : "No se pudo entrar." });
+      setEntrando(null);
+    }
+  }
+
+  return (
+    <main className="mx-auto flex min-h-dvh w-full max-w-[400px] flex-col justify-center px-4 py-10">
+      <Marca />
+      <p className="rotulo mt-6 text-estimado">Versión de prueba</p>
+      <h1 className="mt-1 font-display text-[32px] font-bold leading-none">Entrar</h1>
+      <p className="mt-3 text-sm text-texto-2">{textos.demoIngreso}</p>
+      <ul className="mt-6 flex flex-col gap-3">
+        {perfiles.map((p) => {
+          const horas = producto.versiones?.[p.version]?.horas_mes;
+          return (
+            <li key={p.perfil}>
+              <button
+                type="button"
+                disabled={!p.disponible || entrando !== null}
+                onClick={() => entrar(p.perfil)}
+                className="flex min-h-20 w-full flex-col items-start gap-1 rounded-md border border-borde bg-superficie px-4 py-3 text-left hover:border-borde-fuerte disabled:opacity-60"
+              >
+                <span className="font-display text-xl font-semibold">{p.nombre}</span>
+                <span className="text-sm text-texto-2">{p.disponible ? p.descripcion : textos.enConstruccion.titulo}</span>
+                {horas != null && <span className="dato text-xs text-texto-3">{decimal(horas, 0)} h de video por mes</span>}
+                {entrando === p.perfil && <span role="status" className="text-xs text-texto-2">Entrando…</span>}
+              </button>
+              {error?.perfil === p.perfil && (
+                <div role="alert" className="mt-2 rounded-md border border-error-borde bg-error-fondo px-3 py-2 text-sm text-error">
+                  {error.mensaje}
+                  <button type="button" className="ml-2 min-h-11 underline underline-offset-4" onClick={() => entrar(p.perfil)}>
+                    Reintentar
+                  </button>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </main>
   );
 }

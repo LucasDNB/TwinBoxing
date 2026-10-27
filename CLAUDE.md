@@ -329,6 +329,17 @@ Qué sigue y en qué orden, al 20-10: `docs/tareas/2026-10-20-proxima-sesion.md`
 Están pre-registrados en la sección 7 de la spec, escritos antes de medir. No se
 tocan después de ver los resultados.
 
+## 5quinquies. Versiones Individual y Gimnasio (desde el 26-10)
+
+Specs SDD en `prototipo/specs/versiones-26-10/`, registro en `prototipo/TAREAS.md`. Una versión es
+el plan de la cuenta (`cuentas`, `miembros`): toda ruta con datos recibe `acceso_actual` y filtra
+por `cuenta_id`, nunca por `usuario_id`; `tests/test_acceso_estructural.py` falla si alguien
+vuelve a comparar por usuario. Ingreso de prueba con un botón por versión detrás de
+`BOXTWIN_DEMO` (apagada por defecto), cuentas de prueba con `python -m boxtwin_api.demo
+sembrar|reiniciar`. Construido en la rama `versiones-26-10`, **sin desplegar**: se despliega
+después de las sesiones de prueba, con la base respaldada (`despliegue/README.md`). El texto del
+consentimiento por atleta (B25) no está: lo carga Lucas en `boxtwin_api/textos/`.
+
 ## 5quater. Fight-Card, tipo de golpe v2 (desde el 16-10)
 
 Specs SDD en `docs/specs/2026-10-16-fightcard-tipo-v2/`, registro en
