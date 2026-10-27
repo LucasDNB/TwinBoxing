@@ -62,7 +62,66 @@ Las dos instancias levantadas en local desde los ejemplos de entorno de esta ram
   respuesta que cualquier ruta inexistente con POST (la atiende el montaje de la web), así que no
   delata que la ruta existe, que es lo que el requisito protege. Se deja así y se declara.
 
-## Estado de la estación al 26-10 (leído, sin tocar)
+## Registro del despliegue de A (26-10, 16:37 a 16:40)
+
+Lucas decidió desplegar antes de las sesiones de prueba del 27-10. Es un **desvío de
+`versiones-26-10/06` §1** (y de `dos-instancias/01-produccion.md`, que daba A por intacta): C4, C5
+y C6 se miden sobre `c936b0f` y no sobre `34e991d`. Va así a la tesis, con fecha y motivo.
+
+1. Antes: cola vacía, GPU libre, una cuenta real con 12 sesiones. Huella en
+   `~/boxtwin/huella-antes-de-produccion.txt`.
+2. Respaldos: `~/boxtwin/datos/boxtwin.db.antes-de-produccion-20261026-1637.bak` (12 sesiones,
+   abre) y `/etc/boxtwin.env.antes-de-produccion-20261026-1637.bak`. B apagada.
+3. Copia principal: `git checkout --detach produccion` → `c936b0f`. Web con `produccion.sh web`
+   (el primer build cortó con el aviso de Next y el reintento siguió; presupuesto y sin-demo ok).
+4. `/etc/boxtwin.env`: se agregaron `BOXTWIN_CUPO=informar`, `BOXTWIN_DEMO=` y
+   `BOXTWIN_DEMO_SUBIR=1` (sigue en 600, lucasb). Restart de `boxtwin-api` y `boxtwin-worker`.
+5. Migración al arrancar: columnas nuevas en `usuarios`, `boxeadores`, `sesiones` y
+   `correcciones`; la cuenta real quedó Entrenador titular con sus 12 sesiones y 5 peleadores; 12
+   duraciones copiadas; índice `uq_boxeador_cuenta_nombre`.
+6. `produccion.sh verificar a`: todo ok, versión de prueba apagada. Por el Funnel: `/salud` con
+   `c936b0f`, `/ingresar/` 200, `/cuenta` sin token 401.
+7. B encendida de nuevo, sin cambios: `verificar b` ok en `efcec23`, sin arranque automático,
+   `:8443` solo en la tailnet.
+8. Huella después en `~/boxtwin/huella-despues-de-produccion.txt`. Cambian el entorno, el commit,
+   `/salud`, la fecha de la web y el hash de `pip freeze`. Este último solo porque las líneas
+   editables llevan el commit de la copia; ningún paquete cambió. Sesiones: 12 antes y después.
+
+Sin hacer: CV6 y la versión de prueba (`BOXTWIN_DEMO` sigue vacía), y entrar con la cuenta real
+desde el navegador. Eso último lo verifica Lucas, porque la clave no la tiene el SDD.
+
+## Versión de prueba encendida (26-10, 16:50)
+
+Pedido de Lucas. `~/boxtwin/demo.yaml` sin sesiones copiadas (DV-9: ningún video de nadie
+expuesto); Atleta 1 y 2 en Entrenador, Atleta 3 a 5 en Gimnasio con su consentimiento de semilla.
+`produccion.sh demo sembrar`: 3 cuentas, 4 usuarios, 6 atletas, 3 consentimientos. Respaldo
+`/etc/boxtwin.env.antes-de-demo-*.bak`, `BOXTWIN_DEMO=1`, restart solo de `boxtwin-api` (cola vacía).
+
+- Por el Funnel, los cuatro botones disponibles; cada perfil entra a su versión y rol (4, 15, 50 y
+  50 h) y ve 0 sesiones.
+- **CV6 cumple**: con cada perfil, 53 pedidos contra las 12 sesiones y los 5 peleadores de la cuenta
+  real (`/jobs`, `/fightcards`, ticket de video, tramos, perfil): 0 fugas, todos 404.
+- Mientras esté encendida, la cuenta real no entra por la web (DV-10).
+
+Apagarla: `BOXTWIN_DEMO=` vacía en `/etc/boxtwin.env` y `sudo systemctl restart boxtwin-api`. Para
+dejar las cuentas de prueba como nuevas: `produccion.sh demo reiniciar`.
+
+## Avatar MPFB2 desplegado en A (27-10, 02:51)
+
+PR #30 (avatar MPFB2 y calor sobre la piel, `prototipo/specs/cambios-27-10/`) mergeado a
+`produccion` como `1058d5e`. Cambio solo de web: sin migración, sin tocar B ni el worker.
+
+- Copia principal de `c936b0f` a `1058d5e` (`git checkout --detach origin/produccion`),
+  `produccion.sh web`: presupuesto en verde, `/peleador/` 340,9 KB, la más pesada
+  `/sesion/identificar/` 371,1 KB; `sin-demo` limpio.
+- La web nueva sale de disco: `/peleador/` 200 y `/models/boxer_mpfb2.glb` 200, `model/gltf-binary`,
+  idéntico byte a byte al del repo.
+- `sudo systemctl restart boxtwin-api` (Lucas, 02:51:22). `produccion.sh verificar a`: commit
+  `1058d5e`, secreto fijo, invitación, web y `geometrico` ok. Avisa la versión de prueba encendida,
+  que sigue así a pedido de Lucas (ventana de ensayo).
+- Vuelta atrás: `git checkout --detach c936b0f`, `produccion.sh web` y restart de la API.
+
+## Estado de la estación al 26-10 antes del despliegue (leído, sin tocar)
 
 - A: `boxtwin-api` y `boxtwin-worker` activos, `/salud` `34e991d`, `geometrico`. Sin las versiones.
 - B: `boxtwin-academico-api` y `-worker` activos y **no habilitados al arranque**, `/salud`
@@ -163,4 +222,4 @@ sudo systemctl stop boxtwin-academico-worker boxtwin-academico-api        # B ap
 - CV3 a CV6 de las versiones, en la estación.
 - Next 16.4.0 avisa de una vulnerabilidad conocida al hacer el build. No se actualizó: es un
   cambio de dependencia y pide el OK de Lucas.
-- La rama no está en GitHub ni tiene PR.
+- La rama está en GitHub desde el 27-10 (PR #30 la usó de base).

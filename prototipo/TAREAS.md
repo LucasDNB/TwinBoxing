@@ -93,11 +93,12 @@ DC-1 y DC-2 tomadas por Lucas el 14-10; DC-3 a DC-9 en `specs/cambios-14-10/00-R
 ## Avatar MPFB2 y calor sobre la piel (`specs/cambios-27-10/01-avatar-mpfb2.md`)
 
 Decisión de producto de Lucas, 27-10: impacto visual por encima de la precisión que sugiere la imagen.
+W39 y W40 y no W27 y W28: las versiones del 26-10 ya usan de W27 a W38.
 
 | Id | Tarea | Spec | Estado | Evidencia / notas |
 |---|---|---|---|---|
-| W27 | Malla MPFB2 con rig, posada en guardia | `cambios-27-10/01` §1 a §4 | hecha | `lib/avatar/solverRig.ts`, `components/boxtwin/avatar/escena.ts`; `avatar-calor.test.ts` (solver sobre rig en T). GLB armado por `scripts/avatar_mpfb2.py` en Blender 4.2 + MPFB2: 34.360 triángulos, 2,42 MB, validador sin avisos. Guantes modelados con metaballs. Visto posado en Chromium |
-| W28 | Calor de golpes dirigidos sobre la piel | `cambios-27-10/01` §5 | hecha | `lib/avatar/shaderCalor.ts`, `lib/avatar/exposicion.ts`, `LeyendaCalor.tsx`; mismo dato que W22, solo con `06.exposicion` visible. `avatar-calor.test.ts` y `perfil-tactico.test.tsx`. `/peleador/` en 318,5 KB y `/rival/` en 323,5 KB de JS inicial (CA-23.1). Compilado y visto en Chromium con SwiftShader |
+| W39 | Malla MPFB2 con rig, posada en guardia | `cambios-27-10/01` §1 a §4 | hecha | `lib/avatar/solverRig.ts`, `components/boxtwin/avatar/escena.ts`; `avatar-calor.test.ts` (solver sobre rig en T). GLB armado por `scripts/avatar_mpfb2.py` en Blender 4.2 + MPFB2: 34.360 triángulos, 2,42 MB, validador sin avisos. Guantes modelados con metaballs. Visto posado en Chromium |
+| W40 | Calor de golpes dirigidos sobre la piel | `cambios-27-10/01` §5 | hecha | `lib/avatar/shaderCalor.ts`, `lib/avatar/exposicion.ts`, `LeyendaCalor.tsx`; mismo dato que W22, solo con `06.exposicion` visible. `avatar-calor.test.ts` y `perfil-tactico.test.tsx`. `/peleador/` en 318,5 KB y `/rival/` en 323,5 KB de JS inicial (CA-23.1). Compilado y visto en Chromium con SwiftShader |
 ## Versiones Individual y Gimnasio (`specs/versiones-26-10/`)
 
 26-10, por delegación de Lucas ("tomá todas las decisiones según tu criterio de recomendaciones"):
