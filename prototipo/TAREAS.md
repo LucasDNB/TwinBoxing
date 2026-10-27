@@ -96,5 +96,5 @@ Decisión de producto de Lucas, 27-10: impacto visual por encima de la precisió
 
 | Id | Tarea | Spec | Estado | Evidencia / notas |
 |---|---|---|---|---|
-| W27 | Malla MPFB2 con rig, posada en guardia | `cambios-27-10/01` §1 a §4 | hecha sin asset | `lib/avatar/solverRig.ts`, `components/boxtwin/avatar/escena.ts`; `avatar-calor.test.ts` (solver sobre rig en T). Sin `public/models/boxer_mpfb2.glb` cae al maniquí. `scripts/validar-glb.mjs` revisa el contrato. Falta que Lucas exporte el GLB |
+| W27 | Malla MPFB2 con rig, posada en guardia | `cambios-27-10/01` §1 a §4 | hecha | `lib/avatar/solverRig.ts`, `components/boxtwin/avatar/escena.ts`; `avatar-calor.test.ts` (solver sobre rig en T). GLB armado por `scripts/avatar_mpfb2.py` en Blender 4.2 + MPFB2: 34.360 triángulos, 2,42 MB, validador sin avisos. Guantes modelados con metaballs. Visto posado en Chromium |
 | W28 | Calor de golpes dirigidos sobre la piel | `cambios-27-10/01` §5 | hecha | `lib/avatar/shaderCalor.ts`, `lib/avatar/exposicion.ts`, `LeyendaCalor.tsx`; mismo dato que W22, solo con `06.exposicion` visible. `avatar-calor.test.ts` y `perfil-tactico.test.tsx`. `/peleador/` en 318,5 KB y `/rival/` en 323,5 KB de JS inicial (CA-23.1). Compilado y visto en Chromium con SwiftShader |

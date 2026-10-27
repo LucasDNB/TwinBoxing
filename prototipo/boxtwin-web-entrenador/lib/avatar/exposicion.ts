@@ -46,8 +46,8 @@ export function intensidades(zonas: Partial<Record<Zona, FilaZona>> | null | und
 }
 
 // Desplazamientos en alturas: hacia adelante (la cara y el pecho miran al rival) y al costado.
-const CABEZA = { adelante: 0.035, costado: 0.04, radio: 0.1 };
-const CUERPO = { adelante: 0.06, costado: 0.075, radio: 0.16 };
+const CABEZA = { adelante: 0.035, costado: 0.035, radio: 0.075 };
+const CUERPO = { adelante: 0.06, costado: 0.07, radio: 0.12 };
 
 export function zonasCalor(a: Anclas, int: Intensidades): ZonaCalor[] {
   const H = a.altura;

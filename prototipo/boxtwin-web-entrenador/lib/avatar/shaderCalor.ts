@@ -95,7 +95,8 @@ float calorEn(vec3 p) {
 // Despues de map_fragment: el albedo ya trae su textura, el calor se mezcla encima.
 const FRAGMENT_MEZCLA = /* glsl */ `
 float calorH = calorEn(vCalorPos);
-float calorM = uOpacidad * smoothstep(uUmbral, uUmbral + 0.12, calorH);
+// El calor bajo se desvanece en vez de pintar de cian todo el torso: la opacidad sube con h.
+float calorM = uOpacidad * smoothstep(uUmbral, uUmbral + 0.45, calorH);
 vec3 calorC = calorRampa(calorH);
 diffuseColor.rgb = mix(diffuseColor.rgb, calorC, calorM);`;
 

@@ -128,19 +128,24 @@ async function mpfb2(grupo: THREE.Group, gltf: GLTF, f: Figura, u: UniformesCalo
   orientar(raiz, H);
   posar(raiz, esqueleto(f.medidas, f.guardia, f.extension));
   const transparente = (f.opacidad ?? 1) < 1;
+  // Si el export nombra el cuerpo, el calor va solo ahi (no en el short ni en los ojos).
+  let conNombre = false;
+  raiz.traverse((o) => { conNombre ||= o.name.includes(CUERPO) || !!o.parent?.name.includes(CUERPO); });
   raiz.traverse((o) => {
     if (!(o instanceof THREE.Mesh)) return;
     o.frustumCulled = false;
     const nombre = `${o.name} ${o.parent?.name ?? ""}`;
     const guantes = nombre.includes(GUANTES);
+    const piel = conNombre ? nombre.includes(CUERPO) : o instanceof THREE.SkinnedMesh;
     const mats = (Array.isArray(o.material) ? o.material : [o.material]).map((m: THREE.Material) => {
       const c = m.clone();
       desechar.push(c);
       c.transparent = transparente;
       c.opacity = f.opacidad ?? 1;
-      if (guantes && c instanceof THREE.MeshStandardMaterial) c.color.setHex(colorDe(f.lado));
-      // El calor va en la piel; si el export no nombra el cuerpo, en toda malla que no sea guante.
-      else if (!guantes && (nombre.includes(CUERPO) || o instanceof THREE.SkinnedMesh) && c instanceof THREE.MeshStandardMaterial) aplicarCalor(c, u);
+      // El cuero toma el color del lado; el abrojo ("Detalle") queda como vino.
+      if (guantes && c instanceof THREE.MeshStandardMaterial) {
+        if (!c.name.includes("Detalle")) c.color.setHex(colorDe(f.lado));
+      } else if (piel && c instanceof THREE.MeshStandardMaterial) aplicarCalor(c, u);
       return c;
     });
     o.material = Array.isArray(o.material) ? mats : mats[0];

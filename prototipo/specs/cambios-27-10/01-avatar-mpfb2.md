@@ -46,14 +46,29 @@ estructura del repo:
 - Sin Draco ni Meshopt: el GLTFLoader se usa sin decodificadores.
 - La orientación no importa: el solver lee la derecha de los hombros y escala a la altura cargada.
 
-## 4. Export desde Blender (a confirmar por Lucas al exportar)
+## 4. El GLB se arma con un script (27-10)
 
-1. MPFB2: nuevo humano, cuerpo de peleador. Borrar helpers.
-2. Rig: "Game engine". Sin animaciones.
-3. Piel: material de textura de imagen (el procedural no exporta a glTF). Texturas a 1024 o 2048.
-4. Guantes: malla aparte pesada a `hand_l` y `hand_r`, nombrada `Boxer_Gloves_Mesh`.
-5. Exportar glTF binario, +Y arriba, con skinning, sin compresión de malla.
-6. Copiar a `prototipo/boxtwin-web-entrenador/public/models/boxer_mpfb2.glb` y correr el validador.
+`scripts/avatar_mpfb2.py` lo arma entero en Blender 4.2 LTS sin interfaz, con MPFB2 instalado
+como extensión (`blender --online-mode -c extension install -s --enable mpfb`):
+
+```
+~/blender/blender-4.2.23-linux-x64/blender -b --python scripts/avatar_mpfb2.py -- --salida public/models/boxer_mpfb2.glb
+```
+
+1. Humano MPFB2 (varón, músculo 1,0, peso 0,5) con las macros fijadas en la malla, sin morphs.
+2. Rig "Game engine": trae exactamente los huesos del contrato (verificado, 53 huesos).
+3. Ojos propios sobre los helpers de MPFB2, pesados a `head`.
+4. Se borran helpers y manos (las tapan los guantes).
+5. Short desde las caras de la cadera, cortado con planos, con cintura blanca; la piel de abajo se borra.
+6. Guantes con metaballs medidos (con rigidez 4 la superficie queda a 0,684 del radio), remallado
+   por vóxeles, manga abierta, abrojo en relieve, cuero horneado (normal y rugosidad). El material
+   `Guante_Cuero` es blanco y la web lo tiñe con el color del lado; `Guante_Detalle` no se tiñe.
+7. Piel: la LAYERED de MPFB2 horneada con Cycles (OptiX en la 2080) a color, llevada a un tono
+   trigueño, más rugosidad despareja de sudor y normal de poros.
+
+El paquete de pieles de MakeHuman (280 MB) baja a unos 8 KB/s, por eso la piel es la procedural
+horneada y no una de MakeHuman. Resultado al 27-10: 34.360 triángulos, 2,42 MB, sin avisos del
+validador. Se arma en unos 15 segundos.
 
 Los assets de MakeHuman son CC0: el GLB puede ir al repo y a la tesis.
 
@@ -71,5 +86,6 @@ la escena.
 - `tests/unit/avatar-calor.test.ts` (13): zonas y lados, inyección sobre el shader real de Three
   0.170, solver sobre un rig en T mirando a +z, validador sobre GLB sintéticos.
 - `perfil-tactico.test.tsx`: rótulo nuevo y leyenda con la bandera de exposición.
-- Visto en Chromium (SwiftShader) con un arnés fuera del repo: compila con y sin skinning, y cae
-  al maniquí sin el GLB. Con un GLB real de MPFB2 no se probó: no hay ninguno todavía.
+- Visto en Chromium (SwiftShader) con un arnés fuera del repo: compila con y sin skinning, cae al
+  maniquí sin el GLB, y con el GLB del script carga, se posa en guardia, tiñe los guantes por lado
+  y pinta el calor solo en la piel.
