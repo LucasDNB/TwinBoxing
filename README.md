@@ -797,3 +797,35 @@ PENDIENTE Y PROXIMO PASO
 4. Lo que la Fight-Card ya declara en estas sesiones: margen del detector medido en sparring,
    tipo como estimacion. La identidad se corrige a mano por tramos
 5. Mismo camino que PoseConv3D en el MVP. En la tesis va como funcion sin validar
+
+  Y el proximo paso del proyecto es RESOLVER LA IDENTIDAD DE FORMA AUTOMATICA. Es la
+  pieza que sigue siendo enteramente manual y la que se lleva el 73% del tiempo de
+  anotacion, medido. Todo lo demas del pipeline -pose, deteccion, familia- ya corre
+  solo; la identidad no, y es lo que impide correr el sistema sobre un video nuevo sin
+  intervencion humana.
+
+15-09 Medicion de la cadena completa: S-19 y S-04 cerrados, S-17 no
+
+1. S-19 medido en 1,447 h de computo por hora de video, rango 1,134 a 2,624, sobre
+   7 videos y 14 corridas en caliente. El Capitulo 5 declaraba 1,8 sin respaldo
+2. El ratio no depende de la duracion sino de los cuadros por segundo: el costo por
+   cuadro es casi constante, 43,7 a 51,6 ms sobre 1080p. El video de 580 s da 1,447 y
+   cae entre los de tres minutos; el de 60 fps da 2,62 con el costo por cuadro mas bajo
+3. El seguimiento cuesta mas que la pose, 47,7% contra 25,4%. La compensacion de
+   movimiento global explica el 93% de ese costo, 21,7 ms por cuadro contra 1,5 sin
+   ella, y apagarla multiplica por 2,8 el rendimiento de toda la cadena. No se apaga
+   hasta medir si degrada la identidad
+4. Identidad y deteccion juntas no llegan al 0,5% del tiempo. Lo que cuesta son los
+   dos modelos de terceros y el seguidor, no lo que construyo este proyecto
+5. Los caches reales usan half=True y el default del codigo es half=False. Medir con
+   el default cuesta 93,5 s de pose contra 60,5, un 55% mas
+6. Cada corrida verifica que reproduce el cache del proyecto. Atrapo una corrida con
+   la identidad corrompida por cortes de plano falsos: 27 golpes en vez de 80, con el
+   tiempo casi igual. Sin esa comparacion pasaba por medicion valida
+7. S-04 derivado en 0,88 USD por hora de video contra 1,25 declarado, pero el techo
+   con una instancia mas rapida da 1,68 y el numero viejo cae dentro del rango
+8. S-17 NO se midio: nvidia-smi no arranca, modulo del kernel 595.84 contra NVML
+   595.91. Se arregla reiniciando; el muestreador queda escrito y verificado
+9. Dos de las seis etapas que pide la especificacion no existen como codigo: la
+   identidad automatica, que ya era el proximo paso del proyecto, y la estimacion de
+   resultado, que hoy es un campo que se completa a mano

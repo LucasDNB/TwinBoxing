@@ -1,0 +1,42 @@
+AVISO: 3 corridas se aceptan por excepcion documentada (divergencia confinada al ultimo cuadro del recorte).
+corridas leidas: 24  validas: 21  frias: 7  calientes: 14
+
+por video, corridas en caliente
+  video                           dur_s  n  ratio med            rango
+  01-sparring.mp4                 168.4  2      1.389   1.389-1.390   
+  02-sparring.mp4                 170.6  2      1.370   1.370-1.370   
+  03-sparring.mp4                 174.9  2      1.548   1.546-1.551   
+  04-sparring.mp4                 182.6  2      1.490   1.482-1.498   
+  Sparring.mp4                    186.6  2      1.136   1.134-1.138   
+  pacquiao_margarito.mp4          191.0  2      2.620   2.616-2.624   
+  sparring-3-rounds.mp4           580.0  2      1.447   1.446-1.448   
+
+S-19  relacion de computo por hora de video
+  mediana sobre 14 corridas en caliente : 1.447x tiempo real
+  rango                                   : 1.134x a 2.624x
+  dispersion entre videos (mediana por video): 1.136x a 2.620x
+  corridas en frio (aparte, M-07)         : mediana 1.445x, rango 1.142x a 2.609x
+  en horas de computo por hora de video   : 1.447 h/h
+
+reparto por etapa, corridas en caliente (mediana del % del total)
+  preparacion         4.1%   (0.1% a 5.1%)
+  decodificacion      3.0%   (0.7% a 3.4%)
+  pose               25.4%   (22.9% a 41.3%)
+  seguimiento        47.7%   (33.9% a 52.7%)
+  identidad           0.2%   (0.2% a 0.4%)
+  deteccion           0.0%   (0.0% a 0.0%)
+  clasificacion      21.7%   (12.5% a 23.8%)
+  SUMA              100.0%   (100.0% a 100.0%)  <- cuanto del total explican
+  estimacion de resultado: NO MEDIDA, no existe como codigo (desvio D-1)
+
+S-17  consumo electrico
+  NO MEDIDO. nvidia-smi no arranca en esta maquina (desvio D-3).
+  El supuesto de 250 W sigue siendo supuesto.
+
+S-04  costo variable por hora de video
+  instancia           : AWS g4dn.xlarge (T4), us-east-1, precio de lista al 15-09-2026
+  precio de lista     : 0.5260 USD/h
+  computo             : 1.447 h x 0.5260 = 0.7613 USD por hora de video
+  + 15% almacenamiento y transferencia = 0.8755 USD por hora de video
+  rango por el rango de S-19: 0.6861 a 1.5876 USD
+  SUPUESTO NO CERRADO: que esa instancia rinda como una RTX 2080 Super.
