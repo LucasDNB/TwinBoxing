@@ -116,7 +116,7 @@ Una línea por decisión, con el motivo, antes de correr la parte afectada.
       no `nvidia-smi`; CG8 se sigue midiendo con `nvidia-smi` en S23.
     - Sale con 1 si H1 o H2 fallan. Que hacer despues (frenar E8 o entrar en D-H2) lo decide
       Lucas, no el script.
-18. 29-10 (S6), PROPUESTA, pendiente de Lucas: entrar en la rama D-H2. H2 no fallo, pero mostro
+18. 29-10 (S6), decidida por Lucas el 29-10 02:38 UTC ("Si, D-H2"): entrar en la rama D-H2. H2 no fallo, pero mostro
     que `model: auto` no actua igual en las dos condiciones. YOLO26 tiene cabeza de punta a punta
     (`end2end`), y `ultralytics/trackers/track.py` 8.4.41 en ese caso reemplaza `auto` por
     `yolo26n-cls.pt`: una red de ReID aparte, en vez de las features del detector que usa v8.
