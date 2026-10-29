@@ -80,3 +80,11 @@ def test_veredicto_general(gemelo):
     assert humo.codigo_de_salida(bien) == 0
     assert humo.codigo_de_salida({**bien, "H1": {"pasa": False}}) == 1
     assert humo.codigo_de_salida({**bien, "H2": {"pasa": False}}) == 1
+
+
+def test_h3_no_cuenta_al_propio_proceso_como_otro(gemelo, monkeypatch):
+    """S6 del 29-10: H1 y H2 dejan al proceso del humo en la GPU, y H3 se frenaba por el."""
+    import os
+    import humo
+    assert humo.otros_en_gpu(f"{os.getpid()}\n") == []
+    assert humo.otros_en_gpu(f"{os.getpid()}\n4242\n") == [4242]
