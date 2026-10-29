@@ -862,3 +862,14 @@ PENDIENTE Y PROXIMO PASO
 2. Los cuatro botones por el Funnel, cada uno en su version y rol
 3. CV6 cumple: 0 fugas en 53 pedidos por perfil contra la cuenta real
 4. Mientras este encendida, la cuenta real no entra por la web. Apagar: BOXTWIN_DEMO vacia
+
+29-10 E8: YOLO26l-pose en lugar de YOLOv8l-pose, todo lo demas fijo (gemelo C)
+
+1. Una sola variable, el checkpoint de pose; rama D-H2: las dos sin ReID
+2. Detector, F1 en 0,80: 0,433 contra 0,623, 0 de 6 folds: no demostrada
+3. Familia de E4: 0,675 contra 0,732, 1 de 7 folds: no demostrada
+4. Trackeo: menos cambios de track (306 contra 326) y mas tracks mixtos (29 contra 23)
+5. Mecanismo probable: munecas con puntaje >= 0,3 en 0,750 contra 0,896 (K3)
+6. YOLO26 mas rapido (37,1 contra 40,6 ms por cuadro) y con menos memoria
+7. Auditoria independiente: 9 de 9 items pasan
+8. Documentado en docs/experiments/2026-10-29-e8-yolo26.md
