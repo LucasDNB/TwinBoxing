@@ -120,6 +120,27 @@ def _commit(checkout: Path | None = None) -> str | None:
 COMMIT = _commit()
 
 
+def _modelo_pose(ruta: Path) -> dict | None:
+    """Nombre y los 12 primeros del sha256 del checkpoint de pose; None si no esta.
+
+    Una vez al arrancar, como el commit: en la estacion conviven A con yolov8l-pose y C con
+    yolo26l-pose, y /salud tiene que decir cual (docs/specs/2026-10-27-gemelo-yolo26, T2).
+    """
+    import hashlib
+
+    try:
+        h = hashlib.sha256()
+        with Path(ruta).open("rb") as fh:
+            for bloque in iter(lambda: fh.read(1 << 20), b""):
+                h.update(bloque)
+    except OSError:
+        return None
+    return {"archivo": Path(ruta).name, "sha256": h.hexdigest()[:12]}
+
+
+MODELO_POSE = _modelo_pose(cfg.modelo_pose)
+
+
 @asynccontextmanager
 async def _ciclo(_app: FastAPI):
     crear_tablas()
@@ -1334,6 +1355,7 @@ def salud() -> dict:
         # Para poder contestar desde afuera "esto corre el codigo que creo que corre".
         "arrancado": ARRANCADO,
         "commit": COMMIT,
+        "modelo_pose": MODELO_POSE,
         "frontend": bool(cfg.web and (cfg.web / "index.html").is_file()),
         # Tipo de golpe v2: que metodo clasifica (BOXTWIN_CLASIFICADOR).
         "clasificador": cfg.clasificador,

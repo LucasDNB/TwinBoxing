@@ -71,6 +71,15 @@ def project_paths(video: Path) -> ProjectPaths:
     )
 
 
+def _modelo_de_pose(meta: dict) -> str:
+    """
+    El nombre del checkpoint que escribio el cache, sin extension. Un meta sin `model_path`
+    es de antes de que se registrara, y todos esos son de yolov8l-pose.
+    """
+    ruta = (meta.get("inference") or {}).get("model_path")
+    return Path(ruta).stem if ruta else "yolov8l-pose"
+
+
 def cargar_o_crear(paths: "ProjectPaths", meta: dict) -> tuple:
     """
     El documento del proyecto: el que hay, o uno vacio y valido si todavia no existe.
@@ -114,7 +123,7 @@ def cargar_o_crear(paths: "ProjectPaths", meta: dict) -> tuple:
             meta_path=str(paths.meta),
             meta_sha256=sha256_file(paths.meta) if paths.meta.is_file() else "0" * 64,
             keypoint_format=KeypointFormat(meta.get("keypoint_format", "coco17")),
-            keypoint_sources={"0-16": "yolov8l-pose"},
+            keypoint_sources={"0-16": _modelo_de_pose(meta)},
         ),
         # Punto de partida, no un dato: se elige ortodoxa porque es lo mas frecuente, no
         # porque se sepa. La real la fija el anotador desde el panel de identidad.
