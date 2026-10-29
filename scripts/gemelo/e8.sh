@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# POR QUE EXISTE: la fase 1 de E8 son siete etapas largas sobre la GPU que comparte A
-# (docs/specs/2026-10-27-gemelo-yolo26, 05-pasos.md S7 a S13). Corridas a mano, una se lanza
+# POR QUE EXISTE: la fase 1 de E8 son ocho etapas largas sobre la GPU que comparte A
+# (docs/specs/2026-10-27-gemelo-yolo26, 05-pasos.md S6 a S13). Corridas a mano, una se lanza
 # con trabajos de A en cola o se repite sin querer. Este es el unico camino de la fase 1.
 # QUE HACE: antes de cada etapa espera el candado (guardas.py: base de A sin trabajos en_cola o
 # tomado, nvidia-smi sin otros procesos; cada espera queda en e8/candado.log) y despues la
@@ -77,6 +77,11 @@ etapa() {
   fi
 }
 
+s6() {
+  correr "$PY" "$G/humo.py" --modelo "$MODELO" --modelo-v8 "$MODELO_V8" --tracker "$TRACKER" \
+    --out "$GEMELO/humo/humo.json"
+}
+
 s7() {
   correr "$PY" "$G/recache.py" --modelo "$MODELO" --tracker "$TRACKER" --raiz-y26 "$RAIZ_Y26" \
     --registro "$E8/recache.json"
@@ -145,10 +150,10 @@ s13() {
     --modelo "$GUANTES" --device 0 -o "$E8/y26/c1"
 }
 
-declare -A QUE=([S7]="recache" [S8]="puente" [S9]="exports y tensores" [S10]="folds del detector"
+declare -A QUE=([S6]="humo" [S7]="recache" [S8]="puente" [S9]="exports y tensores" [S10]="folds del detector"
                 [S11]="E4 y E4a" [S12]="trackeo" [S13]="C1")
 pedidas=("$@")
-[[ ${#pedidas[@]} -gt 0 ]] || pedidas=(S7 S8 S9 S10 S11 S12 S13)
+[[ ${#pedidas[@]} -gt 0 ]] || pedidas=(S6 S7 S8 S9 S10 S11 S12 S13)
 for id in "${pedidas[@]}"; do
   [[ -n "${QUE[$id]:-}" ]] || { echo "etapa desconocida: $id" >&2; exit 2; }
   etapa "$id" "${QUE[$id]}" "${id,,}"

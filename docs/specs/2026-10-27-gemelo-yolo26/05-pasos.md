@@ -99,12 +99,30 @@ Una línea por decisión, con el motivo, antes de correr la parte afectada.
 16. 28-10 (S1, T8): `e8.sh` corre `boxtwin-detector folds` sin `--en-distribucion`, sobre los
     `.det.npz` de las siete fuentes. Si ese no es el protocolo del 0,635, K2 lo marca en S10 y se
     corrige antes de leer P12a.
+17. 29-10 (T11, pregunta abierta 3): el humo H1 a H3 corre con `scripts/gemelo/humo.py`, como
+    etapa S6 de `e8.sh`, bajo el candado. Pruebas de las partes que dan un numero en
+    `scripts/gemelo/tests/test_humo.py`, en rojo y despues en verde. Lo que difiere de §3 de
+    `01-percepcion.md`, declarado antes de H1:
+    - H1 compara contra las 255 permutaciones izquierda-derecha (todo subconjunto de las ocho
+      parejas de COCO), con la mediana sobre los 17 keypoints de todos los pares, sin filtrar
+      por puntaje. Las personas se emparejan de mayor IoU a menor, cada una una sola vez.
+    - H2 no corre `preprocess` sobre copias: corre en el proceso las mismas funciones del
+      runner (`_cargar_modelo`, `_inferir`, `_reiniciar_tracker`) sobre los videos originales,
+      leidos sin copiar. Es el mismo camino de inferencia y no escribe ningun cache. El tramo de
+      `pacquiao_margarito` va de 60 cuadros antes del primer corte (718) a 60 despues del
+      segundo (1712), y pasa con dos reinicios.
+    - H3 mide solo la inferencia con tracking (sin decodificar), con `torch.cuda.synchronize`
+      antes y despues de cada cuadro. El pico es `torch.cuda.max_memory_reserved` del proceso,
+      no `nvidia-smi`; CG8 se sigue midiendo con `nvidia-smi` en S23.
+    - Sale con 1 si H1 o H2 fallan. Que hacer despues (frenar E8 o entrar en D-H2) lo decide
+      Lucas, no el script.
 
 ## Preguntas abiertas
 
 1. ¿C en la tailnet, como B pero en otro puerto, para abrirla desde el celular? Hoy no, por D2.
 2. Qué sparring y qué bolsa propios entran en L4.
-3. El humo H1 a H3 (S6) no tiene script en T1 a T10. Recomendacion: sumar T11,
+3. ~~El humo H1 a H3 (S6) no tiene script en T1 a T10.~~ Resuelta el 29-10 con T11 (decision
+   17). Recomendacion original: sumar T11,
    `scripts/gemelo/humo.py` con pruebas (orden de keypoints contra las permutaciones
    izquierda-derecha, mediana y p95 del tiempo despues del calentamiento), antes de S6. Es una
    correccion del spec y va como decision antes de H1.
