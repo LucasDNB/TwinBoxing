@@ -8,9 +8,9 @@ Ninguna tarea escribe en A ni en B. `S` = la corre el SDD sin `sudo`; `L` = la h
 
 | Id | Quién | Tarea | Depende de | Verificación | Estado | Evidencia |
 |---|---|---|---|---|---|---|
-| S1 | SDD | T1 a T10 (`01-percepcion.md` §6): pruebas primero, en rojo; código; en verde. Rama `gemelo-yolo26-fase0`, PR contra `main` | — | las pruebas nuevas en rojo y después en verde; suites completas en verde (`boxtwin-api`, `boxtwin-annotator`, `boxtwin-detector`, `boxtwin-guantes`, `scripts/clasificador*/tests`); ensayo de T9 con rutas por entorno | en curso: codigo y pruebas en verde el 28-10; falta el PR | rama `gemelo-yolo26-fase0` (spec en `gemelo-yolo26-spec`, 916f7d8); pruebas nuevas en rojo y despues en verde, salvo las unidades de T10, que se derivaron de las de B con sed antes de su prueba. Suites: boxtwin-annotator 774, boxtwin-api 311, boxtwin-detector 152, boxtwin-guantes 46, scripts/clasificador 32, scripts/clasificador_geo 84 (1 salteada, la de mmpose), scripts/gemelo 39, despliegue/tests 20 (ensayo de T9 con rutas por entorno y puertos libres, decision 15); `verificar a` y `verificar b` como antes |
-| L0 | Lucas | Revisar y mergear el PR de este spec y el de S1 | S1 | los dos en `main` | pendiente | |
-| S2 | SDD | Huellas antes: `despliegue/academico/huella-A.sh` y `despliegue/gemelo/huella-B.sh` en `~/boxtwin-gemelo/huella-{A,B}-antes.txt` | L0 | los dos archivos existen; `/salud` de A y de B dan lo de `PRODUCCION.md` | pendiente | |
+| S1 | SDD | T1 a T10 (`01-percepcion.md` §6): pruebas primero, en rojo; código; en verde. Rama `gemelo-yolo26-fase0`, PR contra `main` | — | las pruebas nuevas en rojo y después en verde; suites completas en verde (`boxtwin-api`, `boxtwin-annotator`, `boxtwin-detector`, `boxtwin-guantes`, `scripts/clasificador*/tests`); ensayo de T9 con rutas por entorno | hecha | rama `gemelo-yolo26-fase0` (spec en `gemelo-yolo26-spec`, 916f7d8); pruebas nuevas en rojo y despues en verde, salvo las unidades de T10, que se derivaron de las de B con sed antes de su prueba. Suites: boxtwin-annotator 774, boxtwin-api 311, boxtwin-detector 152, boxtwin-guantes 46, scripts/clasificador 32, scripts/clasificador_geo 84 (1 salteada, la de mmpose), scripts/gemelo 39, despliegue/tests 20 (ensayo de T9 con rutas por entorno y puertos libres, decision 15); `verificar a` y `verificar b` como antes; PR #36 mergeado el 29-10 (`6a0f0db`) |
+| L0 | Lucas | Revisar y mergear el PR de este spec y el de S1 | S1 | los dos en `main` | hecha | 29-10: PR #35 (spec, `ce4c5a8`) y PR #36 (fase 0, `6a0f0db`) mergeados en `main` |
+| S2 | SDD | Huellas antes: `despliegue/academico/huella-A.sh` y `despliegue/gemelo/huella-B.sh` en `~/boxtwin-gemelo/huella-{A,B}-antes.txt` | L0 | los dos archivos existen; `/salud` de A y de B dan lo de `PRODUCCION.md` | hecha | 29-10, con los scripts de `6a0f0db`: `~/boxtwin-gemelo/huella-A-antes.txt` (HEAD de A `1058d5e`, 17 sesiones) y `huella-B-antes.txt` (HEAD de B `efcec23`, 2 sesiones, B encendida). `produccion.sh verificar a` y `verificar b` ok; A con la version de prueba encendida, como esta registrado el 26-10 |
 | L1 | Lucas | OK para la fase 1 y la noche elegida, con las sesiones de prueba de A ya cerradas | S2 | la fecha anotada acá | pendiente | |
 
 ## Fase 1 · E8, de noche y bajo el candado
@@ -99,12 +99,30 @@ Una línea por decisión, con el motivo, antes de correr la parte afectada.
 16. 28-10 (S1, T8): `e8.sh` corre `boxtwin-detector folds` sin `--en-distribucion`, sobre los
     `.det.npz` de las siete fuentes. Si ese no es el protocolo del 0,635, K2 lo marca en S10 y se
     corrige antes de leer P12a.
+17. 29-10 (T11, pregunta abierta 3): el humo H1 a H3 corre con `scripts/gemelo/humo.py`, como
+    etapa S6 de `e8.sh`, bajo el candado. Pruebas de las partes que dan un numero en
+    `scripts/gemelo/tests/test_humo.py`, en rojo y despues en verde. Lo que difiere de §3 de
+    `01-percepcion.md`, declarado antes de H1:
+    - H1 compara contra las 255 permutaciones izquierda-derecha (todo subconjunto de las ocho
+      parejas de COCO), con la mediana sobre los 17 keypoints de todos los pares, sin filtrar
+      por puntaje. Las personas se emparejan de mayor IoU a menor, cada una una sola vez.
+    - H2 no corre `preprocess` sobre copias: corre en el proceso las mismas funciones del
+      runner (`_cargar_modelo`, `_inferir`, `_reiniciar_tracker`) sobre los videos originales,
+      leidos sin copiar. Es el mismo camino de inferencia y no escribe ningun cache. El tramo de
+      `pacquiao_margarito` va de 60 cuadros antes del primer corte (718) a 60 despues del
+      segundo (1712), y pasa con dos reinicios.
+    - H3 mide solo la inferencia con tracking (sin decodificar), con `torch.cuda.synchronize`
+      antes y despues de cada cuadro. El pico es `torch.cuda.max_memory_reserved` del proceso,
+      no `nvidia-smi`; CG8 se sigue midiendo con `nvidia-smi` en S23.
+    - Sale con 1 si H1 o H2 fallan. Que hacer despues (frenar E8 o entrar en D-H2) lo decide
+      Lucas, no el script.
 
 ## Preguntas abiertas
 
 1. ¿C en la tailnet, como B pero en otro puerto, para abrirla desde el celular? Hoy no, por D2.
 2. Qué sparring y qué bolsa propios entran en L4.
-3. El humo H1 a H3 (S6) no tiene script en T1 a T10. Recomendacion: sumar T11,
+3. ~~El humo H1 a H3 (S6) no tiene script en T1 a T10.~~ Resuelta el 29-10 con T11 (decision
+   17). Recomendacion original: sumar T11,
    `scripts/gemelo/humo.py` con pruebas (orden de keypoints contra las permutaciones
    izquierda-derecha, mediana y p95 del tiempo despues del calentamiento), antes de S6. Es una
    correccion del spec y va como decision antes de H1.

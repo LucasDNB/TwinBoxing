@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 
 E8 = Path(__file__).resolve().parents[1] / "e8.sh"
-ETAPAS = ["S7", "S8", "S9", "S10", "S11", "S12", "S13"]
+ETAPAS = ["S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13"]
 
 
 def _correr(gemelo, *args, **env):
@@ -44,6 +44,13 @@ def test_una_etapa_hecha_no_se_repite(gemelo):
     lineas = _correr(gemelo)
     assert not any(l.startswith("+ candado S7 ") for l in lineas)
     assert any("S7 ya hecha" in l for l in lineas)
+
+
+def test_el_humo_corre_las_dos_poses_con_el_tracker_de_la_rama(gemelo):
+    (humo,) = [l for l in _correr(gemelo) if "humo.py" in l]
+    assert "yolo26l-pose.pt" in humo and "yolov8l-pose.pt" in humo and "botsort.yaml" in humo
+    (humo,) = [l for l in _correr(gemelo, E8_DH2="1") if "humo.py" in l]
+    assert "botsort-sin-reid.yaml" in humo
 
 
 def test_una_sola_etapa(gemelo):
