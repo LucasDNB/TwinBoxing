@@ -60,3 +60,16 @@ def test_total_suma_las_fuentes(gemelo):
     tot = mt.total([una, una], FPS)
     assert tot["base"]["A"]["cambios"] == 2 and tot["y26"]["B"]["cambios"] == 2
     assert tot["denominador"] == {"A": 6, "B": 4}
+
+
+def test_k3_fraccion_de_munecas_con_puntaje(gemelo, tmp_path):
+    """K3: munecas (9 y 10) con puntaje >= 0,3 en los cuadros del denominador comun."""
+    import medir_trackeo as mt
+    from boxtwin.core.posecache import PoseCache
+    A, B = caja(300), caja(800)
+    npz = cache(tmp_path / "c" / "spar.pose.npz", [[(1, A), (2, B)] for _ in range(4)])
+    doc = documento(npz, 4, [(1, "A", 0, 4), (2, "B", 0, 4)])
+    c = PoseCache.open(npz)
+    r = mt.medir_fuente(doc, c, c, c)
+    assert r["k3"] == {"base": 1.0, "y26": 1.0, "diferencia": 0.0, "munecas": 16}
+    assert mt.fraccion_munecas(c, {"A": {0: 1}, "B": {}}, {"A": {0}, "B": set()}, umbral=0.95) == (0.0, 2)

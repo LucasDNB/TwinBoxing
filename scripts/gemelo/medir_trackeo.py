@@ -15,8 +15,9 @@ QUE HACE
   - tracks distintos por peleador;
   - tracks mixtos (un mismo track de A en unos cuadros y de B en otros) y cuadros dentro de
     tracks mixtos.
-  Aparte, sin verdad: tracks totales de cada cache. Escribe trackeo.json con cada fuente y el
-  total.
+  Aparte, sin verdad: tracks totales de cada cache. Y K3 (02-preregistro-e8.md §3): fraccion
+  de keypoints de muneca con puntaje >= 0,3 por condicion, en los mismos cuadros. Escribe
+  trackeo.json con cada fuente y el total.
 
 USO
   python scripts/gemelo/medir_trackeo.py
@@ -34,6 +35,7 @@ AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
 sys.path.insert(0, str(AQUI.parent / "clasificador"))
 import guardas  # noqa: E402
+import comun  # noqa: E402
 from puente_identidad import PELEADORES, _original, emparejar, verdad  # noqa: E402
 
 
@@ -71,6 +73,24 @@ def comparar(asign_base, asign_y26, fps: float) -> dict:
             "base": base, "y26": y26, "diferencia": dif}
 
 
+MUNECAS = (comun.BRAZO_COCO["left"][2], comun.BRAZO_COCO["right"][2])
+
+
+def fraccion_munecas(cache, asign, frames, umbral: float = comun.MIN_SCORE) -> tuple[float | None, int]:
+    """Fraccion de munecas con puntaje >= umbral en los cuadros dados, y cuantas se miraron."""
+    buenas = total = 0
+    for p in PELEADORES:
+        for f in frames[p]:
+            dets = cache.detections(f)
+            i = dets.index_of_track(asign[p][f])
+            if i is None:
+                continue
+            sc = dets.kp_score[i][list(MUNECAS)]
+            buenas += int((sc >= umbral).sum())
+            total += len(MUNECAS)
+    return (buenas / total if total else None), total
+
+
 def medir_fuente(doc, cache_orig, cache_base, cache_y26) -> dict:
     gt = verdad(doc, cache_orig)
     ab, _, cb, _ = emparejar(gt, cache_base)
@@ -81,12 +101,24 @@ def medir_fuente(doc, cache_orig, cache_base, cache_y26) -> dict:
                         "y26": {p: len(ay[p]) for p in PELEADORES}}
     r["conflictos"] = {"base": cb, "y26": cy}
     r["tracks_totales"] = {"base": len(cache_base.track_ids()), "y26": len(cache_y26.track_ids())}
+    comun_ = {p: set(ab[p]) & set(ay[p]) for p in PELEADORES}
+    kb, n = fraccion_munecas(cache_base, ab, comun_)
+    ky, _ = fraccion_munecas(cache_y26, ay, comun_)
+    r["k3"] = {"base": kb, "y26": ky, "diferencia": (ky - kb) if kb is not None and ky is not None else None,
+               "munecas": n}
     return r
 
 
 def total(fuentes: list[dict], fps_ref: float | None = None) -> dict:
     """Suma de las fuentes. Los cambios por minuto salen de las sumas, con el fps de cada una."""
     salida: dict = {"denominador": {p: sum(f["denominador"][p] for f in fuentes) for p in PELEADORES}}
+    if all("k3" in f for f in fuentes):
+        n = sum(f["k3"]["munecas"] for f in fuentes)
+        k3 = {c: (sum(f["k3"][c] * f["k3"]["munecas"] for f in fuentes if f["k3"][c] is not None) / n
+                  if n else None) for c in ("base", "y26")}
+        k3["diferencia"] = k3["y26"] - k3["base"] if n else None
+        k3["munecas"] = n
+        salida["k3"] = k3
     for cond in ("base", "y26"):
         c: dict = {}
         for p in PELEADORES:
