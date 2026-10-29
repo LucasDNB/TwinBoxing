@@ -19,35 +19,35 @@ Ninguna tarea escribe en A ni en B. `S` = la corre el SDD sin `sudo`; `L` = la h
 |---|---|---|---|---|---|---|
 | S3 | SDD | sha256 de las siete anotaciones, `meta.json` y `pose.npz` originales de la copia principal, en `~/boxtwin-gemelo/e8/originales-antes.txt` | L1 | el archivo existe con 21 líneas | hecha | 29-10 01:55 UTC: `~/boxtwin-gemelo/e8/originales-antes.txt`, 21 lineas |
 | S4 | SDD | Bajar `yolo26l-pose.pt` a `~/boxtwin-gemelo/modelos/` y anotar su sha256 | L1 | `sha256sum` anotado acá | hecha | 29-10: release v8.4.0 de Ultralytics, 57995961 bytes, sha256 `ad33da8a29ea5772318c4c980844e47b56792d2b63815ad4e8e09c078c7d1abf` |
-| S5 | SDD | Worktree fijo: `produccion.sh worktree-gemelo <punta de main después de L0>`; anotar el hash | L0 | `git -C ~/Proyectos/TwinBoxing-gemelo rev-parse HEAD` igual al anotado; HEAD de A sin cambios | hecha, se repite | 29-10: `684b1dd` (punta de `main` con el PR #37); HEAD de A sin cambios (`1058d5e`). Se repite con el PR del arreglo de H3 y la decision 18 |
-| S6 | SDD | Humo H1 a H3 (`01-percepcion.md` §3), con el código de S5 | S4, S5 | los tres pasan, o la rama D-H2 anotada como decisión antes de S7 | en curso | 29-10, con `684b1dd`, en `~/boxtwin-gemelo/humo/humo.json`: H1 pasa (`kpt_shape` [17, 3]; 5 personas con 17 keypoints en GPU y en CPU; 240 pares, mediana propia 5,97 px contra 6,49 px de la mejor permutacion, que cambia las munecas). H2 pasa (600 cuadros; tramo 658 a 1772 de pacquiao con 2 reinicios), pero con ReID por `yolo26n-cls.pt` y no por las features de YOLO26 (decision 18). H3 no midio: el chequeo de GPU conto al propio proceso (arreglado en `otros_en_gpu`). Se repite despues de S5 |
-| S7 | SDD | Re-caché de las siete fuentes con `recache.py` dentro de `e8.sh` | S6 | siete cachés en `raiz-y26` con el sha256 del modelo de S4 y el del yaml igual al de A; `recache.json` con tiempo y fps por fuente | pendiente | |
-| S8 | SDD | Puente de identidad de las siete fuentes; K1 y K4 | S7 | K1 al 100%; `puente.json` por fuente; cada `annot.json` carga con `load` | pendiente | |
-| S9 | SDD | Exports `sequence` y tensores del detector de las dos condiciones, con `--out` en `e8/{base,y26}`; K3 | S8 | catorce exports; los mismos eventos en las dos condiciones; K3 anotado | pendiente | |
-| S10 | SDD | `boxtwin-detector folds` de las dos condiciones, cinco semillas, siete folds; K2 del detector | S9 | los dos reportes; K2 dentro de ±0,02 o la explicación anotada | pendiente | |
-| S11 | SDD | `datos.py` y E4 de las dos condiciones (`BOXTWIN_RAIZ_FUENTES`, `BOXTWIN_CLASIFICADOR_GEO`); K2 de E4; SH1 | S8 | 1047 `frame_dir` idénticos; 35 corridas por condición; K2 dentro de ±0,02 | pendiente | |
-| S12 | SDD | `medir_trackeo.py` (P12c) | S8 | JSON por fuente y total | pendiente | |
-| S13 | SDD | `medir_c1.py` sobre `raiz-y26` (P12d) | S8 | resumen de C1 con su JSON por fuente | pendiente | |
-| S14 | SDD | Originales después: lo mismo que S3, en `originales-despues.txt` | S10 a S13 | igual a S3 (CG4) | pendiente | |
-| S15 | SDD | Lectura contra el pre-registro en `e8/veredictos.json` y borrador del documento | S14 | cada pregunta con su lectura según `02-preregistro-e8.md` §4 | pendiente | |
-| S16 | SDD | Auditoría independiente (`02-preregistro-e8.md` §7); documento final, JSON en `docs/experiments/datos/`, entrada del README y cambios de tesis, en un PR | S15 | auditoría sin fallas, o las fallas en el documento (CG6) | pendiente | |
+| S5 | SDD | Worktree fijo: `produccion.sh worktree-gemelo <punta de main después de L0>`; anotar el hash | L0 | `git -C ~/Proyectos/TwinBoxing-gemelo rev-parse HEAD` igual al anotado; HEAD de A sin cambios | hecha | 29-10: primero `684b1dd`; repetida en `0c9dd69` (punta de `main` con el PR #38), con `git checkout --detach` sobre el mismo worktree. HEAD de A sin cambios (`1058d5e`) |
+| S6 | SDD | Humo H1 a H3 (`01-percepcion.md` §3), con el código de S5 | S4, S5 | los tres pasan, o la rama D-H2 anotada como decisión antes de S7 | hecha | 29-10, con `0c9dd69` y `botsort-sin-reid.yaml` (D-H2), en `~/boxtwin-gemelo/humo/humo.json`: H1 pasa (240 pares, 5,97 px contra 6,49 de la mejor permutacion); H2 pasa (600 cuadros; 2 reinicios en 658 a 1772 de pacquiao); H3 v8 40,6 ms (p95 44,0) y 544 MiB, YOLO26 37,1 ms (p95 40,7) y 350 MiB. El primer humo, con `684b1dd` y ReID, en `humo-684b1dd.json` |
+| S7 | SDD | Re-caché de las siete fuentes con `recache.py` dentro de `e8.sh` | S6 | siete cachés en `raiz-y26` con el sha256 del modelo de S4 y el del yaml igual al de A; `recache.json` con tiempo y fps por fuente | hecha | `e8/recache.json` y `recache-v8.json`: 180193 cuadros por condicion, 118 min con YOLO26 y 129 con v8; las siete con el modelo de S4 (`ad33da8a29ea`) y el yaml sin ReID (`27ecd7c5632a`) |
+| S8 | SDD | Puente de identidad de las siete fuentes; K1 y K4 | S7 | K1 al 100%; `puente.json` por fuente; cada `annot.json` carga con `load` | hecha | K1 al 100% en las siete fuentes, 0 conflictos; YOLO26 empareja el 95,7% de los cuadros con verdad, mediana del IoU 0,959 a 0,973 (K4 sin debiles); base v8 0,998 a 1,000; los catorce `annot.json` cargan con `load` |
+| S9 | SDD | Exports `sequence` y tensores del detector de las dos condiciones, con `--out` en `e8/{base,y26}`; K3 | S8 | catorce exports; los mismos eventos en las dos condiciones; K3 anotado | hecha | catorce exports; los mismos 1046 golpes y 38 amagues por fuente en las dos; cuadros-carril usables 147788 (base) contra 111472 (YOLO26). K3 en S12 (decision 12) |
+| S10 | SDD | `boxtwin-detector folds` de las dos condiciones, cinco semillas, siete folds; K2 del detector | S9 | los dos reportes; K2 dentro de ±0,02 o la explicación anotada | hecha | `e8/{base,y26}/folds.json`; K2 del detector 0,637 contra 0,635 |
+| S11 | SDD | `datos.py` y E4 de las dos condiciones (`BOXTWIN_RAIZ_FUENTES`, `BOXTWIN_CLASIFICADOR_GEO`); K2 de E4; SH1 | S8 | 1047 `frame_dir` idénticos; 35 corridas por condición; K2 dentro de ±0,02 | hecha | 1047 `frame_dir` identicos (D3 ok en las dos); 35 corridas por variante y condicion; K2 de E4 0,732 contra 0,727; SH1 lectura a (0,572) |
+| S12 | SDD | `medir_trackeo.py` (P12c) | S8 | JSON por fuente y total | hecha | `e8/trackeo.json`; denominador 48944 (A) y 49578 (B) |
+| S13 | SDD | `medir_c1.py` sobre `raiz-y26` (P12d) | S8 | resumen de C1 con su JSON por fuente | hecha | `e8/y26/c1/resumen.json`: 85/100 = 0,850 (Wilson 0,767 a 0,907) |
+| S14 | SDD | Originales después: lo mismo que S3, en `originales-despues.txt` | S10 a S13 | igual a S3 (CG4) | hecha | `e8/originales-despues.txt` igual a S3, 21 lineas (CG4) |
+| S15 | SDD | Lectura contra el pre-registro en `e8/veredictos.json` y borrador del documento | S14 | cada pregunta con su lectura según `02-preregistro-e8.md` §4 | hecha | `e8/veredictos.json` con `scripts/gemelo/lectura_e8.py`: P12a no demostrada (0,433 contra 0,623, 0 de 6); P12b no demostrada (0,675 contra 0,732, 1 de 7); P12c mezclada; K3 se declara (0,750 contra 0,896) |
+| S16 | SDD | Auditoría independiente (`02-preregistro-e8.md` §7); documento final, JSON en `docs/experiments/datos/`, entrada del README y cambios de tesis, en un PR | S15 | auditoría sin fallas, o las fallas en el documento (CG6) | hecha | auditor independiente: 9 de 9 items pasan, con recalculo propio de P12a y P12b; `docs/experiments/2026-10-29-e8-yolo26.md`, los tres JSON, la entrada del README y `docs/tesis/2026-10-29-e8-cambios.md`, en el PR de resultados |
 
 ## Fase 2 · la instancia C
 
 | Id | Quién | Tarea | Depende de | Verificación | Estado | Evidencia |
 |---|---|---|---|---|---|---|
-| S17 | SDD | `detector_7fuentes_y26.ens.pt` y su `.metricas.json` (`03-instancia-c.md` §5), con el control de la receta | S16 | `meta` con commit y sha256 de los tensores; control anotado | pendiente | |
-| S18 | SDD | `clasificador_geo_y26_v1`, en CPU | S16 | `meta.json` con las métricas de P12b | pendiente | |
-| S19 | SDD | `clasificador_geo_y26_v1_sin_rival`, en CPU | S16 | `meta.json` con las métricas de E4a sobre Y26 | pendiente | |
-| S20 | SDD | Web de C: `produccion.sh web ~/Proyectos/TwinBoxing-gemelo` | S5 | `out/index.html` en el worktree de C; la fecha del de A sin cambios | pendiente | |
-| S21 | SDD | `produccion.sh env-gemelo`; unidades copiadas a `~/boxtwin-gemelo/systemd/`; `demo.yaml` sin sesiones; `produccion.sh previo c` | S17 a S20 | `stat -c %a` da `600`; secreto e invitación distintos de A y de B; nada en `:8002` | pendiente | |
-| L2 | Lucas | `sudo install -m 600 -o lucasb -g lucasb ~/boxtwin-gemelo/boxtwin-gemelo.env /etc/boxtwin-gemelo.env`; `sudo cp ~/boxtwin-gemelo/systemd/*.service /etc/systemd/system/`; `sudo systemctl daemon-reload`; **sin** `enable` | S21 | `systemctl is-enabled boxtwin-gemelo-api` da `disabled` | pendiente | |
-| L3 | Lucas | B apagada; arrancar C: `sudo systemctl start boxtwin-gemelo-api boxtwin-gemelo-worker` | L2 | las dos `active` | pendiente | |
-| S22 | SDD | CG2 y CG3: `produccion.sh verificar c`, `ss -ltn`, `tailscale serve status`; sembrar las cuentas de prueba con el entorno de C | L3 | todo lo de `03-instancia-c.md` §8; `:8002` solo en `127.0.0.1` | pendiente | |
-| L4 | Lucas | Subir a C un sparring propio y una bolsa propia, con consentimiento, y hacer la siembra | S22 | los videos anotados acá, con quién aparece | pendiente | |
-| S23 | SDD | CG5 y CG7 sobre las sesiones de L4; CG8, pico de VRAM mientras procesan | L4 | Fight-Cards con el bloque `pose` y los números de E8; pico anotado | pendiente | |
-| S24 | SDD | Huellas después de A y de B (CG1, CG4), CG9, y lectura de CG1 a CG9 | S23 | iguales a S2 | pendiente | |
-| L5 | Lucas | Apagar C: `sudo systemctl stop boxtwin-gemelo-worker boxtwin-gemelo-api` | S24 | las dos `inactive` | pendiente | |
+| S17 | SDD | `detector_7fuentes_y26.ens.pt` y su `.metricas.json` (`03-instancia-c.md` §5), con el control de la receta | S16 | `meta` con commit y sha256 de los tensores; control anotado | hecha | `detector_7fuentes_y26.ens.pt` (`8ff9073c33d1`), `.metricas.json` con precision 0,404 y recall 0,480 de P12a en 0,80, `.meta.json` con sha256 de los siete tensores. Control sin umbral: la receta sobre los tensores de A difiere de `detector_7fuentes.ens.pt` hasta 0,124 de P por cuadro en 01-sparring (decision 20) |
+| S18 | SDD | `clasificador_geo_y26_v1`, en CPU | S16 | `meta.json` con las métricas de P12b | hecha | `clasificador_geo_y26_v1`, cpu, `0c9dd69`, familia 0,6753 de E8, comando en el meta (decision 21) |
+| S19 | SDD | `clasificador_geo_y26_v1_sin_rival`, en CPU | S16 | `meta.json` con las métricas de E4a sobre Y26 | hecha | `clasificador_geo_y26_v1_sin_rival`, cpu, `0c9dd69`, familia 0,6781 de E8 |
+| S20 | SDD | Web de C: `produccion.sh web ~/Proyectos/TwinBoxing-gemelo` | S5 | `out/index.html` en el worktree de C; la fecha del de A sin cambios | hecha | 29-10: `out/index.html` en el worktree de C; el de A con el mismo mtime (1793069420) |
+| S21 | SDD | `produccion.sh env-gemelo`; unidades copiadas a `~/boxtwin-gemelo/systemd/`; `demo.yaml` sin sesiones; `produccion.sh previo c` | S17 a S20 | `stat -c %a` da `600`; secreto e invitación distintos de A y de B; nada en `:8002` | hecha | `~/boxtwin-gemelo/boxtwin-gemelo.env` en 600, secreto e invitacion distintos de A y de B; unidades en `~/boxtwin-gemelo/systemd/`; `demo.yaml` sin sesiones; `previo c` ok |
+| L2 | Lucas | `sudo install -m 600 -o lucasb -g lucasb ~/boxtwin-gemelo/boxtwin-gemelo.env /etc/boxtwin-gemelo.env`; `sudo cp ~/boxtwin-gemelo/systemd/*.service /etc/systemd/system/`; `sudo systemctl daemon-reload`; **sin** `enable` | S21 | `systemctl is-enabled boxtwin-gemelo-api` da `disabled` | hecha | 29-10, con sudo por pedido de Lucas: `/etc/boxtwin-gemelo.env` 600 lucasb; unidades copiadas; `daemon-reload`; `is-enabled` da `disabled` en las dos |
+| L3 | Lucas | B apagada; arrancar C: `sudo systemctl start boxtwin-gemelo-api boxtwin-gemelo-worker` | L2 | las dos `active` | hecha | 29-10 07:38 UTC: B apagada (estaba `active`); `previo c` ok; las dos unidades de C `active` |
+| S22 | SDD | CG2 y CG3: `produccion.sh verificar c`, `ss -ltn`, `tailscale serve status`; sembrar las cuentas de prueba con el entorno de C | L3 | todo lo de `03-instancia-c.md` §8; `:8002` solo en `127.0.0.1` | hecha | `verificar c` ok (commit `0c9dd69`, `yolo26l-pose.pt` `ad33da8a29ea`, geometrico, modelo individual, secreto fijo, web); `:8002` solo en 127.0.0.1; `tailscale serve` sin `:8002`, `:443` y `:8443` como en S2; cuentas de prueba sembradas (3 cuentas, 0 sesiones) |
+| L4 | Lucas | Subir a C un sparring propio y una bolsa propia, con consentimiento, y hacer la siembra | S22 | los videos anotados acá, con quién aparece | pendiente | necesita un sparring y una bolsa propios con consentimiento; los elige Lucas |
+| S23 | SDD | CG5 y CG7 sobre las sesiones de L4; CG8, pico de VRAM mientras procesan | L4 | Fight-Cards con el bloque `pose` y los números de E8; pico anotado | bloqueada | por L4: CG5 y CG7 sobre sesiones reales y CG8 con C procesando |
+| S24 | SDD | Huellas después de A y de B (CG1, CG4), CG9, y lectura de CG1 a CG9 | S23 | iguales a S2 | hecha, se repite despues de L4 | 29-10: `huella-A-despues.txt` y `huella-B-despues.txt` identicas a las de S2 (CG1); CG9 ok (abajo) |
+| L5 | Lucas | Apagar C: `sudo systemctl stop boxtwin-gemelo-worker boxtwin-gemelo-api` | S24 | las dos `inactive` | hecha | 29-10: C `inactive` en las dos unidades; B vuelta a encender como estaba en S2 |
 
 ## Decisiones
 
@@ -129,6 +129,31 @@ Una línea por decisión, con el motivo, antes de correr la parte afectada.
     del ensamble por umbral de la grilla (0,10 a 0,90, con 0,80), sumando conteos como el mejor
     umbral. Sin esto el F1 en 0,80 que pide P12a (§4) no se podia leer: `folds` guardaba solo el
     mejor umbral. El mejor umbral sigue igual en `ensamble`, y es el estadistico del 0,635 de K2.
+20. 29-10 (S17): la receta del detector final es la de `scripts/gemelo/detector_final.py`:
+    `entrenar_ensamble` con la `Config` por defecto, cinco semillas y las siete fuentes como
+    entrenamiento y como validacion de la parada temprana. El script no esta en `0c9dd69`: corrio
+    con el `PYTHONPATH` de C (la biblioteca es la del commit de C) y su meta dice `ff6e159`, el commit
+    del script. El control contra el detector de A da hasta 0,124 de diferencia de P por cuadro: se
+    declara en el documento de E8.
+21. 29-10 (S18 y S19): `entrenar_final.py` del commit de C lee el JSON de E8 de `docs/` de su propio
+    checkout. Se copio ahi `2026-10-29-e8-yolo26-E4.json`, identico al del PR de resultados (sha256
+    `cfe9773615600a69...`), como archivo sin versionar; el codigo de C no cambio.
+22. 29-10 (L3 y L5): B estaba encendida en S2. Se apago para encender C (regla 2) y se volvio a
+    encender despues de L5, para que la huella de S24 se compare con B en el mismo estado.
+
+## Criterios de aceptacion, al 29-10
+
+| Id | Estado | Evidencia |
+|---|---|---|
+| CG1 | cumple | huellas de A y de B de S24 iguales a las de S2, sin ninguna linea distinta |
+| CG2 | cumple | `verificar c` ok el 29-10 (S22) |
+| CG3 | cumple | `:8002` solo en 127.0.0.1; `tailscale serve` sin entrada hacia `:8002`; `:443` y `:8443` como en S2 |
+| CG4 | cumple | sesiones de A 17 y de B 2, sin cambios; S14 igual a S3 |
+| CG5 | parcial | el detector de C lleva precision 0,404 y recall 0,480 de E8 y los clasificadores su familia de E8; el bloque `pose` lo prueba T3. Falta verlo en una Fight-Card real (L4) |
+| CG6 | cumple | pre-registro `916f7d8` anterior a H1; auditoria 9 de 9 |
+| CG7 | pendiente | L4 |
+| CG8 | parcial | el candado sin etapas con trabajos de A (auditoria, item 8). El pico de VRAM de C procesando sola falta: necesita L4 |
+| CG9 | cumple | cada modelo con su meta; volver a correr `entrenar_final.py` da los mismos sha256 en las diez semillas de los dos clasificadores (el detector entrena en GPU y no se pide) |
 
 ## Preguntas abiertas
 
