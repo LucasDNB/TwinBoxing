@@ -354,6 +354,8 @@ def completar(
         "checkpoint": Path(detector).name,
         "semillas_del_ensamble": list(getattr(ens, "semillas", [])),
         "umbral": umbral,
+        **_metricas_medidas(Path(detector)),
+        "pose": _info_pose(paths, cache),
     }
     (directorio / SEGMENTOS).write_text(
         json.dumps(
@@ -478,6 +480,36 @@ def _recortar_tramos(video: Path, ses: Sesion, directorio: Path, cache, tramos: 
     por_track = {c.track: c.recorte for c in cands}
     for t in tramos:
         t["recorte"] = por_track.get(t["track"])
+
+
+# Lo que se copia del archivo de metricas del detector. Nada mas: el archivo lo escribe un
+# script de E8 y la Fight-Card no tiene por que llevar lo que se le haya agregado.
+CAMPOS_METRICAS = ("precision_medida", "recall_medido", "medido_sobre")
+
+
+def _metricas_medidas(detector: Path) -> dict:
+    """
+    Precision y recall medidos para ESTE checkpoint, de `<checkpoint>.metricas.json` al lado.
+
+    Sin el archivo devuelve {} y la Fight-Card queda con los numeros de A (0,885 y 0,484). Con
+    el, el gemelo C muestra los que midio E8 para su detector y no los de otro
+    (docs/specs/2026-10-27-gemelo-yolo26, T3 y CG5).
+    """
+    ruta = detector.with_suffix(".metricas.json")
+    if not ruta.is_file():
+        return {}
+    crudo = json.loads(ruta.read_text())
+    return {k: crudo[k] for k in CAMPOS_METRICAS if k in crudo}
+
+
+def _info_pose(paths: ProjectPaths, cache) -> dict:
+    """El checkpoint de pose que escribio el cache de la sesion, con su sha256, o nulos."""
+    meta = cache.meta
+    if paths.meta.is_file():
+        meta = json.loads(paths.meta.read_text())
+    inf = (meta or {}).get("inference") or {}
+    ruta = inf.get("model_path")
+    return {"modelo": Path(ruta).name if ruta else None, "sha256": inf.get("model_sha256")}
 
 
 def _paths_de(ses: Sesion, directorio: Path) -> ProjectPaths:

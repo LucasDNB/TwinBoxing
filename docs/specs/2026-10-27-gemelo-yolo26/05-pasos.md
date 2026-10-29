@@ -8,7 +8,7 @@ Ninguna tarea escribe en A ni en B. `S` = la corre el SDD sin `sudo`; `L` = la h
 
 | Id | Quién | Tarea | Depende de | Verificación | Estado | Evidencia |
 |---|---|---|---|---|---|---|
-| S1 | SDD | T1 a T10 (`01-percepcion.md` §6): pruebas primero, en rojo; código; en verde. Rama `gemelo-yolo26-fase0`, PR contra `main` | — | las pruebas nuevas en rojo y después en verde; suites completas en verde (`boxtwin-api`, `boxtwin-annotator`, `boxtwin-detector`, `boxtwin-guantes`, `scripts/clasificador*/tests`); ensayo de T9 con rutas por entorno | pendiente | |
+| S1 | SDD | T1 a T10 (`01-percepcion.md` §6): pruebas primero, en rojo; código; en verde. Rama `gemelo-yolo26-fase0`, PR contra `main` | — | las pruebas nuevas en rojo y después en verde; suites completas en verde (`boxtwin-api`, `boxtwin-annotator`, `boxtwin-detector`, `boxtwin-guantes`, `scripts/clasificador*/tests`); ensayo de T9 con rutas por entorno | en curso: codigo y pruebas en verde el 28-10; falta el PR | rama `gemelo-yolo26-fase0` (spec en `gemelo-yolo26-spec`, 916f7d8); pruebas nuevas en rojo y despues en verde, salvo las unidades de T10, que se derivaron de las de B con sed antes de su prueba. Suites: boxtwin-annotator 774, boxtwin-api 311, boxtwin-detector 152, boxtwin-guantes 46, scripts/clasificador 32, scripts/clasificador_geo 84 (1 salteada, la de mmpose), scripts/gemelo 39, despliegue/tests 20 (ensayo de T9 con rutas por entorno y puertos libres, decision 15); `verificar a` y `verificar b` como antes |
 | L0 | Lucas | Revisar y mergear el PR de este spec y el de S1 | S1 | los dos en `main` | pendiente | |
 | S2 | SDD | Huellas antes: `despliegue/academico/huella-A.sh` y `despliegue/gemelo/huella-B.sh` en `~/boxtwin-gemelo/huella-{A,B}-antes.txt` | L0 | los dos archivos existen; `/salud` de A y de B dan lo de `PRODUCCION.md` | pendiente | |
 | L1 | Lucas | OK para la fase 1 y la noche elegida, con las sesiones de prueba de A ya cerradas | S2 | la fecha anotada acá | pendiente | |
@@ -71,11 +71,43 @@ Una línea por decisión, con el motivo, antes de correr la parte afectada.
    las versiones. No hay cuentas reales en C.
 8. 27-10: a diferencia de B, el `PYTHONPATH` de C incluye `boxtwin-detector/src`, para que la
    inferencia del detector sea la del commit de C.
+9. 28-10 (S1, T6): `AssignmentOp` suma `puente`, el `origin.op` que pide §5 de
+   `01-percepcion.md`. Es un valor nuevo del enum; A corre un commit desacoplado y no lo lee.
+10. 28-10 (S1, T6): el puente pasa solo los roles de peleador. Las asignaciones `ignore` (el
+    arbitro) no se transportan: la verdad es por peleador. Los ids nuevos son `as_pe8_*` e
+    `in_pe8_*`, y `counters` se copia igual, como pide §5.5. El `iou_at_join` de una
+    interpolacion transportada se recalcula sobre las cajas nuevas. "Cuadros con deteccion de
+    YOLO26 sin verdad" se cuenta por peleador: cuadros sin verdad de ese peleador donde el cache
+    nuevo tiene una deteccion que no se emparejo con nadie.
+11. 28-10 (S1, T4): el JSON de E4 de E8 (`docs/experiments/datos/<fecha>-e8-yolo26-E4.json`)
+    lleva `{"base": {"E4": ..., "E4a": ...}, "y26": {"E4": ..., "E4a": ...}}`, cada uno con el
+    `ensamble_total` que ya escribe `evaluar.py`. `entrenar_final.py --exp E4-y26` lee
+    `y26.E4` y se niega a entrenar si el archivo no esta (CG5). El `meta.json` de cada modelo
+    suma `comando` (CG9).
+12. 28-10 (S1, T7): K3 se calcula en `medir_trackeo.py` (S12) y no en S9: necesita los dos caches
+    emparejados contra la verdad, que es lo que ese script ya tiene. El denominador es el mismo
+    de P12c.
+13. 28-10 (S1, T8): `recache.py` corre el preproceso con `--no-proxy`. El proxy no entra en
+    `config_hash` ni en E8, y son unos minutos menos por fuente.
+14. 28-10 (S1, T5): `datos.py` nombra el sha256 de cada anotacion relativo a
+    `BOXTWIN_RAIZ_FUENTES` y no al repo; con la variable sin definir, la clave es la de hoy.
+15. 28-10 (S1, T9): el ensayo de `produccion.sh` (`despliegue/tests/test_produccion_sh.py`)
+    elige puertos libres al arrancar en vez de 8100 a 8102: el 28-10 esos tres seguian ocupados
+    por los `uvicorn` del ensayo del 26-10 (pids 435864, 435865 y 436003, mas de dos dias
+    arriba). No se tocaron. `huella-B.sh` saca `arrancado` de `/salud`, que cambia con cada
+    reinicio del proceso y no es de B.
+16. 28-10 (S1, T8): `e8.sh` corre `boxtwin-detector folds` sin `--en-distribucion`, sobre los
+    `.det.npz` de las siete fuentes. Si ese no es el protocolo del 0,635, K2 lo marca en S10 y se
+    corrige antes de leer P12a.
 
 ## Preguntas abiertas
 
 1. ¿C en la tailnet, como B pero en otro puerto, para abrirla desde el celular? Hoy no, por D2.
 2. Qué sparring y qué bolsa propios entran en L4.
+3. El humo H1 a H3 (S6) no tiene script en T1 a T10. Recomendacion: sumar T11,
+   `scripts/gemelo/humo.py` con pruebas (orden de keypoints contra las permutaciones
+   izquierda-derecha, mediana y p95 del tiempo despues del calentamiento), antes de S6. Es una
+   correccion del spec y va como decision antes de H1.
 
 ## Lo que este spec no hace
 

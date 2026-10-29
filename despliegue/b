@@ -1,0 +1,17 @@
+## sha256 entorno y unidades
+83ec9468a5b0080c1dd378fa01dcf471124212689796f0c73596d56748155764  /etc/boxtwin.env
+5dab81b50ef667d21e73fcf5f833d972487493ab638bb652fbb0917d9b191f19  /etc/systemd/system/boxtwin-api.service
+6cc52efda647b9c6c722a70042ee3c0323e8a8f42251d02ee3fdf43d069b4e4e  /etc/systemd/system/boxtwin-worker.service
+## HEAD de la copia principal
+1058d5edad4a439647c4d94dd50065463dc2e328
+## /salud de A
+{"ok":true,"version":"0.1","secreto_efimero":false,"registro":"invitacion","docs":false,"arrancado":"2026-10-27T02:51:22+00:00","commit":"1058d5e","frontend":true,"clasificador":"geometrico","sesiones_individuales":true,"modelo_individual":true,"modelo_e7":null}
+## tailscale serve status
+## pip freeze de twinboxing_env (sha256)
+ff0c7d096d455ff0b04b786f6a09d57830446ca4e51821bea6234edcfaf52c62  -
+## mtime de out/index.html de A
+1793069420
+## sesiones de A (puede crecer por el uso de A)
+17
+## carpetas en ~/boxtwin/datos/sesiones
+17
