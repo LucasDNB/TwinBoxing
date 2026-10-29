@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import itertools
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -136,6 +137,11 @@ def tramo_de_cortes(cortes: list[int], margen: int = MARGEN_CORTES) -> tuple[int
 
 def cuadros_equiespaciados(total: int, n: int = CUADROS_ORDEN) -> list[int]:
     return sorted({int(x) for x in np.linspace(0, total - 1, n)})
+
+
+def otros_en_gpu(salida: str) -> list[int]:
+    """Procesos en la GPU que no son este: H1 y H2 ya dejaron a este proceso ahi."""
+    return [p for p in guardas.pids_en_gpu(salida) if p != os.getpid()]
 
 
 def codigo_de_salida(res: dict) -> int:
@@ -246,7 +252,7 @@ def h2(modelo_y26: Path, tracker: Path, device: str, sparring: Path, pacquiao: P
 def h3(modelos: dict[str, Path], tracker: Path, device: str, video: Path) -> dict:
     salida = {}
     for nombre, ruta in modelos.items():
-        otros = guardas.pids_en_gpu(guardas.salida_nvidia_smi())
+        otros = otros_en_gpu(guardas.salida_nvidia_smi())
         if otros:
             return {"pasa": False, "error": f"la GPU tiene otros procesos: {otros}"}
         r = _recorrer(ruta, tracker, device, video, 0, CALENTAMIENTO + MEDIDOS, [], cronometrar=True)

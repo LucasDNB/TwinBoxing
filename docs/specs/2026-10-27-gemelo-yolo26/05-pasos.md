@@ -11,16 +11,16 @@ Ninguna tarea escribe en A ni en B. `S` = la corre el SDD sin `sudo`; `L` = la h
 | S1 | SDD | T1 a T10 (`01-percepcion.md` §6): pruebas primero, en rojo; código; en verde. Rama `gemelo-yolo26-fase0`, PR contra `main` | — | las pruebas nuevas en rojo y después en verde; suites completas en verde (`boxtwin-api`, `boxtwin-annotator`, `boxtwin-detector`, `boxtwin-guantes`, `scripts/clasificador*/tests`); ensayo de T9 con rutas por entorno | hecha | rama `gemelo-yolo26-fase0` (spec en `gemelo-yolo26-spec`, 916f7d8); pruebas nuevas en rojo y despues en verde, salvo las unidades de T10, que se derivaron de las de B con sed antes de su prueba. Suites: boxtwin-annotator 774, boxtwin-api 311, boxtwin-detector 152, boxtwin-guantes 46, scripts/clasificador 32, scripts/clasificador_geo 84 (1 salteada, la de mmpose), scripts/gemelo 39, despliegue/tests 20 (ensayo de T9 con rutas por entorno y puertos libres, decision 15); `verificar a` y `verificar b` como antes; PR #36 mergeado el 29-10 (`6a0f0db`) |
 | L0 | Lucas | Revisar y mergear el PR de este spec y el de S1 | S1 | los dos en `main` | hecha | 29-10: PR #35 (spec, `ce4c5a8`) y PR #36 (fase 0, `6a0f0db`) mergeados en `main` |
 | S2 | SDD | Huellas antes: `despliegue/academico/huella-A.sh` y `despliegue/gemelo/huella-B.sh` en `~/boxtwin-gemelo/huella-{A,B}-antes.txt` | L0 | los dos archivos existen; `/salud` de A y de B dan lo de `PRODUCCION.md` | hecha | 29-10, con los scripts de `6a0f0db`: `~/boxtwin-gemelo/huella-A-antes.txt` (HEAD de A `1058d5e`, 17 sesiones) y `huella-B-antes.txt` (HEAD de B `efcec23`, 2 sesiones, B encendida). `produccion.sh verificar a` y `verificar b` ok; A con la version de prueba encendida, como esta registrado el 26-10 |
-| L1 | Lucas | OK para la fase 1 y la noche elegida, con las sesiones de prueba de A ya cerradas | S2 | la fecha anotada acá | pendiente | |
+| L1 | Lucas | OK para la fase 1 y la noche elegida, con las sesiones de prueba de A ya cerradas | S2 | la fecha anotada acá | hecha | 29-10: "ejecuta todo hoy" de Lucas, tomado como OK para la noche del 29-10. Al arrancar: cola de A sin trabajos `en_cola` ni `tomado` (ultimo trabajo del 27-10), GPU sin procesos |
 
 ## Fase 1 · E8, de noche y bajo el candado
 
 | Id | Quién | Tarea | Depende de | Verificación | Estado | Evidencia |
 |---|---|---|---|---|---|---|
-| S3 | SDD | sha256 de las siete anotaciones, `meta.json` y `pose.npz` originales de la copia principal, en `~/boxtwin-gemelo/e8/originales-antes.txt` | L1 | el archivo existe con 21 líneas | pendiente | |
-| S4 | SDD | Bajar `yolo26l-pose.pt` a `~/boxtwin-gemelo/modelos/` y anotar su sha256 | L1 | `sha256sum` anotado acá | pendiente | |
-| S5 | SDD | Worktree fijo: `produccion.sh worktree-gemelo <punta de main después de L0>`; anotar el hash | L0 | `git -C ~/Proyectos/TwinBoxing-gemelo rev-parse HEAD` igual al anotado; HEAD de A sin cambios | pendiente | |
-| S6 | SDD | Humo H1 a H3 (`01-percepcion.md` §3), con el código de S5 | S4, S5 | los tres pasan, o la rama D-H2 anotada como decisión antes de S7 | pendiente | |
+| S3 | SDD | sha256 de las siete anotaciones, `meta.json` y `pose.npz` originales de la copia principal, en `~/boxtwin-gemelo/e8/originales-antes.txt` | L1 | el archivo existe con 21 líneas | hecha | 29-10 01:55 UTC: `~/boxtwin-gemelo/e8/originales-antes.txt`, 21 lineas |
+| S4 | SDD | Bajar `yolo26l-pose.pt` a `~/boxtwin-gemelo/modelos/` y anotar su sha256 | L1 | `sha256sum` anotado acá | hecha | 29-10: release v8.4.0 de Ultralytics, 57995961 bytes, sha256 `ad33da8a29ea5772318c4c980844e47b56792d2b63815ad4e8e09c078c7d1abf` |
+| S5 | SDD | Worktree fijo: `produccion.sh worktree-gemelo <punta de main después de L0>`; anotar el hash | L0 | `git -C ~/Proyectos/TwinBoxing-gemelo rev-parse HEAD` igual al anotado; HEAD de A sin cambios | hecha, se repite | 29-10: `684b1dd` (punta de `main` con el PR #37); HEAD de A sin cambios (`1058d5e`). Se repite con el PR del arreglo de H3 y la decision 18 |
+| S6 | SDD | Humo H1 a H3 (`01-percepcion.md` §3), con el código de S5 | S4, S5 | los tres pasan, o la rama D-H2 anotada como decisión antes de S7 | en curso | 29-10, con `684b1dd`, en `~/boxtwin-gemelo/humo/humo.json`: H1 pasa (`kpt_shape` [17, 3]; 5 personas con 17 keypoints en GPU y en CPU; 240 pares, mediana propia 5,97 px contra 6,49 px de la mejor permutacion, que cambia las munecas). H2 pasa (600 cuadros; tramo 658 a 1772 de pacquiao con 2 reinicios), pero con ReID por `yolo26n-cls.pt` y no por las features de YOLO26 (decision 18). H3 no midio: el chequeo de GPU conto al propio proceso (arreglado en `otros_en_gpu`). Se repite despues de S5 |
 | S7 | SDD | Re-caché de las siete fuentes con `recache.py` dentro de `e8.sh` | S6 | siete cachés en `raiz-y26` con el sha256 del modelo de S4 y el del yaml igual al de A; `recache.json` con tiempo y fps por fuente | pendiente | |
 | S8 | SDD | Puente de identidad de las siete fuentes; K1 y K4 | S7 | K1 al 100%; `puente.json` por fuente; cada `annot.json` carga con `load` | pendiente | |
 | S9 | SDD | Exports `sequence` y tensores del detector de las dos condiciones, con `--out` en `e8/{base,y26}`; K3 | S8 | catorce exports; los mismos eventos en las dos condiciones; K3 anotado | pendiente | |
@@ -116,6 +116,19 @@ Una línea por decisión, con el motivo, antes de correr la parte afectada.
       no `nvidia-smi`; CG8 se sigue midiendo con `nvidia-smi` en S23.
     - Sale con 1 si H1 o H2 fallan. Que hacer despues (frenar E8 o entrar en D-H2) lo decide
       Lucas, no el script.
+18. 29-10 (S6), decidida por Lucas el 29-10 02:38 UTC ("Si, D-H2"): entrar en la rama D-H2. H2 no fallo, pero mostro
+    que `model: auto` no actua igual en las dos condiciones. YOLO26 tiene cabeza de punta a punta
+    (`end2end`), y `ultralytics/trackers/track.py` 8.4.41 en ese caso reemplaza `auto` por
+    `yolo26n-cls.pt`: una red de ReID aparte, en vez de las features del detector que usa v8.
+    Con `botsort.yaml` E8 cambiaria dos cosas, la pose y el ReID. D-H2 (`with_reid: false` en
+    las dos condiciones, `botsort-sin-reid.yaml`, la base re-cacheada y pasada por el puente)
+    deja una sola. Costo: un re-cache mas de v8 (unas 1 h 45) y el puente de la base; el ReID ya
+    se midio sin efecto el 18-08 (31 cambios con ReID, 29 sin). El `botsort.yaml` de A no
+    cambia. Es una rama del pre-registro, no una correccion: se puede elegir despues de H1.
+19. 29-10 (S6): `boxtwin-detector folds` suma `ensamble_curva` al JSON: recall, precision y F1
+    del ensamble por umbral de la grilla (0,10 a 0,90, con 0,80), sumando conteos como el mejor
+    umbral. Sin esto el F1 en 0,80 que pide P12a (§4) no se podia leer: `folds` guardaba solo el
+    mejor umbral. El mejor umbral sigue igual en `ensamble`, y es el estadistico del 0,635 de K2.
 
 ## Preguntas abiertas
 

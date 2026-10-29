@@ -80,3 +80,12 @@ def test_correr_deja_tiempo_y_fps_y_saltea_lo_hecho(gemelo, tmp_path):
     recache.correr(["01-sparring"], gemelo / "raiz-y26", raiz_a, gemelo / "modelos" / "yolo26l-pose.pt",
                    registro, ejecutar=ejecutar, reloj=lambda: 0.0)
     assert len(llamadas) == 1                                  # reanudable: lo hecho no se rehace
+
+
+def test_el_yaml_sin_reid_es_el_mismo_con_una_linea_cambiada(gemelo):
+    """Rama D-H2 (01-percepcion.md §3): botsort-sin-reid.yaml = botsort.yaml con with_reid false."""
+    import recache
+    con = recache.TRACKER.read_text().splitlines()
+    sin = (recache.TRACKER.parent / "botsort-sin-reid.yaml").read_text().splitlines()
+    distintas = [(a, b) for a, b in zip(con, sin) if a != b]
+    assert len(con) == len(sin) and distintas == [("with_reid: true", "with_reid: false")]

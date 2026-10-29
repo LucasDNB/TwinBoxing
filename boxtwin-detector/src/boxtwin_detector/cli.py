@@ -413,7 +413,8 @@ def _folds(args: argparse.Namespace) -> int:
             corridas.append({"semilla": s, **b})
             fs.append(b["f1"])
         ens_probs = [[a / n for a in fuente_] for fuente_ in acum]
-        e = mejor_en(us_voto, curva_de_probs(ens_probs, val, us_voto))
+        curva_e = curva_de_probs(ens_probs, val, us_voto)
+        e = mejor_en(us_voto, curva_e)
         h = curva_heuristica(val)
         rm = e.get("recall_medidos"); rr = e.get("recall_rellenados")
         s_rm = f"{rm:.3f} ({e['golpes_medidos']})" if rm is not None else "-"
@@ -434,6 +435,7 @@ def _folds(args: argparse.Namespace) -> int:
                            "boundary_version_val": sorted(x for x in v_val if x is not None),
                            "boundary_version_train": sorted(x for x in v_train if x is not None),
                            "ensamble": e,
+                           "ensamble_curva": agregar_curva(us_voto, curva_e),
                            "f1_medio": round(float(np.mean(fs)), 4),
                            "f1_desvio": round(float(np.std(fs)), 4)})
 
@@ -452,6 +454,26 @@ def _folds(args: argparse.Namespace) -> int:
              "resultados": resultados}, indent=2, ensure_ascii=False) + "\n")
         print(f"  -> {args.out}")
     return 0
+
+
+def agregar_curva(umbrales, curvas) -> list[dict]:
+    """
+    Recall, precision y F1 por umbral, sumando los conteos de todas las fuentes.
+
+    `folds` elige el mejor umbral; E8 lee el ensamble en 0,80 e informa la curva entera
+    (docs/specs/2026-10-27-gemelo-yolo26, 02-preregistro-e8.md §4). Los conteos se suman y no se
+    promedian, igual que en el mejor umbral: cada fuente aporta otra cantidad de golpes.
+    """
+    salida = []
+    for i, u in enumerate(umbrales):
+        g = sum(c[i]["golpes"] for c in curvas)
+        pr = sum(c[i]["predichos"] for c in curvas)
+        em = sum(c[i]["emparejados"] for c in curvas)
+        r, p = (em / g if g else 0.0), (em / pr if pr else 0.0)
+        salida.append({"umbral": u, "golpes": g, "predichos": pr, "emparejados": em,
+                       "recall": round(r, 4), "precision": round(p, 4),
+                       "f1": round(2 * r * p / (r + p) if r + p else 0.0, 4)})
+    return salida
 
 
 def main(argv: list[str] | None = None) -> int:
