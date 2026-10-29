@@ -1,0 +1,4343 @@
+{
+  "base": {
+    "alpha": 0.5,
+    "semillas": [
+      42,
+      1,
+      2,
+      3,
+      4
+    ],
+    "epocas": 40,
+    "procedencia": {
+      "01-sparring": {
+        "video": "01-sparring.mp4",
+        "video_sha256": "6410442dcdb429c60b959566e04599f21034525bf4823687c67186940c5a4769",
+        "annot_sha256": "b4f6e66c9c630b8d0a3b229b1fd924cb641b7fd95f0270005d5578ef15c93af4",
+        "boundary_definitions_version": 2,
+        "fps_origen": 30.0,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      },
+      "02-sparring": {
+        "video": "02-sparring.mp4",
+        "video_sha256": "ecbe63e1f075ff9e8cc92ef6bfc0403533ffde92dce55d8664fa23100793f4f1",
+        "annot_sha256": "afd2bb077a9b795b4214bde3db8ea9070dbf7a118d77745b17d0ba8d9b8f3165",
+        "boundary_definitions_version": 2,
+        "fps_origen": 30.0,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      },
+      "03-sparring": {
+        "video": "03-sparring.mp4",
+        "video_sha256": "18a885850184537647dbc1e669147dffdd35d78e76139243ff7a41333e83de4a",
+        "annot_sha256": "23d4b6e091b51b7b29a266b2b413c1d4cbc5704824c76f5df792fe7009a7cd9f",
+        "boundary_definitions_version": 2,
+        "fps_origen": 30.0,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      },
+      "04-sparring": {
+        "video": "04-sparring.mp4",
+        "video_sha256": "7e4491455a6cd14c915b996377570abe310bc934277e74253c49bb93bed30a40",
+        "annot_sha256": "91ed2dcaea46013d005da100e82689faf846dfed89c8f1cc9366f4a9887c8385",
+        "boundary_definitions_version": 2,
+        "fps_origen": 30.0,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      },
+      "pacquiao_margarito": {
+        "video": "pacquiao_margarito.mp4",
+        "video_sha256": "3fb01b7f255f58cc5d46199bd1ea4b7c0b0072d2f68e92b9b879c7a81334efd8",
+        "annot_sha256": "85d737a698b778dd9f4f7a2a90833839bb6f46f187ab198bd4774b5db6a59faa",
+        "boundary_definitions_version": 2,
+        "fps_origen": 59.94005994005994,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      },
+      "sparring-3-rounds": {
+        "video": "sparring-3-rounds.mp4",
+        "video_sha256": "2d39ef1b76008d3b6141a25853753c60e74bd5a8660b0bea2e5a511563c0040a",
+        "annot_sha256": "a6df2d89be53915b6d93dd4dc7260982496606dd48670c82e04901ebaf25ff1e",
+        "boundary_definitions_version": 2,
+        "fps_origen": 30.0,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      },
+      "Sparring": {
+        "video": "Sparring.mp4",
+        "video_sha256": "bb3611d2bb0e038d55b066d19561447d4d4979e4dfdeae447faca50db308d381",
+        "annot_sha256": "1b842e385a1ccac059181ee84a69a1c94854f6b725b0ea5fb00cd2418fa7a809",
+        "boundary_definitions_version": 1,
+        "fps_origen": 29.643,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      }
+    },
+    "resultados": [
+      {
+        "fold": "sin-01-sparring",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.7,
+            "golpes": 96,
+            "predichos": 82,
+            "recall": 0.6667,
+            "precision": 0.7805,
+            "f1": 0.7191,
+            "golpes_medidos": 96,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6667,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.55,
+            "golpes": 96,
+            "predichos": 216,
+            "recall": 0.7188,
+            "precision": 0.3194,
+            "f1": 0.4423,
+            "golpes_medidos": 96,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.7188,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.6,
+            "golpes": 96,
+            "predichos": 213,
+            "recall": 0.7604,
+            "precision": 0.3427,
+            "f1": 0.4725,
+            "golpes_medidos": 96,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.7604,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.9,
+            "golpes": 96,
+            "predichos": 59,
+            "recall": 0.5104,
+            "precision": 0.8305,
+            "f1": 0.6323,
+            "golpes_medidos": 96,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.5104,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.9,
+            "golpes": 96,
+            "predichos": 53,
+            "recall": 0.4479,
+            "precision": 0.8113,
+            "f1": 0.5772,
+            "golpes_medidos": 96,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.4479,
+            "recall_rellenados": null
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.85,
+          "golpes": 96,
+          "recall": 0.3646,
+          "precision": 0.28,
+          "f1": 0.3167
+        },
+        "boundary_version_val": [
+          2
+        ],
+        "boundary_version_train": [
+          1,
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.8,
+          "golpes": 96,
+          "predichos": 63,
+          "recall": 0.5521,
+          "precision": 0.8413,
+          "f1": 0.6667,
+          "golpes_medidos": 96,
+          "golpes_rellenados": 0,
+          "recall_medidos": 0.5521,
+          "recall_rellenados": null
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 96,
+            "predichos": 278,
+            "emparejados": 65,
+            "recall": 0.6771,
+            "precision": 0.2338,
+            "f1": 0.3476
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 96,
+            "predichos": 274,
+            "emparejados": 73,
+            "recall": 0.7604,
+            "precision": 0.2664,
+            "f1": 0.3946
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 96,
+            "predichos": 260,
+            "emparejados": 72,
+            "recall": 0.75,
+            "precision": 0.2769,
+            "f1": 0.4045
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 96,
+            "predichos": 250,
+            "emparejados": 72,
+            "recall": 0.75,
+            "precision": 0.288,
+            "f1": 0.4162
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 96,
+            "predichos": 251,
+            "emparejados": 75,
+            "recall": 0.7812,
+            "precision": 0.2988,
+            "f1": 0.4323
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 96,
+            "predichos": 235,
+            "emparejados": 75,
+            "recall": 0.7812,
+            "precision": 0.3191,
+            "f1": 0.4532
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 96,
+            "predichos": 226,
+            "emparejados": 76,
+            "recall": 0.7917,
+            "precision": 0.3363,
+            "f1": 0.472
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 96,
+            "predichos": 218,
+            "emparejados": 76,
+            "recall": 0.7917,
+            "precision": 0.3486,
+            "f1": 0.4841
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 96,
+            "predichos": 206,
+            "emparejados": 74,
+            "recall": 0.7708,
+            "precision": 0.3592,
+            "f1": 0.4901
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 96,
+            "predichos": 197,
+            "emparejados": 71,
+            "recall": 0.7396,
+            "precision": 0.3604,
+            "f1": 0.4846
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 96,
+            "predichos": 175,
+            "emparejados": 67,
+            "recall": 0.6979,
+            "precision": 0.3829,
+            "f1": 0.4945
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 96,
+            "predichos": 162,
+            "emparejados": 66,
+            "recall": 0.6875,
+            "precision": 0.4074,
+            "f1": 0.5116
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 96,
+            "predichos": 130,
+            "emparejados": 59,
+            "recall": 0.6146,
+            "precision": 0.4538,
+            "f1": 0.5221
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 96,
+            "predichos": 82,
+            "emparejados": 56,
+            "recall": 0.5833,
+            "precision": 0.6829,
+            "f1": 0.6292
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 96,
+            "predichos": 63,
+            "emparejados": 53,
+            "recall": 0.5521,
+            "precision": 0.8413,
+            "f1": 0.6667
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 96,
+            "predichos": 54,
+            "emparejados": 50,
+            "recall": 0.5208,
+            "precision": 0.9259,
+            "f1": 0.6667
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 96,
+            "predichos": 44,
+            "emparejados": 40,
+            "recall": 0.4167,
+            "precision": 0.9091,
+            "f1": 0.5714
+          }
+        ],
+        "f1_medio": 0.5687,
+        "f1_desvio": 0.1019
+      },
+      {
+        "fold": "sin-02-sparring",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.65,
+            "golpes": 62,
+            "predichos": 52,
+            "recall": 0.6613,
+            "precision": 0.7885,
+            "f1": 0.7193,
+            "golpes_medidos": 62,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6613,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.6,
+            "golpes": 62,
+            "predichos": 135,
+            "recall": 0.5806,
+            "precision": 0.2667,
+            "f1": 0.3655,
+            "golpes_medidos": 62,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.5806,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.65,
+            "golpes": 62,
+            "predichos": 118,
+            "recall": 0.5806,
+            "precision": 0.3051,
+            "f1": 0.4,
+            "golpes_medidos": 62,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.5806,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.75,
+            "golpes": 62,
+            "predichos": 53,
+            "recall": 0.5645,
+            "precision": 0.6604,
+            "f1": 0.6087,
+            "golpes_medidos": 62,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.5645,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.6,
+            "golpes": 62,
+            "predichos": 149,
+            "recall": 0.6613,
+            "precision": 0.2752,
+            "f1": 0.3886,
+            "golpes_medidos": 62,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6613,
+            "recall_rellenados": null
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.85,
+          "golpes": 62,
+          "recall": 0.4032,
+          "precision": 0.25,
+          "f1": 0.3086
+        },
+        "boundary_version_val": [
+          2
+        ],
+        "boundary_version_train": [
+          1,
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.8,
+          "golpes": 62,
+          "predichos": 38,
+          "recall": 0.4839,
+          "precision": 0.7895,
+          "f1": 0.6,
+          "golpes_medidos": 62,
+          "golpes_rellenados": 0,
+          "recall_medidos": 0.4839,
+          "recall_rellenados": null
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 62,
+            "predichos": 209,
+            "emparejados": 30,
+            "recall": 0.4839,
+            "precision": 0.1435,
+            "f1": 0.2214
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 62,
+            "predichos": 196,
+            "emparejados": 33,
+            "recall": 0.5323,
+            "precision": 0.1684,
+            "f1": 0.2558
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 62,
+            "predichos": 188,
+            "emparejados": 39,
+            "recall": 0.629,
+            "precision": 0.2074,
+            "f1": 0.312
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 62,
+            "predichos": 187,
+            "emparejados": 42,
+            "recall": 0.6774,
+            "precision": 0.2246,
+            "f1": 0.3373
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 62,
+            "predichos": 175,
+            "emparejados": 43,
+            "recall": 0.6935,
+            "precision": 0.2457,
+            "f1": 0.3629
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 62,
+            "predichos": 159,
+            "emparejados": 43,
+            "recall": 0.6935,
+            "precision": 0.2704,
+            "f1": 0.3891
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 62,
+            "predichos": 158,
+            "emparejados": 44,
+            "recall": 0.7097,
+            "precision": 0.2785,
+            "f1": 0.4
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 62,
+            "predichos": 146,
+            "emparejados": 42,
+            "recall": 0.6774,
+            "precision": 0.2877,
+            "f1": 0.4038
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 62,
+            "predichos": 135,
+            "emparejados": 41,
+            "recall": 0.6613,
+            "precision": 0.3037,
+            "f1": 0.4162
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 62,
+            "predichos": 128,
+            "emparejados": 39,
+            "recall": 0.629,
+            "precision": 0.3047,
+            "f1": 0.4105
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 62,
+            "predichos": 116,
+            "emparejados": 40,
+            "recall": 0.6452,
+            "precision": 0.3448,
+            "f1": 0.4494
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 62,
+            "predichos": 107,
+            "emparejados": 38,
+            "recall": 0.6129,
+            "precision": 0.3551,
+            "f1": 0.4497
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 62,
+            "predichos": 91,
+            "emparejados": 36,
+            "recall": 0.5806,
+            "precision": 0.3956,
+            "f1": 0.4706
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 62,
+            "predichos": 54,
+            "emparejados": 31,
+            "recall": 0.5,
+            "precision": 0.5741,
+            "f1": 0.5345
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 62,
+            "predichos": 38,
+            "emparejados": 30,
+            "recall": 0.4839,
+            "precision": 0.7895,
+            "f1": 0.6
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 62,
+            "predichos": 33,
+            "emparejados": 27,
+            "recall": 0.4355,
+            "precision": 0.8182,
+            "f1": 0.5684
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 62,
+            "predichos": 25,
+            "emparejados": 21,
+            "recall": 0.3387,
+            "precision": 0.84,
+            "f1": 0.4828
+          }
+        ],
+        "f1_medio": 0.4964,
+        "f1_desvio": 0.1417
+      },
+      {
+        "fold": "sin-03-sparring",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.55,
+            "golpes": 129,
+            "predichos": 133,
+            "recall": 0.7674,
+            "precision": 0.7444,
+            "f1": 0.7557,
+            "golpes_medidos": 129,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.7674,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.55,
+            "golpes": 129,
+            "predichos": 266,
+            "recall": 0.7287,
+            "precision": 0.3534,
+            "f1": 0.4759,
+            "golpes_medidos": 129,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.7287,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.65,
+            "golpes": 129,
+            "predichos": 260,
+            "recall": 0.7132,
+            "precision": 0.3538,
+            "f1": 0.473,
+            "golpes_medidos": 129,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.7132,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.75,
+            "golpes": 129,
+            "predichos": 108,
+            "recall": 0.5814,
+            "precision": 0.6944,
+            "f1": 0.6329,
+            "golpes_medidos": 129,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.5814,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.55,
+            "golpes": 129,
+            "predichos": 261,
+            "recall": 0.7364,
+            "precision": 0.364,
+            "f1": 0.4872,
+            "golpes_medidos": 129,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.7364,
+            "recall_rellenados": null
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.8,
+          "golpes": 129,
+          "recall": 0.3953,
+          "precision": 0.3806,
+          "f1": 0.3878
+        },
+        "boundary_version_val": [
+          2
+        ],
+        "boundary_version_train": [
+          1,
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.75,
+          "golpes": 129,
+          "predichos": 91,
+          "recall": 0.5659,
+          "precision": 0.8022,
+          "f1": 0.6636,
+          "golpes_medidos": 129,
+          "golpes_rellenados": 0,
+          "recall_medidos": 0.5659,
+          "recall_rellenados": null
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 129,
+            "predichos": 325,
+            "emparejados": 68,
+            "recall": 0.5271,
+            "precision": 0.2092,
+            "f1": 0.2996
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 129,
+            "predichos": 333,
+            "emparejados": 79,
+            "recall": 0.6124,
+            "precision": 0.2372,
+            "f1": 0.342
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 129,
+            "predichos": 320,
+            "emparejados": 82,
+            "recall": 0.6357,
+            "precision": 0.2562,
+            "f1": 0.3653
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 129,
+            "predichos": 304,
+            "emparejados": 90,
+            "recall": 0.6977,
+            "precision": 0.2961,
+            "f1": 0.4157
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 129,
+            "predichos": 300,
+            "emparejados": 96,
+            "recall": 0.7442,
+            "precision": 0.32,
+            "f1": 0.4476
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 129,
+            "predichos": 293,
+            "emparejados": 98,
+            "recall": 0.7597,
+            "precision": 0.3345,
+            "f1": 0.4645
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 129,
+            "predichos": 283,
+            "emparejados": 100,
+            "recall": 0.7752,
+            "precision": 0.3534,
+            "f1": 0.4854
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 129,
+            "predichos": 273,
+            "emparejados": 97,
+            "recall": 0.7519,
+            "precision": 0.3553,
+            "f1": 0.4826
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 129,
+            "predichos": 270,
+            "emparejados": 98,
+            "recall": 0.7597,
+            "precision": 0.363,
+            "f1": 0.4912
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 129,
+            "predichos": 254,
+            "emparejados": 97,
+            "recall": 0.7519,
+            "precision": 0.3819,
+            "f1": 0.5065
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 129,
+            "predichos": 236,
+            "emparejados": 94,
+            "recall": 0.7287,
+            "precision": 0.3983,
+            "f1": 0.5151
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 129,
+            "predichos": 210,
+            "emparejados": 88,
+            "recall": 0.6822,
+            "precision": 0.419,
+            "f1": 0.5192
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 129,
+            "predichos": 150,
+            "emparejados": 84,
+            "recall": 0.6512,
+            "precision": 0.56,
+            "f1": 0.6022
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 129,
+            "predichos": 91,
+            "emparejados": 73,
+            "recall": 0.5659,
+            "precision": 0.8022,
+            "f1": 0.6636
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 129,
+            "predichos": 75,
+            "emparejados": 64,
+            "recall": 0.4961,
+            "precision": 0.8533,
+            "f1": 0.6275
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 129,
+            "predichos": 66,
+            "emparejados": 57,
+            "recall": 0.4419,
+            "precision": 0.8636,
+            "f1": 0.5846
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 129,
+            "predichos": 51,
+            "emparejados": 45,
+            "recall": 0.3488,
+            "precision": 0.8824,
+            "f1": 0.5
+          }
+        ],
+        "f1_medio": 0.5649,
+        "f1_desvio": 0.1126
+      },
+      {
+        "fold": "sin-04-sparring",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.55,
+            "golpes": 120,
+            "predichos": 110,
+            "recall": 0.6083,
+            "precision": 0.6636,
+            "f1": 0.6348,
+            "golpes_medidos": 120,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6083,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.4,
+            "golpes": 120,
+            "predichos": 294,
+            "recall": 0.7417,
+            "precision": 0.3027,
+            "f1": 0.43,
+            "golpes_medidos": 120,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.7417,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.45,
+            "golpes": 120,
+            "predichos": 259,
+            "recall": 0.6333,
+            "precision": 0.2934,
+            "f1": 0.4011,
+            "golpes_medidos": 120,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6333,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.7,
+            "golpes": 120,
+            "predichos": 91,
+            "recall": 0.55,
+            "precision": 0.7253,
+            "f1": 0.6256,
+            "golpes_medidos": 120,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.55,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.5,
+            "golpes": 120,
+            "predichos": 243,
+            "recall": 0.65,
+            "precision": 0.321,
+            "f1": 0.4298,
+            "golpes_medidos": 120,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.65,
+            "recall_rellenados": null
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.7,
+          "golpes": 120,
+          "recall": 0.4167,
+          "precision": 0.2165,
+          "f1": 0.2849
+        },
+        "boundary_version_val": [
+          2
+        ],
+        "boundary_version_train": [
+          1,
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.75,
+          "golpes": 120,
+          "predichos": 72,
+          "recall": 0.475,
+          "precision": 0.7917,
+          "f1": 0.5937,
+          "golpes_medidos": 120,
+          "golpes_rellenados": 0,
+          "recall_medidos": 0.475,
+          "recall_rellenados": null
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 120,
+            "predichos": 371,
+            "emparejados": 86,
+            "recall": 0.7167,
+            "precision": 0.2318,
+            "f1": 0.3503
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 120,
+            "predichos": 363,
+            "emparejados": 91,
+            "recall": 0.7583,
+            "precision": 0.2507,
+            "f1": 0.3768
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 120,
+            "predichos": 336,
+            "emparejados": 93,
+            "recall": 0.775,
+            "precision": 0.2768,
+            "f1": 0.4079
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 120,
+            "predichos": 322,
+            "emparejados": 91,
+            "recall": 0.7583,
+            "precision": 0.2826,
+            "f1": 0.4118
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 120,
+            "predichos": 303,
+            "emparejados": 89,
+            "recall": 0.7417,
+            "precision": 0.2937,
+            "f1": 0.4208
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 120,
+            "predichos": 283,
+            "emparejados": 87,
+            "recall": 0.725,
+            "precision": 0.3074,
+            "f1": 0.4318
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 120,
+            "predichos": 263,
+            "emparejados": 82,
+            "recall": 0.6833,
+            "precision": 0.3118,
+            "f1": 0.4282
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 120,
+            "predichos": 251,
+            "emparejados": 79,
+            "recall": 0.6583,
+            "precision": 0.3147,
+            "f1": 0.4259
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 120,
+            "predichos": 228,
+            "emparejados": 73,
+            "recall": 0.6083,
+            "precision": 0.3202,
+            "f1": 0.4195
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 120,
+            "predichos": 215,
+            "emparejados": 72,
+            "recall": 0.6,
+            "precision": 0.3349,
+            "f1": 0.4299
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 120,
+            "predichos": 174,
+            "emparejados": 69,
+            "recall": 0.575,
+            "precision": 0.3966,
+            "f1": 0.4694
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 120,
+            "predichos": 112,
+            "emparejados": 64,
+            "recall": 0.5333,
+            "precision": 0.5714,
+            "f1": 0.5517
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 120,
+            "predichos": 85,
+            "emparejados": 60,
+            "recall": 0.5,
+            "precision": 0.7059,
+            "f1": 0.5854
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 120,
+            "predichos": 72,
+            "emparejados": 57,
+            "recall": 0.475,
+            "precision": 0.7917,
+            "f1": 0.5937
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 120,
+            "predichos": 60,
+            "emparejados": 53,
+            "recall": 0.4417,
+            "precision": 0.8833,
+            "f1": 0.5889
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 120,
+            "predichos": 52,
+            "emparejados": 47,
+            "recall": 0.3917,
+            "precision": 0.9038,
+            "f1": 0.5465
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 120,
+            "predichos": 34,
+            "emparejados": 33,
+            "recall": 0.275,
+            "precision": 0.9706,
+            "f1": 0.4286
+          }
+        ],
+        "f1_medio": 0.5043,
+        "f1_desvio": 0.1034
+      },
+      {
+        "fold": "sin-Sparring",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.65,
+            "golpes": 114,
+            "predichos": 132,
+            "recall": 0.5877,
+            "precision": 0.5076,
+            "f1": 0.5447,
+            "golpes_medidos": 86,
+            "golpes_rellenados": 28,
+            "recall_medidos": 0.6047,
+            "recall_rellenados": 0.5357
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.5,
+            "golpes": 114,
+            "predichos": 357,
+            "recall": 0.693,
+            "precision": 0.2213,
+            "f1": 0.3355,
+            "golpes_medidos": 86,
+            "golpes_rellenados": 28,
+            "recall_medidos": 0.6744,
+            "recall_rellenados": 0.75
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.55,
+            "golpes": 114,
+            "predichos": 346,
+            "recall": 0.6316,
+            "precision": 0.2081,
+            "f1": 0.313,
+            "golpes_medidos": 86,
+            "golpes_rellenados": 28,
+            "recall_medidos": 0.6512,
+            "recall_rellenados": 0.5714
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.8,
+            "golpes": 114,
+            "predichos": 91,
+            "recall": 0.4386,
+            "precision": 0.5495,
+            "f1": 0.4878,
+            "golpes_medidos": 86,
+            "golpes_rellenados": 28,
+            "recall_medidos": 0.4884,
+            "recall_rellenados": 0.2857
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.7,
+            "golpes": 114,
+            "predichos": 273,
+            "recall": 0.614,
+            "precision": 0.2564,
+            "f1": 0.3618,
+            "golpes_medidos": 86,
+            "golpes_rellenados": 28,
+            "recall_medidos": 0.6163,
+            "recall_rellenados": 0.6071
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.8,
+          "golpes": 114,
+          "recall": 0.4123,
+          "precision": 0.1728,
+          "f1": 0.2435
+        },
+        "boundary_version_val": [
+          1
+        ],
+        "boundary_version_train": [
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.75,
+          "golpes": 114,
+          "predichos": 101,
+          "recall": 0.4912,
+          "precision": 0.5545,
+          "f1": 0.5209,
+          "golpes_medidos": 86,
+          "golpes_rellenados": 28,
+          "recall_medidos": 0.5465,
+          "recall_rellenados": 0.3214
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 114,
+            "predichos": 342,
+            "emparejados": 43,
+            "recall": 0.3772,
+            "precision": 0.1257,
+            "f1": 0.1886
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 114,
+            "predichos": 346,
+            "emparejados": 50,
+            "recall": 0.4386,
+            "precision": 0.1445,
+            "f1": 0.2174
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 114,
+            "predichos": 367,
+            "emparejados": 59,
+            "recall": 0.5175,
+            "precision": 0.1608,
+            "f1": 0.2453
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 114,
+            "predichos": 366,
+            "emparejados": 62,
+            "recall": 0.5439,
+            "precision": 0.1694,
+            "f1": 0.2583
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 114,
+            "predichos": 365,
+            "emparejados": 69,
+            "recall": 0.6053,
+            "precision": 0.189,
+            "f1": 0.2881
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 114,
+            "predichos": 362,
+            "emparejados": 75,
+            "recall": 0.6579,
+            "precision": 0.2072,
+            "f1": 0.3151
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 114,
+            "predichos": 360,
+            "emparejados": 74,
+            "recall": 0.6491,
+            "precision": 0.2056,
+            "f1": 0.3122
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 114,
+            "predichos": 353,
+            "emparejados": 74,
+            "recall": 0.6491,
+            "precision": 0.2096,
+            "f1": 0.3169
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 114,
+            "predichos": 340,
+            "emparejados": 74,
+            "recall": 0.6491,
+            "precision": 0.2176,
+            "f1": 0.326
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 114,
+            "predichos": 318,
+            "emparejados": 72,
+            "recall": 0.6316,
+            "precision": 0.2264,
+            "f1": 0.3333
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 114,
+            "predichos": 283,
+            "emparejados": 73,
+            "recall": 0.6404,
+            "precision": 0.258,
+            "f1": 0.3678
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 114,
+            "predichos": 252,
+            "emparejados": 70,
+            "recall": 0.614,
+            "precision": 0.2778,
+            "f1": 0.3825
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 114,
+            "predichos": 161,
+            "emparejados": 61,
+            "recall": 0.5351,
+            "precision": 0.3789,
+            "f1": 0.4436
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 114,
+            "predichos": 101,
+            "emparejados": 56,
+            "recall": 0.4912,
+            "precision": 0.5545,
+            "f1": 0.5209
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 114,
+            "predichos": 70,
+            "emparejados": 44,
+            "recall": 0.386,
+            "precision": 0.6286,
+            "f1": 0.4783
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 114,
+            "predichos": 48,
+            "emparejados": 34,
+            "recall": 0.2982,
+            "precision": 0.7083,
+            "f1": 0.4198
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 114,
+            "predichos": 33,
+            "emparejados": 23,
+            "recall": 0.2018,
+            "precision": 0.697,
+            "f1": 0.3129
+          }
+        ],
+        "f1_medio": 0.4086,
+        "f1_desvio": 0.0911
+      },
+      {
+        "fold": "sin-pacquiao_margarito",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.45,
+            "golpes": 145,
+            "predichos": 127,
+            "recall": 0.6759,
+            "precision": 0.7717,
+            "f1": 0.7206,
+            "golpes_medidos": 130,
+            "golpes_rellenados": 15,
+            "recall_medidos": 0.7,
+            "recall_rellenados": 0.4667
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.85,
+            "golpes": 145,
+            "predichos": 94,
+            "recall": 0.4897,
+            "precision": 0.7553,
+            "f1": 0.5941,
+            "golpes_medidos": 130,
+            "golpes_rellenados": 15,
+            "recall_medidos": 0.5231,
+            "recall_rellenados": 0.2
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.85,
+            "golpes": 145,
+            "predichos": 135,
+            "recall": 0.4828,
+            "precision": 0.5185,
+            "f1": 0.5,
+            "golpes_medidos": 130,
+            "golpes_rellenados": 15,
+            "recall_medidos": 0.5077,
+            "recall_rellenados": 0.2667
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.85,
+            "golpes": 145,
+            "predichos": 79,
+            "recall": 0.4138,
+            "precision": 0.7595,
+            "f1": 0.5357,
+            "golpes_medidos": 130,
+            "golpes_rellenados": 15,
+            "recall_medidos": 0.4462,
+            "recall_rellenados": 0.1333
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.8,
+            "golpes": 145,
+            "predichos": 209,
+            "recall": 0.5793,
+            "precision": 0.4019,
+            "f1": 0.4746,
+            "golpes_medidos": 130,
+            "golpes_rellenados": 15,
+            "recall_medidos": 0.6154,
+            "recall_rellenados": 0.2667
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.8,
+          "golpes": 145,
+          "recall": 0.2897,
+          "precision": 0.3231,
+          "f1": 0.3055
+        },
+        "boundary_version_val": [
+          2
+        ],
+        "boundary_version_train": [
+          1,
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.75,
+          "golpes": 145,
+          "predichos": 88,
+          "recall": 0.5103,
+          "precision": 0.8409,
+          "f1": 0.6352,
+          "golpes_medidos": 130,
+          "golpes_rellenados": 15,
+          "recall_medidos": 0.5538,
+          "recall_rellenados": 0.1333
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 145,
+            "predichos": 354,
+            "emparejados": 67,
+            "recall": 0.4621,
+            "precision": 0.1893,
+            "f1": 0.2685
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 145,
+            "predichos": 359,
+            "emparejados": 79,
+            "recall": 0.5448,
+            "precision": 0.2201,
+            "f1": 0.3135
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 145,
+            "predichos": 349,
+            "emparejados": 86,
+            "recall": 0.5931,
+            "precision": 0.2464,
+            "f1": 0.3482
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 145,
+            "predichos": 338,
+            "emparejados": 92,
+            "recall": 0.6345,
+            "precision": 0.2722,
+            "f1": 0.381
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 145,
+            "predichos": 331,
+            "emparejados": 95,
+            "recall": 0.6552,
+            "precision": 0.287,
+            "f1": 0.3992
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 145,
+            "predichos": 319,
+            "emparejados": 100,
+            "recall": 0.6897,
+            "precision": 0.3135,
+            "f1": 0.431
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 145,
+            "predichos": 304,
+            "emparejados": 102,
+            "recall": 0.7034,
+            "precision": 0.3355,
+            "f1": 0.4543
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 145,
+            "predichos": 294,
+            "emparejados": 103,
+            "recall": 0.7103,
+            "precision": 0.3503,
+            "f1": 0.4692
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 145,
+            "predichos": 277,
+            "emparejados": 103,
+            "recall": 0.7103,
+            "precision": 0.3718,
+            "f1": 0.4882
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 145,
+            "predichos": 257,
+            "emparejados": 102,
+            "recall": 0.7034,
+            "precision": 0.3969,
+            "f1": 0.5075
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 145,
+            "predichos": 226,
+            "emparejados": 99,
+            "recall": 0.6828,
+            "precision": 0.4381,
+            "f1": 0.5337
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 145,
+            "predichos": 183,
+            "emparejados": 91,
+            "recall": 0.6276,
+            "precision": 0.4973,
+            "f1": 0.5549
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 145,
+            "predichos": 131,
+            "emparejados": 86,
+            "recall": 0.5931,
+            "precision": 0.6565,
+            "f1": 0.6232
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 145,
+            "predichos": 88,
+            "emparejados": 74,
+            "recall": 0.5103,
+            "precision": 0.8409,
+            "f1": 0.6352
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 145,
+            "predichos": 71,
+            "emparejados": 67,
+            "recall": 0.4621,
+            "precision": 0.9437,
+            "f1": 0.6204
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 145,
+            "predichos": 58,
+            "emparejados": 57,
+            "recall": 0.3931,
+            "precision": 0.9828,
+            "f1": 0.5616
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 145,
+            "predichos": 35,
+            "emparejados": 35,
+            "recall": 0.2414,
+            "precision": 1.0,
+            "f1": 0.3889
+          }
+        ],
+        "f1_medio": 0.565,
+        "f1_desvio": 0.0875
+      },
+      {
+        "fold": "sin-sparring-3-rounds",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.6,
+            "golpes": 380,
+            "predichos": 308,
+            "recall": 0.6184,
+            "precision": 0.763,
+            "f1": 0.6831,
+            "golpes_medidos": 369,
+            "golpes_rellenados": 11,
+            "recall_medidos": 0.6314,
+            "recall_rellenados": 0.1818
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.85,
+            "golpes": 380,
+            "predichos": 213,
+            "recall": 0.3684,
+            "precision": 0.6573,
+            "f1": 0.4722,
+            "golpes_medidos": 369,
+            "golpes_rellenados": 11,
+            "recall_medidos": 0.3767,
+            "recall_rellenados": 0.0909
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.85,
+            "golpes": 380,
+            "predichos": 242,
+            "recall": 0.5105,
+            "precision": 0.8017,
+            "f1": 0.6238,
+            "golpes_medidos": 369,
+            "golpes_rellenados": 11,
+            "recall_medidos": 0.523,
+            "recall_rellenados": 0.0909
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.75,
+            "golpes": 380,
+            "predichos": 253,
+            "recall": 0.5368,
+            "precision": 0.8063,
+            "f1": 0.6445,
+            "golpes_medidos": 369,
+            "golpes_rellenados": 11,
+            "recall_medidos": 0.5501,
+            "recall_rellenados": 0.0909
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.65,
+            "golpes": 380,
+            "predichos": 757,
+            "recall": 0.6474,
+            "precision": 0.325,
+            "f1": 0.4327,
+            "golpes_medidos": 369,
+            "golpes_rellenados": 11,
+            "recall_medidos": 0.6558,
+            "recall_rellenados": 0.3636
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.8,
+          "golpes": 380,
+          "recall": 0.2868,
+          "precision": 0.2633,
+          "f1": 0.2746
+        },
+        "boundary_version_val": [
+          2
+        ],
+        "boundary_version_train": [
+          1,
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.7,
+          "golpes": 380,
+          "predichos": 293,
+          "recall": 0.5895,
+          "precision": 0.7645,
+          "f1": 0.6657,
+          "golpes_medidos": 369,
+          "golpes_rellenados": 11,
+          "recall_medidos": 0.6043,
+          "recall_rellenados": 0.0909
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 380,
+            "predichos": 978,
+            "emparejados": 183,
+            "recall": 0.4816,
+            "precision": 0.1871,
+            "f1": 0.2695
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 380,
+            "predichos": 958,
+            "emparejados": 213,
+            "recall": 0.5605,
+            "precision": 0.2223,
+            "f1": 0.3184
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 380,
+            "predichos": 927,
+            "emparejados": 229,
+            "recall": 0.6026,
+            "precision": 0.247,
+            "f1": 0.3504
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 380,
+            "predichos": 898,
+            "emparejados": 236,
+            "recall": 0.6211,
+            "precision": 0.2628,
+            "f1": 0.3693
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 380,
+            "predichos": 892,
+            "emparejados": 250,
+            "recall": 0.6579,
+            "precision": 0.2803,
+            "f1": 0.3931
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 380,
+            "predichos": 857,
+            "emparejados": 255,
+            "recall": 0.6711,
+            "precision": 0.2975,
+            "f1": 0.4123
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 380,
+            "predichos": 826,
+            "emparejados": 256,
+            "recall": 0.6737,
+            "precision": 0.3099,
+            "f1": 0.4245
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 380,
+            "predichos": 778,
+            "emparejados": 252,
+            "recall": 0.6632,
+            "precision": 0.3239,
+            "f1": 0.4352
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 380,
+            "predichos": 722,
+            "emparejados": 253,
+            "recall": 0.6658,
+            "precision": 0.3504,
+            "f1": 0.4592
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 380,
+            "predichos": 677,
+            "emparejados": 251,
+            "recall": 0.6605,
+            "precision": 0.3708,
+            "f1": 0.4749
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 380,
+            "predichos": 548,
+            "emparejados": 240,
+            "recall": 0.6316,
+            "precision": 0.438,
+            "f1": 0.5172
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 380,
+            "predichos": 379,
+            "emparejados": 237,
+            "recall": 0.6237,
+            "precision": 0.6253,
+            "f1": 0.6245
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 380,
+            "predichos": 293,
+            "emparejados": 224,
+            "recall": 0.5895,
+            "precision": 0.7645,
+            "f1": 0.6657
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 380,
+            "predichos": 242,
+            "emparejados": 204,
+            "recall": 0.5368,
+            "precision": 0.843,
+            "f1": 0.6559
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 380,
+            "predichos": 205,
+            "emparejados": 185,
+            "recall": 0.4868,
+            "precision": 0.9024,
+            "f1": 0.6325
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 380,
+            "predichos": 159,
+            "emparejados": 148,
+            "recall": 0.3895,
+            "precision": 0.9308,
+            "f1": 0.5492
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 380,
+            "predichos": 117,
+            "emparejados": 109,
+            "recall": 0.2868,
+            "precision": 0.9316,
+            "f1": 0.4386
+          }
+        ],
+        "f1_medio": 0.5713,
+        "f1_desvio": 0.0996
+      }
+    ]
+  },
+  "y26": {
+    "alpha": 0.5,
+    "semillas": [
+      42,
+      1,
+      2,
+      3,
+      4
+    ],
+    "epocas": 40,
+    "procedencia": {
+      "01-sparring": {
+        "video": "01-sparring.mp4",
+        "video_sha256": "6410442dcdb429c60b959566e04599f21034525bf4823687c67186940c5a4769",
+        "annot_sha256": "516fd9c6375dc454788ac1734464b07f449ba64a1ae77f6649e2511da811e004",
+        "boundary_definitions_version": 2,
+        "fps_origen": 30.0,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      },
+      "02-sparring": {
+        "video": "02-sparring.mp4",
+        "video_sha256": "ecbe63e1f075ff9e8cc92ef6bfc0403533ffde92dce55d8664fa23100793f4f1",
+        "annot_sha256": "428ef2cf00394ee9d85d5e7a836ee043c2864fb32b67fb65d5f7e76148ec8e52",
+        "boundary_definitions_version": 2,
+        "fps_origen": 30.0,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      },
+      "03-sparring": {
+        "video": "03-sparring.mp4",
+        "video_sha256": "18a885850184537647dbc1e669147dffdd35d78e76139243ff7a41333e83de4a",
+        "annot_sha256": "68f185b4646de289fe6766a11a87ba09339a04dd95c9260ab5cbc19a1f737015",
+        "boundary_definitions_version": 2,
+        "fps_origen": 30.0,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      },
+      "04-sparring": {
+        "video": "04-sparring.mp4",
+        "video_sha256": "7e4491455a6cd14c915b996377570abe310bc934277e74253c49bb93bed30a40",
+        "annot_sha256": "f37e4ec51e326837ace554da4ced3c71c794189d17472710bcee9c399aae6af6",
+        "boundary_definitions_version": 2,
+        "fps_origen": 30.0,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      },
+      "pacquiao_margarito": {
+        "video": "pacquiao_margarito.mp4",
+        "video_sha256": "3fb01b7f255f58cc5d46199bd1ea4b7c0b0072d2f68e92b9b879c7a81334efd8",
+        "annot_sha256": "400a861f4f18de5bf2648ac56296d9e46d5094a78366e554175799419c9aaf3f",
+        "boundary_definitions_version": 2,
+        "fps_origen": 59.94005994005994,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      },
+      "sparring-3-rounds": {
+        "video": "sparring-3-rounds.mp4",
+        "video_sha256": "2d39ef1b76008d3b6141a25853753c60e74bd5a8660b0bea2e5a511563c0040a",
+        "annot_sha256": "749b6bfcea2837f5234c2253f0e1d0bda07830608803c2e2470bc44986181704",
+        "boundary_definitions_version": 2,
+        "fps_origen": 30.0,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      },
+      "Sparring": {
+        "video": "Sparring.mp4",
+        "video_sha256": "bb3611d2bb0e038d55b066d19561447d4d4979e4dfdeae447faca50db308d381",
+        "annot_sha256": "bf22adfe72183232edb407e45efa080daee929af7eda8651e1c261b2887302d1",
+        "boundary_definitions_version": 1,
+        "fps_origen": 29.643,
+        "fps_destino": 30.0,
+        "label_space": "side",
+        "classes": [
+          "straight-left-head",
+          "straight-left-body",
+          "straight-right-head",
+          "straight-right-body",
+          "hook-left-head",
+          "hook-left-body",
+          "hook-right-head",
+          "hook-right-body",
+          "uppercut-left-head",
+          "uppercut-left-body",
+          "uppercut-right-head",
+          "uppercut-right-body",
+          "feint",
+          "background"
+        ],
+        "features": [
+          "muneca_x",
+          "muneca_y",
+          "codo_x",
+          "codo_y",
+          "extension",
+          "angulo_codo",
+          "hombros_cos",
+          "hombros_sin",
+          "caderas_cos",
+          "caderas_sin",
+          "torsion_cos",
+          "torsion_sin",
+          "otra_muneca_x",
+          "otra_muneca_y",
+          "nariz_y",
+          "d_muneca_x",
+          "d_muneca_y",
+          "d_extension",
+          "d_angulo_codo",
+          "dd_extension"
+        ]
+      }
+    },
+    "resultados": [
+      {
+        "fold": "sin-01-sparring",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.6,
+            "golpes": 96,
+            "predichos": 79,
+            "recall": 0.6562,
+            "precision": 0.7975,
+            "f1": 0.72,
+            "golpes_medidos": 96,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6562,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.75,
+            "golpes": 96,
+            "predichos": 223,
+            "recall": 0.6562,
+            "precision": 0.2825,
+            "f1": 0.395,
+            "golpes_medidos": 96,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6562,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.55,
+            "golpes": 96,
+            "predichos": 257,
+            "recall": 0.6771,
+            "precision": 0.2529,
+            "f1": 0.3683,
+            "golpes_medidos": 96,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6771,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.4,
+            "golpes": 96,
+            "predichos": 258,
+            "recall": 0.7083,
+            "precision": 0.2636,
+            "f1": 0.3842,
+            "golpes_medidos": 96,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.7083,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.65,
+            "golpes": 96,
+            "predichos": 236,
+            "recall": 0.6562,
+            "precision": 0.2669,
+            "f1": 0.3795,
+            "golpes_medidos": 96,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6562,
+            "recall_rellenados": null
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.85,
+          "golpes": 96,
+          "recall": 0.3646,
+          "precision": 0.307,
+          "f1": 0.3333
+        },
+        "boundary_version_val": [
+          2
+        ],
+        "boundary_version_train": [
+          1,
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.85,
+          "golpes": 96,
+          "predichos": 40,
+          "recall": 0.3542,
+          "precision": 0.85,
+          "f1": 0.5,
+          "golpes_medidos": 96,
+          "golpes_rellenados": 0,
+          "recall_medidos": 0.3542,
+          "recall_rellenados": null
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 96,
+            "predichos": 276,
+            "emparejados": 49,
+            "recall": 0.5104,
+            "precision": 0.1775,
+            "f1": 0.2634
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 96,
+            "predichos": 262,
+            "emparejados": 50,
+            "recall": 0.5208,
+            "precision": 0.1908,
+            "f1": 0.2793
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 96,
+            "predichos": 260,
+            "emparejados": 58,
+            "recall": 0.6042,
+            "precision": 0.2231,
+            "f1": 0.3258
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 96,
+            "predichos": 269,
+            "emparejados": 64,
+            "recall": 0.6667,
+            "precision": 0.2379,
+            "f1": 0.3507
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 96,
+            "predichos": 266,
+            "emparejados": 68,
+            "recall": 0.7083,
+            "precision": 0.2556,
+            "f1": 0.3757
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 96,
+            "predichos": 266,
+            "emparejados": 68,
+            "recall": 0.7083,
+            "precision": 0.2556,
+            "f1": 0.3757
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 96,
+            "predichos": 258,
+            "emparejados": 67,
+            "recall": 0.6979,
+            "precision": 0.2597,
+            "f1": 0.3785
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 96,
+            "predichos": 253,
+            "emparejados": 66,
+            "recall": 0.6875,
+            "precision": 0.2609,
+            "f1": 0.3782
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 96,
+            "predichos": 252,
+            "emparejados": 68,
+            "recall": 0.7083,
+            "precision": 0.2698,
+            "f1": 0.3908
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 96,
+            "predichos": 244,
+            "emparejados": 65,
+            "recall": 0.6771,
+            "precision": 0.2664,
+            "f1": 0.3824
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 96,
+            "predichos": 235,
+            "emparejados": 64,
+            "recall": 0.6667,
+            "precision": 0.2723,
+            "f1": 0.3867
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 96,
+            "predichos": 225,
+            "emparejados": 64,
+            "recall": 0.6667,
+            "precision": 0.2844,
+            "f1": 0.3988
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 96,
+            "predichos": 209,
+            "emparejados": 55,
+            "recall": 0.5729,
+            "precision": 0.2632,
+            "f1": 0.3607
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 96,
+            "predichos": 198,
+            "emparejados": 56,
+            "recall": 0.5833,
+            "precision": 0.2828,
+            "f1": 0.381
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 96,
+            "predichos": 117,
+            "emparejados": 49,
+            "recall": 0.5104,
+            "precision": 0.4188,
+            "f1": 0.4601
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 96,
+            "predichos": 40,
+            "emparejados": 34,
+            "recall": 0.3542,
+            "precision": 0.85,
+            "f1": 0.5
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 96,
+            "predichos": 31,
+            "emparejados": 28,
+            "recall": 0.2917,
+            "precision": 0.9032,
+            "f1": 0.4409
+          }
+        ],
+        "f1_medio": 0.4494,
+        "f1_desvio": 0.1356
+      },
+      {
+        "fold": "sin-02-sparring",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.5,
+            "golpes": 62,
+            "predichos": 59,
+            "recall": 0.6452,
+            "precision": 0.678,
+            "f1": 0.6612,
+            "golpes_medidos": 62,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6452,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.9,
+            "golpes": 62,
+            "predichos": 22,
+            "recall": 0.2581,
+            "precision": 0.7273,
+            "f1": 0.381,
+            "golpes_medidos": 62,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.2581,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.85,
+            "golpes": 62,
+            "predichos": 163,
+            "recall": 0.5161,
+            "precision": 0.1963,
+            "f1": 0.2844,
+            "golpes_medidos": 62,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.5161,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.5,
+            "golpes": 62,
+            "predichos": 204,
+            "recall": 0.5806,
+            "precision": 0.1765,
+            "f1": 0.2707,
+            "golpes_medidos": 62,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.5806,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.75,
+            "golpes": 62,
+            "predichos": 187,
+            "recall": 0.5,
+            "precision": 0.1658,
+            "f1": 0.249,
+            "golpes_medidos": 62,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.5,
+            "recall_rellenados": null
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.85,
+          "golpes": 62,
+          "recall": 0.3548,
+          "precision": 0.2683,
+          "f1": 0.3056
+        },
+        "boundary_version_val": [
+          2
+        ],
+        "boundary_version_train": [
+          1,
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.85,
+          "golpes": 62,
+          "predichos": 26,
+          "recall": 0.371,
+          "precision": 0.8846,
+          "f1": 0.5227,
+          "golpes_medidos": 62,
+          "golpes_rellenados": 0,
+          "recall_medidos": 0.371,
+          "recall_rellenados": null
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 62,
+            "predichos": 232,
+            "emparejados": 27,
+            "recall": 0.4355,
+            "precision": 0.1164,
+            "f1": 0.1837
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 62,
+            "predichos": 230,
+            "emparejados": 29,
+            "recall": 0.4677,
+            "precision": 0.1261,
+            "f1": 0.1986
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 62,
+            "predichos": 236,
+            "emparejados": 33,
+            "recall": 0.5323,
+            "precision": 0.1398,
+            "f1": 0.2215
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 62,
+            "predichos": 222,
+            "emparejados": 32,
+            "recall": 0.5161,
+            "precision": 0.1441,
+            "f1": 0.2254
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 62,
+            "predichos": 218,
+            "emparejados": 34,
+            "recall": 0.5484,
+            "precision": 0.156,
+            "f1": 0.2429
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 62,
+            "predichos": 211,
+            "emparejados": 36,
+            "recall": 0.5806,
+            "precision": 0.1706,
+            "f1": 0.2637
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 62,
+            "predichos": 199,
+            "emparejados": 35,
+            "recall": 0.5645,
+            "precision": 0.1759,
+            "f1": 0.2682
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 62,
+            "predichos": 194,
+            "emparejados": 34,
+            "recall": 0.5484,
+            "precision": 0.1753,
+            "f1": 0.2656
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 62,
+            "predichos": 190,
+            "emparejados": 35,
+            "recall": 0.5645,
+            "precision": 0.1842,
+            "f1": 0.2778
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 62,
+            "predichos": 182,
+            "emparejados": 33,
+            "recall": 0.5323,
+            "precision": 0.1813,
+            "f1": 0.2705
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 62,
+            "predichos": 173,
+            "emparejados": 32,
+            "recall": 0.5161,
+            "precision": 0.185,
+            "f1": 0.2723
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 62,
+            "predichos": 166,
+            "emparejados": 32,
+            "recall": 0.5161,
+            "precision": 0.1928,
+            "f1": 0.2807
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 62,
+            "predichos": 157,
+            "emparejados": 35,
+            "recall": 0.5645,
+            "precision": 0.2229,
+            "f1": 0.3196
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 62,
+            "predichos": 143,
+            "emparejados": 33,
+            "recall": 0.5323,
+            "precision": 0.2308,
+            "f1": 0.322
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 62,
+            "predichos": 116,
+            "emparejados": 28,
+            "recall": 0.4516,
+            "precision": 0.2414,
+            "f1": 0.3146
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 62,
+            "predichos": 26,
+            "emparejados": 23,
+            "recall": 0.371,
+            "precision": 0.8846,
+            "f1": 0.5227
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 62,
+            "predichos": 17,
+            "emparejados": 15,
+            "recall": 0.2419,
+            "precision": 0.8824,
+            "f1": 0.3797
+          }
+        ],
+        "f1_medio": 0.3693,
+        "f1_desvio": 0.1528
+      },
+      {
+        "fold": "sin-03-sparring",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.65,
+            "golpes": 129,
+            "predichos": 116,
+            "recall": 0.6667,
+            "precision": 0.7414,
+            "f1": 0.702,
+            "golpes_medidos": 129,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6667,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.3,
+            "golpes": 129,
+            "predichos": 328,
+            "recall": 0.6667,
+            "precision": 0.2622,
+            "f1": 0.3764,
+            "golpes_medidos": 129,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6667,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.4,
+            "golpes": 129,
+            "predichos": 326,
+            "recall": 0.5969,
+            "precision": 0.2362,
+            "f1": 0.3385,
+            "golpes_medidos": 129,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.5969,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.55,
+            "golpes": 129,
+            "predichos": 278,
+            "recall": 0.6124,
+            "precision": 0.2842,
+            "f1": 0.3882,
+            "golpes_medidos": 129,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6124,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.55,
+            "golpes": 129,
+            "predichos": 315,
+            "recall": 0.6124,
+            "precision": 0.2508,
+            "f1": 0.3559,
+            "golpes_medidos": 129,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6124,
+            "recall_rellenados": null
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.9,
+          "golpes": 129,
+          "recall": 0.2868,
+          "precision": 0.4512,
+          "f1": 0.3507
+        },
+        "boundary_version_val": [
+          2
+        ],
+        "boundary_version_train": [
+          1,
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.85,
+          "golpes": 129,
+          "predichos": 68,
+          "recall": 0.4109,
+          "precision": 0.7794,
+          "f1": 0.5381,
+          "golpes_medidos": 129,
+          "golpes_rellenados": 0,
+          "recall_medidos": 0.4109,
+          "recall_rellenados": null
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 129,
+            "predichos": 340,
+            "emparejados": 66,
+            "recall": 0.5116,
+            "precision": 0.1941,
+            "f1": 0.2814
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 129,
+            "predichos": 336,
+            "emparejados": 74,
+            "recall": 0.5736,
+            "precision": 0.2202,
+            "f1": 0.3183
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 129,
+            "predichos": 332,
+            "emparejados": 76,
+            "recall": 0.5891,
+            "precision": 0.2289,
+            "f1": 0.3297
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 129,
+            "predichos": 330,
+            "emparejados": 77,
+            "recall": 0.5969,
+            "precision": 0.2333,
+            "f1": 0.3355
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 129,
+            "predichos": 329,
+            "emparejados": 79,
+            "recall": 0.6124,
+            "precision": 0.2401,
+            "f1": 0.345
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 129,
+            "predichos": 325,
+            "emparejados": 80,
+            "recall": 0.6202,
+            "precision": 0.2462,
+            "f1": 0.3524
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 129,
+            "predichos": 319,
+            "emparejados": 80,
+            "recall": 0.6202,
+            "precision": 0.2508,
+            "f1": 0.3571
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 129,
+            "predichos": 315,
+            "emparejados": 78,
+            "recall": 0.6047,
+            "precision": 0.2476,
+            "f1": 0.3514
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 129,
+            "predichos": 306,
+            "emparejados": 79,
+            "recall": 0.6124,
+            "precision": 0.2582,
+            "f1": 0.3632
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 129,
+            "predichos": 301,
+            "emparejados": 77,
+            "recall": 0.5969,
+            "precision": 0.2558,
+            "f1": 0.3581
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 129,
+            "predichos": 290,
+            "emparejados": 77,
+            "recall": 0.5969,
+            "precision": 0.2655,
+            "f1": 0.3675
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 129,
+            "predichos": 279,
+            "emparejados": 75,
+            "recall": 0.5814,
+            "precision": 0.2688,
+            "f1": 0.3676
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 129,
+            "predichos": 261,
+            "emparejados": 73,
+            "recall": 0.5659,
+            "precision": 0.2797,
+            "f1": 0.3744
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 129,
+            "predichos": 241,
+            "emparejados": 73,
+            "recall": 0.5659,
+            "precision": 0.3029,
+            "f1": 0.3946
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 129,
+            "predichos": 142,
+            "emparejados": 63,
+            "recall": 0.4884,
+            "precision": 0.4437,
+            "f1": 0.4649
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 129,
+            "predichos": 68,
+            "emparejados": 53,
+            "recall": 0.4109,
+            "precision": 0.7794,
+            "f1": 0.5381
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 129,
+            "predichos": 49,
+            "emparejados": 40,
+            "recall": 0.3101,
+            "precision": 0.8163,
+            "f1": 0.4494
+          }
+        ],
+        "f1_medio": 0.4322,
+        "f1_desvio": 0.136
+      },
+      {
+        "fold": "sin-04-sparring",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.6,
+            "golpes": 120,
+            "predichos": 108,
+            "recall": 0.5833,
+            "precision": 0.6481,
+            "f1": 0.614,
+            "golpes_medidos": 120,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.5833,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.4,
+            "golpes": 120,
+            "predichos": 320,
+            "recall": 0.6583,
+            "precision": 0.2469,
+            "f1": 0.3591,
+            "golpes_medidos": 120,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6583,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.15,
+            "golpes": 120,
+            "predichos": 371,
+            "recall": 0.6833,
+            "precision": 0.221,
+            "f1": 0.334,
+            "golpes_medidos": 120,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6833,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.85,
+            "golpes": 120,
+            "predichos": 69,
+            "recall": 0.2917,
+            "precision": 0.5072,
+            "f1": 0.3704,
+            "golpes_medidos": 120,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.2917,
+            "recall_rellenados": null
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.3,
+            "golpes": 120,
+            "predichos": 326,
+            "recall": 0.6083,
+            "precision": 0.2239,
+            "f1": 0.3274,
+            "golpes_medidos": 120,
+            "golpes_rellenados": 0,
+            "recall_medidos": 0.6083,
+            "recall_rellenados": null
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.7,
+          "golpes": 120,
+          "recall": 0.375,
+          "precision": 0.2394,
+          "f1": 0.2922
+        },
+        "boundary_version_val": [
+          2
+        ],
+        "boundary_version_train": [
+          1,
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.85,
+          "golpes": 120,
+          "predichos": 51,
+          "recall": 0.35,
+          "precision": 0.8235,
+          "f1": 0.4912,
+          "golpes_medidos": 120,
+          "golpes_rellenados": 0,
+          "recall_medidos": 0.35,
+          "recall_rellenados": null
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 120,
+            "predichos": 353,
+            "emparejados": 73,
+            "recall": 0.6083,
+            "precision": 0.2068,
+            "f1": 0.3087
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 120,
+            "predichos": 352,
+            "emparejados": 80,
+            "recall": 0.6667,
+            "precision": 0.2273,
+            "f1": 0.339
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 120,
+            "predichos": 342,
+            "emparejados": 81,
+            "recall": 0.675,
+            "precision": 0.2368,
+            "f1": 0.3506
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 120,
+            "predichos": 335,
+            "emparejados": 80,
+            "recall": 0.6667,
+            "precision": 0.2388,
+            "f1": 0.3516
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 120,
+            "predichos": 337,
+            "emparejados": 77,
+            "recall": 0.6417,
+            "precision": 0.2285,
+            "f1": 0.337
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 120,
+            "predichos": 329,
+            "emparejados": 77,
+            "recall": 0.6417,
+            "precision": 0.234,
+            "f1": 0.343
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 120,
+            "predichos": 328,
+            "emparejados": 79,
+            "recall": 0.6583,
+            "precision": 0.2409,
+            "f1": 0.3527
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 120,
+            "predichos": 330,
+            "emparejados": 75,
+            "recall": 0.625,
+            "precision": 0.2273,
+            "f1": 0.3333
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 120,
+            "predichos": 327,
+            "emparejados": 68,
+            "recall": 0.5667,
+            "precision": 0.208,
+            "f1": 0.3043
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 120,
+            "predichos": 327,
+            "emparejados": 68,
+            "recall": 0.5667,
+            "precision": 0.208,
+            "f1": 0.3043
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 120,
+            "predichos": 324,
+            "emparejados": 65,
+            "recall": 0.5417,
+            "precision": 0.2006,
+            "f1": 0.2928
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 120,
+            "predichos": 319,
+            "emparejados": 63,
+            "recall": 0.525,
+            "precision": 0.1975,
+            "f1": 0.287
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 120,
+            "predichos": 292,
+            "emparejados": 62,
+            "recall": 0.5167,
+            "precision": 0.2123,
+            "f1": 0.301
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 120,
+            "predichos": 259,
+            "emparejados": 56,
+            "recall": 0.4667,
+            "precision": 0.2162,
+            "f1": 0.2955
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 120,
+            "predichos": 99,
+            "emparejados": 50,
+            "recall": 0.4167,
+            "precision": 0.5051,
+            "f1": 0.4566
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 120,
+            "predichos": 51,
+            "emparejados": 42,
+            "recall": 0.35,
+            "precision": 0.8235,
+            "f1": 0.4912
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 120,
+            "predichos": 32,
+            "emparejados": 29,
+            "recall": 0.2417,
+            "precision": 0.9062,
+            "f1": 0.3816
+          }
+        ],
+        "f1_medio": 0.401,
+        "f1_desvio": 0.1077
+      },
+      {
+        "fold": "sin-Sparring",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.7,
+            "golpes": 114,
+            "predichos": 104,
+            "recall": 0.4035,
+            "precision": 0.4423,
+            "f1": 0.422,
+            "golpes_medidos": 105,
+            "golpes_rellenados": 9,
+            "recall_medidos": 0.4,
+            "recall_rellenados": 0.4444
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.55,
+            "golpes": 114,
+            "predichos": 357,
+            "recall": 0.5088,
+            "precision": 0.1625,
+            "f1": 0.2463,
+            "golpes_medidos": 105,
+            "golpes_rellenados": 9,
+            "recall_medidos": 0.4762,
+            "recall_rellenados": 0.8889
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.8,
+            "golpes": 114,
+            "predichos": 319,
+            "recall": 0.5,
+            "precision": 0.1787,
+            "f1": 0.2633,
+            "golpes_medidos": 105,
+            "golpes_rellenados": 9,
+            "recall_medidos": 0.4952,
+            "recall_rellenados": 0.5556
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.65,
+            "golpes": 114,
+            "predichos": 387,
+            "recall": 0.5263,
+            "precision": 0.155,
+            "f1": 0.2395,
+            "golpes_medidos": 105,
+            "golpes_rellenados": 9,
+            "recall_medidos": 0.5143,
+            "recall_rellenados": 0.6667
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.8,
+            "golpes": 114,
+            "predichos": 299,
+            "recall": 0.4474,
+            "precision": 0.1706,
+            "f1": 0.247,
+            "golpes_medidos": 105,
+            "golpes_rellenados": 9,
+            "recall_medidos": 0.4286,
+            "recall_rellenados": 0.6667
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.85,
+          "golpes": 114,
+          "recall": 0.3421,
+          "precision": 0.2021,
+          "f1": 0.2541
+        },
+        "boundary_version_val": [
+          1
+        ],
+        "boundary_version_train": [
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.85,
+          "golpes": 114,
+          "predichos": 99,
+          "recall": 0.2895,
+          "precision": 0.3333,
+          "f1": 0.3099,
+          "golpes_medidos": 105,
+          "golpes_rellenados": 9,
+          "recall_medidos": 0.3048,
+          "recall_rellenados": 0.1111
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 114,
+            "predichos": 263,
+            "emparejados": 20,
+            "recall": 0.1754,
+            "precision": 0.076,
+            "f1": 0.1061
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 114,
+            "predichos": 260,
+            "emparejados": 25,
+            "recall": 0.2193,
+            "precision": 0.0962,
+            "f1": 0.1337
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 114,
+            "predichos": 276,
+            "emparejados": 30,
+            "recall": 0.2632,
+            "precision": 0.1087,
+            "f1": 0.1538
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 114,
+            "predichos": 279,
+            "emparejados": 36,
+            "recall": 0.3158,
+            "precision": 0.129,
+            "f1": 0.1832
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 114,
+            "predichos": 282,
+            "emparejados": 42,
+            "recall": 0.3684,
+            "precision": 0.1489,
+            "f1": 0.2121
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 114,
+            "predichos": 291,
+            "emparejados": 46,
+            "recall": 0.4035,
+            "precision": 0.1581,
+            "f1": 0.2272
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 114,
+            "predichos": 305,
+            "emparejados": 47,
+            "recall": 0.4123,
+            "precision": 0.1541,
+            "f1": 0.2243
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 114,
+            "predichos": 313,
+            "emparejados": 50,
+            "recall": 0.4386,
+            "precision": 0.1597,
+            "f1": 0.2342
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 114,
+            "predichos": 318,
+            "emparejados": 53,
+            "recall": 0.4649,
+            "precision": 0.1667,
+            "f1": 0.2454
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 114,
+            "predichos": 324,
+            "emparejados": 55,
+            "recall": 0.4825,
+            "precision": 0.1698,
+            "f1": 0.2511
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 114,
+            "predichos": 334,
+            "emparejados": 57,
+            "recall": 0.5,
+            "precision": 0.1707,
+            "f1": 0.2545
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 114,
+            "predichos": 354,
+            "emparejados": 64,
+            "recall": 0.5614,
+            "precision": 0.1808,
+            "f1": 0.2735
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 114,
+            "predichos": 360,
+            "emparejados": 52,
+            "recall": 0.4561,
+            "precision": 0.1444,
+            "f1": 0.2194
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 114,
+            "predichos": 348,
+            "emparejados": 51,
+            "recall": 0.4474,
+            "precision": 0.1466,
+            "f1": 0.2208
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 114,
+            "predichos": 293,
+            "emparejados": 42,
+            "recall": 0.3684,
+            "precision": 0.1433,
+            "f1": 0.2064
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 114,
+            "predichos": 99,
+            "emparejados": 33,
+            "recall": 0.2895,
+            "precision": 0.3333,
+            "f1": 0.3099
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 114,
+            "predichos": 35,
+            "emparejados": 21,
+            "recall": 0.1842,
+            "precision": 0.6,
+            "f1": 0.2819
+          }
+        ],
+        "f1_medio": 0.2836,
+        "f1_desvio": 0.0696
+      },
+      {
+        "fold": "sin-pacquiao_margarito",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.6,
+            "golpes": 145,
+            "predichos": 120,
+            "recall": 0.6207,
+            "precision": 0.75,
+            "f1": 0.6792,
+            "golpes_medidos": 138,
+            "golpes_rellenados": 7,
+            "recall_medidos": 0.6232,
+            "recall_rellenados": 0.5714
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.8,
+            "golpes": 145,
+            "predichos": 343,
+            "recall": 0.5724,
+            "precision": 0.242,
+            "f1": 0.3402,
+            "golpes_medidos": 138,
+            "golpes_rellenados": 7,
+            "recall_medidos": 0.5652,
+            "recall_rellenados": 0.7143
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.75,
+            "golpes": 145,
+            "predichos": 350,
+            "recall": 0.5448,
+            "precision": 0.2257,
+            "f1": 0.3192,
+            "golpes_medidos": 138,
+            "golpes_rellenados": 7,
+            "recall_medidos": 0.5435,
+            "recall_rellenados": 0.5714
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.9,
+            "golpes": 145,
+            "predichos": 71,
+            "recall": 0.3034,
+            "precision": 0.6197,
+            "f1": 0.4074,
+            "golpes_medidos": 138,
+            "golpes_rellenados": 7,
+            "recall_medidos": 0.3043,
+            "recall_rellenados": 0.2857
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.8,
+            "golpes": 145,
+            "predichos": 347,
+            "recall": 0.5586,
+            "precision": 0.2334,
+            "f1": 0.3293,
+            "golpes_medidos": 138,
+            "golpes_rellenados": 7,
+            "recall_medidos": 0.558,
+            "recall_rellenados": 0.5714
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.7,
+          "golpes": 145,
+          "recall": 0.3655,
+          "precision": 0.3155,
+          "f1": 0.3387
+        },
+        "boundary_version_val": [
+          2
+        ],
+        "boundary_version_train": [
+          1,
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.85,
+          "golpes": 145,
+          "predichos": 84,
+          "recall": 0.4621,
+          "precision": 0.7976,
+          "f1": 0.5852,
+          "golpes_medidos": 138,
+          "golpes_rellenados": 7,
+          "recall_medidos": 0.4638,
+          "recall_rellenados": 0.4286
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 145,
+            "predichos": 340,
+            "emparejados": 57,
+            "recall": 0.3931,
+            "precision": 0.1676,
+            "f1": 0.2351
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 145,
+            "predichos": 344,
+            "emparejados": 63,
+            "recall": 0.4345,
+            "precision": 0.1831,
+            "f1": 0.2577
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 145,
+            "predichos": 361,
+            "emparejados": 72,
+            "recall": 0.4966,
+            "precision": 0.1994,
+            "f1": 0.2846
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 145,
+            "predichos": 362,
+            "emparejados": 73,
+            "recall": 0.5034,
+            "precision": 0.2017,
+            "f1": 0.288
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 145,
+            "predichos": 364,
+            "emparejados": 78,
+            "recall": 0.5379,
+            "precision": 0.2143,
+            "f1": 0.3065
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 145,
+            "predichos": 360,
+            "emparejados": 79,
+            "recall": 0.5448,
+            "precision": 0.2194,
+            "f1": 0.3129
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 145,
+            "predichos": 355,
+            "emparejados": 76,
+            "recall": 0.5241,
+            "precision": 0.2141,
+            "f1": 0.304
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 145,
+            "predichos": 347,
+            "emparejados": 77,
+            "recall": 0.531,
+            "precision": 0.2219,
+            "f1": 0.313
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 145,
+            "predichos": 347,
+            "emparejados": 81,
+            "recall": 0.5586,
+            "precision": 0.2334,
+            "f1": 0.3293
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 145,
+            "predichos": 348,
+            "emparejados": 86,
+            "recall": 0.5931,
+            "precision": 0.2471,
+            "f1": 0.3489
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 145,
+            "predichos": 345,
+            "emparejados": 88,
+            "recall": 0.6069,
+            "precision": 0.2551,
+            "f1": 0.3592
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 145,
+            "predichos": 342,
+            "emparejados": 90,
+            "recall": 0.6207,
+            "precision": 0.2632,
+            "f1": 0.3696
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 145,
+            "predichos": 336,
+            "emparejados": 90,
+            "recall": 0.6207,
+            "precision": 0.2679,
+            "f1": 0.3742
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 145,
+            "predichos": 286,
+            "emparejados": 84,
+            "recall": 0.5793,
+            "precision": 0.2937,
+            "f1": 0.3898
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 145,
+            "predichos": 191,
+            "emparejados": 79,
+            "recall": 0.5448,
+            "precision": 0.4136,
+            "f1": 0.4702
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 145,
+            "predichos": 84,
+            "emparejados": 67,
+            "recall": 0.4621,
+            "precision": 0.7976,
+            "f1": 0.5852
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 145,
+            "predichos": 53,
+            "emparejados": 47,
+            "recall": 0.3241,
+            "precision": 0.8868,
+            "f1": 0.4747
+          }
+        ],
+        "f1_medio": 0.4151,
+        "f1_desvio": 0.1356
+      },
+      {
+        "fold": "sin-sparring-3-rounds",
+        "corridas": [
+          {
+            "semilla": 42,
+            "umbral": 0.5,
+            "golpes": 380,
+            "predichos": 338,
+            "recall": 0.6526,
+            "precision": 0.7337,
+            "f1": 0.6908,
+            "golpes_medidos": 373,
+            "golpes_rellenados": 7,
+            "recall_medidos": 0.6595,
+            "recall_rellenados": 0.2857
+          },
+          {
+            "semilla": 1,
+            "umbral": 0.7,
+            "golpes": 380,
+            "predichos": 925,
+            "recall": 0.6053,
+            "precision": 0.2486,
+            "f1": 0.3525,
+            "golpes_medidos": 373,
+            "golpes_rellenados": 7,
+            "recall_medidos": 0.6139,
+            "recall_rellenados": 0.1429
+          },
+          {
+            "semilla": 2,
+            "umbral": 0.65,
+            "golpes": 380,
+            "predichos": 968,
+            "recall": 0.6132,
+            "precision": 0.2407,
+            "f1": 0.3457,
+            "golpes_medidos": 373,
+            "golpes_rellenados": 7,
+            "recall_medidos": 0.6193,
+            "recall_rellenados": 0.2857
+          },
+          {
+            "semilla": 3,
+            "umbral": 0.55,
+            "golpes": 380,
+            "predichos": 879,
+            "recall": 0.6026,
+            "precision": 0.2605,
+            "f1": 0.3638,
+            "golpes_medidos": 373,
+            "golpes_rellenados": 7,
+            "recall_medidos": 0.6113,
+            "recall_rellenados": 0.1429
+          },
+          {
+            "semilla": 4,
+            "umbral": 0.65,
+            "golpes": 380,
+            "predichos": 922,
+            "recall": 0.5763,
+            "precision": 0.2375,
+            "f1": 0.3364,
+            "golpes_medidos": 373,
+            "golpes_rellenados": 7,
+            "recall_medidos": 0.5818,
+            "recall_rellenados": 0.2857
+          }
+        ],
+        "heuristica": {
+          "umbral": 0.85,
+          "golpes": 380,
+          "recall": 0.2816,
+          "precision": 0.3768,
+          "f1": 0.3223
+        },
+        "boundary_version_val": [
+          2
+        ],
+        "boundary_version_train": [
+          1,
+          2
+        ],
+        "ensamble": {
+          "umbral": 0.85,
+          "golpes": 380,
+          "predichos": 163,
+          "recall": 0.3816,
+          "precision": 0.8896,
+          "f1": 0.5341,
+          "golpes_medidos": 373,
+          "golpes_rellenados": 7,
+          "recall_medidos": 0.3861,
+          "recall_rellenados": 0.1429
+        },
+        "ensamble_curva": [
+          {
+            "umbral": 0.1,
+            "golpes": 380,
+            "predichos": 933,
+            "emparejados": 138,
+            "recall": 0.3632,
+            "precision": 0.1479,
+            "f1": 0.2102
+          },
+          {
+            "umbral": 0.15,
+            "golpes": 380,
+            "predichos": 937,
+            "emparejados": 160,
+            "recall": 0.4211,
+            "precision": 0.1708,
+            "f1": 0.243
+          },
+          {
+            "umbral": 0.2,
+            "golpes": 380,
+            "predichos": 947,
+            "emparejados": 184,
+            "recall": 0.4842,
+            "precision": 0.1943,
+            "f1": 0.2773
+          },
+          {
+            "umbral": 0.25,
+            "golpes": 380,
+            "predichos": 952,
+            "emparejados": 193,
+            "recall": 0.5079,
+            "precision": 0.2027,
+            "f1": 0.2898
+          },
+          {
+            "umbral": 0.3,
+            "golpes": 380,
+            "predichos": 946,
+            "emparejados": 201,
+            "recall": 0.5289,
+            "precision": 0.2125,
+            "f1": 0.3032
+          },
+          {
+            "umbral": 0.35,
+            "golpes": 380,
+            "predichos": 940,
+            "emparejados": 211,
+            "recall": 0.5553,
+            "precision": 0.2245,
+            "f1": 0.3197
+          },
+          {
+            "umbral": 0.4,
+            "golpes": 380,
+            "predichos": 940,
+            "emparejados": 222,
+            "recall": 0.5842,
+            "precision": 0.2362,
+            "f1": 0.3364
+          },
+          {
+            "umbral": 0.45,
+            "golpes": 380,
+            "predichos": 948,
+            "emparejados": 234,
+            "recall": 0.6158,
+            "precision": 0.2468,
+            "f1": 0.3524
+          },
+          {
+            "umbral": 0.5,
+            "golpes": 380,
+            "predichos": 940,
+            "emparejados": 239,
+            "recall": 0.6289,
+            "precision": 0.2543,
+            "f1": 0.3621
+          },
+          {
+            "umbral": 0.55,
+            "golpes": 380,
+            "predichos": 926,
+            "emparejados": 238,
+            "recall": 0.6263,
+            "precision": 0.257,
+            "f1": 0.3645
+          },
+          {
+            "umbral": 0.6,
+            "golpes": 380,
+            "predichos": 922,
+            "emparejados": 236,
+            "recall": 0.6211,
+            "precision": 0.256,
+            "f1": 0.3625
+          },
+          {
+            "umbral": 0.65,
+            "golpes": 380,
+            "predichos": 880,
+            "emparejados": 226,
+            "recall": 0.5947,
+            "precision": 0.2568,
+            "f1": 0.3587
+          },
+          {
+            "umbral": 0.7,
+            "golpes": 380,
+            "predichos": 835,
+            "emparejados": 215,
+            "recall": 0.5658,
+            "precision": 0.2575,
+            "f1": 0.3539
+          },
+          {
+            "umbral": 0.75,
+            "golpes": 380,
+            "predichos": 724,
+            "emparejados": 191,
+            "recall": 0.5026,
+            "precision": 0.2638,
+            "f1": 0.346
+          },
+          {
+            "umbral": 0.8,
+            "golpes": 380,
+            "predichos": 441,
+            "emparejados": 178,
+            "recall": 0.4684,
+            "precision": 0.4036,
+            "f1": 0.4336
+          },
+          {
+            "umbral": 0.85,
+            "golpes": 380,
+            "predichos": 163,
+            "emparejados": 145,
+            "recall": 0.3816,
+            "precision": 0.8896,
+            "f1": 0.5341
+          },
+          {
+            "umbral": 0.9,
+            "golpes": 380,
+            "predichos": 114,
+            "emparejados": 105,
+            "recall": 0.2763,
+            "precision": 0.9211,
+            "f1": 0.4251
+          }
+        ],
+        "f1_medio": 0.4178,
+        "f1_desvio": 0.1368
+      }
+    ]
+  },
+  "P12a": {
+    "veredicto": "no demostrada",
+    "diferencia": -0.18933333333333324,
+    "folds_ganados": 0,
+    "folds": 6,
+    "folds_min": 5,
+    "ganados": [],
+    "desvio_familia_max": null,
+    "base": {
+      "folds": [
+        "sin-01-sparring",
+        "sin-02-sparring",
+        "sin-03-sparring",
+        "sin-04-sparring",
+        "sin-pacquiao_margarito",
+        "sin-sparring-3-rounds"
+      ],
+      "f1_080": 0.6226666666666666,
+      "f1_080_por_fold": {
+        "sin-01-sparring": 0.6667,
+        "sin-02-sparring": 0.6,
+        "sin-03-sparring": 0.6275,
+        "sin-04-sparring": 0.5889,
+        "sin-pacquiao_margarito": 0.6204,
+        "sin-sparring-3-rounds": 0.6325
+      },
+      "recall_080": 0.48711666666666664,
+      "precision_080": 0.8689166666666667,
+      "curva": {
+        "0.7": 0.5782,
+        "0.75": 0.6186833333333334,
+        "0.8": 0.6226666666666666,
+        "0.85": 0.5795,
+        "0.9": 0.4683833333333333
+      },
+      "f1_mejor_umbral": 0.6374833333333333,
+      "recall_medidos_mejor_umbral": [
+        0.5521,
+        0.4839,
+        0.5659,
+        0.475,
+        0.5538,
+        0.6043
+      ],
+      "recall_rellenados_mejor_umbral": [
+        null,
+        null,
+        null,
+        null,
+        0.1333,
+        0.0909
+      ],
+      "una_semilla": {
+        "media": 0.5450933333333333,
+        "desvio": 0.11559546863011583
+      },
+      "no_comparables": [
+        "sin-Sparring"
+      ]
+    },
+    "y26": {
+      "folds": [
+        "sin-01-sparring",
+        "sin-02-sparring",
+        "sin-03-sparring",
+        "sin-04-sparring",
+        "sin-pacquiao_margarito",
+        "sin-sparring-3-rounds"
+      ],
+      "f1_080": 0.43333333333333335,
+      "f1_080_por_fold": {
+        "sin-01-sparring": 0.4601,
+        "sin-02-sparring": 0.3146,
+        "sin-03-sparring": 0.4649,
+        "sin-04-sparring": 0.4566,
+        "sin-pacquiao_margarito": 0.4702,
+        "sin-sparring-3-rounds": 0.4336
+      },
+      "recall_080": 0.48005,
+      "precision_080": 0.40436666666666665,
+      "curva": {
+        "0.7": 0.3473,
+        "0.75": 0.35481666666666667,
+        "0.8": 0.43333333333333335,
+        "0.85": 0.5285500000000001,
+        "0.9": 0.42523333333333335
+      },
+      "f1_mejor_umbral": 0.5285500000000001,
+      "recall_medidos_mejor_umbral": [
+        0.3542,
+        0.371,
+        0.4109,
+        0.35,
+        0.4638,
+        0.3861
+      ],
+      "recall_rellenados_mejor_umbral": [
+        null,
+        null,
+        null,
+        null,
+        0.4286,
+        0.1429
+      ],
+      "una_semilla": {
+        "media": 0.41412333333333334,
+        "desvio": 0.13938527029321512
+      },
+      "no_comparables": [
+        "sin-Sparring"
+      ]
+    }
+  }
+}

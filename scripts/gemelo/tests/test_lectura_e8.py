@@ -120,3 +120,19 @@ def test_json_de_e4_con_la_estructura_de_la_decision_11(gemelo):
     import lectura_e8 as le
     d = le.json_e4({"E4": _e4(0.7, {}), "E4a": _e4(0.69, {})}, {"E4": _e4(0.72, {}), "E4a": _e4(0.71, {})})
     assert set(d) >= {"base", "y26"} and d["y26"]["E4a"]["ensamble_total"]["familia"]["exactitud"] == 0.71
+
+
+def test_main_escribe_veredictos_con_lo_que_haya(gemelo, tmp_path):
+    """El 29-10 main() fallo por un import que las pruebas de las reglas no tocaban."""
+    import json
+    import lectura_e8 as le
+    e8 = gemelo / "e8"
+    for c, f1s in (("base", [0.625] * 6), ("y26", [0.55] * 6)):    # base: K2 pasa (0,635)
+        (e8 / c).mkdir(parents=True)
+        (e8 / c / "folds.json").write_text(json.dumps(_detector(f1s)))
+    datos = tmp_path / "datos"
+    assert le.main(["--fecha", "2026-10-29", "--e8", str(e8), "--datos", str(datos),
+                    "--raices", str(gemelo / "raiz-y26"), str(gemelo / "raiz-v8")]) == 0
+    v = json.loads((e8 / "veredictos.json").read_text())
+    assert v["P12a"]["veredicto"] == "no demostrada"
+    assert (datos / "2026-10-29-e8-yolo26-detector.json").is_file()

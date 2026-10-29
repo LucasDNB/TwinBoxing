@@ -1,0 +1,573 @@
+{
+  "fuentes": {
+    "Sparring": {
+      "denominador": {
+        "A": 4273,
+        "B": 4223
+      },
+      "fps": 29.643,
+      "base": {
+        "A": {
+          "cuadros": 4273,
+          "cambios": 12,
+          "cambios_por_minuto": 4.994842031359701,
+          "tracks_distintos": 13
+        },
+        "B": {
+          "cuadros": 4223,
+          "cambios": 12,
+          "cambios_por_minuto": 5.053980582524272,
+          "tracks_distintos": 11
+        },
+        "tracks_mixtos": 5,
+        "cuadros_en_tracks_mixtos": 4800
+      },
+      "y26": {
+        "A": {
+          "cuadros": 4273,
+          "cambios": 10,
+          "cambios_por_minuto": 4.162368359466417,
+          "tracks_distintos": 11
+        },
+        "B": {
+          "cuadros": 4223,
+          "cambios": 11,
+          "cambios_por_minuto": 4.632815533980582,
+          "tracks_distintos": 11
+        },
+        "tracks_mixtos": 6,
+        "cuadros_en_tracks_mixtos": 4297
+      },
+      "diferencia": {
+        "A_cambios": -2,
+        "B_cambios": -1,
+        "A_tracks_distintos": -2,
+        "B_tracks_distintos": 0,
+        "tracks_mixtos": 1,
+        "cuadros_en_tracks_mixtos": -503
+      },
+      "cuadros_con_verdad": {
+        "A": 4890,
+        "B": 4781
+      },
+      "emparejados": {
+        "base": {
+          "A": 4890,
+          "B": 4781
+        },
+        "y26": {
+          "A": 4273,
+          "B": 4223
+        }
+      },
+      "conflictos": {
+        "base": 0,
+        "y26": 22
+      },
+      "tracks_totales": {
+        "base": 40,
+        "y26": 27
+      },
+      "k3": {
+        "base": 0.8276247645951036,
+        "y26": 0.6749646892655368,
+        "diferencia": -0.15266007532956682,
+        "munecas": 16992
+      }
+    },
+    "01-sparring": {
+      "denominador": {
+        "A": 4818,
+        "B": 4931
+      },
+      "fps": 30.0,
+      "base": {
+        "A": {
+          "cuadros": 4818,
+          "cambios": 11,
+          "cambios_por_minuto": 4.10958904109589,
+          "tracks_distintos": 12
+        },
+        "B": {
+          "cuadros": 4931,
+          "cambios": 9,
+          "cambios_por_minuto": 3.285337659703914,
+          "tracks_distintos": 10
+        },
+        "tracks_mixtos": 0,
+        "cuadros_en_tracks_mixtos": 0
+      },
+      "y26": {
+        "A": {
+          "cuadros": 4818,
+          "cambios": 18,
+          "cambios_por_minuto": 6.724782067247821,
+          "tracks_distintos": 16
+        },
+        "B": {
+          "cuadros": 4931,
+          "cambios": 10,
+          "cambios_por_minuto": 3.6503751774487934,
+          "tracks_distintos": 11
+        },
+        "tracks_mixtos": 1,
+        "cuadros_en_tracks_mixtos": 814
+      },
+      "diferencia": {
+        "A_cambios": 7,
+        "B_cambios": 1,
+        "A_tracks_distintos": 4,
+        "B_tracks_distintos": 1,
+        "tracks_mixtos": 1,
+        "cuadros_en_tracks_mixtos": 814
+      },
+      "cuadros_con_verdad": {
+        "A": 4926,
+        "B": 4973
+      },
+      "emparejados": {
+        "base": {
+          "A": 4926,
+          "B": 4973
+        },
+        "y26": {
+          "A": 4818,
+          "B": 4931
+        }
+      },
+      "conflictos": {
+        "base": 0,
+        "y26": 7
+      },
+      "tracks_totales": {
+        "base": 172,
+        "y26": 142
+      },
+      "k3": {
+        "base": 0.9080418504461996,
+        "y26": 0.7903374705097959,
+        "diferencia": -0.1177043799364037,
+        "munecas": 19498
+      }
+    },
+    "02-sparring": {
+      "denominador": {
+        "A": 4973,
+        "B": 4740
+      },
+      "fps": 30.0,
+      "base": {
+        "A": {
+          "cuadros": 4973,
+          "cambios": 5,
+          "cambios_por_minuto": 1.8097727729740598,
+          "tracks_distintos": 6
+        },
+        "B": {
+          "cuadros": 4740,
+          "cambios": 23,
+          "cambios_por_minuto": 8.734177215189874,
+          "tracks_distintos": 13
+        },
+        "tracks_mixtos": 0,
+        "cuadros_en_tracks_mixtos": 0
+      },
+      "y26": {
+        "A": {
+          "cuadros": 4973,
+          "cambios": 4,
+          "cambios_por_minuto": 1.4478182183792478,
+          "tracks_distintos": 5
+        },
+        "B": {
+          "cuadros": 4740,
+          "cambios": 25,
+          "cambios_por_minuto": 9.49367088607595,
+          "tracks_distintos": 14
+        },
+        "tracks_mixtos": 1,
+        "cuadros_en_tracks_mixtos": 1174
+      },
+      "diferencia": {
+        "A_cambios": -1,
+        "B_cambios": 2,
+        "A_tracks_distintos": -1,
+        "B_tracks_distintos": 1,
+        "tracks_mixtos": 1,
+        "cuadros_en_tracks_mixtos": 1174
+      },
+      "cuadros_con_verdad": {
+        "A": 5016,
+        "B": 4815
+      },
+      "emparejados": {
+        "base": {
+          "A": 5016,
+          "B": 4815
+        },
+        "y26": {
+          "A": 4973,
+          "B": 4740
+        }
+      },
+      "conflictos": {
+        "base": 0,
+        "y26": 1
+      },
+      "tracks_totales": {
+        "base": 415,
+        "y26": 363
+      },
+      "k3": {
+        "base": 0.9303510758776897,
+        "y26": 0.8075259960877175,
+        "diferencia": -0.12282507978997226,
+        "munecas": 19426
+      }
+    },
+    "03-sparring": {
+      "denominador": {
+        "A": 4694,
+        "B": 4613
+      },
+      "fps": 30.0,
+      "base": {
+        "A": {
+          "cuadros": 4694,
+          "cambios": 19,
+          "cambios_por_minuto": 7.285896889646357,
+          "tracks_distintos": 19
+        },
+        "B": {
+          "cuadros": 4613,
+          "cambios": 17,
+          "cambios_por_minuto": 6.633427270756558,
+          "tracks_distintos": 17
+        },
+        "tracks_mixtos": 5,
+        "cuadros_en_tracks_mixtos": 3311
+      },
+      "y26": {
+        "A": {
+          "cuadros": 4694,
+          "cambios": 20,
+          "cambios_por_minuto": 7.6693651469961654,
+          "tracks_distintos": 19
+        },
+        "B": {
+          "cuadros": 4613,
+          "cambios": 18,
+          "cambios_por_minuto": 7.023628874918708,
+          "tracks_distintos": 18
+        },
+        "tracks_mixtos": 6,
+        "cuadros_en_tracks_mixtos": 5214
+      },
+      "diferencia": {
+        "A_cambios": 1,
+        "B_cambios": 1,
+        "A_tracks_distintos": 0,
+        "B_tracks_distintos": 1,
+        "tracks_mixtos": 1,
+        "cuadros_en_tracks_mixtos": 1903
+      },
+      "cuadros_con_verdad": {
+        "A": 4889,
+        "B": 4827
+      },
+      "emparejados": {
+        "base": {
+          "A": 4888,
+          "B": 4827
+        },
+        "y26": {
+          "A": 4694,
+          "B": 4613
+        }
+      },
+      "conflictos": {
+        "base": 0,
+        "y26": 48
+      },
+      "tracks_totales": {
+        "base": 474,
+        "y26": 404
+      },
+      "k3": {
+        "base": 0.9113570430858493,
+        "y26": 0.755990114967229,
+        "diferencia": -0.1553669281186203,
+        "munecas": 18614
+      }
+    },
+    "04-sparring": {
+      "denominador": {
+        "A": 4990,
+        "B": 5215
+      },
+      "fps": 30.0,
+      "base": {
+        "A": {
+          "cuadros": 4990,
+          "cambios": 20,
+          "cambios_por_minuto": 7.21442885771543,
+          "tracks_distintos": 18
+        },
+        "B": {
+          "cuadros": 5215,
+          "cambios": 6,
+          "cambios_por_minuto": 2.0709491850431445,
+          "tracks_distintos": 7
+        },
+        "tracks_mixtos": 1,
+        "cuadros_en_tracks_mixtos": 301
+      },
+      "y26": {
+        "A": {
+          "cuadros": 4990,
+          "cambios": 17,
+          "cambios_por_minuto": 6.132264529058116,
+          "tracks_distintos": 16
+        },
+        "B": {
+          "cuadros": 5215,
+          "cambios": 6,
+          "cambios_por_minuto": 2.0709491850431445,
+          "tracks_distintos": 7
+        },
+        "tracks_mixtos": 3,
+        "cuadros_en_tracks_mixtos": 5945
+      },
+      "diferencia": {
+        "A_cambios": -3,
+        "B_cambios": 0,
+        "A_tracks_distintos": -2,
+        "B_tracks_distintos": 0,
+        "tracks_mixtos": 2,
+        "cuadros_en_tracks_mixtos": 5644
+      },
+      "cuadros_con_verdad": {
+        "A": 5177,
+        "B": 5304
+      },
+      "emparejados": {
+        "base": {
+          "A": 5177,
+          "B": 5304
+        },
+        "y26": {
+          "A": 4990,
+          "B": 5215
+        }
+      },
+      "conflictos": {
+        "base": 0,
+        "y26": 31
+      },
+      "tracks_totales": {
+        "base": 366,
+        "y26": 282
+      },
+      "k3": {
+        "base": 0.906859382655561,
+        "y26": 0.7060264576188143,
+        "diferencia": -0.20083292503674666,
+        "munecas": 20410
+      }
+    },
+    "sparring-3-rounds": {
+      "denominador": {
+        "A": 15760,
+        "B": 15988
+      },
+      "fps": 30.0,
+      "base": {
+        "A": {
+          "cuadros": 15760,
+          "cambios": 48,
+          "cambios_por_minuto": 5.482233502538071,
+          "tracks_distintos": 33
+        },
+        "B": {
+          "cuadros": 15988,
+          "cambios": 37,
+          "cambios_por_minuto": 4.165624218163623,
+          "tracks_distintos": 35
+        },
+        "tracks_mixtos": 8,
+        "cuadros_en_tracks_mixtos": 9979
+      },
+      "y26": {
+        "A": {
+          "cuadros": 15760,
+          "cambios": 31,
+          "cambios_por_minuto": 3.5406091370558372,
+          "tracks_distintos": 27
+        },
+        "B": {
+          "cuadros": 15988,
+          "cambios": 31,
+          "cambios_por_minuto": 3.4901175881911435,
+          "tracks_distintos": 27
+        },
+        "tracks_mixtos": 6,
+        "cuadros_en_tracks_mixtos": 9759
+      },
+      "diferencia": {
+        "A_cambios": -17,
+        "B_cambios": -6,
+        "A_tracks_distintos": -6,
+        "B_tracks_distintos": -8,
+        "tracks_mixtos": -2,
+        "cuadros_en_tracks_mixtos": -220
+      },
+      "cuadros_con_verdad": {
+        "A": 16469,
+        "B": 16513
+      },
+      "emparejados": {
+        "base": {
+          "A": 16464,
+          "B": 16512
+        },
+        "y26": {
+          "A": 15765,
+          "B": 15988
+        }
+      },
+      "conflictos": {
+        "base": 1,
+        "y26": 50
+      },
+      "tracks_totales": {
+        "base": 251,
+        "y26": 193
+      },
+      "k3": {
+        "base": 0.8897725840997858,
+        "y26": 0.7460627441098652,
+        "diferencia": -0.1437098399899206,
+        "munecas": 63496
+      }
+    },
+    "pacquiao_margarito": {
+      "denominador": {
+        "A": 9436,
+        "B": 9868
+      },
+      "fps": 59.94005994005994,
+      "base": {
+        "A": {
+          "cuadros": 9436,
+          "cambios": 60,
+          "cambios_por_minuto": 22.868187344660424,
+          "tracks_distintos": 39
+        },
+        "B": {
+          "cuadros": 9868,
+          "cambios": 47,
+          "cambios_por_minuto": 17.129202374439505,
+          "tracks_distintos": 35
+        },
+        "tracks_mixtos": 4,
+        "cuadros_en_tracks_mixtos": 2708
+      },
+      "y26": {
+        "A": {
+          "cuadros": 9436,
+          "cambios": 57,
+          "cambios_por_minuto": 21.724777977427404,
+          "tracks_distintos": 39
+        },
+        "B": {
+          "cuadros": 9868,
+          "cambios": 48,
+          "cambios_por_minuto": 17.49365348878928,
+          "tracks_distintos": 40
+        },
+        "tracks_mixtos": 6,
+        "cuadros_en_tracks_mixtos": 2751
+      },
+      "diferencia": {
+        "A_cambios": -3,
+        "B_cambios": 1,
+        "A_tracks_distintos": 0,
+        "B_tracks_distintos": 5,
+        "tracks_mixtos": 2,
+        "cuadros_en_tracks_mixtos": 43
+      },
+      "cuadros_con_verdad": {
+        "A": 10126,
+        "B": 10251
+      },
+      "emparejados": {
+        "base": {
+          "A": 10121,
+          "B": 10251
+        },
+        "y26": {
+          "A": 9441,
+          "B": 9868
+        }
+      },
+      "conflictos": {
+        "base": 0,
+        "y26": 11
+      },
+      "tracks_totales": {
+        "base": 10956,
+        "y26": 6032
+      },
+      "k3": {
+        "base": 0.9019633236634894,
+        "y26": 0.7624585578118525,
+        "diferencia": -0.13950476585163696,
+        "munecas": 38608
+      }
+    }
+  },
+  "total": {
+    "denominador": {
+      "A": 48944,
+      "B": 49578
+    },
+    "k3": {
+      "base": 0.8964190739124257,
+      "y26": 0.7503755506384361,
+      "diferencia": -0.14604352327398962,
+      "munecas": 197044
+    },
+    "base": {
+      "A": {
+        "cuadros": 48944,
+        "cambios": 175,
+        "cambios_por_minuto": 7.113471073354221,
+        "tracks_distintos": 140
+      },
+      "B": {
+        "cuadros": 49578,
+        "cambios": 151,
+        "cambios_por_minuto": 6.080565081797597,
+        "tracks_distintos": 128
+      },
+      "tracks_mixtos": 23,
+      "cuadros_en_tracks_mixtos": 21099
+    },
+    "y26": {
+      "A": {
+        "cuadros": 48944,
+        "cambios": 157,
+        "cambios_por_minuto": 6.381799762952073,
+        "tracks_distintos": 133
+      },
+      "B": {
+        "cuadros": 49578,
+        "cambios": 149,
+        "cambios_por_minuto": 6.000027795945973,
+        "tracks_distintos": 128
+      },
+      "tracks_mixtos": 29,
+      "cuadros_en_tracks_mixtos": 29954
+    }
+  }
+}

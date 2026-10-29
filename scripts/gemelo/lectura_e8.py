@@ -35,6 +35,7 @@ from pathlib import Path
 AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
 sys.path.insert(0, str(AQUI.parent / "clasificador_geo"))
+sys.path.append(str(AQUI.parent / "clasificador"))   # comun; al final: tiene otro evaluar.py
 import guardas  # noqa: E402
 
 UMBRAL_P12A = 0.80
