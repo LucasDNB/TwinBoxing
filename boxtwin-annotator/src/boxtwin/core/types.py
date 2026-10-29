@@ -161,6 +161,9 @@ class AssignmentOp(str, Enum):
     RESEED = "reseed"
     SPLIT = "split"
     INTERPOLATION = "interpolation"
+    # Gemelo YOLO26 (27-10): asignacion pasada de un cache de v8 a uno de YOLO26 por IoU,
+    # sin intervencion humana (scripts/gemelo/puente_identidad.py).
+    PUENTE = "puente"
 
 
 class InterpolationMethod(str, Enum):
