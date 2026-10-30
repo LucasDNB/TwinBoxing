@@ -57,7 +57,8 @@ def largos(sc: np.ndarray, presente: np.ndarray, umbrales: dict) -> dict:
 
 
 def resumen(l: dict, fps: float) -> dict:
-    tope = int(np.floor(TOPE_S * fps + 1e-9))
+    from boxtwin_detector.relleno import maximo_cuadros
+    tope = maximo_cuadros(fps, TOPE_S)
     salida = {}
     for nombre in ARTICULACIONES:
         ls = np.asarray(l[nombre], np.float64)

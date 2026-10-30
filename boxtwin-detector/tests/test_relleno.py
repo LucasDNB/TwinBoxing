@@ -36,11 +36,22 @@ def test_tope_de_0_10_s(fps, largo, se_rellena):
         assert np.array_equal(sc2, sc) and np.array_equal(kp2, kp)
 
 
-def test_el_tope_se_redondea_hacia_abajo():
+def test_el_tope_va_al_entero_mas_cercano():
+    # decision 9: 3 cuadros a 29,97 y 6 a 59,94, como 30 y 60; hacia abajo daban 2 y 5
     assert maximo_cuadros(30, 0.10) == 3
     assert maximo_cuadros(60, 0.10) == 6
-    assert maximo_cuadros(29.97, 0.10) == 2
+    assert maximo_cuadros(29.97, 0.10) == 3
+    assert maximo_cuadros(59.94, 0.10) == 6
     assert maximo_cuadros(30, 0.20) == 6
+
+
+@pytest.mark.parametrize("fps,largo,se_rellena", [(29.97, 3, True), (29.97, 4, False),
+                                                   (59.94, 6, True), (59.94, 7, False)])
+def test_tope_a_29_97_y_59_94(fps, largo, se_rellena):
+    kp, sc = serie()
+    hueco(sc, 10, largo)
+    _, _, r = rellenar(kp, sc, U, fps)
+    assert r.any() == se_rellena
 
 
 def test_interpolacion_lineal_entre_los_extremos():

@@ -19,7 +19,8 @@ QUE HACE
   1. Un hueco es una corrida de cuadros con score bajo el umbral de esa articulacion, con un
      cuadro aceptado justo antes y otro justo despues, y con la deteccion del peleador
      presente en todos (los extremos incluidos).
-  2. Si dura a lo sumo floor(0,10 s * fps) cuadros, las coordenadas se interpolan
+  2. Si dura a lo sumo round(0,10 s * fps) cuadros (3 a 30 y a 29,97 fps, 6 a 60 y a 59,94),
+     las coordenadas se interpolan
      linealmente entre los extremos y el score queda en el umbral, o sea aceptado.
   3. Huecos mas largos o abiertos quedan como estaban.
   4. Las coordenadas medidas no se tocan nunca: solo cambian los cuadros del hueco, y se
@@ -47,9 +48,13 @@ INDICES = {"nariz": (0,), "hombro": (5, 6), "codo": (7, 8), "muneca": (9, 10), "
 
 
 def maximo_cuadros(fps: float, max_s: float = MAX_S) -> int:
-    """El largo maximo de un hueco rellenable, redondeado hacia abajo (3 a 30 fps, 6 a 60)."""
-    # el 1e-9 es para que 0,1 * 30 = 3,0000000000000004 no dependa del redondeo de punto flotante
-    return int(np.floor(max_s * fps + 1e-9))
+    """
+    El largo maximo de un hueco rellenable, al entero mas cercano (3 a 30 fps, 6 a 60).
+
+    No hacia abajo, como decia E10 §2: 0,10 s a 29,97 fps son 2,997 cuadros y daban 2, y a
+    59,94 daban 5, cuando el tope se penso como 3 y 6 (decision 9 de 10-pasos.md).
+    """
+    return int(round(max_s * fps))
 
 
 def _corridas(x: np.ndarray) -> list[tuple[int, int]]:
