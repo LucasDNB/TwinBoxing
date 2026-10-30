@@ -154,3 +154,143 @@ def test_un_solo_cuadro_no_rompe_las_derivadas():
     f, ok = features_de(kp, sc, "left")
     assert f.shape == (1, N_FEATURES)
     assert np.isfinite(f).all()
+
+
+# -- T1 (mejoras post-E8, E8b): umbrales por articulacion -----------------------------------
+
+from pathlib import Path  # noqa: E402
+
+from boxtwin_detector.features import ARTICULACIONES, resolver_umbrales  # noqa: E402
+
+HOY = Path(__file__).parent / "datos" / "features_hoy.npz"
+
+
+@pytest.mark.parametrize("umbrales", [None, MIN_SCORE, {a: MIN_SCORE for a in ARTICULACIONES}])
+def test_umbrales_apagados_dan_lo_de_antes_bit_a_bit(umbrales):
+    # K-reuso en chico: las tres fixtures se guardaron con el codigo anterior a T1.
+    d = np.load(HOY)
+    for s in range(3):
+        for brazo in ("left", "right"):
+            f, ok = features_de(d[f"kp{s}"], d[f"sc{s}"], brazo, umbrales=umbrales)
+            assert f.tobytes() == d[f"f{s}_{brazo}"].tobytes()
+            assert (ok == d[f"ok{s}_{brazo}"]).all()
+
+
+@pytest.mark.parametrize("articulacion,indice", [
+    ("hombro", 6), ("codo", L_COD), ("muneca", L_MUN), ("cadera", R_CAD),
+])
+def test_cada_articulacion_se_filtra_con_su_umbral(articulacion, indice):
+    kp, sc = esqueleto(T=10)
+    sc[5, indice] = 0.5
+    u = {a: 0.3 for a in ARTICULACIONES}
+    _, ok = features_de(kp, sc, "left", umbrales=u)
+    assert ok[5]
+    u[articulacion] = 0.6
+    _, ok = features_de(kp, sc, "left", umbrales=u)
+    assert not ok[5]
+    # las demas articulaciones mas exigentes no tocan ese cuadro: todas tienen score 1
+    otro = {a: (0.99 if a != articulacion else 0.3) for a in ARTICULACIONES}
+    _, ok = features_de(kp, sc, "left", umbrales=otro)
+    assert ok[5]
+
+
+def test_un_umbral_bajo_recupera_el_cuadro():
+    kp, sc = esqueleto(T=10)
+    sc[5, L_MUN] = 0.2
+    _, ok = features_de(kp, sc, "left")
+    assert not ok[5]
+    _, ok = features_de(kp, sc, "left", umbrales={**{a: 0.3 for a in ARTICULACIONES}, "muneca": 0.15})
+    assert ok[5]
+
+
+def test_el_umbral_del_brazo_derecho_es_el_mismo_espejado():
+    kp, sc = esqueleto(T=10)
+    sc[5, 10] = 0.5  # muneca derecha
+    u = {**{a: 0.3 for a in ARTICULACIONES}, "muneca": 0.6}
+    _, ok = features_de(kp, sc, "right", umbrales=u)
+    assert not ok[5]
+
+
+def test_resolver_umbrales():
+    assert resolver_umbrales(None) == {a: MIN_SCORE for a in ARTICULACIONES}
+    assert resolver_umbrales(0.2) == {a: 0.2 for a in ARTICULACIONES}
+    with pytest.raises(ValueError):
+        resolver_umbrales({"muneca": 0.2})          # faltan articulaciones
+    with pytest.raises(ValueError):
+        resolver_umbrales({**{a: 0.3 for a in ARTICULACIONES}, "rodilla": 0.3})
+
+
+# -- T9 (E12 §3): el guante como keypoints 17 y 18 -----------------------------------------
+
+from boxtwin_detector.features import NOMBRES_GUANTE, L_GUA, R_GUA  # noqa: E402
+
+
+def con_guantes(kp, sc, conf=0.9):
+    """Agrega los dos guantes al lado de cada muneca, con la confianza como score."""
+    T = len(kp)
+    kp19 = np.concatenate([kp, np.zeros((T, 2, 2))], 1)
+    sc19 = np.concatenate([sc, np.full((T, 2), conf)], 1)
+    kp19[:, L_GUA] = kp[:, L_MUN] + [5.0, 0.0]
+    kp19[:, R_GUA] = kp[:, 10] + [-5.0, 0.0]
+    return kp19, sc19
+
+
+def test_con_guantes_son_25_features():
+    kp, sc = con_guantes(*esqueleto())
+    f, _ = features_de(kp, sc, "left")
+    assert f.shape == (len(kp), N_FEATURES + 5)
+    assert NOMBRES_GUANTE == ["guante_x", "guante_y", "guante_ok", "d_guante_x", "d_guante_y"]
+
+
+def test_con_guantes_las_20_de_antes_no_cambian():
+    kp, sc = esqueleto(semilla=4)
+    a, ok_a = features_de(kp, sc, "left")
+    b, ok_b = features_de(*con_guantes(kp, sc), "left")
+    assert np.array_equal(a, b[:, :N_FEATURES]) and np.array_equal(ok_a, ok_b)
+
+
+def test_muneca_baja_con_guante_el_cuadro_sirve_y_la_muneca_va_en_cero():
+    kp, sc = con_guantes(*esqueleto(T=10))
+    sc[5, L_MUN] = 0.1
+    f, ok = features_de(kp, sc, "left")
+    assert ok[5]
+    muneca_y_codo = [NOMBRES.index(n) for n in (
+        "muneca_x", "muneca_y", "codo_x", "codo_y", "extension", "angulo_codo",
+        "d_muneca_x", "d_muneca_y", "d_extension", "d_angulo_codo", "dd_extension")]
+    assert np.abs(f[5, muneca_y_codo]).max() == 0.0
+    assert f[5, N_FEATURES + NOMBRES_GUANTE.index("guante_ok")] == 1.0
+    assert np.abs(f[5, N_FEATURES:N_FEATURES + 2]).max() > 0
+
+
+def test_muneca_baja_sin_guante_el_cuadro_sale_como_hoy():
+    kp, sc = con_guantes(*esqueleto(T=10))
+    sc[5, L_MUN] = 0.1
+    sc[5, L_GUA] = 0.0
+    _, ok = features_de(kp, sc, "left")
+    assert not ok[5] and not ok[4] and not ok[6]
+
+
+def test_sin_guante_las_features_de_guante_van_en_cero():
+    kp, sc = con_guantes(*esqueleto(T=10), conf=0.0)
+    f, ok = features_de(kp, sc, "left")
+    assert ok[3:7].all()
+    assert np.abs(f[:, N_FEATURES:]).max() == 0.0
+
+
+def test_la_derivada_del_guante_no_cruza_un_cuadro_sin_guante():
+    kp, sc = con_guantes(*esqueleto(T=10))
+    sc[5, L_GUA] = 0.0
+    f, _ = features_de(kp, sc, "left")
+    d = [N_FEATURES + NOMBRES_GUANTE.index(n) for n in ("d_guante_x", "d_guante_y")]
+    assert np.abs(f[4:7][:, d]).max() == 0.0
+
+
+def test_el_espejado_lleva_el_guante_izquierdo_al_derecho():
+    kp, sc = con_guantes(*esqueleto(semilla=2))
+    sc[:, R_GUA] = 0.5
+    k2, s2 = espejar(kp, sc)
+    assert np.array_equal(k2[:, R_GUA, 0], -kp[:, L_GUA, 0])
+    assert np.array_equal(s2[:, L_GUA], sc[:, R_GUA])
+    der, _ = features_de(kp, sc, "right")
+    izq, _ = features_de(k2, s2, "left")
+    assert np.array_equal(der, izq)

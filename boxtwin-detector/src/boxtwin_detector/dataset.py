@@ -62,6 +62,18 @@ QUE HACE
   independiente, porque las features estan espejadas y el brazo derecho ya se ve como uno
   izquierdo.
 
+  Tres opciones de la campana posterior a E8 (docs/specs/2026-10-30-mejoras-post-e8/), las
+  tres apagadas por defecto, y apagadas dan los mismos tensores que antes:
+
+  - `umbrales`: un umbrales.json (E8b) con un umbral de score por articulacion. El meta
+    registra los umbrales y el sha256 del archivo.
+  - `relleno`: los huecos cortos bajo umbral se interpolan antes de las features (E10). Corre
+    en el fps original, porque el tope es en segundos, y solo donde la deteccion esta: un
+    cuadro de pose interpolada por la identidad no cuenta como presente. Suma `rellenado`
+    por carril, para separar las metricas.
+  - `guantes`: un directorio con <fuente>.npz de guantes_por_cuadro.py (E12). El guante entra
+    como keypoints 17 y 18 y las features pasan de 20 a 25.
+
 USO
   fuente = construir(Path("exports/spar.sequence.npz"))
   escribir(fuente, Path("data/"))
@@ -69,6 +81,7 @@ USO
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -76,10 +89,11 @@ from pathlib import Path
 import numpy as np
 
 from boxtwin_detector.bio import Segmento, etiquetas_de, segmentos_de
-from boxtwin_detector.features import N_FEATURES, NOMBRES, features_de
+from boxtwin_detector.features import NOMBRES, NOMBRES_GUANTE, features_de, resolver_umbrales
+from boxtwin_detector.relleno import MAX_S, rellenar
 
 __all__ = ["Fuente", "FPS_DESTINO", "construir", "escribir", "leer", "indice_remuestreo",
-           "remuestrear_segmentos"]
+           "remuestrear_segmentos", "leer_umbrales"]
 
 FPS_DESTINO = 30.0
 CLASE_AMAGUE = "feint"
@@ -98,6 +112,7 @@ class Fuente:
     fps: float
     conteos: dict = field(default_factory=dict)
     procedencia: dict = field(default_factory=dict)
+    rellenado: np.ndarray | None = None  # (carriles, T) bool, solo con relleno (E10)
 
     @property
     def T(self) -> int:
@@ -153,14 +168,25 @@ def remuestrear_segmentos(
     return salida, ajustados
 
 
+def leer_umbrales(ruta: Path) -> tuple[dict[str, float], str]:
+    """Los umbrales por articulacion de un umbrales.json (E8b) y el sha256 del archivo."""
+    ruta = Path(ruta)
+    crudo = ruta.read_bytes()
+    return resolver_umbrales(json.loads(crudo)["umbrales"]), hashlib.sha256(crudo).hexdigest()
+
+
 def construir(
-    npz: Path, fps_destino: float = FPS_DESTINO, interpolados: bool = True
+    npz: Path, fps_destino: float = FPS_DESTINO, interpolados: bool = True,
+    umbrales: Path | None = None, relleno: bool = False, guantes: Path | None = None,
 ) -> Fuente:
     """
     Arma los tensores de una fuente a partir de su export `sequence`.
 
     Con `interpolados=False`, los cuadros de pose rellenada salen de la mascara: no son un
     dato observado y el modelo no deberia responder por ellos.
+
+    `umbrales`, `relleno` y `guantes` son las mejoras de E8b, E10 y E12; ver el docstring
+    del modulo.
     """
     npz = Path(npz)
     meta_path = npz.with_name(npz.name.replace(".npz", ".meta.json"))
@@ -188,13 +214,44 @@ def construir(
             "queda como fondo y le ensena al modelo que el gesto de golpe es fondo"
         )
 
+    extra: dict = {}
+    u = None
+    if umbrales is not None:
+        u, sha = leer_umbrales(umbrales)
+        extra["umbrales"], extra["umbrales_sha256"] = u, sha
+
+    rell = None
+    if relleno:
+        # en el fps original: el tope de E10 es en segundos y se cuenta en cuadros del video
+        kp, sc = kp.copy(), sc.copy()
+        rell = np.zeros(sc.shape[:2], bool)
+        for p in range(kp.shape[0]):
+            kp[p], sc[p], r = rellenar(kp[p], sc[p], u, fps, presente=valid[p] & ~interp[p])
+            rell[p] = r.any(axis=1)
+        extra["relleno"] = {"max_s": MAX_S}
+
+    if guantes is not None:
+        ruta_g = Path(guantes) / f"{npz.name.replace('.sequence.npz', '')}.npz"
+        if not ruta_g.is_file():
+            raise FileNotFoundError(f"faltan los guantes de la fuente: {ruta_g}")
+        with np.load(ruta_g) as z:
+            g = z["guantes"]           # (2, T, mano, [x, y, conf])
+        if g.shape[:3] != (kp.shape[0], T, 2):
+            raise ValueError(f"guantes {g.shape} no coincide con el export ({kp.shape[0]}, {T}, 2)")
+        kp = np.concatenate([kp, g[..., :2].astype(kp.dtype)], axis=2)
+        sc = np.concatenate([sc, g[..., 2].astype(sc.dtype)], axis=2)
+        extra["guantes"] = {"archivo": ruta_g.name,
+                            "sha256": hashlib.sha256(ruta_g.read_bytes()).hexdigest()}
+    nombres = NOMBRES + (NOMBRES_GUANTE if guantes is not None else [])
+
     idx = indice_remuestreo(T, fps, fps_destino)
     T_nuevo = len(idx)
     kp_r, sc_r, valid_r = kp[:, idx], sc[:, idx], valid[:, idx]
     interp_r = interp[:, idx]
 
     n_carriles = labels.shape[0] * labels.shape[1]
-    F = np.zeros((n_carriles, T_nuevo, N_FEATURES), np.float32)
+    F = np.zeros((n_carriles, T_nuevo, len(nombres)), np.float32)
+    RELL = np.zeros((n_carriles, T_nuevo), bool) if rell is not None else None
     L = np.zeros((n_carriles, T_nuevo), np.int8)
     U = np.zeros((n_carriles, T_nuevo), bool)
     INT = np.zeros((n_carriles, T_nuevo), bool)
@@ -206,10 +263,12 @@ def construir(
             i = p * len(lanes) + c
             nombres_carril.append(f"{peleador}-{brazo}")
 
-            f, ok = features_de(kp_r[p], sc_r[p], brazo)
+            f, ok = features_de(kp_r[p], sc_r[p], brazo, umbrales=u)
             F[i] = f
             U[i] = ok & valid_r[p]
             INT[i] = interp_r[p]
+            if RELL is not None:
+                RELL[i] = rell[p, idx]
             if not interpolados:
                 U[i] &= ~interp_r[p]
 
@@ -256,6 +315,11 @@ def construir(
         "cuadros_I": int(((L == 2) & U).sum()),
         "etiquetados_no_usables": int(((L != 0) & ~U).sum()),
     }
+    if RELL is not None:
+        conteos["cuadros_rellenados"] = int(RELL.sum())
+        conteos["cuadros_rellenados_usables"] = int((RELL & U).sum())
+    if guantes is not None:
+        conteos["cuadros_con_guante"] = int((sc_r[:, :, 17:19] > 0).any(axis=2).sum())
     procedencia = {
         "video": meta["video"]["name"],
         "video_sha256": meta["video"]["sha256"],
@@ -268,13 +332,14 @@ def construir(
         "fps_destino": fps_destino,
         "label_space": meta.get("label_space"),
         "classes": meta.get("classes"),
-        "features": NOMBRES,
+        "features": nombres,
+        **extra,
     }
     return Fuente(
         nombre=Path(meta["video"]["name"]).stem,
         features=F, labels=L, usable=U, interpolado=INT,
         carriles=nombres_carril, fps=fps_destino,
-        conteos=conteos, procedencia=procedencia,
+        conteos=conteos, procedencia=procedencia, rellenado=RELL,
     )
 
 
@@ -284,10 +349,13 @@ def escribir(f: Fuente, out_dir: Path) -> tuple[Path, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     npz = out_dir / f"{f.nombre}.det.npz"
     man = out_dir / f"{f.nombre}.det.json"
+    # `rellenado` solo con relleno: apagado, el npz tiene que ser el de antes
+    opcional = {} if f.rellenado is None else {"rellenado": f.rellenado}
     np.savez_compressed(
         npz,
         features=f.features, labels=f.labels, usable=f.usable,
         interpolado=f.interpolado, carriles=np.array(f.carriles), fps=np.array(f.fps),
+        **opcional,
     )
     man.write_text(json.dumps(
         {"kind": "boxtwin.detector.dataset", "fuente": f.nombre,
@@ -308,4 +376,5 @@ def leer(npz: Path) -> Fuente:
         interpolado=d["interpolado"],
         carriles=[str(x) for x in d["carriles"]], fps=float(d["fps"]),
         conteos=man["conteos"], procedencia=man["procedencia"],
+        rellenado=d["rellenado"] if "rellenado" in d.files else None,
     )

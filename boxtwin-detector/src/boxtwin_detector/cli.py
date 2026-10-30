@@ -11,8 +11,12 @@ QUE HACE
   del 95% de los cuadros, asi que la exactitud por cuadro no significa nada y conviene verlo
   antes de entrenar y no despues.
 
+  `--umbrales`, `--relleno` y `--guantes` son las mejoras de E8b, E10 y E12
+  (docs/specs/2026-10-30-mejoras-post-e8/). Sin ellas, los tensores son los de antes.
+
 USO
   boxtwin-detector build exports/*.sequence.npz --out data/
+  boxtwin-detector build exports/*.sequence.npz --out data/ --umbrales umbrales.json --relleno
 """
 
 from __future__ import annotations
@@ -31,7 +35,8 @@ def _build(args: argparse.Namespace) -> int:
         if not Path(npz).is_file():
             print(f"error: no existe {npz}", file=sys.stderr)
             return 1
-        f = construir(npz, args.fps, interpolados=not args.sin_interpolados)
+        f = construir(npz, args.fps, interpolados=not args.sin_interpolados,
+                      umbrales=args.umbrales, relleno=args.relleno, guantes=args.guantes)
         salida, man = escribir(f, args.out)
         c = f.conteos
         usables = c["cuadros_usables"]
@@ -52,6 +57,15 @@ def _build(args: argparse.Namespace) -> int:
                   f"mascara y no entran en la perdida")
         cf = c["carriles"] * c["cuadros"]
         print(f"  usables {usables}/{cf} ({usables/cf:.1%})")
+        if "umbrales" in f.procedencia:
+            print(f"  umbrales {f.procedencia['umbrales']} "
+                  f"(sha256 {f.procedencia['umbrales_sha256'][:12]})")
+        if "cuadros_rellenados" in c:
+            print(f"  rellenados {c['cuadros_rellenados']} cuadros-carril, "
+                  f"{c['cuadros_rellenados_usables']} usables")
+        if "cuadros_con_guante" in c:
+            print(f"  con guante {c['cuadros_con_guante']} cuadros-peleador; "
+                  f"{f.features.shape[2]} features")
         for k in ("O", "B", "I"):
             n = c[f"cuadros_{k}"]
             print(f"    {k}: {n:7d}  {n/max(usables,1):6.2%}")
@@ -493,6 +507,15 @@ def main(argv: list[str] | None = None) -> int:
                    help="fps comun al que se lleva todo. Pacquiao viene a 59,94 y el resto "
                         "a 30; sin esto el mismo golpe dura el doble de cuadros en una "
                         "fuente que en otra.")
+    b.add_argument("--umbrales", type=Path, default=None,
+                   help="umbrales.json de E8b: un umbral de score por articulacion en vez del "
+                        "0,3. Sin la opcion, el 0,3 de siempre.")
+    b.add_argument("--relleno", action="store_true",
+                   help="E10: interpola los huecos de hasta 0,10 s bajo umbral antes de las "
+                        "features, en vez de enmascararlos.")
+    b.add_argument("--guantes", type=Path, default=None,
+                   help="E12: directorio con <fuente>.npz de guantes_por_cuadro.py. El guante "
+                        "entra como keypoints 17 y 18 y las features pasan a 25.")
     b.set_defaults(func=_build)
 
     tr = sub.add_parser("train", help="entrena el detector sobre un fold")
