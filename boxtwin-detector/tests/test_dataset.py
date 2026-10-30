@@ -286,3 +286,148 @@ def test_un_export_viejo_sin_el_campo_no_rompe(tmp_path):
     npz = _export_falso(tmp_path, 30.0, 200, {(0, 0): [Segmento(50, 56, 0)]})
     f = construir(npz)
     assert f.procedencia["boundary_definitions_version"] is None
+
+
+# -- T3, T5 y T9 (mejoras post-E8): umbrales, relleno y guante, apagados por defecto ---------
+
+from boxtwin_detector.dataset import leer_umbrales  # noqa: E402
+from boxtwin_detector.features import ARTICULACIONES  # noqa: E402
+
+L_MUN = 9
+
+
+def _export_con_huecos(tmp_path, T=200):
+    npz = _export_falso(tmp_path, 30.0, T, {(0, 0): [Segmento(50, 56, 0)]})
+    d = dict(np.load(npz))
+    rng = np.random.default_rng(3)
+    sc = d["kp_score"]
+    sc[:, :, :13] = rng.uniform(0.0, 1.0, size=sc[:, :, :13].shape) ** 0.25
+    sc[0, 60:62, L_MUN] = 0.05      # un hueco de 2 de la muneca izquierda de A
+    d["kp_score"] = sc
+    np.savez_compressed(npz, **d)
+    return npz
+
+
+def _umbrales_json(tmp_path, valor=0.3, **cambios):
+    u = {a: valor for a in ARTICULACIONES}
+    u.update(cambios)
+    p = tmp_path / "umbrales.json"
+    p.write_text(json.dumps({"umbrales": u}))
+    return p
+
+
+def _tensores(f):
+    return f.features.tobytes(), f.usable.tobytes(), f.labels.tobytes(), f.interpolado.tobytes()
+
+
+def test_apagado_da_los_mismos_tensores(tmp_path):
+    npz = _export_con_huecos(tmp_path)
+    base = construir(npz)
+    con_03 = construir(npz, umbrales=_umbrales_json(tmp_path))
+    assert _tensores(base) == _tensores(con_03)
+    assert base.rellenado is None
+    assert "umbrales" not in base.procedencia
+    a, _ = escribir(base, tmp_path / "a")
+    d = np.load(a)
+    assert "rellenado" not in d.files
+
+
+def test_el_meta_registra_el_sha256_de_los_umbrales(tmp_path):
+    import hashlib
+    npz = _export_con_huecos(tmp_path)
+    p = _umbrales_json(tmp_path, muneca=0.2)
+    f = construir(npz, umbrales=p)
+    assert f.procedencia["umbrales_sha256"] == hashlib.sha256(p.read_bytes()).hexdigest()
+    assert f.procedencia["umbrales"]["muneca"] == 0.2
+
+
+def test_los_umbrales_cambian_la_mascara(tmp_path):
+    npz = _export_con_huecos(tmp_path)
+    base = construir(npz)
+    exigente = construir(npz, umbrales=_umbrales_json(tmp_path, muneca=0.9))
+    assert exigente.usable.sum() < base.usable.sum()
+
+
+def test_leer_umbrales_rechaza_un_archivo_incompleto(tmp_path):
+    p = tmp_path / "u.json"
+    p.write_text(json.dumps({"umbrales": {"muneca": 0.2}}))
+    with pytest.raises(ValueError):
+        leer_umbrales(p)
+
+
+def test_con_relleno_el_hueco_corto_vuelve_a_la_mascara(tmp_path):
+    npz = _export_con_huecos(tmp_path)
+    base = construir(npz)
+    r = construir(npz, relleno=True)
+    assert r.rellenado is not None and r.rellenado.shape == r.usable.shape
+    assert r.rellenado[0, 60:62].all()
+    assert r.usable.sum() > base.usable.sum()
+    assert r.conteos["cuadros_rellenados"] > 0
+    assert r.procedencia["relleno"]["max_s"] == 0.10
+    a, _ = escribir(r, tmp_path / "r")
+    assert leer(a).rellenado.tobytes() == r.rellenado.tobytes()
+
+
+def test_el_relleno_no_cruza_cuadros_interpolados(tmp_path):
+    npz = _export_con_huecos(tmp_path)
+    d = dict(np.load(npz))
+    d["interpolated"][0, 61] = True
+    np.savez_compressed(npz, **d)
+    r = construir(npz, relleno=True)
+    assert not r.rellenado[0, 60:62].any()
+
+
+def _guantes(tmp_path, T=200, conf=0.8):
+    g = np.zeros((2, T, 2, 3), np.float32)
+    g[..., 0], g[..., 1], g[..., 2] = 300.0, 280.0, conf
+    d = tmp_path / "guantes"
+    d.mkdir(exist_ok=True)
+    np.savez_compressed(d / "falso.npz", guantes=g)
+    return d
+
+
+def test_sin_guantes_siguen_las_20(tmp_path):
+    f = construir(_export_con_huecos(tmp_path))
+    assert f.features.shape[2] == N_FEATURES
+
+
+def test_con_guantes_son_25_y_las_20_no_cambian_donde_la_muneca_esta_bien(tmp_path):
+    npz = _export_con_huecos(tmp_path)
+    base = construir(npz)
+    g = construir(npz, guantes=_guantes(tmp_path))
+    assert g.features.shape[2] == N_FEATURES + 5
+    assert g.usable.sum() >= base.usable.sum()
+    ambos = base.usable & g.usable
+    assert np.array_equal(base.features[ambos], g.features[ambos][:, :N_FEATURES])
+    assert len(g.procedencia["guantes"]["sha256"]) == 64
+    assert len(g.procedencia["features"]) == N_FEATURES + 5
+
+
+def test_guantes_de_otro_largo_es_error(tmp_path):
+    npz = _export_con_huecos(tmp_path)
+    with pytest.raises(ValueError):
+        construir(npz, guantes=_guantes(tmp_path, T=150))
+
+
+def test_falta_el_archivo_de_guantes(tmp_path):
+    npz = _export_con_huecos(tmp_path)
+    d = tmp_path / "vacio"
+    d.mkdir()
+    with pytest.raises(FileNotFoundError):
+        construir(npz, guantes=d)
+
+
+def test_build_por_cli_sin_opciones_y_con_umbrales(tmp_path):
+    from boxtwin_detector.cli import main
+    npz = _export_con_huecos(tmp_path)
+    assert main(["build", str(npz), "--out", str(tmp_path / "a")]) == 0
+    assert main(["build", str(npz), "--out", str(tmp_path / "b"),
+                 "--umbrales", str(_umbrales_json(tmp_path))]) == 0
+    a, b = np.load(tmp_path / "a" / "falso.det.npz"), np.load(tmp_path / "b" / "falso.det.npz")
+    assert all(a[k].tobytes() == b[k].tobytes() for k in a.files)
+    man = json.loads((tmp_path / "b" / "falso.det.json").read_text())
+    assert len(man["procedencia"]["umbrales_sha256"]) == 64
+    assert main(["build", str(npz), "--out", str(tmp_path / "c"), "--relleno",
+                 "--guantes", str(_guantes(tmp_path))]) == 0
+    c = np.load(tmp_path / "c" / "falso.det.npz")
+    assert c["features"].shape[2] == 25 and "rellenado" in c.files

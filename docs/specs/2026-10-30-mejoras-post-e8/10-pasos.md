@@ -33,7 +33,7 @@ fase, con este mismo formato.
 
 | Id | Quién | Tarea | Depende de | Verificación | Estado | Evidencia |
 |---|---|---|---|---|---|---|
-| S1 | SDD | T1 a T12, PR `mejoras-fase0` | — | pruebas nuevas en rojo y después en verde; suites completas en verde (las de S1 de E8) | pendiente | |
+| S1 | SDD | T1 a T12, PR `mejoras-fase0` | — | pruebas nuevas en rojo y después en verde; suites completas en verde (las de S1 de E8) | hecha | 30-10: T1 a T12 en la rama `mejoras-fase0` (`fb406e0`), PR #41 contra `main`, encima de #40. En rojo antes del código: T1, T3, T4, T5, T6 y T9 (fixtures de antes guardadas con el código viejo: `boxtwin-detector/tests/datos/features_hoy.npz`, `boxtwin-annotator/tests/datos/propuesta_mixta_hoy.json`) y T2; las de T7, T8, T10, T11 y T12 se escribieron junto con el script. Suites: boxtwin-annotator 786, boxtwin-api 311, boxtwin-detector 203 (con la decisión 9), boxtwin-guantes 46, scripts/clasificador 32, scripts/clasificador_geo 89 (1 salteada, la de mmpose), scripts/gemelo 69, scripts/mejoras 57, despliegue/tests 20. Nada corrido sobre datos reales |
 | L0 | Lucas | Mergear el PR de este spec y el de S1 | S1 | los dos en `main` | pendiente | |
 | S2 | SDD | Worktree fijo `~/Proyectos/TwinBoxing-mejoras` desacoplado en la punta de `main` después de L0; huellas de A y de B; sha256 de los originales de A y de los cachés de `raiz-v8` y `raiz-y26` en `~/boxtwin-mejoras/antes.txt` | L0 | hash anotado; los archivos existen; C `inactive` | pendiente | |
 | L1 | Lucas | OK para las noches del 31-10 al 3-11 | S2 | fechas anotadas acá | pendiente | |
@@ -76,3 +76,28 @@ Una línea por decisión, con el motivo, antes de correr la parte afectada.
 6. 30-10: E12 cambia features y máscara juntas y lo declara como una sola variable (E12 §3).
 7. 30-10: las licencias de RTMO, OC-SORT, ByteTrack, BoxMOT y SAM 2 se verifican en el humo de
    cada experimento (H9-4, H13-1, H14-1) con fuente y fecha, no desde este spec.
+8. 30-10 (S1, T1): la nariz entra en `umbrales.json` y se calibra, pero no entra en la máscara de
+   `features_de`, igual que hoy (hoy la nariz no se filtra). Así, con todo en 0,3, la salida es la
+   de antes bit a bit. Si se quisiera filtrar la nariz sería otra variable.
+9. 30-10 (S1, T4; corrige E10 §2, antes de la primera corrida de S8): el tope del relleno va al
+   entero más cercano y no hacia abajo: 3 cuadros a 30 y a 29,97 fps, 6 a 60 y a 59,94. Hacia abajo
+   daba 2 a 29,97 (0,10 × 29,97 = 2,997) y 5 a 59,94, cuando los ejemplos de §2 (3 a 30, 6 a 60)
+   muestran que el tope se pensó como 3 y 6. Decidido por Lucas el 30-10. En segundos el tope queda
+   en 0,1001 s a 29,97 y a 59,94.
+10. 30-10 (S1, T4 y T5): "detección presente" es `valid` y no `interpolated` en el export (la pose
+    interpolada por la identidad no es una detección); en E4, `valid` de la serie. Un extremo del hueco
+    sin detección no cuenta como aceptado.
+11. 30-10 (S1, T6): la mediana empata (con un cambio limpio de color, todo k entre m y el cambio da la
+    misma diferencia, y el primero corta en la muestra 5). El empate se rompe por la diferencia de
+    medias, que tiene el pico en el cambio. Los cortes solo caen entre cuadros distintos.
+12. 30-10 (S1, T6): "se repite una sola vez dentro de cada mitad" y "como mucho dos cortes" se leen
+    juntos: si las dos mitades piden corte, queda el de mayor diferencia de medianas.
+13. 30-10 (S1, T6): sin `cuadros_semilla`, el cuadro del recorte de una semilla partida es la mediana
+    de sus cuadros con color, que es el que muestra `candidatos.elegir` fuera del par sugerido.
+    `medir_e11.py` le pasa el cuadro real de cada candidato. Los segmentos de un track partido llevan
+    id −(3·track + k + 1) en la propuesta; el `Assignment` va al track con el rango del segmento.
+14. 30-10 (S1, T3): `datos.py` no cambia: no calcula features ni máscaras. Los umbrales y el relleno de
+    E4 entran en `features2d.py` (las 20 del brazo y las 6 del rival).
+15. 30-10 (S1): S7 (P14d) no tenía tarea de código; se suma `scripts/mejoras/huecos.py` con su prueba.
+    S8c (relleno a 0,20 s) y P16e (E4 con guante) no están en `mejoras.sh`: son informativas, para si
+    sobra noche, y piden código que no está en T1 a T12.

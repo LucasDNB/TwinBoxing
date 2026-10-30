@@ -33,6 +33,11 @@ QUE HACE
   y el anotador lo ve, mientras que un rol equivocado se dibuja sobre un cuerpo y se ve
   perfecto. Es la asimetria que manda en este modulo.
 
+  Con `cortar_mixtos` (E11, docs/specs/2026-10-30-mejoras-post-e8/03-e11-tracks-mixtos.md),
+  antes de la particion cada track se parte donde el color del guante dice que cambio de
+  persona (`segmentar`), y los segmentos reemplazan a los tracks como nodos. Esta apagado por
+  defecto: apagado, la propuesta es la de antes.
+
 USO
   ev = analizar(cache, video, detector, cfg)
   prop = proponer(ev, cfg, fps=30.0, alto_imagen=1080)
@@ -60,8 +65,8 @@ from boxtwin.core.schema import AnnotationDoc, Assignment, Identity
 from boxtwin.core.types import AssignmentOp, TrackRole
 
 __all__ = [
-    "ConfigIdentidadAuto", "EvidenciaTrack", "Propuesta", "analizar", "proponer",
-    "AsignarIdentidadAuto",
+    "ConfigIdentidadAuto", "EvidenciaTrack", "Propuesta", "Segmento", "analizar", "proponer",
+    "segmentar", "AsignarIdentidadAuto",
 ]
 
 
@@ -125,6 +130,9 @@ class ConfigIdentidadAuto:
     # a ojo, los 20 tracks que recibian rol de peleador sin serlo eran todos eso: gente afuera
     # del ring, cerca de la camara, con guantes ajenos en el recorte.
     max_distancia_muneca: float = 1.2
+    # E11: partir los tracks mixtos antes de la particion. Apagado, A no cambia aunque corra
+    # este codigo. Solo actua con siembra (sin perfiles de las semillas no hay contra que medir).
+    cortar_mixtos: bool = False
 
 
 @dataclass
@@ -155,6 +163,9 @@ class Propuesta:
 
     roles: dict[int, TrackRole]              # track -> rol propuesto
     rangos: dict[int, tuple[int, int]]       # track -> [primer, ultimo+1)
+    # Con cortes (E11), las claves de roles y rangos son segmentos: este es su track. Un track
+    # que no se partio no aparece y su clave sigue siendo el track.
+    tracks: dict[int, int] = field(default_factory=dict)
     sin_asignar: list[int] = field(default_factory=list)
     perfiles: dict[str, Color] = field(default_factory=dict)
     semillas: dict[str, int] = field(default_factory=dict)
@@ -321,6 +332,8 @@ def proponer(
     total_frames: int,
     fps: float,
     semillas: tuple[int, int] | None = None,
+    cache=None,
+    cuadros_semilla: dict[int, int] | None = None,
 ) -> Propuesta:
     """
     Decide un rol por track a partir de la evidencia.
@@ -332,6 +345,8 @@ def proponer(
     decidirse por posicion en pantalla, y los dos tracks entran al nucleo aunque los filtros
     los hayan descartado: si alguien los eligio mirando el video, la altura y el guante no
     tienen nada que agregar sobre si son peleadores.
+
+    `cache` y `cuadros_semilla` solo los usa el corte de E11 (`segmentar`).
     """
     prop = Propuesta(roles={}, rangos={})
     if not evidencia:
@@ -347,6 +362,17 @@ def proponer(
             )
         if semillas[0] == semillas[1]:
             raise ValueError("las dos semillas son el mismo track")
+
+    if cfg.cortar_mixtos:
+        prop.diagnostico["tracks_partidos"] = 0
+        if semillas:
+            segs, diag_cortes = segmentar(evidencia, cfg, semillas, cache, cuadros_semilla)
+            evidencia = {sid: sg.evidencia for sid, sg in segs.items()}
+            prop.tracks = {sid: sg.track_id for sid, sg in segs.items() if sid != sg.track_id}
+            semillas = diag_cortes["semillas"]
+            cortes_diag = diag_cortes
+        else:
+            cortes_diag = {"tracks_partidos": 0, "cortes": [], "motivo": "sin siembra no se corta"}
 
     for tid, e in evidencia.items():
         prop.rangos[tid] = (e.primer_frame, min(e.ultimo_frame + 1, total_frames))
@@ -409,6 +435,8 @@ def proponer(
             prop.sin_asignar.append(t)            # no alcanzo para decir nada
 
     prop.diagnostico = {
+        **({"tracks_partidos": cortes_diag["tracks_partidos"], "cortes": cortes_diag["cortes"]}
+           if cfg.cortar_mixtos else {}),
         "tracks": len(evidencia),
         "umbral_altura": round(umbral_alto, 4),
         "umbral_guante": round(umbral_g, 4),
@@ -611,7 +639,9 @@ class AsignarIdentidadAuto(_SnapshotCommand):
             nuevas.append(
                 Assignment(
                     id=new_id(doc, "assignment"),
-                    track_id=tid,
+                    # con cortes (E11) la clave es un segmento: el assignment va a su track,
+                    # con el rango del segmento
+                    track_id=self.propuesta.tracks.get(tid, tid),
                     role=rol,
                     start_frame=ini,
                     end_frame_excl=fin,
@@ -906,4 +936,191 @@ def particionar(
         diag["ancla_por_semilla"] = True
         diag["componentes_orientados_por_semilla"] = por_semilla
         diag["semillas_en_conflicto"] = conflicto
+    return salida, diag
+
+
+# ---------------------------------------------------------------------------
+# Corte de tracks mixtos (E11)
+#
+# 18 de los 20 errores de C1 salieron de tracks mixtos: el tracker paso de una persona a la
+# otra a mitad del track, el tramo de B coexiste con otro track de B, y `particionar` da por
+# hecho que dos tracks en el mismo cuadro son dos personas. Con perfiles de oraculo el color
+# acierta 0,969: la senal esta, lo que falla es la unidad de decision. Aca el track se parte
+# donde el color dice que cambio de persona, y los pedazos entran a la particion como nodos.
+# Todos los parametros son los que el modulo ya tenia; ninguno salio de mirar los errores.
+
+
+@dataclass
+class Segmento:
+    """Un tramo [inicio, fin) de un track, con la evidencia que cae adentro."""
+
+    seg_id: int
+    track_id: int
+    inicio: int
+    fin: int
+    evidencia: EvidenciaTrack
+
+
+def _sub_evidencia(e: EvidenciaTrack, seg_id: int, inicio: int, fin: int) -> EvidenciaTrack:
+    adentro = lambda f: inicio <= f < fin  # noqa: E731
+    xs = [(f, x) for f, x in e.xs if adentro(f)]
+    con_guante = [f for f in e.frames_con_guante if adentro(f)]
+    # `xs` tiene una entrada por recorte medido, asi que los recortes del tramo son exactos
+    return EvidenciaTrack(
+        track_id=seg_id, primer_frame=inicio, ultimo_frame=fin - 1, alto_max=e.alto_max,
+        recortes=len(xs), con_guante=len(con_guante),
+        colores=[(f, c) for f, c in e.colores if adentro(f)],
+        frames_con_guante=con_guante, xs=xs,
+    )
+
+
+def _mejor_corte(frames: list[int], s: list[float], m: int, margen: float):
+    """
+    El indice k (m <= k <= n - m) que maximiza |mediana(s[:k]) - mediana(s[k:])|, si las dos
+    medianas tienen signo opuesto y las dos llegan a `margen`. Solo entre cuadros distintos:
+    los dos guantes de un mismo cuadro no se reparten entre dos personas.
+
+    La mediana es robusta y por eso empata: con un cambio limpio de color, todo k entre m y el
+    cambio da la misma diferencia, y quedarse con el primero corta en la muestra m. El empate
+    se rompe por la diferencia de medias, que si tiene el pico en el cambio.
+    """
+    n = len(s)
+    x = np.asarray(s, np.float64)
+    acum = np.concatenate([[0.0], np.cumsum(x)])
+    mejor = None
+    for k in range(m, n - m + 1):
+        if frames[k - 1] == frames[k]:
+            continue
+        a, b = float(np.median(x[:k])), float(np.median(x[k:]))
+        clave = (round(abs(a - b), 9), abs(acum[k] / k - (acum[n] - acum[k]) / (n - k)))
+        if mejor is None or clave > mejor[0]:
+            mejor = (clave, k, a, b)
+    if mejor is None:
+        return None
+    (d, _), k, a, b = mejor
+    if a * b < 0 and abs(a) >= margen and abs(b) >= margen:
+        return k, d, a, b
+    return None
+
+
+def _cortes(frames: list[int], s: list[float], cfg: ConfigIdentidadAuto) -> list[tuple]:
+    """
+    Segmentacion binaria con dos cortes como maximo: uno sobre la serie entera y, si lo hubo,
+    uno mas dentro de cada mitad. Si las dos mitades piden corte, queda el de mayor diferencia
+    de medianas, para no pasar de dos.
+    """
+    m, margen = cfg.min_guantes_voto, cfg.margen_orientacion
+    primero = _mejor_corte(frames, s, m, margen)
+    if primero is None:
+        return []
+    k = primero[0]
+    izq = _mejor_corte(frames[:k], s[:k], m, margen)
+    der = _mejor_corte(frames[k:], s[k:], m, margen)
+    if der is not None:
+        der = (der[0] + k, *der[1:])
+    segundos = [c for c in (izq, der) if c is not None]
+    if segundos:
+        segundos = [max(segundos, key=lambda c: c[1])]
+    return sorted([primero, *segundos])
+
+
+def _cuadro_de_corte(track: int, f_a: int, f_b: int, cache, cfg: ConfigIdentidadAuto) -> int:
+    """
+    Entre la ultima muestra del primer tramo (f_a) y la primera del segundo (f_b): el cuadro
+    donde la caja del track tiene el IoU maximo con otra deteccion de altura comparable,
+    porque el tracker se confunde cuando los cuerpos se superponen. Sin superposicion, o sin
+    cache, el punto medio. El cuadro devuelto es el primero del segundo tramo.
+    """
+    medio = (f_a + f_b + 1) // 2
+    if cache is None:
+        return medio
+    mejor, mejor_iou = medio, 0.0
+    for f in range(f_a + 1, f_b + 1):
+        dets = cache.detections(f)
+        i = dets.index_of_track(track)
+        if i is None:
+            continue
+        caja = np.asarray(dets.bbox[i], np.float64)
+        alto = caja[3] - caja[1]
+        for j in range(len(dets)):
+            if j == i:
+                continue
+            otra = np.asarray(dets.bbox[j], np.float64)
+            if otra[3] - otra[1] < cfg.fraccion_alto_relevante * alto:
+                continue
+            v = _iou(caja, otra)
+            if v > mejor_iou:
+                mejor, mejor_iou = f, v
+    return mejor
+
+
+def segmentar(
+    evidencia: dict[int, EvidenciaTrack],
+    cfg: ConfigIdentidadAuto,
+    semillas: tuple[int, int],
+    cache=None,
+    cuadros_semilla: dict[int, int] | None = None,
+) -> tuple[dict[int, Segmento], dict]:
+    """
+    Parte cada track donde el color del guante dice que cambio de persona (E11 §2.2).
+
+    La senal de cada muestra es s = d(c, perfil B) - d(c, perfil A): positiva es "mas A". Los
+    perfiles salen de las semillas ANTES de partir; si no separan (separacion_minima), no se
+    parte nada. Un track que no se parte conserva su id y su evidencia tal cual. Los
+    segmentos de un track partido llevan ids negativos, -(3 * track + k + 1), que no chocan
+    con ningun track.
+
+    Si una semilla se parte, la semilla pasa a ser el segmento que contiene el cuadro del
+    recorte que vio la persona (`cuadros_semilla`; si no se sabe, la mediana de sus cuadros
+    con color, que es el que muestra la pantalla cuando el par sugerido no lo fija).
+
+    Devuelve los segmentos y un diagnostico con las semillas nuevas y cada corte.
+    """
+    sa, sb = semillas
+    identidad = {t: Segmento(t, t, e.primer_frame, e.ultimo_frame + 1, e) for t, e in evidencia.items()}
+    pa = perfil_de([c for _, c in evidencia[sa].colores])
+    pb = perfil_de([c for _, c in evidencia[sb].colores])
+    separacion = distancia_color(pa, pb)
+    diag: dict = {"tracks_partidos": 0, "cortes": [], "semillas": semillas,
+                  "separacion_semillas": round(separacion, 3)}
+    if separacion < cfg.separacion_minima:
+        diag["motivo"] = (f"la separacion de las semillas ({separacion:.3f}) no llega al piso "
+                          f"{cfg.separacion_minima}: sin perfiles que separen no se corta")
+        return identidad, diag
+
+    salida: dict[int, Segmento] = {}
+    for t, e in evidencia.items():
+        muestras = sorted(e.colores, key=lambda x: x[0])
+        frames = [f for f, _ in muestras]
+        s = [distancia_color(c, pb) - distancia_color(c, pa) for _, c in muestras]
+        cortes = _cortes(frames, s, cfg)
+        if not cortes:
+            salida[t] = identidad[t]
+            continue
+        bordes = [e.primer_frame]
+        for k, d, a, b in cortes:
+            f = _cuadro_de_corte(t, frames[k - 1], frames[k], cache, cfg)
+            bordes.append(f)
+            diag["cortes"].append({"track": t, "cuadro": f, "medianas": [round(a, 3), round(b, 3)],
+                                   "diferencia": round(d, 3)})
+        bordes.append(e.ultimo_frame + 1)
+        for i, (ini, fin) in enumerate(zip(bordes, bordes[1:])):
+            sid = -(3 * t + i + 1)
+            salida[sid] = Segmento(sid, t, ini, fin, _sub_evidencia(e, sid, ini, fin))
+        diag["tracks_partidos"] += 1
+
+    nuevas = []
+    for semilla in semillas:
+        partes = [g for g in salida.values() if g.track_id == semilla]
+        if len(partes) == 1:
+            nuevas.append(partes[0].seg_id)
+            continue
+        if cuadros_semilla and semilla in cuadros_semilla:
+            cuadro = cuadros_semilla[semilla]
+        else:
+            fs = sorted(f for f, _ in evidencia[semilla].colores)
+            cuadro = fs[len(fs) // 2] if fs else evidencia[semilla].primer_frame
+        elegido = next((g for g in partes if g.inicio <= cuadro < g.fin), partes[0])
+        nuevas.append(elegido.seg_id)
+    diag["semillas"] = tuple(nuevas)
     return salida, diag

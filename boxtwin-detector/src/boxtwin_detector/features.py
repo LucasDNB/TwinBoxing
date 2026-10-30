@@ -41,15 +41,32 @@ QUE HACE
   -pi y a +pi el cuerpo esta en la misma pose, y un escalar que salta de uno a otro le
   ensena al modelo un borde que no existe.
 
+  El umbral de score es 0,3 para todas las articulaciones salvo que se pase `umbrales`: un
+  numero (el mismo para todas) o un dict por articulacion (nariz, hombro, codo, muneca,
+  cadera). Existe por E8b (docs/specs/2026-10-30-mejoras-post-e8/01): el 0,3 esta pensado
+  para como puntua YOLOv8, y otro estimador reparte sus scores distinto. La nariz se acepta
+  en el dict para que la calibracion sea de las cinco, pero no entra en la mascara, igual
+  que hoy: con el umbral en 0,3 todo da lo mismo que antes, bit a bit.
+
+  Con el guante detectado (E12, docs/specs/2026-10-30-mejoras-post-e8/04): si el esqueleto
+  trae 19 keypoints, el 17 y el 18 son los centros de los guantes izquierdo y derecho, con la
+  confianza del detector de guantes como score (0 = no hay guante). Se espejan como un par
+  mas, asi que el brazo derecho no necesita una rama aparte. Suman 5 features por brazo
+  (NOMBRES_GUANTE) y cambian la mascara: un cuadro con la muneca o el codo bajo umbral sirve
+  si hay guante en esa mano, y entonces las features de muneca y codo van en 0 y la mano la
+  lleva el guante. Con 17 keypoints todo es como antes.
+
 USO
   f, ok = features_de(kp, sc, brazo="left")
+  f, ok = features_de(kp, sc, brazo="left", umbrales={"nariz": .2, "hombro": .25, ...})
 """
 
 from __future__ import annotations
 
 import numpy as np
 
-__all__ = ["NOMBRES", "N_FEATURES", "features_de", "espejar", "MIN_SCORE"]
+__all__ = ["NOMBRES", "N_FEATURES", "NOMBRES_GUANTE", "L_GUA", "R_GUA", "features_de", "espejar", "MIN_SCORE", "ARTICULACIONES",
+           "resolver_umbrales"]
 
 # COCO17
 NARIZ = 0
@@ -57,9 +74,25 @@ L_HOM, R_HOM = 5, 6
 L_COD, R_COD = 7, 8
 L_MUN, R_MUN = 9, 10
 L_CAD, R_CAD = 11, 12
+# E12: el guante entra como dos keypoints mas
+L_GUA, R_GUA = 17, 18
 
 MIN_SCORE = 0.3
 _EPS = 1e-6
+
+# Las cinco que usan las features; izquierda y derecha comparten umbral.
+ARTICULACIONES = ("nariz", "hombro", "codo", "muneca", "cadera")
+
+
+def resolver_umbrales(umbrales=None) -> dict[str, float]:
+    """None, un numero o un dict con las cinco articulaciones -> dict con las cinco."""
+    if umbrales is None:
+        return {a: MIN_SCORE for a in ARTICULACIONES}
+    if isinstance(umbrales, (int, float)):
+        return {a: float(umbrales) for a in ARTICULACIONES}
+    if set(umbrales) != set(ARTICULACIONES):
+        raise ValueError(f"umbrales tiene que traer exactamente {ARTICULACIONES}, trae {sorted(umbrales)}")
+    return {a: float(umbrales[a]) for a in ARTICULACIONES}
 
 # Un brazo humano estirado no llega a 2 desde el centro de hombros, ni con la escala mas
 # favorable. Es una red de contencion: con la escala actual no descarta practicamente nada
@@ -71,7 +104,7 @@ EXTENSION_MAX = 3.0
 # del otro lado y sigue siendo su hombro izquierdo, asi que los pares tambien se permutan.
 # Sin la permutacion, el vector de hombros queda con el signo cambiado y el brazo derecho no
 # se ve como un izquierdo, que es todo el objetivo.
-PARES_LR = [(1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12), (13, 14), (15, 16)]
+PARES_LR = [(1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12), (13, 14), (15, 16), (L_GUA, R_GUA)]
 
 
 def espejar(kp: np.ndarray, sc: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -79,6 +112,8 @@ def espejar(kp: np.ndarray, sc: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     kp, sc = kp.copy(), sc.copy()
     kp[..., 0] *= -1
     for a, b in PARES_LR:
+        if b >= kp.shape[1]:        # sin guantes el esqueleto tiene 17
+            continue
         kp[:, [a, b]] = kp[:, [b, a]]
         sc[:, [a, b]] = sc[:, [b, a]]
     return kp, sc
@@ -98,6 +133,15 @@ NOMBRES = [
 ]
 N_FEATURES = len(NOMBRES)
 
+# Las 5 del guante, que van despues de las 20 cuando el esqueleto trae 19 keypoints.
+NOMBRES_GUANTE = ["guante_x", "guante_y", "guante_ok", "d_guante_x", "d_guante_y"]
+
+# Las que salen de la muneca o del codo del brazo que actua: con el guante llevando la mano
+# van en 0, porque su keypoint esta bajo umbral.
+_DE_MUNECA_Y_CODO = [NOMBRES.index(n) for n in (
+    "muneca_x", "muneca_y", "codo_x", "codo_y", "extension", "angulo_codo",
+    "d_muneca_x", "d_muneca_y", "d_extension", "d_angulo_codo", "dd_extension")]
+
 
 def _angulo(v: np.ndarray) -> np.ndarray:
     """Angulo de un vector (T, 2), como (cos, sin). Sin saltos en +-pi."""
@@ -106,7 +150,7 @@ def _angulo(v: np.ndarray) -> np.ndarray:
 
 
 def features_de(
-    kp: np.ndarray, sc: np.ndarray, brazo: str
+    kp: np.ndarray, sc: np.ndarray, brazo: str, umbrales=None
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Features del brazo `brazo` ("left" o "right") y mascara de cuadros usables.
@@ -126,6 +170,7 @@ def features_de(
         raise ValueError(f"brazo invalido: {brazo!r}")
     kp = np.asarray(kp, np.float64)
     sc = np.asarray(sc, np.float64)
+    u = resolver_umbrales(umbrales)
     if brazo == "right":
         kp, sc = espejar(kp, sc)
     T = len(kp)
@@ -133,16 +178,15 @@ def features_de(
     centro = (kp[:, L_HOM] + kp[:, R_HOM]) / 2
     ancho = np.linalg.norm(kp[:, L_HOM] - kp[:, R_HOM], axis=-1)
     torso = np.linalg.norm(centro - (kp[:, L_CAD] + kp[:, R_CAD]) / 2, axis=-1)
-    caderas_ok = np.minimum(sc[:, L_CAD], sc[:, R_CAD]) >= MIN_SCORE
+    caderas_ok = np.minimum(sc[:, L_CAD], sc[:, R_CAD]) >= u["cadera"]
     escala = np.where(caderas_ok, np.maximum(ancho, torso), ancho)
 
-    ok = (
-        (np.minimum(sc[:, L_HOM], sc[:, R_HOM]) >= MIN_SCORE)
+    cuerpo_ok = (
+        (np.minimum(sc[:, L_HOM], sc[:, R_HOM]) >= u["hombro"])
         & caderas_ok
-        & (sc[:, L_COD] >= MIN_SCORE)
-        & (sc[:, L_MUN] >= MIN_SCORE)
         & (escala > _EPS)
     )
+    brazo_ok = (sc[:, L_COD] >= u["codo"]) & (sc[:, L_MUN] >= u["muneca"])
 
     rel = (kp - centro[:, None, :]) / np.maximum(escala, _EPS)[:, None, None]
 
@@ -190,7 +234,11 @@ def features_de(
         ],
         axis=-1,
     )
-    ok &= extension <= EXTENSION_MAX
+    brazo_ok &= extension <= EXTENSION_MAX
+    if kp.shape[1] > L_GUA:
+        f, ok = _con_guante(f, rel, sc, cuerpo_ok, brazo_ok, d)
+    else:
+        ok = cuerpo_ok & brazo_ok
     f[~ok] = 0.0
     f = np.nan_to_num(f, nan=0.0, posinf=0.0, neginf=0.0)
 
@@ -200,3 +248,26 @@ def features_de(
         usable[:-1] &= ok[1:]
         usable[1:] &= ok[:-1]
     return f.astype(np.float32), usable
+
+
+def _con_guante(f, rel, sc, cuerpo_ok, brazo_ok, d):
+    """
+    Las 5 features del guante y la mascara de E12 §3.
+
+    La derivada del guante no cruza un cuadro sin guante, con la misma regla de vecinos que
+    la mascara: si falta en t-1 o en t+1, va en 0 en t.
+    """
+    hay = sc[:, L_GUA] > 0
+    g = rel[:, L_GUA]
+    vecinos = hay.copy()
+    if len(hay) > 1:
+        vecinos[:-1] &= hay[1:]
+        vecinos[1:] &= hay[:-1]
+    dg = np.stack([d(g[:, 0]), d(g[:, 1])], -1)
+    dg[~vecinos] = 0.0
+    fg = np.concatenate([g, hay[:, None].astype(np.float64), dg], -1)
+    fg[~hay] = 0.0
+    usa_guante = ~brazo_ok & hay
+    f = np.concatenate([f, fg], -1)
+    f[np.ix_(usa_guante, _DE_MUNECA_Y_CODO)] = 0.0
+    return f, cuerpo_ok & (brazo_ok | hay)
