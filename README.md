@@ -873,3 +873,13 @@ PENDIENTE Y PROXIMO PASO
 6. YOLO26 mas rapido (37,1 contra 40,6 ms por cuadro) y con menos memoria
 7. Auditoria independiente: 9 de 9 items pasan
 8. Documentado en docs/experiments/2026-10-29-e8-yolo26.md
+
+31-10 E8b: YOLO26 con el umbral de puntaje calibrado por articulacion
+
+1. Umbral que iguala la fraccion aceptada de v8 con 0,3: 0,10 a 0,18 segun la articulacion
+2. Detector, F1 en 0,80: 0,626 contra 0,623 de la base, 3 de 6 folds: iguala
+3. Familia de E4: 0,713 contra 0,732, 2 de 7 folds: iguala, del lado bajo
+4. Recupera +0,124 de F1 (mejor umbral de cada uno) y +0,037 de familia respecto de E8
+5. Cuadros-carril usables: 139534 contra 147788 (base) y 111472 (YOLO26 con 0,3)
+6. Auditoria independiente: 6 de 6 items pasan
+7. Documentado en docs/experiments/2026-10-31-e8b-umbral-calibrado.md
