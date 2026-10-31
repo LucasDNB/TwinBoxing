@@ -44,7 +44,7 @@ fase, con este mismo formato.
 | S7 | SDD | E10: P14d, histograma de huecos por condición, sin etiquetas (de día) | S3 | JSON de huecos | hecha | 30-10: `~/boxtwin-mejoras/e10/huecos-{v8,y26,y26cal}.json`. Cuadros perdidos de muñeca en huecos de ≤ 0,10 s: v8 0,225, Y26 0,113, Y26-cal 0,192 (codo 0,256, 0,161, 0,250). Debajo de 0,30: el relleno actúa sobre la minoría de la pérdida (02 §2); el tope no cambia |
 | S8 | SDD | E10: build y corridas de v8+R (noche del 1-11); S8b Y26-cal+R si S5 terminó; S8c variante 0,20 s si sobra noche | S3, S7 | 35 corridas de cada uno | pendiente | |
 | S9 | SDD | E10: lectura, auditoría, documento | S8 | | pendiente | |
-| S10 | SDD | E11 desarrollo: `medir_e11.py` sobre la evidencia de C1, con y sin corte; auditoría ítem 2 (sin corte reproduce 85/105) | S2 | JSON de desarrollo | hecha, en revisión | 30-10 21:53 UTC: `~/boxtwin-mejoras/e11/desarrollo.json` (v1). Auditoría ítem 2: sin corte, 85/105. Con corte mejora 04-sparring (precisión 0,855 a 0,970) y sparring-3-rounds (0,819 a 0,905), sin cambios en 01, 02 y 03, e invierte Sparring (0,887 a 0,059): la regla de §2.2 (máxima diferencia de medianas) es casi plana donde el color es estable y el ruido elige el corte; cayó una muestra antes del cambio, en el recorte de las semillas. Pendiente: decisión de Lucas sobre corregir la regla (decisión 16) |
+| S10 | SDD | E11 desarrollo: `medir_e11.py` sobre la evidencia de C1, con y sin corte; auditoría ítem 2 (sin corte reproduce 85/105) | S2 | JSON de desarrollo | hecha | v1 (30-10 21:53 UTC, `547d58b`, `~/boxtwin-mejoras/e11/desarrollo-v1.json`): auditoría ítem 2, sin corte 85/105; con corte invierte Sparring (precisión 0,887 a 0,059) por la regla de §2.2, punto 1 (decisión 16). v2 (31-10, `9782993`, rama `e11-regla-corte`, PR #42, con la regla corregida; `desarrollo-v2.json`, copiado como `desarrollo.json`): sin corte 85/105 otra vez; precisión por cuadro 0,850 a 0,923 y cobertura 0,788 a 0,872 con corte, ninguna fuente empeora (Sparring 0,887 a 0,960). P15d: 16 tracks partidos, 10 de ellos mixtos según la verdad, de 18 mixtos. Desarrollo: no decide P15a ni P15b |
 | L3 | Lucas | Elegir dos sparrings de confirmación para E11 (E11 §4) y anotar su identidad en el anotador con la propuesta automática apagada; hasta el 7-11 | — | los dos `annot.json` con fecha y la nota de cómo se anotó | pendiente | |
 | S11 | SDD | E11 confirmación sobre L3: preproceso de pose con los parámetros de A y `analizar` de guantes (GPU, poca, bajo el candado), después `medir_e11.py` | S10, L3 | JSON de confirmación | bloqueada | por L3 |
 | S12 | SDD | E11: lectura, auditoría, documento (desarrollo y confirmación separados) | S11, o S10 si L3 no llega el 7-11 | | pendiente | |
@@ -101,3 +101,10 @@ Una línea por decisión, con el motivo, antes de correr la parte afectada.
 15. 30-10 (S1): S7 (P14d) no tenía tarea de código; se suma `scripts/mejoras/huecos.py` con su prueba.
     S8c (relleno a 0,20 s) y P16e (E4 con guante) no están en `mejoras.sh`: son informativas, para si
     sobra noche, y piden código que no está en T1 a T12.
+16. 31-10 (E11, corrige 03 §2.2 punto 1, después de la primera corrida de S10 y antes de S11): el
+    índice de corte sale de la máxima diferencia de MEDIAS, y si se corta lo siguen decidiendo las
+    medianas (signo opuesto, las dos ≥ 0,25). La regla escrita (máxima diferencia de medianas) es casi
+    plana mientras el color no cambia y el ruido elegía el corte: en Sparring cayó una muestra antes
+    del cambio, en el recorte de las semillas, e invirtió la propuesta entera (S10 v1). Se corrigió
+    mirando el material de desarrollo, que es para eso (§4); la confirmación no corrió y queda limpia.
+    Decidido por Lucas el 31-10. Reemplaza la decisión 11 (el desempate por medias deja de hacer falta).
