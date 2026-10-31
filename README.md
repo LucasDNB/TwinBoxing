@@ -883,3 +883,14 @@ PENDIENTE Y PROXIMO PASO
 5. Cuadros-carril usables: 139534 contra 147788 (base) y 111472 (YOLO26 con 0,3)
 6. Auditoria independiente: 6 de 6 items pasan
 7. Documentado en docs/experiments/2026-10-31-e8b-umbral-calibrado.md
+
+31-10 E10: relleno de huecos cortos de keypoints en vez de enmascararlos
+
+1. Huecos cerrados de hasta 0,10 s, por articulacion, interpolados antes de las features
+2. Cuadros-carril usables 158976 contra 147788; pasos usables de E4 0,914 contra 0,842
+3. Detector, F1 en 0,80: 0,628 contra 0,623, 3 de 6 folds: no demostrada
+4. Familia de E4: 0,743 contra 0,732, 5 de 7 folds, debajo de +0,03: no demostrada
+5. Sobre YOLO26 calibrado: +0,018 de F1 y +0,010 de familia, positivas
+6. Solo 27% de los cuadros perdidos de muneca caen en huecos de hasta 0,10 s
+7. Auditoria independiente: 7 de 8 items pasan; el total de P14d se corrigio
+8. Documentado en docs/experiments/2026-10-31-e10-relleno-temporal.md
