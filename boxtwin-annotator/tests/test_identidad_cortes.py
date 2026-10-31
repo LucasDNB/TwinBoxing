@@ -164,3 +164,27 @@ def test_el_comando_escribe_un_assignment_por_segmento(doc_min):
                   if a.track_id == 3)
     assert del3 == [(300, 448, TrackRole.A), (448, 596, TrackRole.B)]
     assert all(a.track_id >= 0 for a in doc_min.identity.assignments)
+
+
+# -- decision 16: el punto de corte sale de la diferencia de medias ---------------------------
+
+
+def test_con_ruido_el_corte_cae_en_el_cambio():
+    # Sparring, 30-10: con colores reales la diferencia de medianas es casi plana mientras el
+    # color no cambia, y el ruido (1,58 contra 1,67) elegia el corte una muestra antes del cambio
+    from boxtwin.core.identidad_auto import _mejor_corte
+    rng = np.random.default_rng(0)
+    for semilla in range(50):
+        rng = np.random.default_rng(semilla)
+        n_a, n_b = int(rng.integers(5, 30)), int(rng.integers(5, 30))
+        s = list(1.6 + rng.normal(0, 0.05, n_a)) + list(-1.6 + rng.normal(0, 0.05, n_b))
+        frames = list(range(0, 5 * (n_a + n_b), 5))
+        k, _, a, b = _mejor_corte(frames, s, 5, 0.25)
+        assert k == n_a and a > 0 > b, semilla
+
+
+def test_las_medianas_siguen_decidiendo_si_se_corta():
+    from boxtwin.core.identidad_auto import _mejor_corte
+    # la media salta por un par de muestras extremas, pero las dos medianas son del mismo signo
+    s = [1.6] * 10 + [-3.0, -3.0] + [1.6] * 10
+    assert _mejor_corte(list(range(22)), s, 5, 0.25) is None
