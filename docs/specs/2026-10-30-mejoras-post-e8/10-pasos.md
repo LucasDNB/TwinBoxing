@@ -49,7 +49,7 @@ fase, con este mismo formato.
 | S11 | SDD | E11 confirmación sobre L3: preproceso de pose con los parámetros de A y `analizar` de guantes (GPU, poca, bajo el candado), después `medir_e11.py` | S10, L3 | JSON de confirmación | bloqueada | por L3 |
 | S12 | SDD | E11: lectura, auditoría, documento (desarrollo y confirmación separados) | S11, o S10 si L3 no llega el 7-11 | | pendiente | |
 | S13 | SDD | E12: `guantes_por_cuadro.py` sobre las siete fuentes (noche del 2-11), con tiempo por cuadro (P16d) | S3 | siete `.npz`; P16c y P16d | hecha | 31-10 04:53 a 05:10 UTC: siete `.npz` en `~/boxtwin-mejoras/e12/guantes/`, `kmano.json` (200, semilla 0). P16c (sobre cuadros con el peleador, corregido en `resumen.json`; `resumen-v1.json` contaba el video entero): de 0,16 (Sparring) a 0,73 (02-sparring) por mano. P16d: mediana 12,6 ms y p95 15,4 ms por cuadro con peleador en la 2080; sumado a la proyección de C5 (1,74 a 1,86×) da 2,12 a 2,24×: por §5 no entra en el producto sin muestrear |
-| L2 | Lucas | E12 K-mano: marcar 200 cuadros (la lista la arma S13 con semilla 0) | S13 | ≥ 90% | pendiente | |
+| L2 | Lucas | E12 K-mano: marcar 200 cuadros (la lista la arma S13 con semilla 0) | S13 | ≥ 90% | hecha, pasa | 1-11 15:25 UTC, en la página de `kmano_pagina.py` (respuestas copiadas en `~/boxtwin-mejoras/e12/kmano/`): 137 bien, 6 mal, 57 no se puede saber. Sobre los juzgables 137/143 = 0,958 (Wilson 0,912 a 0,981): pasa (decisión 17). Sobre los 200 sería 0,685 |
 | S14 | SDD | E12: build de v8+G y corridas (noche del 3-11); P16e solo si sobra | L2 | 35 corridas | pendiente | |
 | S15 | SDD | E12: lectura, auditoría, documento | S14 | | pendiente | |
 | S16 | SDD | Cierre: huellas y sha256 después (CM2, CM3), CM1 a CM6, PR de resultados con todos los documentos y cambios de tesis | S6, S9, S12, S15 | iguales a S2 | pendiente | |
@@ -108,3 +108,7 @@ Una línea por decisión, con el motivo, antes de correr la parte afectada.
     del cambio, en el recorte de las semillas, e invirtió la propuesta entera (S10 v1). Se corrigió
     mirando el material de desarrollo, que es para eso (§4); la confirmación no corrió y queda limpia.
     Decidido por Lucas el 31-10. Reemplaza la decisión 11 (el desempate por medias deja de hacer falta).
+17. 1-11 (E12, K-mano, antes de S14): el 90% de K-mano se lee sobre los cuadros juzgables. La página
+    ofrecía una tercera respuesta, "no se puede saber", que el pre-registro no prevé: un cuadro donde
+    ni una persona distingue la mano no confirma ni refuta la asignación. Los no juzgables se declaran
+    al lado: 57 de 200 (0,285), casi todos en clinch. Decidido por Lucas el 1-11.
