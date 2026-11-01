@@ -111,4 +111,4 @@ Una línea por decisión, con el motivo, antes de correr la parte afectada.
 17. 1-11 (E12, K-mano, antes de S14): el 90% de K-mano se lee sobre los cuadros juzgables. La página
     ofrecía una tercera respuesta, "no se puede saber", que el pre-registro no prevé: un cuadro donde
     ni una persona distingue la mano no confirma ni refuta la asignación. Los no juzgables se declaran
-    al lado: 57 de 200 (0,285), casi todos en clinch. Decidido por Lucas el 1-11.
+    al lado: 57 de 200 (0,285); no se clasificó por qué no se ven. Decidido por Lucas el 1-11.
