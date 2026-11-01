@@ -894,3 +894,14 @@ PENDIENTE Y PROXIMO PASO
 6. Solo 27% de los cuadros perdidos de muneca caen en huecos de hasta 0,10 s
 7. Auditoria independiente: 7 de 8 items pasan; el total de P14d se corrigio
 8. Documentado en docs/experiments/2026-10-31-e10-relleno-temporal.md
+
+01-11 E12: el guante detectado como features del detector de golpes
+
+1. Guante por cuadro en las siete fuentes; K-mano 137 de 143 juzgables (0,958)
+2. Detector, F1 en 0,80: 0,429 contra 0,623, 0 de 6 folds: no demostrada
+3. La caida no es del guante: el detector marca golpes en cuadros sin pose (entrada en cero)
+   y la evaluacion los cuenta; defecto heredado, tambien en E8
+4. Sin esos cuadros (diagnostico de un fold): 0,637 contra 0,624, sin efecto
+5. La regla de asignacion de mano dejo inerte el cambio de mascara: la hipotesis no se probo
+6. Costo 12,6 ms por cuadro: con C5 da 2,12 a 2,24 veces, no entra sin muestrear
+7. Documentado en docs/experiments/2026-11-01-e12-guantes-en-detector.md
