@@ -158,13 +158,36 @@ s14() {
 
 s15() { correr "$PY" "$M/lectura.py" e12; }
 
+# R1 (11-r1-evaluacion-producto.md): las seis condiciones del detector, re-armadas con la mascara de
+# pose del producto y re-entrenadas; K-r1a contra los tensores que ya se usaron, con `pose` de mas
+r1() {
+  local R=$MEJORAS/r1 cond exp opc previo
+  for cond in base y26 y26cal v8r y26calr v8g; do
+    case $cond in
+      base)    exp=base; opc=();                                    previo=$E8/base/det ;;
+      y26)     exp=y26;  opc=();                                    previo=$E8/y26/det ;;
+      y26cal)  exp=y26;  opc=(--umbrales "$UMBRALES");              previo=$MEJORAS/e8b/y26cal/det ;;
+      v8r)     exp=base; opc=(--relleno);                           previo=$MEJORAS/e10/v8r/det ;;
+      y26calr) exp=y26;  opc=(--umbrales "$UMBRALES" --relleno);    previo=$MEJORAS/e10/y26calr/det ;;
+      v8g)     exp=base; opc=(--guantes "$MEJORAS/e12/guantes");    previo=$MEJORAS/e12/v8g/det ;;
+    esac
+    build "$exp" "$R/$cond" "${opc[@]}" --mascara-pose
+    correr "$PY" "$M/kreuso.py" "$previo" "$R/$cond/det" --ignorar pose --out "$R/$cond/kreuso.json"
+  done
+  for cond in base y26 y26cal v8r y26calr v8g; do
+    local det=("$R/$cond/det/"*.det.npz)
+    correr "$BIN/boxtwin-detector" folds "${det[@]}" --semillas 42 1 2 3 4 --out "$R/$cond/folds.json"
+  done
+  correr "$PY" "$M/lectura.py" r1
+}
+
 declare -A QUE=([S3]="k-reuso" [S4]="e8b calibracion y build" [S5]="e8b folds y E4" [S6]="e8b lectura"
                 [S7]="e10 huecos" [S8]="e10 relleno" [S9]="e10 lectura" [S10]="e11 desarrollo"
                 [S11]="e11 confirmacion" [S12]="e11 lectura" [S13]="e12 guantes por cuadro"
-                [S14]="e12 build y folds" [S15]="e12 lectura")
+                [S14]="e12 build y folds" [S15]="e12 lectura" [R1]="r1 evaluacion con la mascara del producto")
 pedidas=("$@")
 if [[ ${#pedidas[@]} -eq 0 ]]; then
-  echo "uso: mejoras.sh S3 [S4 ...]   etapas: S3 a S15 (10-pasos.md)" >&2
+  echo "uso: mejoras.sh S3 [S4 ...]   etapas: S3 a S15 y R1 (10-pasos.md, 11-r1)" >&2
   exit 2
 fi
 for id in "${pedidas[@]}"; do

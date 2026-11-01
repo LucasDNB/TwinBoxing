@@ -58,7 +58,7 @@ E4 no cambia: clasifica segmentos anotados y no decodifica.
 |---|---|---|
 | K-r1a | Con `--mascara-pose`, los tensores de siempre son idénticos a los de la condición sin la opción (K-reuso contra los de E8, E8b, E10 y E12, con `pose` como único arreglo de más) | R1 no se lee |
 | K-r1b | La curva vieja de cada condición re-entrenada queda a ±0,02 del F1 en 0,80 que ya se publicó (media de los seis folds comparables) | se declara la diferencia; R1 se lee igual, porque compara dentro del mismo entrenamiento |
-| K-r1c | La máscara nueva solo puede sacar predicciones: en cada fold y umbral, los predichos con la máscara de pose son ≤ los predichos sin ella | la implementación está mal |
+| K-r1c | La máscara nueva solo puede sacar cuadros marcados: en cada carril y umbral, los cuadros dentro de segmentos predichos con la máscara de pose están contenidos en los de sin ella. (Corregido antes de la primera corrida: la versión anterior pedía predichos ≤, y eso es falso en general, porque la máscara puede partir un segmento largo en dos) | la implementación está mal |
 
 ## 5. Reglas de lectura
 

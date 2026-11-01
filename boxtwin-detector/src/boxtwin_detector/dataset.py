@@ -74,6 +74,11 @@ QUE HACE
   - `guantes`: un directorio con <fuente>.npz de guantes_por_cuadro.py (E12). El guante entra
     como keypoints 17 y 18 y las features pasan de 20 a 25.
 
+  Y una de la evaluacion (R1, docs/specs/2026-10-30-mejoras-post-e8/11-r1-evaluacion-producto.md):
+  `mascara_pose` guarda `pose` por carril, la mascara donde el producto deja opinar al detector
+  (la `usable` de inferencia.carriles_de: features_de por la identidad resuelta). No saca amagues
+  ni lo que esta fuera del tramo anotado: eso es de la perdida, no de donde decodifica.
+
 USO
   fuente = construir(Path("exports/spar.sequence.npz"))
   escribir(fuente, Path("data/"))
@@ -113,6 +118,7 @@ class Fuente:
     conteos: dict = field(default_factory=dict)
     procedencia: dict = field(default_factory=dict)
     rellenado: np.ndarray | None = None  # (carriles, T) bool, solo con relleno (E10)
+    pose: np.ndarray | None = None       # (carriles, T) bool, solo con mascara_pose (R1)
 
     @property
     def T(self) -> int:
@@ -178,6 +184,7 @@ def leer_umbrales(ruta: Path) -> tuple[dict[str, float], str]:
 def construir(
     npz: Path, fps_destino: float = FPS_DESTINO, interpolados: bool = True,
     umbrales: Path | None = None, relleno: bool = False, guantes: Path | None = None,
+    mascara_pose: bool = False,
 ) -> Fuente:
     """
     Arma los tensores de una fuente a partir de su export `sequence`.
@@ -252,6 +259,7 @@ def construir(
     n_carriles = labels.shape[0] * labels.shape[1]
     F = np.zeros((n_carriles, T_nuevo, len(nombres)), np.float32)
     RELL = np.zeros((n_carriles, T_nuevo), bool) if rell is not None else None
+    POSE = np.zeros((n_carriles, T_nuevo), bool) if mascara_pose else None
     L = np.zeros((n_carriles, T_nuevo), np.int8)
     U = np.zeros((n_carriles, T_nuevo), bool)
     INT = np.zeros((n_carriles, T_nuevo), bool)
@@ -266,6 +274,8 @@ def construir(
             f, ok = features_de(kp_r[p], sc_r[p], brazo, umbrales=u)
             F[i] = f
             U[i] = ok & valid_r[p]
+            if POSE is not None:
+                POSE[i] = U[i]          # antes de amagues, tramo e interpolados
             INT[i] = interp_r[p]
             if RELL is not None:
                 RELL[i] = rell[p, idx]
@@ -339,7 +349,7 @@ def construir(
         nombre=Path(meta["video"]["name"]).stem,
         features=F, labels=L, usable=U, interpolado=INT,
         carriles=nombres_carril, fps=fps_destino,
-        conteos=conteos, procedencia=procedencia, rellenado=RELL,
+        conteos=conteos, procedencia=procedencia, rellenado=RELL, pose=POSE,
     )
 
 
@@ -351,6 +361,8 @@ def escribir(f: Fuente, out_dir: Path) -> tuple[Path, Path]:
     man = out_dir / f"{f.nombre}.det.json"
     # `rellenado` solo con relleno: apagado, el npz tiene que ser el de antes
     opcional = {} if f.rellenado is None else {"rellenado": f.rellenado}
+    if f.pose is not None:
+        opcional["pose"] = f.pose
     np.savez_compressed(
         npz,
         features=f.features, labels=f.labels, usable=f.usable,
@@ -377,4 +389,5 @@ def leer(npz: Path) -> Fuente:
         carriles=[str(x) for x in d["carriles"]], fps=float(d["fps"]),
         conteos=man["conteos"], procedencia=man["procedencia"],
         rellenado=d["rellenado"] if "rellenado" in d.files else None,
+        pose=d["pose"] if "pose" in d.files else None,
     )

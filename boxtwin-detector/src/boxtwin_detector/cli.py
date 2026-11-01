@@ -36,7 +36,8 @@ def _build(args: argparse.Namespace) -> int:
             print(f"error: no existe {npz}", file=sys.stderr)
             return 1
         f = construir(npz, args.fps, interpolados=not args.sin_interpolados,
-                      umbrales=args.umbrales, relleno=args.relleno, guantes=args.guantes)
+                      umbrales=args.umbrales, relleno=args.relleno, guantes=args.guantes,
+                      mascara_pose=args.mascara_pose)
         salida, man = escribir(f, args.out)
         c = f.conteos
         usables = c["cuadros_usables"]
@@ -330,12 +331,13 @@ def _folds(args: argparse.Namespace) -> int:
                     predecir_secuencia(m, est.aplicar(f.features[c]), cfg, device))
                  for c in range(f.features.shape[0])] for f in vals]
 
-    def curva_de_probs(probs, vals, us):
+    def curva_de_probs(probs, vals, us, con_pose=False):
+        # con_pose (R1): cada carril decodifica solo donde el producto lo haria
         out = []
         for f, ps in zip(vals, probs):
             cob = tuple(f.conteos.get("cobertura", [0, f.T - 1]))
             out.append(barrer(ps, f.labels, f.usable, us, cobertura=cob, como_score=True,
-                              interpolado=f.interpolado))
+                              interpolado=f.interpolado, pose=f.pose if con_pose else None))
         return out
 
     def mejor_en(us, curvas):
@@ -362,14 +364,15 @@ def _folds(args: argparse.Namespace) -> int:
                         "recall_rellenados": round(hr / gr, 4) if gr else None}
         return best
 
-    def curva_heuristica(vals):
+    def curva_heuristica(vals, con_pose=False):
         i = NOMBRES.index("extension")
         us = [round(x, 2) for x in np.arange(0.3, 1.7, 0.05)]
         out = []
         for f in vals:
             ext = [f.features[c, :, i] for c in range(f.features.shape[0])]
             cob = tuple(f.conteos.get("cobertura", [0, f.T - 1]))
-            out.append(barrer(ext, f.labels, f.usable, us, cobertura=cob, como_score=True))
+            out.append(barrer(ext, f.labels, f.usable, us, cobertura=cob, como_score=True,
+                              pose=f.pose if con_pose else None))
         best = None
         for k, u in enumerate(us):
             g = sum(c[k]["golpes"] for c in out)
@@ -400,6 +403,10 @@ def _folds(args: argparse.Namespace) -> int:
     resultados = []
     avisos: list[str] = []
     n = len(args.semillas)
+    # R1: si todos los datos traen la mascara de pose, cada modelo se evalua tambien con ella
+    con_pose = all(f.pose is not None for f in fuentes.values())
+    if con_pose:
+        print("R1: con mascara de pose, se reporta tambien la curva con la mascara del producto")
     us_voto = umbrales
     versiones = {k: version_de(f) for k, f in fuentes.items()}
     print(f"{n} semillas por fold, alpha {args.alpha}")
@@ -412,7 +419,7 @@ def _folds(args: argparse.Namespace) -> int:
           f"{'rellenados':>11} | {'heur':>6}")
     for nombre, train, val in tareas:
         est = Estandarizador.ajustar(train)
-        fs, corridas = [], []
+        fs, corridas, corridas_pose = [], [], []
         acum = [[np.zeros(f.T) for _ in range(f.features.shape[0])] for f in val]
         for s in args.semillas:
             cfg = Config(epocas=args.epocas, alpha_pesos=args.alpha, semilla=s)
@@ -425,6 +432,9 @@ def _folds(args: argparse.Namespace) -> int:
                     acum[i][c] += x
             b = mejor_en(umbrales, curva_de_probs(probs, val, umbrales))
             corridas.append({"semilla": s, **b})
+            if con_pose:
+                corridas_pose.append({"semilla": s,
+                                      **mejor_en(umbrales, curva_de_probs(probs, val, umbrales, True))})
             fs.append(b["f1"])
         ens_probs = [[a / n for a in fuente_] for fuente_ in acum]
         curva_e = curva_de_probs(ens_probs, val, us_voto)
@@ -451,7 +461,10 @@ def _folds(args: argparse.Namespace) -> int:
                            "ensamble": e,
                            "ensamble_curva": agregar_curva(us_voto, curva_e),
                            "f1_medio": round(float(np.mean(fs)), 4),
-                           "f1_desvio": round(float(np.std(fs)), 4)})
+                           "f1_desvio": round(float(np.std(fs)), 4),
+                           **(_r1(curva_de_probs(ens_probs, val, us_voto, True), us_voto,
+                                  corridas_pose, curva_heuristica(val, True), mejor_en)
+                              if con_pose else {})})
 
     for a in avisos:
         print(f"\n  ATENCION: {a}")
@@ -468,6 +481,12 @@ def _folds(args: argparse.Namespace) -> int:
              "resultados": resultados}, indent=2, ensure_ascii=False) + "\n")
         print(f"  -> {args.out}")
     return 0
+
+
+def _r1(curva, us, corridas_pose, heuristica, mejor_en) -> dict:
+    """Los campos de R1 de un fold: lo mismo que la evaluacion de siempre, con la mascara de pose."""
+    return {"ensamble_pose": mejor_en(us, curva), "ensamble_curva_pose": agregar_curva(us, curva),
+            "corridas_pose": corridas_pose, "heuristica_pose": heuristica}
 
 
 def agregar_curva(umbrales, curvas) -> list[dict]:
@@ -516,6 +535,9 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--guantes", type=Path, default=None,
                    help="E12: directorio con <fuente>.npz de guantes_por_cuadro.py. El guante "
                         "entra como keypoints 17 y 18 y las features pasan a 25.")
+    b.add_argument("--mascara-pose", action="store_true",
+                   help="R1: guarda por carril la mascara donde el producto deja opinar al "
+                        "detector, para que folds evalue tambien con ella.")
     b.set_defaults(func=_build)
 
     tr = sub.add_parser("train", help="entrena el detector sobre un fold")

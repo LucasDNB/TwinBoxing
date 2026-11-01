@@ -39,19 +39,20 @@ def huella(arr: np.ndarray) -> str:
     return h.hexdigest()
 
 
-def huellas(raiz: Path) -> dict[str, dict[str, str]]:
-    """{ruta relativa: {clave: sha256}} de los tensores bajo `raiz`."""
+def huellas(raiz: Path, ignorar=()) -> dict[str, dict[str, str]]:
+    """{ruta relativa: {clave: sha256}} de los tensores bajo `raiz`, sin las claves de `ignorar`."""
     raiz = Path(raiz)
     salida = {}
     for patron in PATRONES:
         for p in sorted(raiz.glob(patron)):
             with np.load(p, allow_pickle=False) as z:
-                salida[str(p.relative_to(raiz))] = {k: huella(z[k]) for k in z.files}
+                salida[str(p.relative_to(raiz))] = {k: huella(z[k]) for k in z.files if k not in ignorar}
     return salida
 
 
-def comparar(esperado: Path, nuevo: Path) -> dict:
-    a, b = huellas(esperado), huellas(nuevo)
+def comparar(esperado: Path, nuevo: Path, ignorar=()) -> dict:
+    """`ignorar`: arreglos que el nuevo agrega a proposito (K-r1a: `pose`)."""
+    a, b = huellas(esperado, ignorar), huellas(nuevo, ignorar)
     dif = []
     for archivo in sorted(set(a) | set(b)):
         if archivo not in a or archivo not in b:
@@ -63,7 +64,7 @@ def comparar(esperado: Path, nuevo: Path) -> dict:
             if ha != hb:
                 dif.append({"archivo": archivo, "clave": clave, "esperado": ha, "nuevo": hb})
     return {"esperado": str(esperado), "nuevo": str(nuevo), "archivos": len(set(a) | set(b)),
-            "diferencias": dif, "pasa": not dif and bool(a)}
+            "ignorados": list(ignorar), "diferencias": dif, "pasa": not dif and bool(a)}
 
 
 def main(argv=None) -> int:
@@ -71,8 +72,9 @@ def main(argv=None) -> int:
     ap.add_argument("esperado", type=Path, help="los tensores de E8")
     ap.add_argument("nuevo", type=Path, help="los del codigo nuevo con la mejora apagada")
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--ignorar", nargs="*", default=[], help="arreglos que el nuevo agrega a proposito")
     args = ap.parse_args(argv)
-    r = comparar(args.esperado, args.nuevo)
+    r = comparar(args.esperado, args.nuevo, tuple(args.ignorar))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(r, indent=2) + "\n")
     print(f"K-reuso {'pasa' if r['pasa'] else 'FALLA'}: {r['archivos']} archivos, "

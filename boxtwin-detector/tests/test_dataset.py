@@ -431,3 +431,80 @@ def test_build_por_cli_sin_opciones_y_con_umbrales(tmp_path):
                  "--guantes", str(_guantes(tmp_path))]) == 0
     c = np.load(tmp_path / "c" / "falso.det.npz")
     assert c["features"].shape[2] == 25 and "rellenado" in c.files
+
+
+# -- R1-T1: la mascara de pose del producto, apagada por defecto ---------------------------
+
+
+def test_sin_mascara_pose_no_hay_arreglo_nuevo(tmp_path):
+    npz = _export_con_huecos(tmp_path)
+    f = construir(npz)
+    assert f.pose is None
+    a, _ = escribir(f, tmp_path / "a")
+    assert "pose" not in np.load(a).files
+
+
+def test_la_mascara_pose_es_la_de_inferencia(tmp_path):
+    from boxtwin_detector.dataset import indice_remuestreo
+    from boxtwin_detector.inferencia import carriles_de
+    npz = _export_con_huecos(tmp_path)
+    d = np.load(npz)
+    d2 = dict(d)
+    d2["valid"] = d["valid"].copy()
+    d2["valid"][1, 30:40] = False
+    d2["labels"][0, 1, 70:76] = 2 * 13 + 1        # un amague: sale de usable, no de pose
+    np.savez_compressed(npz, **d2)
+    f = construir(npz, mascara_pose=True)
+    c = carriles_de(d2["keypoints"], d2["kp_score"], d2["valid"], 30.0)
+    assert np.array_equal(f.pose, c.usable)
+    assert not (f.usable & ~f.pose).any(), "usable es un subconjunto de pose"
+    assert (f.pose & ~f.usable).any(), "pose no saca amagues ni lo que esta fuera del tramo"
+    assert np.array_equal(construir(npz).usable, f.usable)
+    a, _ = escribir(f, tmp_path / "p")
+    assert np.array_equal(leer(a).pose, f.pose)
+
+
+def test_folds_con_mascara_pose_reporta_las_dos_curvas(tmp_path):
+    # R1-T2 de punta a punta, chico y en CPU: tres fuentes sinteticas, una epoca, una semilla
+    from boxtwin_detector.cli import main
+    dets = []
+    for k in range(3):
+        d = tmp_path / f"f{k}"
+        d.mkdir()
+        segs = {(0, 0): [Segmento(20 + 40 * i, 26 + 40 * i, 0) for i in range(9)]}
+        npz = _export_falso(d, 30.0, 400, segs)
+        nuevo = d / f"fuente{k}.sequence.npz"
+        npz.rename(nuevo)
+        (d / "falso.sequence.meta.json").rename(d / f"fuente{k}.sequence.meta.json")
+        m = json.loads((d / f"fuente{k}.sequence.meta.json").read_text())
+        m["video"]["name"] = f"fuente{k}.mp4"
+        (d / f"fuente{k}.sequence.meta.json").write_text(json.dumps(m))
+        assert main(["build", str(nuevo), "--out", str(tmp_path / "det"), "--mascara-pose"]) == 0
+        dets.append(str(tmp_path / "det" / f"fuente{k}.det.npz"))
+    out = tmp_path / "folds.json"
+    assert main(["folds", *dets, "--semillas", "0", "--epocas", "1", "--out", str(out)]) == 0
+    r = json.loads(out.read_text())["resultados"]
+    for fold in r:
+        assert {"ensamble_pose", "ensamble_curva_pose", "corridas_pose", "heuristica_pose"} <= set(fold)
+        assert [x["umbral"] for x in fold["ensamble_curva_pose"]] == [x["umbral"] for x in fold["ensamble_curva"]]
+        assert all(x["golpes"] == y["golpes"] for x, y in zip(fold["ensamble_curva"], fold["ensamble_curva_pose"]))
+
+
+def test_folds_sin_mascara_pose_no_cambia_el_reporte(tmp_path):
+    from boxtwin_detector.cli import main
+    dets = []
+    for k in range(3):
+        d = tmp_path / f"f{k}"
+        d.mkdir()
+        npz = _export_falso(d, 30.0, 400, {(0, 0): [Segmento(20, 26, 0), Segmento(370, 376, 0)]})
+        nuevo = d / f"fuente{k}.sequence.npz"
+        npz.rename(nuevo)
+        (d / "falso.sequence.meta.json").rename(d / f"fuente{k}.sequence.meta.json")
+        m = json.loads((d / f"fuente{k}.sequence.meta.json").read_text())
+        m["video"]["name"] = f"fuente{k}.mp4"
+        (d / f"fuente{k}.sequence.meta.json").write_text(json.dumps(m))
+        assert main(["build", str(nuevo), "--out", str(tmp_path / "det")]) == 0
+        dets.append(str(tmp_path / "det" / f"fuente{k}.det.npz"))
+    out = tmp_path / "folds.json"
+    assert main(["folds", *dets, "--semillas", "0", "--epocas", "1", "--out", str(out)]) == 0
+    assert all("ensamble_pose" not in f for f in json.loads(out.read_text())["resultados"])

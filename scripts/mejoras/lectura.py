@@ -19,6 +19,9 @@ QUE HACE
     0,02; empeora si la precision baja 0,03 o mas o la cobertura baja mas de 0,05; si no, sin
     diferencia demostrada.
   - Las diferencias sin umbral (P13c, P14c) van con su direccion declarada.
+  - R1 (11-r1-evaluacion-producto.md): las cuatro reglas del detector otra vez, sobre la curva
+    con la mascara de pose del producto (`ensamble_curva_pose`) de las seis condiciones
+    re-entrenadas en <mejoras>/r1/<condicion>/, y K-r1b (la curva vieja a +-0,02 de lo publicado).
   Lo que no esta medido queda "no realizado". Escribe <mejoras>/<exp>/veredictos.json.
 
 USO
@@ -49,6 +52,11 @@ E11_PRECISION = 0.03
 E11_COBERTURA_MEJORA = 0.02
 E11_COBERTURA_EMPEORA = 0.05
 NO_REALIZADO = {"veredicto": "no realizado"}
+# F1 del ensamble en 0,80, media de los seis folds comparables, como se publico: E8 (base y y26),
+# E8b (y26cal), E10 (v8r, y26calr) y E12 (v8g). K-r1b compara la curva vieja re-entrenada con esto.
+PUBLICADO_R1 = {"base": 0.6227, "y26": 0.4333, "y26cal": 0.6255, "v8r": 0.6276,
+                "y26calr": 0.6438, "v8g": 0.4289}
+TOL_R1 = 0.02
 
 
 def regla(total_nuevo: float, total_base: float, folds_nuevo: dict, folds_base: dict,
@@ -104,6 +112,19 @@ def diferencia(det_a, det_b, e4_a, e4_b) -> dict:
     return r if len(r) > 1 else dict(NO_REALIZADO)
 
 
+def con_pose(reporte: dict | None) -> dict | None:
+    """El reporte de folds con la curva de la mascara de pose en lugar de la de siempre."""
+    if reporte is None:
+        return None
+    res = []
+    for r in reporte["resultados"]:
+        if "ensamble_curva_pose" not in r:
+            return None
+        res.append({**r, "ensamble_curva": r["ensamble_curva_pose"], "ensamble": r["ensamble_pose"],
+                    "corridas": r.get("corridas_pose", r.get("corridas", []))})
+    return {**reporte, "resultados": res}
+
+
 def _leer(p: Path):
     return json.loads(Path(p).read_text()) if Path(p).is_file() else None
 
@@ -139,6 +160,24 @@ def leer(exp: str, mejoras: Path, e8: Path) -> dict:
         det, e4_ = _cond(mejoras / "e12" / "v8g")
         ver["P16a"] = _si(detector, det_v8, det)
         ver["P16e"] = _si(e4, e4_v8, e4_)
+    elif exp == "r1":
+        raiz = mejoras / "r1"
+        det = {c: _leer(raiz / c / "folds.json") for c in PUBLICADO_R1}
+        p = {c: con_pose(r) for c, r in det.items()}
+        ver["P12a-R1"] = _si(detector, p["base"], p["y26"])
+        ver["P13a-R1"] = _si(detector, p["base"], p["y26cal"], tres=True)
+        ver["P14a-R1"] = _si(detector, p["base"], p["v8r"])
+        ver["P14c-R1"] = diferencia(p["y26calr"], p["y26cal"], None, None)
+        ver["P16a-R1"] = _si(detector, p["base"], p["v8g"])
+        k = {}
+        for c, r in det.items():
+            if r is None:
+                k[c] = dict(NO_REALIZADO)
+                continue
+            v = lectura_e8._resumen_detector(r)["f1_080"]
+            k[c] = {"f1_080": v, "publicado": PUBLICADO_R1[c], "diferencia": v - PUBLICADO_R1[c],
+                    "pasa": abs(v - PUBLICADO_R1[c]) <= TOL_R1 + EPS}
+        ver["K-r1b"] = k
     elif exp == "e11":
         conf = _leer(mejoras / "e11" / "confirmacion.json")
         ver["P15ab"] = (regla_e11(conf["con_corte"]["total"], conf["sin_corte"]["total"])
@@ -153,7 +192,7 @@ def leer(exp: str, mejoras: Path, e8: Path) -> dict:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("exp", choices=["e8b", "e10", "e11", "e12"])
+    ap.add_argument("exp", choices=["e8b", "e10", "e11", "e12", "r1"])
     ap.add_argument("--mejoras", type=Path, default=rutas.MEJORAS)
     ap.add_argument("--e8", type=Path, default=rutas.E8)
     args = ap.parse_args(argv)

@@ -84,3 +84,29 @@ def test_main_sin_datos_no_inventa_veredictos(tmp_path):
     assert lectura.main(["e10", "--mejoras", str(tmp_path), "--e8", str(tmp_path / "e8")]) == 0
     v = json.loads((tmp_path / "e10" / "veredictos.json").read_text())
     assert v["P14a"] == {"veredicto": "no realizado"}
+
+
+def _reporte_pose(f1_vieja, f1_pose):
+    r = _reporte(f1_vieja)
+    for x, (f, v) in zip(r["resultados"], f1_pose.items()):
+        x["ensamble_curva_pose"] = [{"umbral": u, "f1": v, "recall": v, "precision": v} for u in lectura.CURVA]
+        x["ensamble_pose"] = {"f1": v}
+    return r
+
+
+def test_r1_lee_la_curva_con_pose(tmp_path):
+    base = {f: 0.60 for f in F6}
+    raiz = tmp_path / "r1"
+    for cond, vieja, nueva in (("base", 0.60, 0.62), ("y26", 0.43, 0.60), ("y26cal", 0.63, 0.66),
+                               ("v8r", 0.63, 0.66), ("y26calr", 0.64, 0.64), ("v8g", 0.43, 0.63)):
+        (raiz / cond).mkdir(parents=True)
+        (raiz / cond / "folds.json").write_text(json.dumps(
+            _reporte_pose({f: vieja for f in F6}, {f: nueva for f in F6})))
+    v = lectura.leer("r1", tmp_path, tmp_path / "e8")
+    assert v["P13a-R1"]["veredicto"] == "mejora"          # +0,04, 6 de 6, con tres categorias
+    assert v["P16a-R1"]["veredicto"] == "no demostrada"   # +0,01
+    assert v["P12a-R1"]["veredicto"] == "no demostrada"   # -0,02
+    assert v["P14c-R1"]["f1_080"] == pytest.approx(-0.02)
+    k = v["K-r1b"]
+    assert k["base"]["f1_080"] == pytest.approx(0.60) and k["base"]["pasa"] is False   # publicado 0,6227
+    assert k["y26"]["pasa"] is True                                                      # 0,43 contra 0,4333
