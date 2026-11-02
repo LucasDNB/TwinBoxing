@@ -56,3 +56,15 @@ def test_main_escribe_el_json(tmp_path):
     assert json.loads(out.read_text())["pasa"]
     b2 = _dir(tmp_path, "c", X * 2)
     assert kreuso.main([str(a), str(b2), "--out", str(out)]) == 2
+
+
+def test_ignorar_un_arreglo_nuevo(tmp_path):
+    # K-r1a: con --mascara-pose, los tensores de siempre iguales y `pose` como unico arreglo de mas
+    X = np.ones((2, 3, 4), np.float32)
+    a = _dir(tmp_path, "a", X)
+    b = tmp_path / "b"
+    (b / "det").mkdir(parents=True)
+    np.savez_compressed(b / "det" / "F.det.npz", features=X, usable=X > 0, pose=np.ones(3, bool))
+    r = kreuso.comparar(a / "det", b / "det", ignorar=("pose",))
+    assert r["pasa"]
+    assert not kreuso.comparar(a / "det", b / "det")["pasa"]

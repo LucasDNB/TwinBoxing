@@ -162,10 +162,14 @@ def barrer(
     cobertura: tuple[int, int] | None = None,
     como_score: bool = False,
     interpolado: np.ndarray | None = None,
+    pose: np.ndarray | None = None,
     **kw,
 ) -> list[dict]:
     """
     Un renglon por umbral. Reportar un solo punto de esta curva es reportar una eleccion.
+
+    Con `pose` (carriles, T), cada carril decodifica solo donde el producto lo haria (R1): el
+    tramo anotado por la mascara de pose de ese carril. Lo anotado y el emparejamiento no cambian.
 
     Con `como_score`, lo que llega no son logits sino una senal cruda por carril: es el
     camino por el que pasa la heuristica, para que la linea de base y el modelo compartan
@@ -176,12 +180,17 @@ def barrer(
     if cobertura is not None:
         valido = np.zeros(labels.shape[1], bool)
         valido[cobertura[0] : cobertura[1] + 1] = True
+    if pose is not None:
+        base = valido if valido is not None else np.ones(labels.shape[1], bool)
+        validos = [base & np.asarray(pose[c], bool) for c in range(len(logits_por_carril))]
+    else:
+        validos = [valido] * len(logits_por_carril)
     filas = []
     for u in umbrales:
         if como_score:
-            pred = [decodificar_score(l, u, valido=valido, **kw) for l in logits_por_carril]
+            pred = [decodificar_score(l, u, valido=v, **kw) for l, v in zip(logits_por_carril, validos)]
         else:
-            pred = [decodificar(l, umbral=u, valido=valido, **kw) for l in logits_por_carril]
+            pred = [decodificar(l, umbral=u, valido=v, **kw) for l, v in zip(logits_por_carril, validos)]
         fila = evaluar(pred, gt, usable, interpolado=interpolado)
         fila["umbral"] = round(float(u), 3)
         filas.append(fila)

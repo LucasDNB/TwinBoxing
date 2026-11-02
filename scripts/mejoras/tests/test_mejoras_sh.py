@@ -78,3 +78,18 @@ def test_golpes_de_e8_se_borra_antes_de_rearmarlo(tmp_path):
     i_f2 = next(i for i, l in enumerate(lineas) if "features2d.py" in l)
     i_cp = next(i for i, l in enumerate(lineas) if l.startswith("+ cp "))
     assert i_cp < i_rm < i_f2
+
+
+def test_r1_arma_las_seis_condiciones_con_la_mascara_y_entrena(tmp_path):
+    lineas = _correr(tmp_path, "R1").stdout.splitlines()
+    builds = [l for l in lineas if " build " in l]
+    assert len(builds) == 6 and all("--mascara-pose" in l for l in builds)
+    assert sum("--umbrales" in l for l in builds) == 2 and sum("--relleno" in l for l in builds) == 2
+    assert sum("--guantes" in l for l in builds) == 1
+    kr = [l for l in lineas if "kreuso.py" in l]
+    assert len(kr) == 6 and all("--ignorar pose" in l for l in kr)
+    assert sum(" folds " in l for l in lineas) == 6
+    assert lineas[-1].endswith("lectura.py r1")
+    for l in lineas:
+        if "--out " in l:
+            assert l.split("--out ")[1].split()[0].startswith(str(tmp_path / "mejoras" / "r1"))
