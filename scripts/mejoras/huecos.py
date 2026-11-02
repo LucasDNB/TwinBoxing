@@ -76,6 +76,34 @@ def resumen(l: dict, fps: float) -> dict:
     return salida
 
 
+def total(fuentes: list[tuple[dict, float]]) -> dict:
+    """
+    Suma de las fuentes, cada una con su fps: el tope se aplica en los cuadros de cada fuente
+    (round(0,10 s * fps), decision 9) y el histograma va en segundos.
+    """
+    from boxtwin_detector.relleno import maximo_cuadros
+    salida = {}
+    for nombre in ARTICULACIONES:
+        corto = perd = n = 0
+        s = []
+        for l, fps in fuentes:
+            ls = np.asarray(l[nombre], np.float64)
+            corto += float(ls[ls <= maximo_cuadros(fps, TOPE_S)].sum())
+            perd += l[f"{nombre}_perdidos"]
+            n += len(ls)
+            s.extend((ls / fps).tolist())
+        s = np.asarray(s)
+        hist, previo = {}, 0.0
+        for b in BORDES_S:
+            hist[str(b)] = int(((s > previo) & (s <= b + 1e-9)).sum())
+            previo = b
+        hist[f">{BORDES_S[-1]}"] = int((s > BORDES_S[-1]).sum())
+        salida[nombre] = {"huecos": n, "cuadros_perdidos": perd,
+                          "fraccion_perdidos_en_huecos_cortos": corto / perd if perd else None,
+                          "histograma_s": hist}
+    return salida
+
+
 def main(argv=None) -> int:
     from boxtwin_detector.dataset import leer_umbrales
     from boxtwin_detector.features import resolver_umbrales
@@ -86,7 +114,7 @@ def main(argv=None) -> int:
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args(argv)
     u = leer_umbrales(args.umbrales)[0] if args.umbrales else resolver_umbrales(None)
-    por, acum = {}, {}
+    por, acum = {}, []
     for npz in args.exports:
         meta = json.loads(npz.with_name(npz.name.replace(".npz", ".meta.json")).read_text())
         fps = float(meta["video"]["fps"])
@@ -98,16 +126,13 @@ def main(argv=None) -> int:
                 l[k] = l.get(k, 0 if isinstance(v, int) else []) + v
         nombre = npz.name.replace(".sequence.npz", "")
         por[nombre] = {"fps": fps, **resumen(l, fps)}
-        # el total se suma en segundos: las fuentes no comparten fps
-        for k in ARTICULACIONES:
-            acum.setdefault(k, []).extend((np.asarray(l[k]) / fps * 30).tolist())
-            acum[f"{k}_perdidos"] = acum.get(f"{k}_perdidos", 0) + l[f"{k}_perdidos"]
-    salida = {"umbrales": u, "fuentes": por, "total_en_cuadros_de_30": resumen(acum, 30.0),
+        acum.append((l, fps))
+    salida = {"umbrales": u, "fuentes": por, "total": total(acum),
               "regla": "02-e10 §2; menos de 0,30 en huecos cortos = el relleno actua sobre la minoria"}
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(salida, indent=2) + "\n")
     print(json.dumps({k: v["fraccion_perdidos_en_huecos_cortos"]
-                      for k, v in salida["total_en_cuadros_de_30"].items()}))
+                      for k, v in salida["total"].items()}))
     return 0
 
 

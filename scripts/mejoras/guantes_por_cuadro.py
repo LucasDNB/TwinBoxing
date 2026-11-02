@@ -17,7 +17,7 @@ QUE HACE
   esperada, a esa; si ninguna, se descarta; dos a la misma mano, queda el de mayor confianza.
   Escribe <out>/<fuente>.npz con guantes (2, T, mano, [x, y, conf]) en pixeles (conf 0 = sin
   guante; mano 0 izquierda, 1 derecha) y ms por cuadro. Reanudable por fuente. Al final,
-  resumen.json con P16c (cobertura por mano y fuente) y P16d (mediana y p95 de ms por cuadro),
+  resumen.json con P16c (cobertura por mano y fuente, sobre los cuadros con el peleador) y P16d (mediana y p95 de ms por cuadro),
   y kmano.json con los 200 cuadros de K-mano de sparring-3-rounds (semilla 0).
 
 USO
@@ -124,7 +124,23 @@ def extraer_fuente(fuente: str, dir_: str, raiz: Path, detector, destino: Path) 
     return {"cuadros": T}
 
 
-def resumir(destino: Path, fuentes: list[str]) -> dict:
+def presencia_de_exports(exports: Path, fuentes: list[str]) -> dict[str, np.ndarray]:
+    """(2, T) por fuente: el peleador tiene deteccion (valid y no interpolated en el export)."""
+    salida = {}
+    for f in fuentes:
+        p = exports / f"{f}.sequence.npz"
+        if p.is_file():
+            with np.load(p) as z:
+                salida[f] = z["valid"].astype(bool) & ~z["interpolated"].astype(bool)
+    return salida
+
+
+def resumir(destino: Path, fuentes: list[str], presente: dict[str, np.ndarray] | None = None) -> dict:
+    """
+    P16c sobre los cuadros donde el peleador tiene deteccion, no sobre el video entero: de
+    Pacquiao solo esta anotado el round 1, y contar los 87 minutos daba 4%. Sin `presente`
+    de una fuente, se cuenta el video entero y se avisa.
+    """
     por, todos = {}, []
     for fuente in fuentes:
         p = destino / f"{fuente}.npz"
@@ -132,9 +148,22 @@ def resumir(destino: Path, fuentes: list[str]) -> dict:
             continue
         with np.load(p) as z:
             g, ms = z["guantes"], z["ms"]
-        todos.append(ms[np.isfinite(ms)])
-        por[fuente] = {"cobertura_por_mano": {f"{'AB'[a]}-{'izq der'.split()[m]}": float((g[a, :, m, 2] > 0).mean())
-                                              for a in (0, 1) for m in (0, 1)}}
+        pres = (presente or {}).get(fuente)
+        if pres is None:
+            pres = np.ones(g.shape[:2], bool)
+        # P16d: el costo en los cuadros con algun peleador, que es el caso del producto; sin
+        # peleador la extraccion no corre el detector y el cuadro cuesta casi nada
+        todos.append(ms[np.isfinite(ms) & pres.any(axis=0)])
+        cob = {}
+        for a in (0, 1):
+            n = int(pres[a].sum())
+            for m in (0, 1):
+                cob[f"{'AB'[a]}-{'izq der'.split()[m]}"] = (
+                    float((g[a, :, m, 2][pres[a]] > 0).mean()) if n else None)
+        por[fuente] = {"cobertura_por_mano": cob,
+                       "cuadros_con_peleador": {"AB"[a]: int(pres[a].sum()) for a in (0, 1)}}
+        if presente is None or fuente not in presente:
+            por[fuente]["aviso"] = "sin presencia del export: cobertura sobre el video entero"
     ms = np.concatenate(todos) if todos else np.array([])
     return {"P16c": por, "P16d": {"mediana_ms": float(np.median(ms)) if len(ms) else None,
                                   "p95_ms": float(np.percentile(ms, 95)) if len(ms) else None,
@@ -150,6 +179,8 @@ def main(argv=None) -> int:
     ap.add_argument("--modelo", type=Path, default=rutas.REPO_A / "boxtwin-guantes" / "modelos" / "guantes-v2.pt")
     ap.add_argument("--device", default="0")
     ap.add_argument("--out", type=Path, default=rutas.MEJORAS / "e12" / "guantes")
+    ap.add_argument("--exports", type=Path, default=rutas.E8 / "base" / "exports",
+                    help="exports sequence de la base, para contar solo cuadros con el peleador")
     args = ap.parse_args(argv)
     from boxtwin.core.deteccion_guantes import DetectorGuantes
 
@@ -163,7 +194,8 @@ def main(argv=None) -> int:
         detector = detector or DetectorGuantes(str(args.modelo), device=args.device)
         print(f"{fuente}: extrayendo", flush=True)
         extraer_fuente(fuente, comun.FUENTES[fuente], args.raiz, detector, destino)
-    (args.out / "resumen.json").write_text(json.dumps(resumir(args.out, args.fuentes), indent=2) + "\n")
+    pres = presencia_de_exports(args.exports, args.fuentes)
+    (args.out / "resumen.json").write_text(json.dumps(resumir(args.out, args.fuentes, pres), indent=2) + "\n")
     k = args.out / f"{FUENTE_K_MANO}.npz"
     if k.is_file():
         with np.load(k) as z:

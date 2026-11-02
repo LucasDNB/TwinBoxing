@@ -76,3 +76,30 @@ def test_lista_k_mano_es_reproducible():
     a = g.lista_k_mano(arr, n=20, semilla=0)
     assert a == g.lista_k_mano(arr, n=20, semilla=0) and len(a) == 20
     assert all(arr[x["peleador"], x["cuadro"], x["mano"], 2] > 0 for x in a)
+
+
+def test_cobertura_solo_sobre_cuadros_con_el_peleador(tmp_path):
+    # P16c es por cuadro-carril con peleador: un video con medio round anotado no puede dar 4%
+    g = np.zeros((2, 10, 2, 3), np.float32)
+    g[0, :4, 0, 2] = 0.9                       # A, mano izquierda, 4 cuadros con guante
+    presente = np.zeros((2, 10), bool)
+    presente[0, :5] = True                     # A esta en 5 cuadros
+    np.savez_compressed(tmp_path / "F.npz", guantes=g, ms=np.ones(10))
+    r = g_mod().resumir(tmp_path, ["F"], {"F": presente})
+    assert r["P16c"]["F"]["cobertura_por_mano"]["A-izq"] == 0.8
+    assert r["P16c"]["F"]["cuadros_con_peleador"] == {"A": 5, "B": 0}
+
+
+def g_mod():
+    import guantes_por_cuadro
+    return guantes_por_cuadro
+
+
+def test_el_costo_es_sobre_cuadros_con_algun_peleador(tmp_path):
+    g = np.zeros((2, 10, 2, 3), np.float32)
+    ms = np.array([20.0] * 4 + [0.2] * 6)      # sin peleador la extraccion no detecta nada
+    presente = np.zeros((2, 10), bool)
+    presente[0, :4] = True
+    np.savez_compressed(tmp_path / "F.npz", guantes=g, ms=ms)
+    r = g_mod().resumir(tmp_path, ["F"], {"F": presente})
+    assert r["P16d"]["mediana_ms"] == 20.0 and r["P16d"]["cuadros"] == 4
