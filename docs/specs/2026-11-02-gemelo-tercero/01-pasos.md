@@ -16,7 +16,7 @@ realizada` (con el motivo). `S` = la corre el SDD en la estación sin `sudo`; `L
 |---|---|---|---|---|---|---|
 | S0 | SDD | T1 y esta spec, PR contra `main` | — | suite de `boxtwin-api` en verde | hecha | 2-11: 11 pruebas nuevas; la suite de `boxtwin-api` entera en verde |
 | L0 | Lucas | Mergear el PR. Elegir otros seudónimos si `Tercero Z` y `Tercero O` no le sirven | S0 | en `main` | hecha | 2-11 22:24 UTC, PR #45. Seudónimos sin cambios |
-| L0b | Lucas | Pasar el video a la estación y marcar el inicio de los doce rounds (mm:ss) | — | doce tiempos anotados acá | en curso | 2-11: el video va a `~/Proyectos/twinboxing-finales/pacman3x1.mp4`; trae los descansos |
+| L0b | Lucas | Pasar el video a la estación y marcar el inicio de los doce rounds (mm:ss) | — | doce tiempos anotados acá | hecha | 2-11: `~/Proyectos/twinboxing-finales/pacman3x1.mp4`, ya recortado por Lucas: el round 1 empieza en 0:00 y cada uno 4:00 después (0:00, 4:00, …, 44:00), descansos de 60 s exactos |
 | S0b | SDD | `cortar_rounds.py --ensayo` y el corte a `pacman-netos.mp4`; ffprobe del resultado (12 × 180 s) | L0b | `pacman-netos.cortes.json` | pendiente | |
 | S1 | SDD | En la estación: `ffprobe` de `pacman-netos.mp4` (fps, duración), respaldo de la base de A (`boxtwin.db.antes-del-tercero.bak`), `GET /salud` y conteos de sesiones y peleadores de A | L0 | commit `1058d5e`; respaldo existe; decisión del descanso anotada acá | pendiente | |
 | L1 | Lucas | OK para correr `procesar` en A: pose y seguimiento del combate entero, unas 2 h de GPU (pose sola, 1 h 45 a 29 fps según E8), sin otra sesión en la cola | S1 | fecha anotada | hecha | 2-11 19:31 (hora local), "Ok" de Lucas |
@@ -37,3 +37,7 @@ realizada` (con el motivo). `S` = la corre el SDD en la estación sin `sudo`; `L
 4. 2-11 (de Lucas): el video trae los descansos. No se carga con descanso 60: se cortan los
    rounds netos con `cortar_rounds.py` y se carga con descanso 0 (§2.1). Contar desde el segundo
    0 con descansos fijos corre los rounds y suma los golpes de las repeticiones.
+5. 2-11: con el video alineado, 180/60 en A daría las ventanas bien, pero el total del peleador
+   (`fightcard._conteo(suyos)`, que alimenta el volumen del perfil) suma todos los golpes, los
+   del descanso incluidos; solo `por_round` filtra por ventana. Se mantiene el corte a rounds
+   netos (decisión 4), con los inicios 0:00, 4:00, …, 44:00 sin marcar a mano.
