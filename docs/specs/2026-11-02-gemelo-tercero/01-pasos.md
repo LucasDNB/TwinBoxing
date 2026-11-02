@@ -7,6 +7,7 @@ realizada` (con el motivo). `S` = la corre el SDD en la estación sin `sudo`; `L
 
 | Id | Qué | Dónde | Prueba que lo cierra |
 |---|---|---|---|
+| T2 | `cortar_rounds.py`: inicios de round a segundos, validación de cortes (orden, solapamiento, fin del video, nocaut), corte con reencode por round y unión sin reencode, JSON con sha256 del original, reanudable, `--ensayo` | `boxtwin-api/scripts/` | `boxtwin-api/tests/test_script_cortar_rounds.py`, 17 pruebas, una de punta a punta con un video sintético de ffmpeg |
 | T1 | `cargar_tercero.py`: valida, crea peleadores con seudónimo, guardia y nota, crea la sesión con el origen en `consentimiento_por`, enlaza o copia el video, encola `procesar`; reanudable; `--ensayo` | `boxtwin-api/scripts/` | `boxtwin-api/tests/test_script_cargar_tercero.py`, 11 pruebas: defaults, cinco rechazos de `validar`, carga completa, la API la lista y la sirve, reanudable sin duplicar, ensayo sin escritura, usuario inexistente |
 
 ## Tareas
@@ -14,10 +15,12 @@ realizada` (con el motivo). `S` = la corre el SDD en la estación sin `sudo`; `L
 | Id | Quién | Tarea | Depende de | Verificación | Estado | Evidencia |
 |---|---|---|---|---|---|---|
 | S0 | SDD | T1 y esta spec, PR contra `main` | — | suite de `boxtwin-api` en verde | hecha | 2-11: 11 pruebas nuevas; la suite de `boxtwin-api` entera en verde |
-| L0 | Lucas | Mergear el PR. Elegir otros seudónimos si `Tercero Z` y `Tercero O` no le sirven | S0 | en `main` | pendiente | |
-| S1 | SDD | En la estación: `ffprobe` del video de `anotacion-pacquiao` (fps, duración, ¿rounds netos?), respaldo de la base de A (`boxtwin.db.antes-del-tercero.bak`), `GET /salud` y conteos de sesiones y peleadores de A | L0 | commit `1058d5e`; respaldo existe; decisión del descanso anotada acá | pendiente | |
-| L1 | Lucas | OK para correr `procesar` en A: pose y seguimiento del combate entero, unas 2 h de GPU (pose sola, 1 h 45 a 29 fps según E8), sin otra sesión en la cola | S1 | fecha anotada | pendiente | |
-| S2 | SDD | `cargar_tercero.py --ensayo` y, si da lo esperado, la carga | L1 | JSON de salida anotado; trabajo `procesar` en cola | pendiente | |
+| L0 | Lucas | Mergear el PR. Elegir otros seudónimos si `Tercero Z` y `Tercero O` no le sirven | S0 | en `main` | hecha | 2-11 22:24 UTC, PR #45. Seudónimos sin cambios |
+| L0b | Lucas | Pasar el video a la estación y marcar el inicio de los doce rounds (mm:ss) | — | doce tiempos anotados acá | en curso | 2-11: el video va a `~/Proyectos/twinboxing-finales/pacman3x1.mp4`; trae los descansos |
+| S0b | SDD | `cortar_rounds.py --ensayo` y el corte a `pacman-netos.mp4`; ffprobe del resultado (12 × 180 s) | L0b | `pacman-netos.cortes.json` | pendiente | |
+| S1 | SDD | En la estación: `ffprobe` de `pacman-netos.mp4` (fps, duración), respaldo de la base de A (`boxtwin.db.antes-del-tercero.bak`), `GET /salud` y conteos de sesiones y peleadores de A | L0 | commit `1058d5e`; respaldo existe; decisión del descanso anotada acá | pendiente | |
+| L1 | Lucas | OK para correr `procesar` en A: pose y seguimiento del combate entero, unas 2 h de GPU (pose sola, 1 h 45 a 29 fps según E8), sin otra sesión en la cola | S1 | fecha anotada | hecha | 2-11 19:31 (hora local), "Ok" de Lucas |
+| S2 | SDD | `cargar_tercero.py --video pacman-netos.mp4 --descanso-s 0 --ensayo` y, si da lo esperado, la carga | L1 | JSON de salida anotado; trabajo `procesar` en cola | pendiente | |
 | S3 | SDD | Seguir `procesar` hasta `espera_siembra` | S2 | estado de `GET /jobs/{id}` | pendiente | |
 | L2 | Lucas | Siembra en la web: A = el zurdo, B = el ortodoxo; corregir a mano los tramos sin asignar que quiera | S3 | `completar` encolado | pendiente | |
 | S4 | SDD | Seguir `completar` y `clasificar` hasta la Fight-Card | L2 | CT2 | pendiente | |
@@ -31,3 +34,6 @@ realizada` (con el motivo). `S` = la corre el SDD en la estación sin `sudo`; `L
    consentimiento que nadie dio, ni cambiar A el día antes del congelamiento.
 3. 2-11: el congelamiento del 3-11 es de funciones. Cargar y procesar una sesión es uso de A, no
    una función nueva; puede correr después del 3-11.
+4. 2-11 (de Lucas): el video trae los descansos. No se carga con descanso 60: se cortan los
+   rounds netos con `cortar_rounds.py` y se carga con descanso 0 (§2.1). Contar desde el segundo
+   0 con descansos fijos corre los rounds y suma los golpes de las repeticiones.
