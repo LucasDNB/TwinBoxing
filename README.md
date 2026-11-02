@@ -905,3 +905,13 @@ PENDIENTE Y PROXIMO PASO
 5. La regla de asignacion de mano dejo inerte el cambio de mascara: la hipotesis no se probo
 6. Costo 12,6 ms por cuadro: con C5 da 2,12 a 2,24 veces, no entra sin muestrear
 7. Documentado en docs/experiments/2026-11-01-e12-guantes-en-detector.md
+
+01-11 R1: el detector evaluado con la mascara de pose del producto
+
+1. La evaluacion dejaba marcar golpes en cuadros sin pose; el producto no
+2. Seis condiciones re-entrenadas, curva vieja igual a la publicada en las seis
+3. Base: F1 0,600 con la mascara del producto contra 0,623 con la vieja
+4. E12: la caida a 0,429 era del defecto; con la mascara el guante iguala (+0,001)
+5. E10: +0,019 y 5 de 6 folds, debajo de +0,03: sigue no demostrada
+6. E8b: sigue iguala, ahora por debajo (-0,025)
+7. Documentado en docs/experiments/2026-11-01-r1-evaluacion-producto.md

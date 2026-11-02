@@ -9,6 +9,10 @@
 0,623), pero esa caída no la causa el guante: viene de un defecto de la evaluación del detector
 que E12 heredó y que también está en E8. Y E12, tal como se diseñó, no llegó a probar su hipótesis.**
 
+> **Aviso del 2-11 (R1).** Re-medido con la máscara del producto (`2026-11-01-r1-evaluacion-producto.md`), el guante iguala a la
+> base: 0,601 contra 0,600 (+0,001, 3 de 6), no demostrada. La caída a 0,429 era entera del
+> defecto de la evaluación. Lo de §3.2 sigue: E12 tal como se diseñó no prueba su hipótesis.
+
 ## 1. Qué se mide (pre-registrado)
 
 El guante detectado, cuadro por cuadro, entra al detector como dos keypoints más (17 y 18), con

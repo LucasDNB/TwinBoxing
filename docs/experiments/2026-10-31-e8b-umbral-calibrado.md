@@ -9,13 +9,11 @@ Lectura: `scripts/mejoras/lectura.py e8b`, que escribe `e8b/veredictos.json`.
 YOLOv8 en el detector y en E4 sobre este material; el umbral explicaba la mayor parte de la caída
 de E8.**
 
-> **Aviso del 1-11 (auditoría de E12).** La evaluación del detector (`evaluacion.barrer`) deja al
-> modelo marcar golpes en cuadros sin pose usable, que entran como un vector de ceros, y los
-> cuenta; el producto no lo hace (`inferencia.py` decodifica solo sobre cuadros usables). Lo que
-> el modelo responde ahí depende de la inicialización, así que P13a puede estar movido por eso en
-> cualquiera de las dos condiciones. Los números de este documento son los de la regla
-> pre-registrada y quedan así; la comparación se revisa con la evaluación corregida antes de
-> pasarla a la tesis. Ver `2026-11-01-e12-guantes-en-detector.md` §3.2 y §5.
+> **Aviso del 2-11 (R1).** La evaluación del detector dejaba al modelo marcar golpes en cuadros
+> sin pose usable; el producto no lo hace. Re-medido con la máscara del producto (`2026-11-01-r1-evaluacion-producto.md`), P13a
+> sigue en "iguala" pero con el signo dado vuelta: Y26-cal 0,575 contra base 0,600 (−0,025, 0 de
+> 6 folds), a 0,005 del borde de "peor". Los números de este documento son los de la regla
+> pre-registrada y quedan así; a la tesis va el de R1, dicho con el signo.
 
 ## 1. Qué se mide (pre-registrado)
 
