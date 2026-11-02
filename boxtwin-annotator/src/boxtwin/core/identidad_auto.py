@@ -976,13 +976,20 @@ def _sub_evidencia(e: EvidenciaTrack, seg_id: int, inicio: int, fin: int) -> Evi
 
 def _mejor_corte(frames: list[int], s: list[float], m: int, margen: float):
     """
-    El indice k (m <= k <= n - m) que maximiza |mediana(s[:k]) - mediana(s[k:])|, si las dos
-    medianas tienen signo opuesto y las dos llegan a `margen`. Solo entre cuadros distintos:
-    los dos guantes de un mismo cuadro no se reparten entre dos personas.
+    Donde cortar y si cortar, por separado (decision 16 de
+    docs/specs/2026-10-30-mejoras-post-e8/10-pasos.md).
 
-    La mediana es robusta y por eso empata: con un cambio limpio de color, todo k entre m y el
-    cambio da la misma diferencia, y quedarse con el primero corta en la muestra m. El empate
-    se rompe por la diferencia de medias, que si tiene el pico en el cambio.
+    DONDE: el indice k (m <= k <= n - m) que maximiza la diferencia de medias de los dos
+    tramos. Solo entre cuadros distintos: los dos guantes de un mismo cuadro no se reparten
+    entre dos personas.
+
+    SI: las medianas de los dos tramos en ese k tienen signo opuesto y las dos llegan a
+    `margen`. La mediana se queda la decision porque es robusta a unas pocas muestras raras.
+
+    La regla pre-registrada elegia k por la diferencia de MEDIANAS, y eso no anda: mientras el
+    color no cambia la mediana es casi plana, y el ruido decide donde cae el corte. En Sparring
+    (S10, 30-10) cayo una muestra antes del cambio, justo en el recorte de las semillas, y la
+    propuesta salio invertida entera. La diferencia de medias si tiene el pico en el cambio.
     """
     n = len(s)
     x = np.asarray(s, np.float64)
@@ -991,15 +998,15 @@ def _mejor_corte(frames: list[int], s: list[float], m: int, margen: float):
     for k in range(m, n - m + 1):
         if frames[k - 1] == frames[k]:
             continue
-        a, b = float(np.median(x[:k])), float(np.median(x[k:]))
-        clave = (round(abs(a - b), 9), abs(acum[k] / k - (acum[n] - acum[k]) / (n - k)))
-        if mejor is None or clave > mejor[0]:
-            mejor = (clave, k, a, b)
+        d_media = abs(acum[k] / k - (acum[n] - acum[k]) / (n - k))
+        if mejor is None or d_media > mejor[0]:
+            mejor = (d_media, k)
     if mejor is None:
         return None
-    (d, _), k, a, b = mejor
+    k = mejor[1]
+    a, b = float(np.median(x[:k])), float(np.median(x[k:]))
     if a * b < 0 and abs(a) >= margen and abs(b) >= margen:
-        return k, d, a, b
+        return k, abs(a - b), a, b
     return None
 
 
@@ -1007,7 +1014,7 @@ def _cortes(frames: list[int], s: list[float], cfg: ConfigIdentidadAuto) -> list
     """
     Segmentacion binaria con dos cortes como maximo: uno sobre la serie entera y, si lo hubo,
     uno mas dentro de cada mitad. Si las dos mitades piden corte, queda el de mayor diferencia
-    de medianas, para no pasar de dos.
+    de medianas, para no pasar de dos (decision 12).
     """
     m, margen = cfg.min_guantes_voto, cfg.margen_orientacion
     primero = _mejor_corte(frames, s, m, margen)
