@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+/*
+ * Tokens del diseño (03 §2). Se declaran una vez aca y ningun componente escribe un
+ * hexadecimal. Tema oscuro unico: el material de sparring es oscuro y una interfaz clara
+ * alrededor del video obliga a la pupila a adaptarse dos veces (03 §1).
+ */
+@theme {
+  --color-fondo: #0E1113;
+  --color-nav: #121518;
+  --color-superficie: #15191C;
+  --color-superficie-2: #111517;
+  --color-elevado: #1F262B;
+  --color-borde: #2A3137;
+  --color-borde-suave: #232A2F;
+  --color-borde-fuerte: #3A4349;
+  --color-texto: #ECEAE4;
+  --color-texto-2: #C9D0D6;
+  --color-texto-3: #B7BFC6;
+  --color-tenue: #A3ACB4;
+  --color-a: #C8412B;  --color-a-trazo: #E5563F;
+  --color-b: #2F74C8;  --color-b-trazo: #4A90E2;
+  --color-estimado: #F0C572; --color-estimado-borde: #E0A93B; --color-estimado-fondo: #261F11;
+  --color-ok: #9FD6B2;  --color-ok-borde: #2F5A3D;  --color-ok-fondo: #18261D;
+  --color-curso: #A9CBF3; --color-curso-borde: #2D4D73; --color-curso-fondo: #152231;
+  --color-error: #F2A3A3; --color-error-borde: #7A3434; --color-error-fondo: #2A1515;
+
+  --radius-sm: 3px; --radius: 6px; --radius-md: 8px; --radius-lg: 10px;
+}
+
+/* Las fuentes las sirve el build (next/font): las variables las pone el layout. */
+@theme inline {
+  --font-display: var(--fuente-display), "Arial Narrow", sans-serif;
+  --font-sans: var(--fuente-sans), "Segoe UI", sans-serif;
+  --font-mono: var(--fuente-mono), Consolas, monospace;
+}
+
+/*
+ * Las variables que esperan shadcn y Animate UI, mapeadas a los tokens. Asi un componente
+ * instalado hereda la paleta sin editarlo. El primario es claro sobre oscuro, como el boton
+ * primario del diseno, y el anillo de foco es ambar para que se vea (03 §2).
+ */
+:root {
+  --background: var(--color-fondo);
+  --foreground: var(--color-texto);
+  --card: var(--color-superficie);
+  --card-foreground: var(--color-texto);
+  --popover: var(--color-superficie);
+  --popover-foreground: var(--color-texto);
+  --primary: var(--color-texto);
+  --primary-foreground: var(--color-fondo);
+  --secondary: var(--color-elevado);
+  --secondary-foreground: var(--color-texto);
+  --muted: var(--color-superficie-2);
+  --muted-foreground: var(--color-tenue);
+  --accent: var(--color-elevado);
+  --accent-foreground: var(--color-texto);
+  --destructive: var(--color-error-borde);
+  --border: var(--color-borde);
+  --input: var(--color-borde-fuerte);
+  --ring: var(--color-estimado-borde);
+  --sidebar: var(--color-nav);
+  --sidebar-foreground: var(--color-texto-2);
+  --sidebar-primary: var(--color-texto);
+  --sidebar-primary-foreground: var(--color-fondo);
+  --sidebar-accent: var(--color-elevado);
+  --sidebar-accent-foreground: var(--color-texto);
+  --sidebar-border: var(--color-borde-suave);
+  --sidebar-ring: var(--color-estimado-borde);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-borde outline-ring/60;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-fondo text-texto font-sans antialiased;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  /* Foco visible en todo, con el anillo de --ring (03 §8). */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  /* 16 px en campos: el minimo para que iOS no agrande la pantalla al enfocar (03 §1). */
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
+
+@utility rotulo {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-tenue);
+}
+
+@utility dato {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility objetivo-tactil {
+  min-height: 44px;
+  min-width: 44px;
+}

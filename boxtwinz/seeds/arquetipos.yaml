@@ -1,0 +1,81 @@
+# Arquetipos de BoxTwinZ (spec seccion 7). TODO es [PROVISIONAL]: los valores, los desvios y
+# los nombres los valida Lucas. Los nombres son inventados, sin parecido con boxeadores reales.
+#
+# Los valores son los de sparring. Sombra y bolsa salen multiplicando el volumen y las
+# combinaciones por `factor_volumen_individual` (boxtwinz.toml, 1,10 por defecto). La curva de
+# ritmo la genera services/archetypes.py desde el sosten, para que sea coherente con el.
+# exposicion: fraccion de golpes del rival que llegan por cada lado del usuario.
+# desvio: fraccion de la media, igual para todas las metricas del arquetipo.
+
+arquetipos:
+  - clave: fajador
+    nombre: El Toro Simulado
+    estilo: fajador
+    variante: null
+    solo_premium: false
+    volumen: 42
+    pct_mano_adelantada: 0.55
+    combinaciones_min: 9
+    sosten_ritmo: 0.85
+    exposicion: {izquierda: 0.40, derecha: 0.60}
+    desvio: 0.12
+
+  - clave: estilista
+    nombre: Zurda de Laboratorio
+    estilo: estilista
+    variante: null
+    solo_premium: false
+    volumen: 26
+    pct_mano_adelantada: 0.72
+    combinaciones_min: 5
+    sosten_ritmo: 0.95
+    exposicion: {izquierda: 0.55, derecha: 0.45}
+    desvio: 0.10
+
+  - clave: hibrido
+    nombre: El Pendulo de Prueba
+    estilo: hibrido
+    variante: null
+    solo_premium: false
+    volumen: 34
+    pct_mano_adelantada: 0.63
+    combinaciones_min: 7
+    sosten_ritmo: 0.90
+    exposicion: {izquierda: 0.50, derecha: 0.50}
+    desvio: 0.10
+
+  - clave: fajador_volumen
+    nombre: Martillo Sintetico
+    estilo: fajador
+    variante: volumen
+    solo_premium: true
+    volumen: 50
+    pct_mano_adelantada: 0.52
+    combinaciones_min: 12
+    sosten_ritmo: 0.80
+    exposicion: {izquierda: 0.35, derecha: 0.65}
+    desvio: 0.14
+
+  - clave: estilista_contra
+    nombre: La Sombra de Probeta
+    estilo: estilista
+    variante: contra
+    solo_premium: true
+    volumen: 22
+    pct_mano_adelantada: 0.75
+    combinaciones_min: 4
+    sosten_ritmo: 0.97
+    exposicion: {izquierda: 0.60, derecha: 0.40}
+    desvio: 0.09
+
+  - clave: hibrido_presion
+    nombre: Presion de Ensayo
+    estilo: hibrido
+    variante: presion
+    solo_premium: true
+    volumen: 38
+    pct_mano_adelantada: 0.60
+    combinaciones_min: 8
+    sosten_ritmo: 0.88
+    exposicion: {izquierda: 0.45, derecha: 0.55}
+    desvio: 0.11
