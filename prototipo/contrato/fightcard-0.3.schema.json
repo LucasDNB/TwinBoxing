@@ -37,7 +37,11 @@
         "tramos_total": { "type": ["integer", "null"], "minimum": 0 },
         "tramos_asignados_auto": { "type": ["integer", "null"], "minimum": 0 },
         "tramos_asignados_manual": { "type": ["integer", "null"], "minimum": 0 },
-        "separacion_color": { "type": ["number", "null"] }
+        "separacion_color": { "type": ["number", "null"] },
+        "revision_pendiente": { "type": "integer", "minimum": 0, "description": "tramos sospechosos (asignados con una pregunta abierta) que nadie reviso; identidad estable 02-11" },
+        "tramos_a_revisar": { "type": "integer", "minimum": 0 },
+        "corte_de_mixtos": { "type": "boolean" },
+        "identidad_estricta": { "type": "boolean" }
       }
     },
     "detector": {

@@ -126,10 +126,15 @@ def _manuales(sesion, d):
 
 def test_el_tramo_sin_asignar_se_lista_con_su_motivo(sesion, detector):
     fc = _completar(sesion, detector)
-    tramos = Sesion.cargar(sesion).identidad["tramos"]
+    todos = Sesion.cargar(sesion).identidad["tramos"]
+    # Identidad estable (02-11): la lista guarda tambien los asignados sin sospecha, al final y
+    # con tipo "asignado"; lo que pide revision va primero.
+    assert [(t["track"], t["tipo"]) for t in todos] == [(3, "sin_asignar"), (2, "asignado"),
+                                                        (1, "asignado")]
+    tramos = [t for t in todos if t["revision_pendiente"]]
     assert [t["track"] for t in tramos] == [3]
     t = tramos[0]
-    assert t["motivo"] == "color_insuficiente"
+    assert t["motivo"] == "color_insuficiente" and t["clave"] == "3"
     assert (t["t_desde"], t["t_hasta"]) == (round(MITAD / FPS, 2), round(T / FPS, 2))
     assert t["asignado"] is None
     assert t["recorte"] is None, "el video de prueba no se puede abrir: sin recorte, sin romper"
