@@ -121,6 +121,42 @@ PR #30 (avatar MPFB2 y calor sobre la piel, `prototipo/specs/cambios-27-10/`) me
   que sigue así a pedido de Lucas (ventana de ensayo).
 - Vuelta atrás: `git checkout --detach c936b0f`, `produccion.sh web` y restart de la API.
 
+## main al 03-11 desplegado en A (03-11, 14:28)
+
+Pedido de Lucas el 3-11, que levanta el congelamiento de A hasta el 17-11 ("llevemos boxtwin a su
+versión definitiva"). PR #52 (`main` → `produccion`) mergeado como `ca347cb`, mismo árbol que
+`main` (`a43e398`). Es un desvío de la regla de no tocar A antes del 17-11 y va así a la tesis.
+
+Qué entra: identidad estable (revisión de tramos asignados sospechosos, correcciones por rango,
+"Acá cambia de persona"; #48 y #49), el verificador de guante, remera y pantalón de IE7 (#50)
+**encendido por defecto** por decisión de Lucas y no de la regla (#51), y Next 16.4.4. Sin
+migraciones. `/etc/boxtwin.env` no se tocó: no define ninguna de las tres banderas, así que
+`BOXTWIN_IDENTIDAD_APARIENCIA` vale 1 y `BOXTWIN_CORTE_MIXTOS` y `BOXTWIN_IDENTIDAD_ESTRICTA` 0.
+Lo de los detectores (E8b, E10, E12), el gemelo C y las mejoras post-E8 va detrás de opciones que
+el producto no usa.
+
+1. Antes: cola vacía (92 trabajos, todos `listo`), GPU libre, B y C apagadas, 21 sesiones.
+   Huella en `~/boxtwin/huella-antes-de-produccion-20261103-1423.txt`.
+2. Respaldos: `~/boxtwin/datos/boxtwin.db.antes-de-produccion-20261103-1423.bak` (21 sesiones,
+   abre) y `~/boxtwin/boxtwin.env.antes-de-produccion-20261103-1423.bak` (600).
+3. Copia principal de `1058d5e` a `ca347cb` (`git checkout --detach origin/produccion`).
+   `produccion.sh web`: el build pasó al primer intento con Next 16.4.4, presupuesto en verde (la
+   más pesada `/sesion/identificar/` 372,2 KB), `sin-demo` limpio.
+4. `sudo systemctl restart boxtwin-api boxtwin-worker` (Lucas, 14:28:08).
+5. `produccion.sh verificar a`: commit `ca347cb`, secreto fijo, invitación, web y `geometrico` ok.
+   Avisa la versión de prueba encendida, que sigue así desde el 26-10. Por el Funnel: `/salud`
+   con `ca347cb`, `/ingresar/` y `/sesion/identificar/` 200, `/cuenta` sin token 401.
+6. Huella después en `~/boxtwin/huella-despues-de-produccion-20261103-1428.txt`. Cambian el
+   commit, `/salud` (que ahora informa también `modelo_pose`), el hash de `pip freeze` (las líneas
+   editables llevan el commit) y la fecha de la web. Sesiones: 21 antes y después.
+
+Sin verificar: una sesión nueva procesada de punta a punta con el código nuevo, y entrar con la
+cuenta real desde el navegador (con la versión de prueba encendida no entra, DV-10).
+
+Vuelta atrás: `git checkout --detach 1058d5e`, `produccion.sh web` y restart de los dos
+servicios. Solo el verificador: `BOXTWIN_IDENTIDAD_APARIENCIA=0` en `/etc/boxtwin.env` y restart
+del worker.
+
 ## Estado de la estación al 26-10 antes del despliegue (leído, sin tocar)
 
 - A: `boxtwin-api` y `boxtwin-worker` activos, `/salud` `34e991d`, `geometrico`. Sin las versiones.
