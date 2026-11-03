@@ -342,8 +342,9 @@ apagadas. Qué se enciende lo decide la medición offline `scripts/identidad/med
 (IE6, la corre Lucas). Nada de esto entra a A antes del 17-11.
 IE6 (3-11) dio no estable con una ronda. IE7 (3-11, `02-ie7-apariencia.md`) da estable en
 desarrollo con rondas y un usuario que separa a un tercero; el verificador de guante, remera y
-pantalon (`boxtwin/core/apariencia.py`, `BOXTWIN_IDENTIDAD_APARIENCIA`) queda apagado por costo.
-Las tres banderas, apagadas.
+pantalon (`boxtwin/core/apariencia.py`, `BOXTWIN_IDENTIDAD_APARIENCIA`) la regla lo dejaba apagado
+por costo; desde el 3-11 viene encendido por defecto por decision de Lucas (red si la persona se
+equivoca en la primera ronda; se apaga con 0). Las otras dos banderas, apagadas.
 
 ## 5quinquies. Versiones Individual y Gimnasio (desde el 26-10)
 

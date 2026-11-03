@@ -87,6 +87,11 @@ en sparring-3-rounds.
 - No cambia nada de lo que decidió IE6: `BOXTWIN_CORTE_MIXTOS=0` y
   `BOXTWIN_IDENTIDAD_ESTRICTA=0`.
 
+**Decisión posterior (3-11, Lucas, no la regla):** después de leer este informe, el verificador
+pasa a venir encendido por defecto (`BOXTWIN_IDENTIDAD_APARIENCIA` sin definir vale 1; se apaga
+con 0). La razón es la de §5: es la red si la persona se equivoca en la primera ronda, a cambio de
+0,9 decisiones más por minuto. La lectura de la regla no cambia.
+
 ## 5. Qué dice esto (no cambia la lectura)
 
 **Con el simulado de IE6 (una ronda, contesta la mayoría):**

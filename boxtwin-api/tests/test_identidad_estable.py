@@ -130,12 +130,12 @@ def test_las_banderas_llegan_al_completar(cliente, lista_nueva, entorno, monkeyp
         s = db.get(Sesion, lista_nueva)
         cmd = comando_de(t, s)[0]
         assert "--cortar-mixtos" not in cmd and "--estricta" not in cmd
-        assert "--apariencia" not in cmd
+        assert "--apariencia" in cmd  # encendido por defecto desde el 3-11
         monkeypatch.setattr(entorno["cfg"], "corte_mixtos", True)
         monkeypatch.setattr(entorno["cfg"], "identidad_estricta", True)
-        monkeypatch.setattr(entorno["cfg"], "identidad_apariencia", True)
+        monkeypatch.setattr(entorno["cfg"], "identidad_apariencia", False)
         cmd = comando_de(t, s)[0]
-    assert "--cortar-mixtos" in cmd and "--estricta" in cmd and "--apariencia" in cmd
+    assert "--cortar-mixtos" in cmd and "--estricta" in cmd and "--apariencia" not in cmd
 
 
 def test_la_bandera_se_lee_del_entorno(monkeypatch):
@@ -145,6 +145,10 @@ def test_la_bandera_se_lee_del_entorno(monkeypatch):
     monkeypatch.setenv("BOXTWIN_IDENTIDAD_ESTRICTA", "quizas")
     c = Config()
     assert c.corte_mixtos is True and c.identidad_estricta is False
-    assert c.identidad_apariencia is False
-    monkeypatch.setenv("BOXTWIN_IDENTIDAD_APARIENCIA", "1")
+    # el verificador de apariencia viene encendido y se apaga con 0
+    monkeypatch.delenv("BOXTWIN_IDENTIDAD_APARIENCIA", raising=False)
+    assert Config().identidad_apariencia is True
+    monkeypatch.setenv("BOXTWIN_IDENTIDAD_APARIENCIA", "0")
+    assert Config().identidad_apariencia is False
+    monkeypatch.setenv("BOXTWIN_IDENTIDAD_APARIENCIA", "")
     assert Config().identidad_apariencia is True
