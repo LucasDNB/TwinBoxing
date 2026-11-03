@@ -926,3 +926,14 @@ PENDIENTE Y PROXIMO PASO
 6. Costo 22 decisiones por minuto de video; 80% de la cola son tracks cortos
 7. Diagnostico aparte: una segunda ronda de la cola destapa 1211 de los 1248
 8. Documentado en docs/experiments/2026-11-03-identidad-estable.md
+
+03-11 IE7: verificador de apariencia (guante, remera, pantalon) y usuario simulado v2
+
+1. Ropa por muestra: remera 0,973 en 01 y remera+pantalon 0,919 en 03, donde el guante no pasa el piso
+2. Ninguna senal sirve en las seis; la altura solo en 04 (0,894) y queda afuera
+3. Verificador: pesos por video con las semillas, dos motivos nuevos, bandera apagada
+4. Auditoria: base con el simulado de IE6 da 1275 silenciosos, igual que IE6
+5. Simulado v2 y rondas: silenciosos 0,052% y precision 0,9993 en las dos condiciones
+6. Regla: estable en desarrollo; se elige base (23,2 contra 24,1 decisiones por minuto)
+7. Con una sola ronda el verificador baja 1275 a 64; con rondas la cola ya los encuentra
+8. Documentado en docs/experiments/2026-11-03-ie7-apariencia.md

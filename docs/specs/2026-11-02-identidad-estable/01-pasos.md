@@ -8,6 +8,7 @@
 | IE4 web | hecha (2-11) | `tests/integracion/tramos.test.tsx`, 4 pruebas nuevas; 261 en verde, lint y tipos limpios. El build no se pudo probar en la sesión de Claude (Google Fonts bloqueado por la red); hay que construir en la estación |
 | IE5 script | hecha (2-11) | `scripts/identidad/tests`, 8 pruebas |
 | IE6 medición | hecha (3-11): **no estable**, se elige `base`, banderas apagadas | `docs/experiments/2026-11-03-identidad-estable.md`; JSON en `docs/experiments/datos/2026-11-03-identidad-estable.json`. Auditoría: `base` y `corte` iguales a E11 S10 v2 en todos los decimales. Ninguna condición pasa E1 (1,54%; 03-sparring 12,8%) ni E2 (mejor 0,984) |
+| IE7 apariencia | hecha (3-11): **estable** en desarrollo con el simulado v2; se elige `base`, `BOXTWIN_IDENTIDAD_APARIENCIA=0` | pre-registro `02-ie7-apariencia.md` (`92e0105`); código `ff49041`; `docs/experiments/2026-11-03-ie7-apariencia.md`. Auditoría contra IE6 bien. Silenciosos 0,052%, precisión después de revisar 0,9993 en las dos condiciones |
 
 Suites al 2-11 en la sesión de Claude (Python 3.13, torch CPU): anotador 759 pasan y 1 falla
 de entorno (`test_render`, sin códec avc1 en ese opencv); API 346 pasan; `scripts/mejoras` 63.

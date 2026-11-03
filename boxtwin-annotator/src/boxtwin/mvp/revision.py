@@ -34,6 +34,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 
+from boxtwin.core import apariencia as _apariencia
 from boxtwin.core.deteccion_guantes import distancia_color
 from boxtwin.core.identidad_auto import (
     ConfigIdentidadAuto,
@@ -52,8 +53,10 @@ __all__ = [
 ]
 
 # Lo que la cola le dice a la web, ademas de los cuatro motivos de sin asignar de tramos.py.
-MOTIVOS_SOSPECHA = ("conflicto", "color_contradice", "posible_mezcla")
-PRIORIDAD = {"conflicto": 1, "color_contradice": 2, "posible_mezcla": 3}   # el resto, 4
+MOTIVOS_SOSPECHA = ("conflicto", "color_contradice", "posible_mezcla",
+                    "apariencia_contradice", "apariencia_mezcla")
+PRIORIDAD = {"conflicto": 1, "color_contradice": 2, "apariencia_contradice": 2,
+             "posible_mezcla": 3, "apariencia_mezcla": 3}   # el resto, 4
 
 _ROL_DE = {TrackRole.A: "A", TrackRole.B: "B", TrackRole.IGNORE: "ninguno"}
 _ROL_A = {"A": TrackRole.A, "B": TrackRole.B, "ninguno": TrackRole.IGNORE}
@@ -281,10 +284,24 @@ def _serie_color(evidencia, t: Tramo, pa, pb):
             [distancia_color(c, pb) - distancia_color(c, pa) for _, c in muestras])
 
 
-def _sospecha_de(t: Tramo, evidencia, perfiles: dict, cfg: ConfigIdentidadAuto) -> str | None:
-    """Color que contradice o posible mezcla, para un tramo automatico con rol A o B."""
+def _sospecha_de(t: Tramo, evidencia, perfiles: dict, cfg: ConfigIdentidadAuto,
+                apariencia=None) -> str | None:
+    """
+    Color que contradice o posible mezcla, para un tramo automatico con rol A o B. Con el
+    modelo de `apariencia` (IE7), si el color del guante no dijo nada, mira guante, remera y
+    pantalon ponderados por lo que separa cada uno en este video.
+    """
     if t.origen != "auto" or t.rol not in ("A", "B"):
         return None
+    motivo = _sospecha_por_color(t, evidencia, perfiles, cfg)
+    if motivo is None and apariencia is not None:
+        motivo = _apariencia.sospecha(apariencia, evidencia.get(t.track), t.rol,
+                                      t.desde, t.hasta, cfg)
+    return motivo
+
+
+def _sospecha_por_color(t: Tramo, evidencia, perfiles: dict,
+                        cfg: ConfigIdentidadAuto) -> str | None:
     pa, pb = perfiles.get("fighter_A"), perfiles.get("fighter_B")
     if pa is None or pb is None or distancia_color(pa, pb) < cfg.separacion_minima:
         return None
@@ -326,6 +343,7 @@ def cola_de_revision(
     fps: float,
     todos: bool = True,
     estricta: bool = False,
+    apariencia=None,
 ) -> list[dict]:
     """
     Lo que la persona tiene que mirar, en orden.
@@ -336,6 +354,9 @@ def cola_de_revision(
     lo partio). Los conflictos se buscan en `corregidos` (despues de las correcciones y ANTES
     de degradar): una correccion puede crear uno o resolverlo. Con `estricta`, un tramo
     automatico en conflicto sale como sin asignar, que es como quedo en la Fight-Card.
+    Con `apariencia` (un ModeloApariencia de boxtwin.core.apariencia, IE7), los asignados se
+    miran tambien con guante, remera y pantalon: suma `apariencia_contradice` y
+    `apariencia_mezcla`. Sin el, la cola es la de antes.
     Con `todos`, la lista suma los asignados sin sospecha (tipo "asignado") al final, para que
     la web pueda mostrar todo lo que se quiera revisar a mano.
 
@@ -365,7 +386,7 @@ def cola_de_revision(
         elif t.rol == "ninguno":
             continue
         else:
-            motivo = _sospecha_de(t, evidencia, perfiles, cfg)
+            motivo = _sospecha_de(t, evidencia, perfiles, cfg, apariencia)
             tipo = "sospechoso" if motivo else "asignado"
             if motivo is None and (not todos or dur <= DURACION_MINIMA_S):
                 continue

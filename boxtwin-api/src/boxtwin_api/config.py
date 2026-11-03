@@ -171,6 +171,9 @@ class Config:
     corte_mixtos: bool = field(default_factory=lambda: _bandera("BOXTWIN_CORTE_MIXTOS"))
     identidad_estricta: bool = field(
         default_factory=lambda: _bandera("BOXTWIN_IDENTIDAD_ESTRICTA"))
+    # IE7 (02-ie7-apariencia.md): verificador de guante, remera y pantalon en la revision.
+    identidad_apariencia: bool = field(
+        default_factory=lambda: _bandera("BOXTWIN_IDENTIDAD_APARIENCIA"))
     umbral_detector: float = field(
         default_factory=lambda: float(os.environ.get("BOXTWIN_UMBRAL", "0.80"))
     )

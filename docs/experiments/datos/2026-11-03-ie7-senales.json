@@ -1,0 +1,587 @@
+{
+ "etiqueta": "diagnostico de senales de apariencia, desarrollo, no decide nada",
+ "fuentes": [
+  {
+   "fuente": "Sparring",
+   "separacion_guante_ie6": 2.08,
+   "senales": {
+    "guante": {
+     "separacion": 1.67,
+     "perfiles": [
+      [
+       5.8,
+       107.0,
+       148.0
+      ],
+      [
+       115.7,
+       112.5,
+       125.0
+      ]
+     ],
+     "aisladas": {
+      "n": 575,
+      "acierto": 0.8678
+     },
+     "en_contacto": {
+      "n": 0,
+      "acierto": null
+     }
+    },
+    "remera": {
+     "separacion": 0.424,
+     "perfiles": [
+      [
+       4.9,
+       109.0,
+       117.2
+      ],
+      [
+       10.5,
+       132.0,
+       64.0
+      ]
+     ],
+     "aisladas": {
+      "n": 1314,
+      "acierto": 0.8447
+     },
+     "en_contacto": {
+      "n": 595,
+      "acierto": 0.7429
+     }
+    },
+    "pantalon": {
+     "separacion": 0.63,
+     "perfiles": [
+      [
+       9.7,
+       173.5,
+       105.2
+      ],
+      [
+       173.2,
+       190.0,
+       156.0
+      ]
+     ],
+     "aisladas": {
+      "n": 1305,
+      "acierto": 0.6
+     },
+     "en_contacto": {
+      "n": 579,
+      "acierto": 0.532
+     }
+    },
+    "remera+pantalon": {
+     "aisladas": {
+      "n": 1291,
+      "acierto": 0.8226
+     },
+     "en_contacto": {
+      "n": 576,
+      "acierto": 0.7274
+     }
+    },
+    "altura": {
+     "n": 845,
+     "cociente_mediana": 0.899,
+     "a_mas_alto": 0.3349,
+     "acierto_con_semillas": 0.6651,
+     "cuadros_semillas": 131
+    }
+   },
+   "muestras": {
+    "detecciones": 2097,
+    "remera": 1994,
+    "pantalon": 1935
+   }
+  },
+  {
+   "fuente": "01-sparring",
+   "separacion_guante_ie6": 0.384,
+   "senales": {
+    "guante": {
+     "separacion": 0.363,
+     "perfiles": [
+      [
+       7.7,
+       84.0,
+       132.0
+      ],
+      [
+       8.0,
+       54.0,
+       71.0
+      ]
+     ],
+     "aisladas": {
+      "n": 1114,
+      "acierto": 0.7424
+     },
+     "en_contacto": {
+      "n": 0,
+      "acierto": null
+     }
+    },
+    "remera": {
+     "separacion": 0.888,
+     "perfiles": [
+      [
+       177.5,
+       94.0,
+       113.0
+      ],
+      [
+       30.4,
+       67.0,
+       126.5
+      ]
+     ],
+     "aisladas": {
+      "n": 1278,
+      "acierto": 0.9734
+     },
+     "en_contacto": {
+      "n": 635,
+      "acierto": 0.9543
+     }
+    },
+    "pantalon": {
+     "separacion": 1.939,
+     "perfiles": [
+      [
+       127.2,
+       46.5,
+       52.0
+      ],
+      [
+       25.0,
+       53.0,
+       99.0
+      ]
+     ],
+     "aisladas": {
+      "n": 1151,
+      "acierto": 0.8914
+     },
+     "en_contacto": {
+      "n": 573,
+      "acierto": 0.8482
+     }
+    },
+    "remera+pantalon": {
+     "aisladas": {
+      "n": 1147,
+      "acierto": 0.9154
+     },
+     "en_contacto": {
+      "n": 571,
+      "acierto": 0.8739
+     }
+    },
+    "altura": {
+     "n": 966,
+     "cociente_mediana": 1.106,
+     "a_mas_alto": 0.7195,
+     "acierto_con_semillas": 0.7195,
+     "cuadros_semillas": 217
+    }
+   },
+   "muestras": {
+    "detecciones": 4671,
+    "remera": 4447,
+    "pantalon": 4157
+   }
+  },
+  {
+   "fuente": "02-sparring",
+   "separacion_guante_ie6": 0.913,
+   "senales": {
+    "guante": {
+     "separacion": 0.948,
+     "perfiles": [
+      [
+       174.4,
+       244.0,
+       125.0
+      ],
+      [
+       15.0,
+       145.0,
+       151.0
+      ]
+     ],
+     "aisladas": {
+      "n": 1164,
+      "acierto": 0.957
+     },
+     "en_contacto": {
+      "n": 0,
+      "acierto": null
+     }
+    },
+    "remera": {
+     "separacion": 0.988,
+     "perfiles": [
+      [
+       159.1,
+       69.5,
+       99.5
+      ],
+      [
+       9.6,
+       128.0,
+       120.0
+      ]
+     ],
+     "aisladas": {
+      "n": 654,
+      "acierto": 0.9235
+     },
+     "en_contacto": {
+      "n": 1217,
+      "acierto": 0.8891
+     }
+    },
+    "pantalon": {
+     "separacion": 1.59,
+     "perfiles": [
+      [
+       174.3,
+       246.0,
+       112.0
+      ],
+      [
+       142.0,
+       73.0,
+       62.5
+      ]
+     ],
+     "aisladas": {
+      "n": 527,
+      "acierto": 0.5446
+     },
+     "en_contacto": {
+      "n": 1045,
+      "acierto": 0.7148
+     }
+    },
+    "remera+pantalon": {
+     "aisladas": {
+      "n": 527,
+      "acierto": 0.7799
+     },
+     "en_contacto": {
+      "n": 1042,
+      "acierto": 0.9213
+     }
+    },
+    "altura": {
+     "n": 941,
+     "cociente_mediana": 1.022,
+     "a_mas_alto": 0.6865,
+     "acierto_con_semillas": 0.6865,
+     "cuadros_semillas": 112
+    }
+   },
+   "muestras": {
+    "detecciones": 9983,
+    "remera": 8459,
+    "pantalon": 4801
+   }
+  },
+  {
+   "fuente": "03-sparring",
+   "separacion_guante_ie6": 0.348,
+   "senales": {
+    "guante": {
+     "separacion": 0.461,
+     "perfiles": [
+      [
+       171.8,
+       172.0,
+       85.0
+      ],
+      [
+       175.3,
+       215.0,
+       140.0
+      ]
+     ],
+     "aisladas": {
+      "n": 1433,
+      "acierto": 0.8597
+     },
+     "en_contacto": {
+      "n": 0,
+      "acierto": null
+     }
+    },
+    "remera": {
+     "separacion": 0.375,
+     "perfiles": [
+      [
+       178.9,
+       105.0,
+       57.0
+      ],
+      [
+       5.3,
+       114.0,
+       107.5
+      ]
+     ],
+     "aisladas": {
+      "n": 779,
+      "acierto": 0.7766
+     },
+     "en_contacto": {
+      "n": 1015,
+      "acierto": 0.7153
+     }
+    },
+    "pantalon": {
+     "separacion": 1.122,
+     "perfiles": [
+      [
+       4.8,
+       70.0,
+       16.0
+      ],
+      [
+       172.4,
+       200.0,
+       102.0
+      ]
+     ],
+     "aisladas": {
+      "n": 494,
+      "acierto": 0.8381
+     },
+     "en_contacto": {
+      "n": 643,
+      "acierto": 0.7947
+     }
+    },
+    "remera+pantalon": {
+     "aisladas": {
+      "n": 494,
+      "acierto": 0.919
+     },
+     "en_contacto": {
+      "n": 636,
+      "acierto": 0.8789
+     }
+    },
+    "altura": {
+     "n": 897,
+     "cociente_mediana": 1.002,
+     "a_mas_alto": 0.5195,
+     "acierto_con_semillas": 0.5195,
+     "cuadros_semillas": 81
+    }
+   },
+   "muestras": {
+    "detecciones": 6761,
+    "remera": 5324,
+    "pantalon": 2744
+   }
+  },
+  {
+   "fuente": "04-sparring",
+   "separacion_guante_ie6": 1.715,
+   "senales": {
+    "guante": {
+     "separacion": 2.12,
+     "perfiles": [
+      [
+       39.9,
+       168.5,
+       112.0
+      ],
+      [
+       146.8,
+       61.0,
+       93.0
+      ]
+     ],
+     "aisladas": {
+      "n": 1040,
+      "acierto": 0.8087
+     },
+     "en_contacto": {
+      "n": 0,
+      "acierto": null
+     }
+    },
+    "remera": {
+     "separacion": 0.452,
+     "perfiles": [
+      [
+       6.5,
+       87.0,
+       49.0
+      ],
+      [
+       169.4,
+       89.0,
+       65.0
+      ]
+     ],
+     "aisladas": {
+      "n": 737,
+      "acierto": 0.6445
+     },
+     "en_contacto": {
+      "n": 1310,
+      "acierto": 0.5908
+     }
+    },
+    "pantalon": {
+     "separacion": 0.589,
+     "perfiles": [
+      [
+       132.9,
+       148.0,
+       67.0
+      ],
+      [
+       149.3,
+       195.0,
+       77.5
+      ]
+     ],
+     "aisladas": {
+      "n": 576,
+      "acierto": 0.6545
+     },
+     "en_contacto": {
+      "n": 1102,
+      "acierto": 0.5091
+     }
+    },
+    "remera+pantalon": {
+     "aisladas": {
+      "n": 575,
+      "acierto": 0.6539
+     },
+     "en_contacto": {
+      "n": 1095,
+      "acierto": 0.6009
+     }
+    },
+    "altura": {
+     "n": 997,
+     "cociente_mediana": 1.114,
+     "a_mas_alto": 0.8937,
+     "acierto_con_semillas": 0.8937,
+     "cuadros_semillas": 254
+    }
+   },
+   "muestras": {
+    "detecciones": 8104,
+    "remera": 7112,
+    "pantalon": 4889
+   }
+  },
+  {
+   "fuente": "sparring-3-rounds",
+   "separacion_guante_ie6": 1.694,
+   "senales": {
+    "guante": {
+     "separacion": 2.195,
+     "perfiles": [
+      [
+       105.0,
+       167.0,
+       213.0
+      ],
+      [
+       1.8,
+       92.0,
+       163.5
+      ]
+     ],
+     "aisladas": {
+      "n": 5242,
+      "acierto": 0.8943
+     },
+     "en_contacto": {
+      "n": 0,
+      "acierto": null
+     }
+    },
+    "remera": {
+     "separacion": 0.494,
+     "perfiles": [
+      [
+       128.3,
+       94.0,
+       112.0
+      ],
+      [
+       132.3,
+       51.5,
+       51.5
+      ]
+     ],
+     "aisladas": {
+      "n": 3551,
+      "acierto": 0.5827
+     },
+     "en_contacto": {
+      "n": 2899,
+      "acierto": 0.545
+     }
+    },
+    "pantalon": {
+     "separacion": 0.068,
+     "perfiles": [
+      [
+       106.9,
+       49.0,
+       48.0
+      ],
+      [
+       104.9,
+       49.0,
+       54.0
+      ]
+     ],
+     "aisladas": {
+      "n": 3000,
+      "acierto": 0.7313
+     },
+     "en_contacto": {
+      "n": 2292,
+      "acierto": 0.7531
+     }
+    },
+    "remera+pantalon": {
+     "aisladas": {
+      "n": 3001,
+      "acierto": 0.5775
+     },
+     "en_contacto": {
+      "n": 2284,
+      "acierto": 0.5442
+     }
+    },
+    "altura": {
+     "n": 3141,
+     "cociente_mediana": 1.049,
+     "a_mas_alto": 0.6966,
+     "acierto_con_semillas": 0.6966,
+     "cuadros_semillas": 290
+    }
+   },
+   "muestras": {
+    "detecciones": 8966,
+    "remera": 8071,
+    "pantalon": 6826
+   }
+  }
+ ]
+}

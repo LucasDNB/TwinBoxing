@@ -90,6 +90,7 @@ def comando_de(trabajo: Trabajo, sesion: Sesion) -> list[list[str]]:
             # Identidad estable (02-11), detras de banderas apagadas por defecto.
             *(["--cortar-mixtos"] if cfg.corte_mixtos else []),
             *(["--estricta"] if cfg.identidad_estricta else []),
+            *(["--apariencia"] if cfg.identidad_apariencia else []),
         ]]
 
     if trabajo.etapa == "clasificar" and cfg.tipo_v2:

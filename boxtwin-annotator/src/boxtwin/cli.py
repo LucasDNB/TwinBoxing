@@ -354,6 +354,9 @@ def build_parser() -> argparse.ArgumentParser:
     cp.add_argument("--estricta", action="store_true",
                     help="le saca el rol a los tramos automaticos en conflicto (dos del mismo "
                          "rol en el mismo cuadro): quedan sin asignar y se revisan")
+    cp.add_argument("--apariencia", action="store_true",
+                    help="suma a la revision los tramos que guante, remera y pantalon "
+                         "contradicen (IE7). No cambia la asignacion")
 
     en = sub.add_parser(
         "enriquecer",
@@ -703,6 +706,7 @@ def _cmd_completar(args: argparse.Namespace) -> int:
         cfg_guardia=ConfigGuardia(retorno_lento_ms=args.retorno_lento_ms),
         manual=args.manual,
         cortar_mixtos=args.cortar_mixtos, estricta=args.estricta,
+        apariencia=args.apariencia,
     )
     ses = Sesion.cargar(args.sesion)
 

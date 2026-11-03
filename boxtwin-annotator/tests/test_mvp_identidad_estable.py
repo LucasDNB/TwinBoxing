@@ -104,3 +104,33 @@ def test_el_corte_de_mixtos_parte_el_track_que_cambia_de_color(sesion, detector)
     # ninguno de los dos pedazos es el track entero: los dos llevan el cuadro en la clave
     assert {p["clave"] for p in partes} == {f"2-{d}" for d in desdes}
     assert fc["identidad"]["corte_de_mixtos"] is True
+
+
+def test_la_apariencia_suma_a_la_revision_sin_cambiar_la_asignacion(sesion, detector):
+    """IE7: con --apariencia, la ropa del otro peleador manda el tramo a la cola; sin ella, no."""
+    ev = cargar_evidencia(sesion / "evidencia.json")
+    blanca, negra = (-1.0, 20.0, 230.0), (-1.0, 30.0, 25.0)
+    azul_p, verde_p = (110.0, 180.0, 120.0), (60.0, 180.0, 120.0)
+    for t, e in ev.items():
+        frames = [f for f, _ in e.colores]
+        e.ropa = [(f, blanca, azul_p, True) if t == 1 else (f, negra, verde_p, True)
+                  for f in frames]
+    # el 3 (A por coexistencia) tiene guante rojo como A pero remera y pantalon de B
+    todo = list(range(MITAD, T, 5))
+    ev[3] = EvidenciaTrack(3, MITAD, T - 1, 0.6, len(todo), len(todo),
+                           [(f, ROJO) for f in todo], todo, [(f, 200.0) for f in todo],
+                           ropa=[(f, negra, verde_p, False) for f in todo])
+    guardar_evidencia(ev, sesion / "evidencia.json")
+
+    antes = _completar(sesion, detector)
+    assert antes["identidad"]["identidad_apariencia"] is None
+    rol_3 = [t["rol_actual"] for t in _tramos(sesion, 3)]
+    assert [t["motivo"] for t in _tramos(sesion, 3)] == [None]
+
+    fc = _completar(sesion, detector, apariencia=True)
+    assert [t["motivo"] for t in _tramos(sesion, 3)] == ["apariencia_contradice"]
+    assert [t["rol_actual"] for t in _tramos(sesion, 3)] == rol_3 == ["A"]
+    assert fc["identidad"]["identidad_apariencia"]["pesos"]["remera"] > 0
+    # la asignacion es la misma: solo cambia que se pregunta
+    assert fc["identidad"]["cobertura_A"] == antes["identidad"]["cobertura_A"]
+    assert fc["identidad"]["revision_pendiente"] == antes["identidad"]["revision_pendiente"] + 1

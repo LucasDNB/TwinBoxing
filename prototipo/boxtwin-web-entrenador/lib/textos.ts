@@ -203,6 +203,8 @@ export const textos = {
     conflicto: "el mismo peleador aparece dos veces a la vez",
     color_contradice: "el color del guante dice lo contrario",
     posible_mezcla: "puede cambiar de persona en el medio",
+    apariencia_contradice: "la ropa y los guantes dicen lo contrario",
+    apariencia_mezcla: "la ropa cambia en el medio: puede ser otra persona",
   } as Record<string, string>,
   /* Identidad estable (02-11): lo que dice hoy un tramo asignado que se sospecha. */
   rolActual: (rol: string) => (rol === "ninguno" ? "Hoy: ignorado" : `Hoy dice: ${rol}`),

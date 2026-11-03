@@ -260,6 +260,7 @@ def completar(
     manual: bool = False,
     cortar_mixtos: bool = False,
     estricta: bool = False,
+    apariencia: bool = False,
 ) -> dict:
     """
     Identidad por color desde las semillas, detector, guardia y Fight-Card.
@@ -276,7 +277,8 @@ def completar(
     tracks mixtos con el corte de E11 antes de la particion, y `estricta` les saca el rol a los
     tramos automaticos en conflicto (dos del mismo rol en el mismo cuadro). Los tramos para
     revisar incluyen ahora los asignados sospechosos. Con las dos banderas apagadas y sin
-    correcciones por rango, la asignacion es la de antes.
+    correcciones por rango, la asignacion es la de antes. `apariencia` (IE7) no cambia la
+    asignacion: suma a la revision los tramos que guante, remera y pantalon contradicen.
     """
     import torch
 
@@ -356,8 +358,12 @@ def completar(
                      cortar_mixtos=bool(cortar_mixtos), estricta=bool(estricta),
                      tracks_partidos=prop.diagnostico.get("tracks_partidos", 0),
                      degradados=degradados)
+    modelo_apariencia = None
+    if apariencia and not individual:
+        from boxtwin.core.apariencia import ajustar
+        modelo_apariencia = ajustar(ev, (int(semilla_a), int(semilla_b)))
     tramos = cola_de_revision(auto_tramos, corregidos, ev, prop.perfiles, cfg_identidad, fps,
-                              todos=True, estricta=estricta)
+                              todos=True, estricta=estricta, apariencia=modelo_apariencia)
     _recortar_tramos(paths.video, ses, directorio, cache, tramos)
     ses.identidad["tramos"] = tramos
 
@@ -412,6 +418,8 @@ def completar(
     cobertura["tramos_a_revisar"] = sum(1 for t in tramos if t["revision_pendiente"])
     cobertura["corte_de_mixtos"] = bool(cortar_mixtos)
     cobertura["identidad_estricta"] = bool(estricta)
+    cobertura["identidad_apariencia"] = (modelo_apariencia.a_dict()
+                                         if modelo_apariencia is not None else None)
     # 0.2: cuantos tramos eran de peleador, cuantos asigno el sistema y cuantos una persona.
     cobertura["tramos_total"] = auto + len(sin_asignar_auto)
     cobertura["tramos_asignados_auto"] = auto
