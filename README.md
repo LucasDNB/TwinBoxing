@@ -915,3 +915,14 @@ PENDIENTE Y PROXIMO PASO
 5. E10: +0,019 y 5 de 6 folds, debajo de +0,03: sigue no demostrada
 6. E8b: sigue iguala, ahora por debajo (-0,025)
 7. Documentado en docs/experiments/2026-11-01-r1-evaluacion-producto.md
+
+03-11 IE6: identidad estable, errores silenciosos y cola de revision (desarrollo)
+
+1. Auditoria: base y corte iguales a E11 S10 v2 (0,850/0,788 y 0,923/0,872)
+2. Silenciosos 1,54% (base) y 1,55% (corte, estricta) contra 0,5%: ninguna pasa E1
+3. 03-sparring concentra 1248 de 1275 (12,8%): perfiles de color no separan (0,348)
+4. Tras usuario simulado, precision 0,970 a 0,984 contra 0,99: ninguna pasa E2
+5. Veredicto: no estable; se elige base, BOXTWIN_CORTE_MIXTOS y ESTRICTA apagadas
+6. Costo 22 decisiones por minuto de video; 80% de la cola son tracks cortos
+7. Diagnostico aparte: una segunda ronda de la cola destapa 1211 de los 1248
+8. Documentado en docs/experiments/2026-11-03-identidad-estable.md
