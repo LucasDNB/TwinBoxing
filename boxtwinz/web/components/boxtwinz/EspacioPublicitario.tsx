@@ -4,6 +4,7 @@
  * anuncios. Registra una impresion por montaje. Solo se muestra en free.
  */
 import { useEffect } from "react";
+import { useYo } from "@/components/boxtwinz/Marco";
 import { api } from "@/lib/api";
 
 export function EspacioPublicitario({ ubicacion, plan }: { ubicacion: string; plan: string }) {
@@ -17,4 +18,10 @@ export function EspacioPublicitario({ ubicacion, plan }: { ubicacion: string; pl
       <span className="rotulo">Publicidad</span>
     </aside>
   );
+}
+
+/* Igual, leyendo el plan del Marco: para usar adentro de una pantalla con sesion. */
+export function PublicidadDelPlan({ ubicacion }: { ubicacion: string }) {
+  const { yo } = useYo();
+  return <EspacioPublicitario ubicacion={ubicacion} plan={yo.plan} />;
 }
