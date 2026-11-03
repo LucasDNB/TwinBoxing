@@ -40,6 +40,7 @@
         "separacion_color": { "type": ["number", "null"] },
         "revision_pendiente": { "type": "integer", "minimum": 0, "description": "tramos sospechosos (asignados con una pregunta abierta) que nadie reviso; identidad estable 02-11" },
         "tramos_a_revisar": { "type": "integer", "minimum": 0 },
+        "tramos_sin_asignar": { "type": "integer", "minimum": 0, "description": "clips sin rol que nadie decidio; lo que salio de cuadro se ignora solo y no cuenta (3-11)" },
         "corte_de_mixtos": { "type": "boolean" },
         "identidad_estricta": { "type": "boolean" },
         "identidad_apariencia": {

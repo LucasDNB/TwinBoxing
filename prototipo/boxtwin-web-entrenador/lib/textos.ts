@@ -94,6 +94,11 @@ export const textos = {
   sinAsignar(fraccion: number) {
     return `El ${porcentajeAR(fraccion)} del video quedó sin saber quién es quién. Los golpes de esos tramos no se cuentan.`;
   },
+  /* 3-11: el resultado de la revision dice solo cuantos clips quedan sin asignar. */
+  clipsSinAsignar: (n: number) =>
+    n === 0 ? "No quedan clips sin asignar." : n === 1 ? "1 clip sin asignar" : `${n} clips sin asignar`,
+  /* 3-11: los botones de la revision dicen el boxeador; sin nombre, el rincon. */
+  rincon: { A: "Rincón rojo", B: "Rincón azul" } as Record<"A" | "B", string>,
   notaCorreccion(checkpoint: string | null | undefined) {
     const ck = checkpoint && checkpoint.trim() ? checkpoint : "sin versión registrada";
     return `El tipo de golpe es una estimación del modelo ${ck} y mejora con cada versión. Tu corrección se guarda para entrenar y no cambia el conteo de golpes detectados.`;

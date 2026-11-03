@@ -80,6 +80,9 @@ def test_sin_banderas_ni_rangos_la_identidad_es_la_de_antes(sesion, detector):
     assert (ident["tramos_total"], ident["tramos_asignados_auto"]) == (3, 2)
     assert ident["corte_de_mixtos"] is False and ident["revision_pendiente"] == 0
     assert ident["cobertura_A"] == pytest.approx(0.5, abs=0.01)
+    # el resultado de la web muestra solo esto: los sin asignar que nadie decidio
+    assert ident["tramos_sin_asignar"] == sum(
+        1 for t in Sesion.cargar(sesion).identidad["tramos"] if t["tipo"] == "sin_asignar" and t["revision_pendiente"])
 
 
 def test_el_corte_de_mixtos_parte_el_track_que_cambia_de_color(sesion, detector):

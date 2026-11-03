@@ -129,6 +129,17 @@ def tramos_de_propuesta(
     return salida
 
 
+def ignorar_cortos(tramos: list[Tramo]) -> list[Tramo]:
+    """
+    Los sin asignar con motivo `corto` ("salio de cuadro") pasan a ignorados, sin preguntar
+    (pedido de Lucas, 3-11). Sus golpes ya no se contaban; lo que cambia es que no ocupan la
+    cola. Siguen siendo automaticos: una correccion de la persona les gana, y con `todos` la
+    cola los muestra para poder rescatarlos.
+    """
+    return [replace(t, rol="ninguno") if t.rol == "" and t.motivo == "corto" else t
+            for t in tramos]
+
+
 def a_propuesta(tramos: list[Tramo], base: Propuesta) -> Propuesta:
     """
     Los tramos finales como Propuesta, para AsignarIdentidadAuto (que no cambia). Cada tramo
@@ -384,7 +395,10 @@ def cola_de_revision(
                 continue
             motivo, tipo = t.motivo or "sin_coexistencia", "sin_asignar"
         elif t.rol == "ninguno":
-            continue
+            # Solo los que ignoro `ignorar_cortos`, y solo en la lista completa.
+            if t.motivo != "corto" or not todos or dur <= DURACION_MINIMA_S:
+                continue
+            motivo, tipo = "corto", "asignado"
         else:
             motivo = _sospecha_de(t, evidencia, perfiles, cfg, apariencia)
             tipo = "sospechoso" if motivo else "asignado"
