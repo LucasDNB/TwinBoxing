@@ -339,7 +339,7 @@ posible mezcla) y las correcciones van por rango, con "Acá cambia de persona" e
 (`boxtwin/mvp/revision.py`, `PUT /jobs/{id}/tramos` con `desde`/`hasta`). El corte de mixtos de
 E11 y el modo estricto van detrás de `BOXTWIN_CORTE_MIXTOS` y `BOXTWIN_IDENTIDAD_ESTRICTA`,
 apagadas. Qué se enciende lo decide la medición offline `scripts/identidad/medir_identidad_estable.py`
-(IE6, la corre Lucas). Nada de esto entra a A antes del 17-11.
+(IE6, la corre Lucas). Entró a A el 3-11 (`ca347cb`), a pedido de Lucas, que levantó el congelamiento hasta el 17-11.
 IE6 (3-11) dio no estable con una ronda. IE7 (3-11, `02-ie7-apariencia.md`) da estable en
 desarrollo con rondas y un usuario que separa a un tercero; el verificador de guante, remera y
 pantalon (`boxtwin/core/apariencia.py`, `BOXTWIN_IDENTIDAD_APARIENCIA`) la regla lo dejaba apagado
@@ -432,7 +432,7 @@ Argparse con defaults sensatos. Todo lo que produzca datos, reanudable.
 
 Ramas con PR contra `main`; commits con mensaje fechado. `testeoDS` está mergeada y
 borrada (20-10). Desde el 26-10 la estación corre la rama `produccion` (desacoplada,
-`1058d5e` al 27-10) desde `~/Proyectos/TwinBoxing`, con las versiones; lo que va a
+`ca347cb` al 03-11, mismo árbol que `main`) desde `~/Proyectos/TwinBoxing`, con las versiones; lo que va a
 producción se hace con PR contra `produccion`, no contra `main`; la instancia académica B sigue en
 `efcec23` (`despliegue/PRODUCCION.md`). `GET /salud` dice el commit que está corriendo.
 

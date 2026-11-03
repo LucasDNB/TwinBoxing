@@ -937,3 +937,11 @@ PENDIENTE Y PROXIMO PASO
 6. Regla: estable en desarrollo; se elige base (23,2 contra 24,1 decisiones por minuto)
 7. Con una sola ronda el verificador baja 1275 a 64; con rondas la cola ya los encuentra
 8. Documentado en docs/experiments/2026-11-03-ie7-apariencia.md
+
+03-11 Produccion: main desplegado en A (ca347cb)
+
+1. Pedido de Lucas: se levanta el congelamiento de A hasta el 17-11
+2. Entran identidad estable, el verificador de apariencia encendido por defecto y Next 16.4.4
+3. Sin migraciones; /etc/boxtwin.env sin tocar
+4. Respaldos de base y entorno, huella antes y despues; 21 sesiones antes y despues
+5. verificar a ok y Funnel ok; registro en despliegue/PRODUCCION.md
