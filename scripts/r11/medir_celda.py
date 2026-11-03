@@ -96,9 +96,9 @@ def main(argv=None) -> int:
     a.salida.parent.mkdir(parents=True, exist_ok=True)
     largo = np.array([len(c) for c in cajas])
     np.savez_compressed(
-        a.salida.with_suffix(".npz"), t_dec=t_dec, t_pose=t_pose, cuadro=np.array(idx), personas=personas,
+        f"{a.salida}.npz", t_dec=t_dec, t_pose=t_pose, cuadro=np.array(idx), personas=personas,
         n=largo, cajas=np.concatenate(cajas), kp=np.concatenate(kps), sc=np.concatenate(scs))
-    a.salida.with_suffix(".json").write_text(json.dumps({
+    Path(f"{a.salida}.json").write_text(json.dumps({
         "proveedor": proveedor,
         "sha_lista": lista["sha256"],
         "fps_sostenidos": float(len(t_dec) / muro),

@@ -159,7 +159,9 @@ def exportar(k: str) -> None:
 
 def medir(k: str, video: str, ronda: int, c: Candado) -> None:
     salida = BASE / "crudo" / f"{k}.{video}.r{ronda}"
-    if salida.with_suffix(".json").is_file():
+    # el nombre lleva puntos: with_suffix cambiaria ".r1" en vez de agregar la extension
+    hecho_j, hecho_n = Path(f"{salida}.json"), Path(f"{salida}.npz")
+    if hecho_j.is_file():
         return
     formato, t, s = k.split("-")
     intentos = 0
@@ -199,9 +201,9 @@ def medir(k: str, video: str, ronda: int, c: Candado) -> None:
             tmp_j.unlink(missing_ok=True)
             tmp_n.unlink(missing_ok=True)
             continue
-        tmp_n.rename(salida.with_suffix(".npz"))
-        tmp_j.rename(salida.with_suffix(".json"))
-        d = np.load(salida.with_suffix(".npz"))
+        tmp_n.rename(hecho_n)
+        tmp_j.rename(hecho_j)
+        d = np.load(hecho_n)
         tot = (d["t_dec"] + d["t_pose"])[regla.WARMUP:]
         log(f"{k} {video} r{ronda}: mediana {np.median(tot):.1f} p95 {np.percentile(tot, 95):.1f}")
         return
