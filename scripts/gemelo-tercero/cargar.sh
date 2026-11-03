@@ -31,8 +31,14 @@ API="http://127.0.0.1:8000"
 COMMIT_A="1058d5e"
 
 mkdir -p "$OUT" "$FIN/scripts"
-source "$HOME/miniforge3/etc/profile.d/conda.sh"
-conda activate twinboxing_env
+# Los scripts de activacion de cuda-nvcc de conda leen variables sin definir: con set -u
+# cortan (NVCC_PREPEND_FLAGS, CUDAARCHS_BACKUP). Se apaga solo para activar.
+if [ "${CONDA_DEFAULT_ENV:-}" != "twinboxing_env" ]; then
+  set +u
+  source "$HOME/miniforge3/etc/profile.d/conda.sh"
+  conda activate twinboxing_env
+  set -u
+fi
 
 echo "== 1. Video"
 [ -f "$VIDEO" ] || { echo "no existe $VIDEO"; exit 1; }
