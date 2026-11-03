@@ -432,7 +432,7 @@ Argparse con defaults sensatos. Todo lo que produzca datos, reanudable.
 
 Ramas con PR contra `main`; commits con mensaje fechado. `testeoDS` está mergeada y
 borrada (20-10). Desde el 26-10 la estación corre la rama `produccion` (desacoplada,
-`ca347cb` al 03-11, mismo árbol que `main`) desde `~/Proyectos/TwinBoxing`, con las versiones; lo que va a
+`ed54f1a` al 03-11, mismo árbol que `main`) desde `~/Proyectos/TwinBoxing`, con las versiones; lo que va a
 producción se hace con PR contra `produccion`, no contra `main`; la instancia académica B sigue en
 `efcec23` (`despliegue/PRODUCCION.md`). `GET /salud` dice el commit que está corriendo.
 

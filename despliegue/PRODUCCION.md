@@ -121,6 +121,27 @@ PR #30 (avatar MPFB2 y calor sobre la piel, `prototipo/specs/cambios-27-10/`) me
   que sigue así a pedido de Lucas (ventana de ensayo).
 - Vuelta atrás: `git checkout --detach c936b0f`, `produccion.sh web` y restart de la API.
 
+## ¿Quién es quién? desplegado en A (03-11, 15:55)
+
+PR #56 (`produccion`) y #55 (`main`), mergeados como `ed54f1a`. En la revisión de identidad, "salió
+de cuadro" se ignora solo, los botones dicen el nombre del boxeador (o Rincón rojo / Rincón azul) y
+el resultado muestra solo los clips sin asignar. Sin migración. La API no cambia y no importa
+código del anotador, y el worker llama al anotador como un programa aparte en cada trabajo:
+**sin restart**.
+
+- Cola vacía (99 trabajos, todos `listo`). Copia principal de `ca347cb` a `ed54f1a`
+  (`git checkout --detach origin/produccion`), `produccion.sh web`: presupuesto en verde,
+  `sin-demo` limpio.
+- Por el Funnel, `/sesion/identificar/` 200 y el chunk servido trae los textos nuevos. El
+  `boxtwin.mvp.revision` que importa el entorno es el de la copia y tiene `ignorar_cortos`.
+- `/salud` sigue diciendo `ca347cb`, que es el commit con que arrancó la API, así que
+  `verificar a` avisa que falta reiniciar. Se corrige con `sudo systemctl restart boxtwin-api`
+  cuando la cola esté vacía.
+- Solo las sesiones procesadas desde ahora traen lo de "salió de cuadro" ignorado en el
+  anotador. En las viejas, la web no lo pregunta.
+
+Vuelta atrás: `git checkout --detach ca347cb` y `produccion.sh web`.
+
 ## main al 03-11 desplegado en A (03-11, 14:28)
 
 Pedido de Lucas el 3-11, que levanta el congelamiento de A hasta el 17-11 ("llevemos boxtwin a su
