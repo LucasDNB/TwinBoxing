@@ -340,6 +340,10 @@ posible mezcla) y las correcciones van por rango, con "Acá cambia de persona" e
 E11 y el modo estricto van detrás de `BOXTWIN_CORTE_MIXTOS` y `BOXTWIN_IDENTIDAD_ESTRICTA`,
 apagadas. Qué se enciende lo decide la medición offline `scripts/identidad/medir_identidad_estable.py`
 (IE6, la corre Lucas). Nada de esto entra a A antes del 17-11.
+IE6 (3-11) dio no estable con una ronda. IE7 (3-11, `02-ie7-apariencia.md`) da estable en
+desarrollo con rondas y un usuario que separa a un tercero; el verificador de guante, remera y
+pantalon (`boxtwin/core/apariencia.py`, `BOXTWIN_IDENTIDAD_APARIENCIA`) queda apagado por costo.
+Las tres banderas, apagadas.
 
 ## 5quinquies. Versiones Individual y Gimnasio (desde el 26-10)
 

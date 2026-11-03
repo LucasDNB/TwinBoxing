@@ -1,0 +1,1116 @@
+{
+ "etiqueta": "desarrollo: material donde se diseno IE7, no confirma",
+ "spec": "docs/specs/2026-11-02-identidad-estable/02-ie7-apariencia.md",
+ "auditoria": {
+  "silenciosos": 1275,
+  "precision_oraculo": 0.9698,
+  "esperado": {
+   "silenciosos": 1275,
+   "precision_oraculo": 0.9698
+  },
+  "coincide": true
+ },
+ "fuentes": [
+  {
+   "fuente": "Sparring",
+   "minutos": 3.1097842098752935,
+   "ropa": 2012,
+   "base": {
+    "modelo": null,
+    "v2": {
+     "auto": {
+      "bien": 4872,
+      "asignados": 5494,
+      "peleador": 9671,
+      "precision": 0.8867855842737532,
+      "cobertura": 0.5037741701995657
+     },
+     "errores": {
+      "silenciosos": 0,
+      "visibles": 622,
+      "peleador": 9671,
+      "fraccion_silenciosa": 0.0
+     },
+     "cola": {
+      "items": 15,
+      "por_motivo": {
+       "posible_mezcla": 4,
+       "corto": 11
+      },
+      "segundos": 188.9
+     },
+     "rondas": 1,
+     "decisiones": 18,
+     "oraculo": {
+      "bien": 5564,
+      "asignados": 5564,
+      "peleador": 9671,
+      "precision": 1.0,
+      "cobertura": 0.5753283011064005
+     }
+    },
+    "ie6": {
+     "auto": {
+      "bien": 4872,
+      "asignados": 5494,
+      "peleador": 9671,
+      "precision": 0.8867855842737532,
+      "cobertura": 0.5037741701995657
+     },
+     "errores": {
+      "silenciosos": 0,
+      "visibles": 622,
+      "peleador": 9671,
+      "fraccion_silenciosa": 0.0
+     },
+     "cola": {
+      "items": 15,
+      "por_motivo": {
+       "posible_mezcla": 4,
+       "corto": 11
+      },
+      "segundos": 188.9
+     },
+     "rondas": 1,
+     "decisiones": 18,
+     "oraculo": {
+      "bien": 5564,
+      "asignados": 5564,
+      "peleador": 9671,
+      "precision": 1.0,
+      "cobertura": 0.5753283011064005
+     }
+    }
+   },
+   "apariencia": {
+    "modelo": {
+     "confiabilidad": {
+      "guante": 0.645,
+      "remera": 0.624,
+      "pantalon": 0.547
+     },
+     "pesos": {
+      "guante": 0.597,
+      "remera": 0.508,
+      "pantalon": 0.189
+     }
+    },
+    "v2": {
+     "auto": {
+      "bien": 4872,
+      "asignados": 5494,
+      "peleador": 9671,
+      "precision": 0.8867855842737532,
+      "cobertura": 0.5037741701995657
+     },
+     "errores": {
+      "silenciosos": 0,
+      "visibles": 622,
+      "peleador": 9671,
+      "fraccion_silenciosa": 0.0
+     },
+     "cola": {
+      "items": 17,
+      "por_motivo": {
+       "posible_mezcla": 4,
+       "apariencia_mezcla": 2,
+       "corto": 11
+      },
+      "segundos": 211.2
+     },
+     "rondas": 1,
+     "decisiones": 20,
+     "oraculo": {
+      "bien": 5564,
+      "asignados": 5564,
+      "peleador": 9671,
+      "precision": 1.0,
+      "cobertura": 0.5753283011064005
+     }
+    },
+    "ie6": {
+     "auto": {
+      "bien": 4872,
+      "asignados": 5494,
+      "peleador": 9671,
+      "precision": 0.8867855842737532,
+      "cobertura": 0.5037741701995657
+     },
+     "errores": {
+      "silenciosos": 0,
+      "visibles": 622,
+      "peleador": 9671,
+      "fraccion_silenciosa": 0.0
+     },
+     "cola": {
+      "items": 17,
+      "por_motivo": {
+       "posible_mezcla": 4,
+       "apariencia_mezcla": 2,
+       "corto": 11
+      },
+      "segundos": 211.2
+     },
+     "rondas": 1,
+     "decisiones": 20,
+     "oraculo": {
+      "bien": 5564,
+      "asignados": 5564,
+      "peleador": 9671,
+      "precision": 1.0,
+      "cobertura": 0.5753283011064005
+     }
+    }
+   }
+  },
+  {
+   "fuente": "01-sparring",
+   "minutos": 2.8072222222222223,
+   "ropa": 4509,
+   "base": {
+    "modelo": null,
+    "v2": {
+     "auto": {
+      "bien": 8883,
+      "asignados": 9068,
+      "peleador": 9908,
+      "precision": 0.9795985884428761,
+      "cobertura": 0.8965482438433588
+     },
+     "errores": {
+      "silenciosos": 2,
+      "visibles": 183,
+      "peleador": 9908,
+      "fraccion_silenciosa": 0.00020185708518368994
+     },
+     "cola": {
+      "items": 35,
+      "por_motivo": {
+       "conflicto": 3,
+       "color_insuficiente": 3,
+       "corto": 29
+      },
+      "segundos": 236.8
+     },
+     "rondas": 1,
+     "decisiones": 38,
+     "oraculo": {
+      "bien": 9844,
+      "asignados": 9846,
+      "peleador": 9908,
+      "precision": 0.9997968718261223,
+      "cobertura": 0.9935405732741219
+     }
+    },
+    "ie6": {
+     "auto": {
+      "bien": 8883,
+      "asignados": 9068,
+      "peleador": 9908,
+      "precision": 0.9795985884428761,
+      "cobertura": 0.8965482438433588
+     },
+     "errores": {
+      "silenciosos": 2,
+      "visibles": 183,
+      "peleador": 9908,
+      "fraccion_silenciosa": 0.00020185708518368994
+     },
+     "cola": {
+      "items": 35,
+      "por_motivo": {
+       "conflicto": 3,
+       "color_insuficiente": 3,
+       "corto": 29
+      },
+      "segundos": 236.8
+     },
+     "rondas": 1,
+     "decisiones": 35,
+     "oraculo": {
+      "bien": 9844,
+      "asignados": 10274,
+      "peleador": 9908,
+      "precision": 0.958146778275258,
+      "cobertura": 0.9935405732741219
+     }
+    }
+   },
+   "apariencia": {
+    "modelo": {
+     "confiabilidad": {
+      "guante": 0.752,
+      "remera": 0.947,
+      "pantalon": 0.853
+     },
+     "pesos": {
+      "guante": 1.107,
+      "remera": 2.882,
+      "pantalon": 1.758
+     }
+    },
+    "v2": {
+     "auto": {
+      "bien": 8883,
+      "asignados": 9068,
+      "peleador": 9908,
+      "precision": 0.9795985884428761,
+      "cobertura": 0.8965482438433588
+     },
+     "errores": {
+      "silenciosos": 2,
+      "visibles": 183,
+      "peleador": 9908,
+      "fraccion_silenciosa": 0.00020185708518368994
+     },
+     "cola": {
+      "items": 35,
+      "por_motivo": {
+       "conflicto": 3,
+       "color_insuficiente": 3,
+       "corto": 29
+      },
+      "segundos": 236.8
+     },
+     "rondas": 1,
+     "decisiones": 38,
+     "oraculo": {
+      "bien": 9844,
+      "asignados": 9846,
+      "peleador": 9908,
+      "precision": 0.9997968718261223,
+      "cobertura": 0.9935405732741219
+     }
+    },
+    "ie6": {
+     "auto": {
+      "bien": 8883,
+      "asignados": 9068,
+      "peleador": 9908,
+      "precision": 0.9795985884428761,
+      "cobertura": 0.8965482438433588
+     },
+     "errores": {
+      "silenciosos": 2,
+      "visibles": 183,
+      "peleador": 9908,
+      "fraccion_silenciosa": 0.00020185708518368994
+     },
+     "cola": {
+      "items": 35,
+      "por_motivo": {
+       "conflicto": 3,
+       "color_insuficiente": 3,
+       "corto": 29
+      },
+      "segundos": 236.8
+     },
+     "rondas": 1,
+     "decisiones": 35,
+     "oraculo": {
+      "bien": 9844,
+      "asignados": 10274,
+      "peleador": 9908,
+      "precision": 0.958146778275258,
+      "cobertura": 0.9935405732741219
+     }
+    }
+   }
+  },
+  {
+   "fuente": "02-sparring",
+   "minutos": 2.843888888888889,
+   "ropa": 8569,
+   "base": {
+    "modelo": null,
+    "v2": {
+     "auto": {
+      "bien": 9497,
+      "asignados": 10247,
+      "peleador": 9942,
+      "precision": 0.9268078461988875,
+      "cobertura": 0.9552403942868638
+     },
+     "errores": {
+      "silenciosos": 0,
+      "visibles": 750,
+      "peleador": 9942,
+      "fraccion_silenciosa": 0.0
+     },
+     "cola": {
+      "items": 145,
+      "por_motivo": {
+       "conflicto": 7,
+       "color_insuficiente": 38,
+       "corto": 100
+      },
+      "segundos": 737.2
+     },
+     "rondas": 1,
+     "decisiones": 149,
+     "oraculo": {
+      "bien": 9882,
+      "asignados": 9883,
+      "peleador": 9942,
+      "precision": 0.9998988161489426,
+      "cobertura": 0.9939649969824985
+     }
+    },
+    "ie6": {
+     "auto": {
+      "bien": 9497,
+      "asignados": 10247,
+      "peleador": 9942,
+      "precision": 0.9268078461988875,
+      "cobertura": 0.9552403942868638
+     },
+     "errores": {
+      "silenciosos": 0,
+      "visibles": 750,
+      "peleador": 9942,
+      "fraccion_silenciosa": 0.0
+     },
+     "cola": {
+      "items": 145,
+      "por_motivo": {
+       "conflicto": 7,
+       "color_insuficiente": 38,
+       "corto": 100
+      },
+      "segundos": 737.2
+     },
+     "rondas": 1,
+     "decisiones": 145,
+     "oraculo": {
+      "bien": 9748,
+      "asignados": 9975,
+      "peleador": 9942,
+      "precision": 0.9772431077694236,
+      "cobertura": 0.9804868235767451
+     }
+    }
+   },
+   "apariencia": {
+    "modelo": {
+     "confiabilidad": {
+      "guante": 0.933,
+      "remera": 0.823,
+      "pantalon": 0.825
+     },
+     "pesos": {
+      "guante": 2.639,
+      "remera": 1.538,
+      "pantalon": 1.548
+     }
+    },
+    "v2": {
+     "auto": {
+      "bien": 9497,
+      "asignados": 10247,
+      "peleador": 9942,
+      "precision": 0.9268078461988875,
+      "cobertura": 0.9552403942868638
+     },
+     "errores": {
+      "silenciosos": 0,
+      "visibles": 750,
+      "peleador": 9942,
+      "fraccion_silenciosa": 0.0
+     },
+     "cola": {
+      "items": 148,
+      "por_motivo": {
+       "conflicto": 7,
+       "apariencia_contradice": 1,
+       "apariencia_mezcla": 2,
+       "color_insuficiente": 38,
+       "corto": 100
+      },
+      "segundos": 798.3
+     },
+     "rondas": 1,
+     "decisiones": 152,
+     "oraculo": {
+      "bien": 9882,
+      "asignados": 9883,
+      "peleador": 9942,
+      "precision": 0.9998988161489426,
+      "cobertura": 0.9939649969824985
+     }
+    },
+    "ie6": {
+     "auto": {
+      "bien": 9497,
+      "asignados": 10247,
+      "peleador": 9942,
+      "precision": 0.9268078461988875,
+      "cobertura": 0.9552403942868638
+     },
+     "errores": {
+      "silenciosos": 0,
+      "visibles": 750,
+      "peleador": 9942,
+      "fraccion_silenciosa": 0.0
+     },
+     "cola": {
+      "items": 148,
+      "por_motivo": {
+       "conflicto": 7,
+       "apariencia_contradice": 1,
+       "apariencia_mezcla": 2,
+       "color_insuficiente": 38,
+       "corto": 100
+      },
+      "segundos": 798.3
+     },
+     "rondas": 1,
+     "decisiones": 148,
+     "oraculo": {
+      "bien": 9748,
+      "asignados": 9975,
+      "peleador": 9942,
+      "precision": 0.9772431077694236,
+      "cobertura": 0.9804868235767451
+     }
+    }
+   }
+  },
+  {
+   "fuente": "03-sparring",
+   "minutos": 2.9155555555555557,
+   "ropa": 5384,
+   "base": {
+    "modelo": null,
+    "v2": {
+     "auto": {
+      "bien": 6889,
+      "asignados": 9467,
+      "peleador": 9717,
+      "precision": 0.7276856448716594,
+      "cobertura": 0.7089636719152002
+     },
+     "errores": {
+      "silenciosos": 37,
+      "visibles": 2541,
+      "peleador": 9717,
+      "fraccion_silenciosa": 0.0038077595965833075
+     },
+     "cola": {
+      "items": 154,
+      "por_motivo": {
+       "conflicto": 10,
+       "color_insuficiente": 6,
+       "corto": 138
+      },
+      "segundos": 461.0
+     },
+     "rondas": 2,
+     "decisiones": 158,
+     "oraculo": {
+      "bien": 9524,
+      "asignados": 9562,
+      "peleador": 9717,
+      "precision": 0.9960259359966535,
+      "cobertura": 0.9801379026448492
+     }
+    },
+    "ie6": {
+     "auto": {
+      "bien": 6889,
+      "asignados": 9467,
+      "peleador": 9717,
+      "precision": 0.7276856448716594,
+      "cobertura": 0.7089636719152002
+     },
+     "errores": {
+      "silenciosos": 1248,
+      "visibles": 1330,
+      "peleador": 9717,
+      "fraccion_silenciosa": 0.12843470206853969
+     },
+     "cola": {
+      "items": 152,
+      "por_motivo": {
+       "conflicto": 8,
+       "color_insuficiente": 6,
+       "corto": 138
+      },
+      "segundos": 401.2
+     },
+     "rondas": 1,
+     "decisiones": 154,
+     "oraculo": {
+      "bien": 8313,
+      "asignados": 9653,
+      "peleador": 9717,
+      "precision": 0.8611830519009634,
+      "cobertura": 0.8555109601728929
+     }
+    }
+   },
+   "apariencia": {
+    "modelo": {
+     "confiabilidad": {
+      "guante": 0.852,
+      "remera": 0.828,
+      "pantalon": 0.774
+     },
+     "pesos": {
+      "guante": 1.75,
+      "remera": 1.574,
+      "pantalon": 1.229
+     }
+    },
+    "v2": {
+     "auto": {
+      "bien": 6889,
+      "asignados": 9467,
+      "peleador": 9717,
+      "precision": 0.7276856448716594,
+      "cobertura": 0.7089636719152002
+     },
+     "errores": {
+      "silenciosos": 37,
+      "visibles": 2541,
+      "peleador": 9717,
+      "fraccion_silenciosa": 0.0038077595965833075
+     },
+     "cola": {
+      "items": 155,
+      "por_motivo": {
+       "conflicto": 8,
+       "apariencia_contradice": 1,
+       "apariencia_mezcla": 2,
+       "color_insuficiente": 6,
+       "corto": 138
+      },
+      "segundos": 470.8
+     },
+     "rondas": 1,
+     "decisiones": 159,
+     "oraculo": {
+      "bien": 9524,
+      "asignados": 9562,
+      "peleador": 9717,
+      "precision": 0.9960259359966535,
+      "cobertura": 0.9801379026448492
+     }
+    },
+    "ie6": {
+     "auto": {
+      "bien": 6889,
+      "asignados": 9467,
+      "peleador": 9717,
+      "precision": 0.7276856448716594,
+      "cobertura": 0.7089636719152002
+     },
+     "errores": {
+      "silenciosos": 37,
+      "visibles": 2541,
+      "peleador": 9717,
+      "fraccion_silenciosa": 0.0038077595965833075
+     },
+     "cola": {
+      "items": 155,
+      "por_motivo": {
+       "conflicto": 8,
+       "apariencia_contradice": 1,
+       "apariencia_mezcla": 2,
+       "color_insuficiente": 6,
+       "corto": 138
+      },
+      "segundos": 470.8
+     },
+     "rondas": 1,
+     "decisiones": 158,
+     "oraculo": {
+      "bien": 9524,
+      "asignados": 9653,
+      "peleador": 9717,
+      "precision": 0.9866362788770331,
+      "cobertura": 0.9801379026448492
+     }
+    }
+   }
+  },
+  {
+   "fuente": "04-sparring",
+   "minutos": 3.0438888888888886,
+   "ropa": 7206,
+   "base": {
+    "modelo": null,
+    "v2": {
+     "auto": {
+      "bien": 8291,
+      "asignados": 9699,
+      "peleador": 10549,
+      "precision": 0.8548303948860707,
+      "cobertura": 0.7859512750023699
+     },
+     "errores": {
+      "silenciosos": 4,
+      "visibles": 1404,
+      "peleador": 10549,
+      "fraccion_silenciosa": 0.00037918286093468573
+     },
+     "cola": {
+      "items": 112,
+      "por_motivo": {
+       "conflicto": 4,
+       "color_contradice": 2,
+       "color_insuficiente": 7,
+       "corto": 99
+      },
+      "segundos": 421.4
+     },
+     "rondas": 1,
+     "decisiones": 115,
+     "oraculo": {
+      "bien": 10435,
+      "asignados": 10441,
+      "peleador": 10549,
+      "precision": 0.9994253424001532,
+      "cobertura": 0.9891932884633614
+     }
+    },
+    "ie6": {
+     "auto": {
+      "bien": 8291,
+      "asignados": 9699,
+      "peleador": 10549,
+      "precision": 0.8548303948860707,
+      "cobertura": 0.7859512750023699
+     },
+     "errores": {
+      "silenciosos": 4,
+      "visibles": 1404,
+      "peleador": 10549,
+      "fraccion_silenciosa": 0.00037918286093468573
+     },
+     "cola": {
+      "items": 112,
+      "por_motivo": {
+       "conflicto": 4,
+       "color_contradice": 2,
+       "color_insuficiente": 7,
+       "corto": 99
+      },
+      "segundos": 421.4
+     },
+     "rondas": 1,
+     "decisiones": 113,
+     "oraculo": {
+      "bien": 10428,
+      "asignados": 10603,
+      "peleador": 10549,
+      "precision": 0.9834952371970197,
+      "cobertura": 0.9885297184567258
+     }
+    }
+   },
+   "apariencia": {
+    "modelo": {
+     "confiabilidad": {
+      "guante": 0.838,
+      "remera": 0.7,
+      "pantalon": 0.593
+     },
+     "pesos": {
+      "guante": 1.64,
+      "remera": 0.849,
+      "pantalon": 0.376
+     }
+    },
+    "v2": {
+     "auto": {
+      "bien": 8291,
+      "asignados": 9699,
+      "peleador": 10549,
+      "precision": 0.8548303948860707,
+      "cobertura": 0.7859512750023699
+     },
+     "errores": {
+      "silenciosos": 4,
+      "visibles": 1404,
+      "peleador": 10549,
+      "fraccion_silenciosa": 0.00037918286093468573
+     },
+     "cola": {
+      "items": 117,
+      "por_motivo": {
+       "conflicto": 4,
+       "color_contradice": 2,
+       "apariencia_contradice": 2,
+       "apariencia_mezcla": 3,
+       "color_insuficiente": 7,
+       "corto": 99
+      },
+      "segundos": 508.9
+     },
+     "rondas": 1,
+     "decisiones": 120,
+     "oraculo": {
+      "bien": 10435,
+      "asignados": 10441,
+      "peleador": 10549,
+      "precision": 0.9994253424001532,
+      "cobertura": 0.9891932884633614
+     }
+    },
+    "ie6": {
+     "auto": {
+      "bien": 8291,
+      "asignados": 9699,
+      "peleador": 10549,
+      "precision": 0.8548303948860707,
+      "cobertura": 0.7859512750023699
+     },
+     "errores": {
+      "silenciosos": 4,
+      "visibles": 1404,
+      "peleador": 10549,
+      "fraccion_silenciosa": 0.00037918286093468573
+     },
+     "cola": {
+      "items": 117,
+      "por_motivo": {
+       "conflicto": 4,
+       "color_contradice": 2,
+       "apariencia_contradice": 2,
+       "apariencia_mezcla": 3,
+       "color_insuficiente": 7,
+       "corto": 99
+      },
+      "segundos": 508.9
+     },
+     "rondas": 1,
+     "decisiones": 118,
+     "oraculo": {
+      "bien": 10428,
+      "asignados": 10603,
+      "peleador": 10549,
+      "precision": 0.9834952371970197,
+      "cobertura": 0.9885297184567258
+     }
+    }
+   }
+  },
+  {
+   "fuente": "sparring-3-rounds",
+   "minutos": 9.666111111111112,
+   "ropa": 8273,
+   "base": {
+    "modelo": null,
+    "v2": {
+     "auto": {
+      "bien": 26857,
+      "asignados": 32810,
+      "peleador": 33022,
+      "precision": 0.8185614142029869,
+      "cobertura": 0.8133062806613772
+     },
+     "errores": {
+      "silenciosos": 0,
+      "visibles": 5953,
+      "peleador": 33022,
+      "fraccion_silenciosa": 0.0
+     },
+     "cola": {
+      "items": 79,
+      "por_motivo": {
+       "conflicto": 12,
+       "color_contradice": 8,
+       "posible_mezcla": 4,
+       "corto": 54,
+       "color_insuficiente": 1
+      },
+      "segundos": 638.5
+     },
+     "rondas": 2,
+     "decisiones": 87,
+     "oraculo": {
+      "bien": 32681,
+      "asignados": 32685,
+      "peleador": 33022,
+      "precision": 0.9998776197032277,
+      "cobertura": 0.9896735509660226
+     }
+    },
+    "ie6": {
+     "auto": {
+      "bien": 26857,
+      "asignados": 32810,
+      "peleador": 33022,
+      "precision": 0.8185614142029869,
+      "cobertura": 0.8133062806613772
+     },
+     "errores": {
+      "silenciosos": 21,
+      "visibles": 5932,
+      "peleador": 33022,
+      "fraccion_silenciosa": 0.0006359396765792502
+     },
+     "cola": {
+      "items": 78,
+      "por_motivo": {
+       "conflicto": 11,
+       "color_contradice": 8,
+       "posible_mezcla": 4,
+       "corto": 54,
+       "color_insuficiente": 1
+      },
+      "segundos": 637.8
+     },
+     "rondas": 1,
+     "decisiones": 83,
+     "oraculo": {
+      "bien": 32660,
+      "asignados": 32874,
+      "peleador": 33022,
+      "precision": 0.9934902962827766,
+      "cobertura": 0.9890376112894435
+     }
+    }
+   },
+   "apariencia": {
+    "modelo": {
+     "confiabilidad": {
+      "guante": 0.941,
+      "remera": 0.626,
+      "pantalon": 0.498
+     },
+     "pesos": {
+      "guante": 2.763,
+      "remera": 0.514,
+      "pantalon": 0.0
+     }
+    },
+    "v2": {
+     "auto": {
+      "bien": 26857,
+      "asignados": 32810,
+      "peleador": 33022,
+      "precision": 0.8185614142029869,
+      "cobertura": 0.8133062806613772
+     },
+     "errores": {
+      "silenciosos": 0,
+      "visibles": 5953,
+      "peleador": 33022,
+      "fraccion_silenciosa": 0.0
+     },
+     "cola": {
+      "items": 90,
+      "por_motivo": {
+       "conflicto": 12,
+       "apariencia_contradice": 2,
+       "color_contradice": 8,
+       "posible_mezcla": 4,
+       "apariencia_mezcla": 9,
+       "corto": 54,
+       "color_insuficiente": 1
+      },
+      "segundos": 1006.0
+     },
+     "rondas": 2,
+     "decisiones": 98,
+     "oraculo": {
+      "bien": 32681,
+      "asignados": 32685,
+      "peleador": 33022,
+      "precision": 0.9998776197032277,
+      "cobertura": 0.9896735509660226
+     }
+    },
+    "ie6": {
+     "auto": {
+      "bien": 26857,
+      "asignados": 32810,
+      "peleador": 33022,
+      "precision": 0.8185614142029869,
+      "cobertura": 0.8133062806613772
+     },
+     "errores": {
+      "silenciosos": 21,
+      "visibles": 5932,
+      "peleador": 33022,
+      "fraccion_silenciosa": 0.0006359396765792502
+     },
+     "cola": {
+      "items": 89,
+      "por_motivo": {
+       "conflicto": 11,
+       "apariencia_contradice": 2,
+       "color_contradice": 8,
+       "posible_mezcla": 4,
+       "apariencia_mezcla": 9,
+       "corto": 54,
+       "color_insuficiente": 1
+      },
+      "segundos": 1005.3
+     },
+     "rondas": 1,
+     "decisiones": 94,
+     "oraculo": {
+      "bien": 32660,
+      "asignados": 32874,
+      "peleador": 33022,
+      "precision": 0.9934902962827766,
+      "cobertura": 0.9890376112894435
+     }
+    }
+   }
+  }
+ ],
+ "totales": {
+  "v2": {
+   "base": {
+    "fuentes": 6,
+    "auto": {
+     "precision": 0.8502832584489158,
+     "cobertura": 0.7884287939716698
+    },
+    "errores": {
+     "silenciosos": 43,
+     "visibles": 11453,
+     "peleador": 82809,
+     "fraccion_silenciosa": 0.0005192672294074315,
+     "peor_fuente": 0.0038077595965833075
+    },
+    "cola": {
+     "items": 540,
+     "por_motivo": {
+      "posible_mezcla": 8,
+      "corto": 431,
+      "conflicto": 36,
+      "color_insuficiente": 55,
+      "color_contradice": 10
+     },
+     "segundos": 2683.8
+    },
+    "decisiones": 565,
+    "decisiones_por_minuto": 23.168603043565064,
+    "oraculo": {
+     "precision": 0.9993459945371308,
+     "cobertura": 0.9410812834353753
+    }
+   },
+   "apariencia": {
+    "fuentes": 6,
+    "auto": {
+     "precision": 0.8502832584489158,
+     "cobertura": 0.7884287939716698
+    },
+    "errores": {
+     "silenciosos": 43,
+     "visibles": 11453,
+     "peleador": 82809,
+     "fraccion_silenciosa": 0.0005192672294074315,
+     "peor_fuente": 0.0038077595965833075
+    },
+    "cola": {
+     "items": 562,
+     "por_motivo": {
+      "posible_mezcla": 8,
+      "apariencia_mezcla": 18,
+      "corto": 431,
+      "conflicto": 34,
+      "color_insuficiente": 55,
+      "apariencia_contradice": 6,
+      "color_contradice": 10
+     },
+     "segundos": 3232.0
+    },
+    "decisiones": 587,
+    "decisiones_por_minuto": 24.070743339066713,
+    "oraculo": {
+     "precision": 0.9993459945371308,
+     "cobertura": 0.9410812834353753
+    }
+   }
+  },
+  "ie6": {
+   "base": {
+    "fuentes": 6,
+    "auto": {
+     "precision": 0.8502832584489158,
+     "cobertura": 0.7884287939716698
+    },
+    "errores": {
+     "silenciosos": 1275,
+     "visibles": 10221,
+     "peleador": 82809,
+     "fraccion_silenciosa": 0.015396877151034308,
+     "peor_fuente": 0.12843470206853969
+    },
+    "cola": {
+     "items": 537,
+     "por_motivo": {
+      "posible_mezcla": 8,
+      "corto": 431,
+      "conflicto": 33,
+      "color_insuficiente": 55,
+      "color_contradice": 10
+     },
+     "segundos": 2623.3
+    },
+    "decisiones": 548,
+    "decisiones_por_minuto": 22.4714946334047,
+    "oraculo": {
+     "precision": 0.9697756609199042,
+     "cobertura": 0.9245009600405752
+    }
+   },
+   "apariencia": {
+    "fuentes": 6,
+    "auto": {
+     "precision": 0.8502832584489158,
+     "cobertura": 0.7884287939716698
+    },
+    "errores": {
+     "silenciosos": 64,
+     "visibles": 11432,
+     "peleador": 82809,
+     "fraccion_silenciosa": 0.000772862853071526,
+     "peor_fuente": 0.0038077595965833075
+    },
+    "cola": {
+     "items": 561,
+     "por_motivo": {
+      "posible_mezcla": 8,
+      "apariencia_mezcla": 18,
+      "corto": 431,
+      "conflicto": 33,
+      "color_insuficiente": 55,
+      "apariencia_contradice": 6,
+      "color_contradice": 10
+     },
+     "segundos": 3231.3
+    },
+    "decisiones": 573,
+    "decisiones_por_minuto": 23.49665406011112,
+    "oraculo": {
+     "precision": 0.9851158430766502,
+     "cobertura": 0.939124974338538
+    }
+   }
+  }
+ },
+ "lectura": {
+  "veredictos": {
+   "base": {
+    "E1": true,
+    "E2": true
+   },
+   "apariencia": {
+    "E1": true,
+    "E2": true
+   }
+  },
+  "elegida": "base",
+  "estado": "estable",
+  "banderas": {
+   "BOXTWIN_IDENTIDAD_APARIENCIA": 0
+  }
+ }
+}
