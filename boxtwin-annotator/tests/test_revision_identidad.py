@@ -11,7 +11,8 @@ from boxtwin.core.identidad_auto import ConfigIdentidadAuto, EvidenciaTrack, pro
 from boxtwin.core.types import TrackRole
 from boxtwin.mvp.revision import (
     Correccion, Tramo, a_propuesta, aplicar_correcciones, cola_de_revision, conflictos,
-    correcciones_de_sesion, degradar_conflictos, extension_de, tramos_de_propuesta,
+    correcciones_de_sesion, degradar_conflictos, extension_de, ignorar_cortos,
+    tramos_de_propuesta,
 )
 from boxtwin.mvp.tramos import aplicar_manuales
 
@@ -131,6 +132,24 @@ def test_la_cola_ve_los_asignados_sospechosos_y_los_ordena():
     resto = {c["track"]: c for c in cola[5:]}
     assert set(resto) == {2, 6} and not any(c["revision_pendiente"] for c in resto.values())
     assert cola_de_revision(auto, auto, ev, PERFILES, CFG, FPS, todos=False)[-1]["track"] == 8
+
+
+def test_lo_que_salio_de_cuadro_se_ignora_solo_y_no_se_pregunta():
+    ev = {**_ev(), 7: _track(7, [(range(500, 600, 5), AZUL)]),
+          8: _track(8, [(range(900, 1000, 5), AZUL)])}
+    auto = ignorar_cortos([Tramo(1, 0, 400, "A"), Tramo(2, 0, 400, "B"),
+                           Tramo(7, 500, 600, "", motivo="corto"),
+                           Tramo(8, 900, 1000, "", motivo="sin_coexistencia")])
+    assert [t.rol for t in auto] == ["A", "B", "ninguno", ""]
+    dudosos = cola_de_revision(auto, auto, ev, PERFILES, CFG, FPS, todos=False)
+    assert [(c["track"], c["tipo"]) for c in dudosos] == [(8, "sin_asignar")]
+    # en la lista completa aparece como ignorado, sin pedir revision, para poder rescatarlo
+    (c7,) = [c for c in cola_de_revision(auto, auto, ev, PERFILES, CFG, FPS) if c["track"] == 7]
+    assert (c7["tipo"], c7["motivo"], c7["rol_actual"], c7["revision_pendiente"]) == (
+        "asignado", "corto", "ninguno", False)
+    # una decision de la persona le gana
+    corr = aplicar_correcciones(auto, [Correccion(7, 500, 600, "B")])
+    assert next(t for t in corr if t.track == 7).rol == "B"
 
 
 def test_un_mixto_fuerte_sin_cortar_tambien_sale_como_sospechoso():
