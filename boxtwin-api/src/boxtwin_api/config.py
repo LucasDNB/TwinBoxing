@@ -37,6 +37,11 @@ def _lista(nombre: str, defecto: str) -> list[str]:
     return [x for x in os.environ.get(nombre, defecto).split() if x]
 
 
+def _bandera(nombre: str) -> bool:
+    """Encendida con 1, si, true u on. Cualquier otra cosa, o nada, es apagada."""
+    return os.environ.get(nombre, "").strip().lower() in ("1", "si", "true", "on")
+
+
 ESTADOS_CRITERIO = ("pendiente", "aprobado", "rechazado")
 
 
@@ -160,6 +165,12 @@ class Config:
         default_factory=lambda: _ruta("BOXTWIN_MODELO_CLASIFICADOR_GEO_INDIVIDUAL",
                                       "~/boxtwin/modelos/clasificador_geo_v1_sin_rival")
     )
+    # Identidad estable (docs/specs/2026-11-02-identidad-estable): partir los tracks mixtos
+    # con el corte de E11 y sacarle el rol a los tramos automaticos en conflicto. Apagadas por
+    # defecto; las enciende Lucas despues de leer la medicion de la spec (§6).
+    corte_mixtos: bool = field(default_factory=lambda: _bandera("BOXTWIN_CORTE_MIXTOS"))
+    identidad_estricta: bool = field(
+        default_factory=lambda: _bandera("BOXTWIN_IDENTIDAD_ESTRICTA"))
     umbral_detector: float = field(
         default_factory=lambda: float(os.environ.get("BOXTWIN_UMBRAL", "0.80"))
     )

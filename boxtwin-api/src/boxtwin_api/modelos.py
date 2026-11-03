@@ -320,6 +320,10 @@ class AsignacionManual(Base):
     sesion_id: Mapped[str] = mapped_column(ForeignKey("sesiones.id"), index=True)
     track: Mapped[int] = mapped_column(Integer)
     rol: Mapped[str] = mapped_column(String(8))
+    # Identidad estable (02-11): el rango en segundos si la decision fue sobre un pedazo del
+    # track (por ejemplo, despues de partirlo donde cambia de persona). Nulo = el track entero.
+    desde: Mapped[float | None] = mapped_column(Float, nullable=True)
+    hasta: Mapped[float | None] = mapped_column(Float, nullable=True)
     usuario_id: Mapped[str] = mapped_column(ForeignKey("usuarios.id"))
     creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
 

@@ -604,14 +604,19 @@ def _tramos_en_disco(s: Sesion) -> tuple[dict, list[dict]]:
 @app.get("/jobs/{sesion_id}/tramos")
 def tramos(
     sesion_id: str,
+    todos: bool = False,
     acceso: Acceso = Depends(acceso_actual),
     db: Session = Depends(obtener_sesion),
 ) -> dict:
     """
-    Lo que la identidad no pudo asignar, para que una persona lo termine (plan B de C1).
+    Lo que una persona tiene que mirar de la identidad (plan B de C1).
 
-    Cada tramo viaja con su motivo y, si ya lo asigno alguien, con esa asignacion: la
-    lista no se achica al asignar, para que una decision se pueda cambiar.
+    Desde el 2-11 (identidad estable) la lista tiene, en orden: los tramos ASIGNADOS que la
+    maquina sospecha que estan mal (conflicto, color que contradice, posible mezcla) y despues
+    los sin asignar. Con `todos=1` suma al final los asignados sin sospecha, para revisar a
+    mano lo que se quiera. Cada tramo viaja con su motivo y con lo que ya decidio la persona
+    en su rango: la lista no se achica al asignar, para que una decision se pueda cambiar.
+    Las sesiones procesadas antes traen solo sin asignar, y se leen igual.
     """
     s = sesion_de_la_cuenta(sesion_id, acceso, db)
     disco, lista = _tramos_en_disco(s)
@@ -622,34 +627,55 @@ def tramos(
     if not _es_individual(s):
         cobertura["B"] = ident.get("cobertura_B", 0.0)
     cobertura["sin_asignar"] = ident.get("sin_asignar", 0.0)
+    salida = []
+    for t in lista:
+        tipo = t.get("tipo", "sin_asignar")
+        if tipo == "asignado" and not todos:
+            continue
+        clave = str(t.get("clave", t["track"]))
+        salida.append({
+            "clave": clave,
+            "track": t["track"],
+            "t_desde": t["t_desde"],
+            "t_hasta": t["t_hasta"],
+            "tipo": tipo,
+            "motivo": t["motivo"],
+            "rol_actual": t.get("rol_actual"),
+            "recorte_url": (f"/jobs/{s.id}/tramos/{clave}/recorte"
+                            if t.get("recorte") else None),
+            "asignado": t.get("asignado") or manuales.get(str(t["track"])),
+            "partes": t.get("partes") or [],
+            "revision_pendiente": t.get("revision_pendiente",
+                                        not (t.get("asignado") or manuales.get(str(t["track"])))),
+        })
     return {
         "cobertura": cobertura,
         "separacion_color": ident.get("separacion_color", ident.get("separacion_de_perfiles")),
-        "tramos": [
-            {
-                "track": t["track"],
-                "t_desde": t["t_desde"],
-                "t_hasta": t["t_hasta"],
-                "motivo": t["motivo"],
-                "recorte_url": (f"/jobs/{s.id}/tramos/{t['track']}/recorte"
-                                if t.get("recorte") else None),
-                "asignado": manuales.get(str(t["track"]), t.get("asignado")),
-            }
-            for t in lista
-        ],
+        "revision_pendiente": ident.get("revision_pendiente"),
+        "tramos": salida,
     }
 
 
-@app.get("/jobs/{sesion_id}/tramos/{track}/recorte")
+_CLAVE_TRAMO = re.compile(r"^\d+(-\d+)?$")
+
+
+@app.get("/jobs/{sesion_id}/tramos/{clave}/recorte")
 def recorte_de_tramo(
-    track: int,
+    clave: str,
     sesion_id: str,
     acceso: Acceso = Depends(acceso_por_ticket),
     db: Session = Depends(obtener_sesion),
 ) -> FileResponse:
-    """El cuadro central de un tramo. Entra con ticket, igual que los recortes de siembra."""
+    """
+    El cuadro central de un tramo. Entra con ticket, igual que los recortes de siembra.
+
+    La clave es el track ('37') o, si el tramo es un pedazo de un track partido, el track y
+    el cuadro donde empieza ('37-1200'). Las sesiones viejas solo tienen la primera forma.
+    """
+    if not _CLAVE_TRAMO.match(clave):
+        raise HTTPException(404, "no hay recorte para ese tramo")
     s = sesion_de_la_cuenta(sesion_id, acceso, db)
-    ruta = cfg.dir_sesion(s.id) / "tramos" / f"track_{int(track)}.jpg"
+    ruta = cfg.dir_sesion(s.id) / "tramos" / f"track_{clave}.jpg"
     if not ruta.is_file():
         raise HTTPException(404, "no hay recorte para ese tramo")
     return FileResponse(ruta, media_type="image/jpeg")
@@ -673,6 +699,8 @@ def asignar_tramos(
     disco, lista = _tramos_en_disco(s)
     if _es_individual(s) and any(a.rol == "B" for a in entrada.asignaciones):
         raise HTTPException(422, "en bolsa y sombra hay una sola persona: un tramo es A o ninguno")
+    # Identidad estable (02-11): se puede corregir cualquier track de la lista, asignado o
+    # no. Las sesiones viejas traen solo los sin asignar y la regla es la de antes.
     validos = {int(t["track"]) for t in lista}
     ajenos = sorted({a.track for a in entrada.asignaciones} - validos)
     if ajenos:
@@ -682,18 +710,33 @@ def asignar_tramos(
 
     ident = disco.setdefault("identidad", {})
     manuales = dict(ident.get("asignaciones_manuales") or {})
+    correcciones = list(ident.get("correcciones") or [])
     for a in entrada.asignaciones:
-        manuales[str(a.track)] = a.rol
-        db.add(AsignacionManual(sesion_id=s.id, track=a.track, rol=a.rol,
-                                usuario_id=acceso.usuario.id))
+        if a.desde is None and a.hasta is None and not correcciones:
+            # La forma de antes, mientras la sesion no tenga correcciones por rango: el
+            # completar de A (congelado el 3-11) solo lee esta.
+            manuales[str(a.track)] = a.rol
+        else:
+            nueva = {"track": a.track, "desde": a.desde, "hasta": a.hasta, "rol": a.rol}
+            # La misma decision sobre el mismo rango reemplaza a la anterior en vez de
+            # apilarse; si no, se agrega al final y manda sobre lo que toca (la ultima gana).
+            correcciones = [c for c in correcciones
+                            if (c["track"], c.get("desde"), c.get("hasta"))
+                            != (a.track, a.desde, a.hasta)]
+            correcciones.append(nueva)
+        db.add(AsignacionManual(sesion_id=s.id, track=a.track, rol=a.rol, desde=a.desde,
+                                hasta=a.hasta, usuario_id=acceso.usuario.id))
     ident["asignaciones_manuales"] = manuales
+    if correcciones:
+        ident["correcciones"] = correcciones[-2000:]
     _escribir_sesion_en_disco(s.id, disco)
 
     s.estado = "en_cola"
     s.error = None
     encolar(db, s.id, "completar", track_a=s.semilla_a, track_b=s.semilla_b, manual=True)
     db.commit()
-    return {"job_id": s.id, "estado": s.estado, "asignaciones": len(manuales)}
+    return {"job_id": s.id, "estado": s.estado,
+            "asignaciones": len(manuales) + len(ident.get("correcciones") or [])}
 
 
 # ---------------------------------------------------------------------------

@@ -200,7 +200,16 @@ export const textos = {
     sin_coexistencia: "cruce o cuerpo a cuerpo",
     corto: "salió de cuadro",
     abstencion: "no se pudo decidir",
+    conflicto: "el mismo peleador aparece dos veces a la vez",
+    color_contradice: "el color del guante dice lo contrario",
+    posible_mezcla: "puede cambiar de persona en el medio",
   } as Record<string, string>,
+  /* Identidad estable (02-11): lo que dice hoy un tramo asignado que se sospecha. */
+  rolActual: (rol: string) => (rol === "ninguno" ? "Hoy: ignorado" : `Hoy dice: ${rol}`),
+  revisionPendiente: (n: number) =>
+    n === 1
+      ? "Hay 1 tramo asignado que puede estar mal. Revisalo antes de mirar los números."
+      : `Hay ${n} tramos asignados que pueden estar mal. Revisalos antes de mirar los números.`,
 };
 
 export const NOMBRE_CONTEXTO: Record<string, string> = {
