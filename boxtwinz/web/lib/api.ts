@@ -48,3 +48,30 @@ export type SesionResumen = {
   id: string; perfil_id: string; modalidad: "sombra" | "bolsa" | "sparring"; estado: string;
   duracion_s: number | null; creado: string; rotulo: string | null; error: string | null;
 };
+
+export type Metrica = {
+  golpes: number; volumen: number; pct_izquierda: number | null; pct_mano_adelantada: number | null;
+  combinaciones_min: number; pct_golpes_en_combinacion: number | null; sosten_ritmo: number | null;
+  iniciativa: number | null; curva?: number[];
+};
+export type Segmento = Metrica & { segmento: number; inicio_s: number; fin_s: number };
+export type BloqueMetricas = { total: Metrica | null; segmentos: Segmento[] };
+export type GolpeR = {
+  id: string; quien: "usuario" | "rival"; mano: "izquierda" | "derecha"; t_inicio: number; t_fin: number;
+  confianza: number; altura_estimada: string | null;
+};
+export type Consejos = { consejos: { clave: string; texto: string }[]; pie: string };
+export type Exposicion = {
+  rival_izquierda: number; rival_derecha: number; lado_izquierdo_usuario: number; lado_derecho_usuario: number; aclaracion: string;
+};
+export type SesionDetalle = SesionResumen & {
+  rival_perfil_id: string | null; rounds_declarados: number | null; calidad_pose: number | null;
+  apta_ranking: boolean; error_etapa: string | null; vista_resultado: boolean;
+};
+export type Resultado = {
+  sesion: SesionDetalle; golpes: GolpeR[]; metricas: { usuario?: BloqueMetricas; rival?: BloqueMetricas };
+  exposicion: Exposicion | null; altura: { rotulo: string; cabeza: number; cuerpo: number } | null;
+  consejos: Consejos; valorada: boolean; valoracion_obligatoria: boolean;
+  rotulos: { golpes: string; evaluacion: string | null; rounds: string; guardia_rival: string | null };
+};
+export type Cupo = { mes: string; limite_min: number; usados_min: number; restantes_min: number };

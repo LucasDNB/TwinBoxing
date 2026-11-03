@@ -1,0 +1,29 @@
+# BoxTwinZ - La API. Copia de boxtwin-api.service de A con su propio puerto, base y entorno.
+#
+# Escucha SOLO en 127.0.0.1:8003: la expone el tunel (Funnel en el puerto 10000). A usa 8000
+# y la instancia B 8001; 8002 queda para el gemelo.
+#
+# Instalacion: ver despliegue/README.md de boxtwinz.
+
+[Unit]
+Description=BoxTwinZ API
+Documentation=https://github.com/LucasDNB/TwinBoxing
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lucasb
+Group=lucasb
+WorkingDirectory=/home/lucasb/Proyectos/TwinBoxing/boxtwinz/api
+EnvironmentFile=/etc/boxtwinz.env
+ExecStart=/home/lucasb/miniforge3/envs/twinboxing_env/bin/python -m uvicorn boxtwinz_api.main:app \
+          --host 127.0.0.1 --port 8003 --proxy-headers
+Restart=always
+RestartSec=3
+NoNewPrivileges=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
