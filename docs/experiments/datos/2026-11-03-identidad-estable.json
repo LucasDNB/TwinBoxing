@@ -1,0 +1,769 @@
+{
+  "etiqueta": "desarrollo: material donde se diagnostico C1 y se diseno E11; no confirma",
+  "spec": "docs/specs/2026-11-02-identidad-estable/00-README.md",
+  "regla": {
+    "E1_total": 0.005,
+    "E1_fuente": 0.02,
+    "E2_precision": 0.99
+  },
+  "fuentes": [
+    {
+      "fuente": "Sparring",
+      "minutos": 3.1097842098752935,
+      "siembra": {
+        "caso": "par_sugerido",
+        "semillas": [
+          1,
+          3
+        ]
+      },
+      "base": {
+        "auto": {
+          "bien": 4872,
+          "asignados": 5494,
+          "peleador": 9671,
+          "precision": 0.8867855842737532,
+          "cobertura": 0.5037741701995657
+        },
+        "errores": {
+          "silenciosos": 0,
+          "visibles": 622,
+          "peleador": 9671,
+          "fraccion_silenciosa": 0.0
+        },
+        "cola": {
+          "items": 15,
+          "por_motivo": {
+            "posible_mezcla": 4,
+            "corto": 11
+          },
+          "segundos": 188.9
+        },
+        "decisiones": 18,
+        "oraculo": {
+          "bien": 5564,
+          "asignados": 5564,
+          "peleador": 9671,
+          "precision": 1.0,
+          "cobertura": 0.5753283011064005
+        },
+        "tracks_partidos": 0
+      },
+      "corte": {
+        "auto": {
+          "bien": 5612,
+          "asignados": 5846,
+          "peleador": 9671,
+          "precision": 0.9599726308587068,
+          "cobertura": 0.5802915934236377
+        },
+        "errores": {
+          "silenciosos": 9,
+          "visibles": 225,
+          "peleador": 9671,
+          "fraccion_silenciosa": 0.0009306173094819563
+        },
+        "cola": {
+          "items": 13,
+          "por_motivo": {
+            "conflicto": 2,
+            "corto": 11
+          },
+          "segundos": 45.3
+        },
+        "decisiones": 13,
+        "oraculo": {
+          "bien": 5907,
+          "asignados": 5916,
+          "peleador": 9671,
+          "precision": 0.9984787018255578,
+          "cobertura": 0.6107951607899907
+        },
+        "tracks_partidos": 5
+      },
+      "corte+estricta": {
+        "auto": {
+          "bien": 5175,
+          "asignados": 5184,
+          "peleador": 9671,
+          "precision": 0.9982638888888888,
+          "cobertura": 0.5351049529521249
+        },
+        "errores": {
+          "silenciosos": 9,
+          "visibles": 0,
+          "peleador": 9671,
+          "fraccion_silenciosa": 0.0009306173094819563
+        },
+        "cola": {
+          "items": 13,
+          "por_motivo": {
+            "conflicto": 2,
+            "corto": 11
+          },
+          "segundos": 45.3
+        },
+        "decisiones": 13,
+        "oraculo": {
+          "bien": 5907,
+          "asignados": 5916,
+          "peleador": 9671,
+          "precision": 0.9984787018255578,
+          "cobertura": 0.6107951607899907
+        },
+        "tracks_partidos": 5
+      }
+    },
+    {
+      "fuente": "01-sparring",
+      "minutos": 2.8072222222222223,
+      "siembra": {
+        "caso": "par_sugerido",
+        "semillas": [
+          62,
+          109
+        ]
+      },
+      "base": {
+        "auto": {
+          "bien": 8883,
+          "asignados": 9068,
+          "peleador": 9908,
+          "precision": 0.9795985884428761,
+          "cobertura": 0.8965482438433588
+        },
+        "errores": {
+          "silenciosos": 2,
+          "visibles": 183,
+          "peleador": 9908,
+          "fraccion_silenciosa": 0.00020185708518368994
+        },
+        "cola": {
+          "items": 35,
+          "por_motivo": {
+            "conflicto": 3,
+            "color_insuficiente": 3,
+            "corto": 29
+          },
+          "segundos": 236.8
+        },
+        "decisiones": 35,
+        "oraculo": {
+          "bien": 9844,
+          "asignados": 10274,
+          "peleador": 9908,
+          "precision": 0.958146778275258,
+          "cobertura": 0.9935405732741219
+        },
+        "tracks_partidos": 0
+      },
+      "corte": {
+        "auto": {
+          "bien": 8883,
+          "asignados": 9068,
+          "peleador": 9908,
+          "precision": 0.9795985884428761,
+          "cobertura": 0.8965482438433588
+        },
+        "errores": {
+          "silenciosos": 2,
+          "visibles": 183,
+          "peleador": 9908,
+          "fraccion_silenciosa": 0.00020185708518368994
+        },
+        "cola": {
+          "items": 35,
+          "por_motivo": {
+            "conflicto": 3,
+            "color_insuficiente": 3,
+            "corto": 29
+          },
+          "segundos": 236.8
+        },
+        "decisiones": 35,
+        "oraculo": {
+          "bien": 9844,
+          "asignados": 10274,
+          "peleador": 9908,
+          "precision": 0.958146778275258,
+          "cobertura": 0.9935405732741219
+        },
+        "tracks_partidos": 0
+      },
+      "corte+estricta": {
+        "auto": {
+          "bien": 5489,
+          "asignados": 5491,
+          "peleador": 9908,
+          "precision": 0.9996357676197414,
+          "cobertura": 0.5539967702866371
+        },
+        "errores": {
+          "silenciosos": 2,
+          "visibles": 0,
+          "peleador": 9908,
+          "fraccion_silenciosa": 0.00020185708518368994
+        },
+        "cola": {
+          "items": 35,
+          "por_motivo": {
+            "conflicto": 3,
+            "color_insuficiente": 3,
+            "corto": 29
+          },
+          "segundos": 236.8
+        },
+        "decisiones": 35,
+        "oraculo": {
+          "bien": 9844,
+          "asignados": 10274,
+          "peleador": 9908,
+          "precision": 0.958146778275258,
+          "cobertura": 0.9935405732741219
+        },
+        "tracks_partidos": 0
+      }
+    },
+    {
+      "fuente": "02-sparring",
+      "minutos": 2.843888888888889,
+      "siembra": {
+        "caso": "par_sugerido",
+        "semillas": [
+          375,
+          384
+        ]
+      },
+      "base": {
+        "auto": {
+          "bien": 9497,
+          "asignados": 10247,
+          "peleador": 9942,
+          "precision": 0.9268078461988875,
+          "cobertura": 0.9552403942868638
+        },
+        "errores": {
+          "silenciosos": 0,
+          "visibles": 750,
+          "peleador": 9942,
+          "fraccion_silenciosa": 0.0
+        },
+        "cola": {
+          "items": 145,
+          "por_motivo": {
+            "conflicto": 7,
+            "color_insuficiente": 38,
+            "corto": 100
+          },
+          "segundos": 737.2
+        },
+        "decisiones": 145,
+        "oraculo": {
+          "bien": 9748,
+          "asignados": 9975,
+          "peleador": 9942,
+          "precision": 0.9772431077694236,
+          "cobertura": 0.9804868235767451
+        },
+        "tracks_partidos": 0
+      },
+      "corte": {
+        "auto": {
+          "bien": 9497,
+          "asignados": 10247,
+          "peleador": 9942,
+          "precision": 0.9268078461988875,
+          "cobertura": 0.9552403942868638
+        },
+        "errores": {
+          "silenciosos": 0,
+          "visibles": 750,
+          "peleador": 9942,
+          "fraccion_silenciosa": 0.0
+        },
+        "cola": {
+          "items": 145,
+          "por_motivo": {
+            "conflicto": 7,
+            "color_insuficiente": 38,
+            "corto": 100
+          },
+          "segundos": 737.2
+        },
+        "decisiones": 145,
+        "oraculo": {
+          "bien": 9748,
+          "asignados": 9975,
+          "peleador": 9942,
+          "precision": 0.9772431077694236,
+          "cobertura": 0.9804868235767451
+        },
+        "tracks_partidos": 0
+      },
+      "corte+estricta": {
+        "auto": {
+          "bien": 5591,
+          "asignados": 5591,
+          "peleador": 9942,
+          "precision": 1.0,
+          "cobertura": 0.5623616978475156
+        },
+        "errores": {
+          "silenciosos": 0,
+          "visibles": 0,
+          "peleador": 9942,
+          "fraccion_silenciosa": 0.0
+        },
+        "cola": {
+          "items": 145,
+          "por_motivo": {
+            "conflicto": 7,
+            "color_insuficiente": 38,
+            "corto": 100
+          },
+          "segundos": 737.2
+        },
+        "decisiones": 145,
+        "oraculo": {
+          "bien": 8486,
+          "asignados": 8713,
+          "peleador": 9942,
+          "precision": 0.9739469757833122,
+          "cobertura": 0.8535505934419634
+        },
+        "tracks_partidos": 0
+      }
+    },
+    {
+      "fuente": "03-sparring",
+      "minutos": 2.9155555555555557,
+      "siembra": {
+        "caso": "par_sugerido",
+        "semillas": [
+          41,
+          64
+        ]
+      },
+      "base": {
+        "auto": {
+          "bien": 6889,
+          "asignados": 9467,
+          "peleador": 9717,
+          "precision": 0.7276856448716594,
+          "cobertura": 0.7089636719152002
+        },
+        "errores": {
+          "silenciosos": 1248,
+          "visibles": 1330,
+          "peleador": 9717,
+          "fraccion_silenciosa": 0.12843470206853969
+        },
+        "cola": {
+          "items": 152,
+          "por_motivo": {
+            "conflicto": 8,
+            "color_insuficiente": 6,
+            "corto": 138
+          },
+          "segundos": 401.2
+        },
+        "decisiones": 154,
+        "oraculo": {
+          "bien": 8313,
+          "asignados": 9653,
+          "peleador": 9717,
+          "precision": 0.8611830519009634,
+          "cobertura": 0.8555109601728929
+        },
+        "tracks_partidos": 0
+      },
+      "corte": {
+        "auto": {
+          "bien": 6889,
+          "asignados": 9467,
+          "peleador": 9717,
+          "precision": 0.7276856448716594,
+          "cobertura": 0.7089636719152002
+        },
+        "errores": {
+          "silenciosos": 1248,
+          "visibles": 1330,
+          "peleador": 9717,
+          "fraccion_silenciosa": 0.12843470206853969
+        },
+        "cola": {
+          "items": 152,
+          "por_motivo": {
+            "conflicto": 8,
+            "color_insuficiente": 6,
+            "corto": 138
+          },
+          "segundos": 401.2
+        },
+        "decisiones": 154,
+        "oraculo": {
+          "bien": 8313,
+          "asignados": 9653,
+          "peleador": 9717,
+          "precision": 0.8611830519009634,
+          "cobertura": 0.8555109601728929
+        },
+        "tracks_partidos": 0
+      },
+      "corte+estricta": {
+        "auto": {
+          "bien": 5144,
+          "asignados": 6392,
+          "peleador": 9717,
+          "precision": 0.804755944931164,
+          "cobertura": 0.529381496346609
+        },
+        "errores": {
+          "silenciosos": 1248,
+          "visibles": 0,
+          "peleador": 9717,
+          "fraccion_silenciosa": 0.12843470206853969
+        },
+        "cola": {
+          "items": 152,
+          "por_motivo": {
+            "conflicto": 8,
+            "color_insuficiente": 6,
+            "corto": 138
+          },
+          "segundos": 401.2
+        },
+        "decisiones": 154,
+        "oraculo": {
+          "bien": 7736,
+          "asignados": 7865,
+          "peleador": 9717,
+          "precision": 0.9835982199618564,
+          "cobertura": 0.7961304929504991
+        },
+        "tracks_partidos": 0
+      }
+    },
+    {
+      "fuente": "04-sparring",
+      "minutos": 3.0438888888888886,
+      "siembra": {
+        "caso": "par_sugerido",
+        "semillas": [
+          60,
+          64
+        ]
+      },
+      "base": {
+        "auto": {
+          "bien": 8291,
+          "asignados": 9699,
+          "peleador": 10549,
+          "precision": 0.8548303948860707,
+          "cobertura": 0.7859512750023699
+        },
+        "errores": {
+          "silenciosos": 4,
+          "visibles": 1404,
+          "peleador": 10549,
+          "fraccion_silenciosa": 0.00037918286093468573
+        },
+        "cola": {
+          "items": 112,
+          "por_motivo": {
+            "conflicto": 4,
+            "color_contradice": 2,
+            "color_insuficiente": 7,
+            "corto": 99
+          },
+          "segundos": 421.4
+        },
+        "decisiones": 113,
+        "oraculo": {
+          "bien": 10428,
+          "asignados": 10603,
+          "peleador": 10549,
+          "precision": 0.9834952371970197,
+          "cobertura": 0.9885297184567258
+        },
+        "tracks_partidos": 0
+      },
+      "corte": {
+        "auto": {
+          "bien": 9372,
+          "asignados": 9699,
+          "peleador": 10549,
+          "precision": 0.9662851840395917,
+          "cobertura": 0.8884254431699687
+        },
+        "errores": {
+          "silenciosos": 3,
+          "visibles": 324,
+          "peleador": 10549,
+          "fraccion_silenciosa": 0.00028438714570101434
+        },
+        "cola": {
+          "items": 112,
+          "por_motivo": {
+            "conflicto": 6,
+            "color_insuficiente": 7,
+            "corto": 99
+          },
+          "segundos": 419.5
+        },
+        "decisiones": 113,
+        "oraculo": {
+          "bien": 10428,
+          "asignados": 10603,
+          "peleador": 10549,
+          "precision": 0.9834952371970197,
+          "cobertura": 0.9885297184567258
+        },
+        "tracks_partidos": 1
+      },
+      "corte+estricta": {
+        "auto": {
+          "bien": 5224,
+          "asignados": 5227,
+          "peleador": 10549,
+          "precision": 0.9994260570116702,
+          "cobertura": 0.4952128163806996
+        },
+        "errores": {
+          "silenciosos": 3,
+          "visibles": 0,
+          "peleador": 10549,
+          "fraccion_silenciosa": 0.00028438714570101434
+        },
+        "cola": {
+          "items": 112,
+          "por_motivo": {
+            "conflicto": 6,
+            "color_insuficiente": 7,
+            "corto": 99
+          },
+          "segundos": 419.5
+        },
+        "decisiones": 113,
+        "oraculo": {
+          "bien": 10428,
+          "asignados": 10603,
+          "peleador": 10549,
+          "precision": 0.9834952371970197,
+          "cobertura": 0.9885297184567258
+        },
+        "tracks_partidos": 1
+      }
+    },
+    {
+      "fuente": "sparring-3-rounds",
+      "minutos": 9.666111111111112,
+      "siembra": {
+        "caso": "par_sugerido",
+        "semillas": [
+          56,
+          60
+        ]
+      },
+      "base": {
+        "auto": {
+          "bien": 26857,
+          "asignados": 32810,
+          "peleador": 33022,
+          "precision": 0.8185614142029869,
+          "cobertura": 0.8133062806613772
+        },
+        "errores": {
+          "silenciosos": 21,
+          "visibles": 5932,
+          "peleador": 33022,
+          "fraccion_silenciosa": 0.0006359396765792502
+        },
+        "cola": {
+          "items": 78,
+          "por_motivo": {
+            "conflicto": 11,
+            "color_contradice": 8,
+            "posible_mezcla": 4,
+            "corto": 54,
+            "color_insuficiente": 1
+          },
+          "segundos": 637.8
+        },
+        "decisiones": 83,
+        "oraculo": {
+          "bien": 32660,
+          "asignados": 32874,
+          "peleador": 33022,
+          "precision": 0.9934902962827766,
+          "cobertura": 0.9890376112894435
+        },
+        "tracks_partidos": 0
+      },
+      "corte": {
+        "auto": {
+          "bien": 31983,
+          "asignados": 33951,
+          "peleador": 33022,
+          "precision": 0.9420341079791464,
+          "cobertura": 0.968536127430198
+        },
+        "errores": {
+          "silenciosos": 22,
+          "visibles": 1946,
+          "peleador": 33022,
+          "fraccion_silenciosa": 0.0006662225183211193
+        },
+        "cola": {
+          "items": 78,
+          "por_motivo": {
+            "conflicto": 22,
+            "color_contradice": 1,
+            "corto": 54,
+            "color_insuficiente": 1
+          },
+          "segundos": 631.6
+        },
+        "decisiones": 80,
+        "oraculo": {
+          "bien": 32658,
+          "asignados": 32874,
+          "peleador": 33022,
+          "precision": 0.9934294579302793,
+          "cobertura": 0.9889770456059597
+        },
+        "tracks_partidos": 10
+      },
+      "corte+estricta": {
+        "auto": {
+          "bien": 19891,
+          "asignados": 19913,
+          "peleador": 33022,
+          "precision": 0.9988951940943103,
+          "cobertura": 0.6023560050875174
+        },
+        "errores": {
+          "silenciosos": 22,
+          "visibles": 0,
+          "peleador": 33022,
+          "fraccion_silenciosa": 0.0006662225183211193
+        },
+        "cola": {
+          "items": 78,
+          "por_motivo": {
+            "conflicto": 22,
+            "color_contradice": 1,
+            "corto": 54,
+            "color_insuficiente": 1
+          },
+          "segundos": 631.6
+        },
+        "decisiones": 80,
+        "oraculo": {
+          "bien": 32658,
+          "asignados": 32874,
+          "peleador": 33022,
+          "precision": 0.9934294579302793,
+          "cobertura": 0.9889770456059597
+        },
+        "tracks_partidos": 10
+      }
+    }
+  ],
+  "totales": {
+    "base": {
+      "fuentes": 6,
+      "auto": {
+        "precision": 0.8502832584489158,
+        "cobertura": 0.7884287939716698
+      },
+      "errores": {
+        "silenciosos": 1275,
+        "visibles": 10221,
+        "peleador": 82809,
+        "fraccion_silenciosa": 0.015396877151034308,
+        "peor_fuente": 0.12843470206853969
+      },
+      "cola": {
+        "items": 537,
+        "segundos": 2623.3
+      },
+      "decisiones": 548,
+      "decisiones_por_minuto": 22.4714946334047,
+      "oraculo": {
+        "precision": 0.9697756609199042,
+        "cobertura": 0.9245009600405752
+      }
+    },
+    "corte": {
+      "fuentes": 6,
+      "auto": {
+        "precision": 0.9228135619203353,
+        "cobertura": 0.8723206414761681
+      },
+      "errores": {
+        "silenciosos": 1284,
+        "visibles": 4758,
+        "peleador": 82809,
+        "fraccion_silenciosa": 0.01550556098974749,
+        "peor_fuente": 0.12843470206853969
+      },
+      "cola": {
+        "items": 535,
+        "segundos": 2471.6
+      },
+      "decisiones": 540,
+      "decisiones_por_minuto": 22.143443616858644,
+      "oraculo": {
+        "precision": 0.9697711078882654,
+        "cobertura": 0.9286188699295971
+      }
+    },
+    "corte+estricta": {
+      "fuentes": 6,
+      "auto": {
+        "precision": 0.973136951336876,
+        "cobertura": 0.56170223043389
+      },
+      "errores": {
+        "silenciosos": 1284,
+        "visibles": 0,
+        "peleador": 82809,
+        "fraccion_silenciosa": 0.01550556098974749,
+        "peor_fuente": 0.12843470206853969
+      },
+      "cola": {
+        "items": 535,
+        "segundos": 2471.6
+      },
+      "decisiones": 540,
+      "decisiones_por_minuto": 22.143443616858644,
+      "oraculo": {
+        "precision": 0.9844448816315824,
+        "cobertura": 0.9064111388858699
+      }
+    }
+  },
+  "lectura": {
+    "veredictos": {
+      "base": {
+        "E1": false,
+        "E2": false
+      },
+      "corte": {
+        "E1": false,
+        "E2": false
+      },
+      "corte+estricta": {
+        "E1": false,
+        "E2": false
+      }
+    },
+    "elegida": "base",
+    "estable": false,
+    "banderas": {
+      "BOXTWIN_CORTE_MIXTOS": 0,
+      "BOXTWIN_IDENTIDAD_ESTRICTA": 0
+    }
+  }
+}

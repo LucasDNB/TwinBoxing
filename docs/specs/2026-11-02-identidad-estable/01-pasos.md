@@ -7,7 +7,7 @@
 | IE3 API | hecha (2-11) | `boxtwin-api/tests/test_identidad_estable.py`, 7 pruebas; `test_web_entrenador_b3.py` actualizado (las sesiones viejas se leen igual) |
 | IE4 web | hecha (2-11) | `tests/integracion/tramos.test.tsx`, 4 pruebas nuevas; 261 en verde, lint y tipos limpios. El build no se pudo probar en la sesión de Claude (Google Fonts bloqueado por la red); hay que construir en la estación |
 | IE5 script | hecha (2-11) | `scripts/identidad/tests`, 8 pruebas |
-| IE6 medición | **pendiente: Lucas** | |
+| IE6 medición | hecha (3-11): **no estable**, se elige `base`, banderas apagadas | `docs/experiments/2026-11-03-identidad-estable.md`; JSON en `docs/experiments/datos/2026-11-03-identidad-estable.json`. Auditoría: `base` y `corte` iguales a E11 S10 v2 en todos los decimales. Ninguna condición pasa E1 (1,54%; 03-sparring 12,8%) ni E2 (mejor 0,984) |
 
 Suites al 2-11 en la sesión de Claude (Python 3.13, torch CPU): anotador 759 pasan y 1 falla
 de entorno (`test_render`, sin códec avc1 en ese opencv); API 346 pasan; `scripts/mejoras` 63.
