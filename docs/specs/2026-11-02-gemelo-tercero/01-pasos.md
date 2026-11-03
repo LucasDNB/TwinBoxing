@@ -17,10 +17,10 @@ realizada` (con el motivo). `S` = la corre el SDD en la estación sin `sudo`; `L
 | S0 | SDD | T1 y esta spec, PR contra `main` | — | suite de `boxtwin-api` en verde | hecha | 2-11: 11 pruebas nuevas; la suite de `boxtwin-api` entera en verde |
 | L0 | Lucas | Mergear el PR. Elegir otros seudónimos si `Tercero Z` y `Tercero O` no le sirven | S0 | en `main` | hecha | 2-11 22:24 UTC, PR #45. Seudónimos sin cambios |
 | L0b | Lucas | Pasar el video a la estación y marcar el inicio de los doce rounds (mm:ss) | — | doce tiempos anotados acá | hecha | 2-11: `~/Proyectos/twinboxing-finales/pacman3x1.mp4`, ya recortado por Lucas: el round 1 empieza en 0:00 y cada uno 4:00 después (0:00, 4:00, …, 44:00), descansos de 60 s exactos |
-| S0b | SDD | `cortar_rounds.py --ensayo` y el corte a `pacman-netos.mp4`; ffprobe del resultado (12 × 180 s) | L0b | `pacman-netos.cortes.json` | pendiente | |
-| S1 | SDD | En la estación: `ffprobe` de `pacman-netos.mp4` (fps, duración), respaldo de la base de A (`boxtwin.db.antes-del-tercero.bak`), `GET /salud` y conteos de sesiones y peleadores de A | L0 | commit `1058d5e`; respaldo existe; decisión del descanso anotada acá | pendiente | |
+| S0b | SDD | `cortar_rounds.py --ensayo` y el corte a `pacman-netos.mp4`; ffprobe del resultado (12 × 180 s) | L0b | `pacman-netos.cortes.json` | no realizada | 2-11: Lucas cortó él mismo los rounds netos en `pac-neto.mp4` (1920×1080, 30 fps), sin `cortar_rounds.py` |
+| S1 | SDD | En la estación: `ffprobe` de `pacman-netos.mp4` (fps, duración), respaldo de la base de A (`boxtwin.db.antes-del-tercero.bak`), `GET /salud` y conteos de sesiones y peleadores de A | L0 | commit `1058d5e`; respaldo existe; decisión del descanso anotada acá | hecha | 2-11 ~22:00 (hora local), con `scripts/gemelo-tercero/cargar.sh`: `pac-neto.mp4` dura 2134 s, no 2160 (decisión 6). `/salud`: commit `1058d5e`, clasificador `geometrico`, arrancado 2-11 15:00 UTC. Antes: 19 sesiones, 12 peleadores, 84 trabajos, 0 pendientes. Respaldo `boxtwin.db.antes-del-tercero.bak`. Todo en `~/Proyectos/twinboxing-finales/gemelo/` |
 | L1 | Lucas | OK para correr `procesar` en A: pose y seguimiento del combate entero, unas 2 h de GPU (pose sola, 1 h 45 a 29 fps según E8), sin otra sesión en la cola | S1 | fecha anotada | hecha | 2-11 19:31 (hora local), "Ok" de Lucas |
-| S2 | SDD | `cargar_tercero.py --video pacman-netos.mp4 --descanso-s 0 --ensayo` y, si da lo esperado, la carga | L1 | JSON de salida anotado; trabajo `procesar` en cola | pendiente | |
+| S2 | SDD | `cargar_tercero.py --video pacman-netos.mp4 --descanso-s 0 --ensayo` y, si da lo esperado, la carga | L1 | JSON de salida anotado; trabajo `procesar` en cola | hecha | 2-11, `cargar_tercero.py` de `main` en `5926972`, con `FORZAR=1`: sesión `3b82b7f828654546b5a2a21855874fab` en cola, cuenta `1556d764…` (usuario `lucas@lucas.com`); `Tercero Z` zurda `4b42ce83…`, `Tercero O` ortodoxa `5acf4b4e…`; video por enlace duro. Ensayo y carga en `gemelo/ensayo.json` y `gemelo/carga.json` |
 | S3 | SDD | Seguir `procesar` hasta `espera_siembra` | S2 | estado de `GET /jobs/{id}` | pendiente | |
 | L2 | Lucas | Siembra en la web: A = el zurdo, B = el ortodoxo; corregir a mano los tramos sin asignar que quiera | S3 | `completar` encolado | pendiente | |
 | S4 | SDD | Seguir `completar` y `clasificar` hasta la Fight-Card | L2 | CT2 | pendiente | |
@@ -41,3 +41,10 @@ realizada` (con el motivo). `S` = la corre el SDD en la estación sin `sudo`; `L
    (`fightcard._conteo(suyos)`, que alimenta el volumen del perfil) suma todos los golpes, los
    del descanso incluidos; solo `por_round` filtra por ventana. Se mantiene el corte a rounds
    netos (decisión 4), con los inicios 0:00, 4:00, …, 44:00 sin marcar a mano.
+6. 2-11 (de Lucas): se carga `pac-neto.mp4` como está, con `FORZAR=1`, aunque dura 2134 s
+   contra los 2160 de 12 × 180. Lo más probable es un corte sin reencode (cada round empieza en
+   el keyframe más cercano, unos 2,2 s menos por round). El total de golpes no cambia, pero
+   las ventanas fijas de 180 s se corren: la del round 12 arranca unos 24 s antes de la campana
+   real y queda de 154 s. Lo que va a la tesis o a la presentación por round se declara con ese
+   desfase; el volumen total y el perfil no se ven afectados. Si hace falta por round exacto, se
+   recorta desde `pacman3x1.mp4` con `cortar_rounds.py` y se carga una sesión nueva.
