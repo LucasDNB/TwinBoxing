@@ -1,0 +1,47 @@
+# Configuracion de BoxTwinZ. Copiar a boxtwinz.toml (o apuntar BOXTWINZ_CONFIG) y editar.
+# Las variables BOXTWINZ_* del entorno pisan lo que diga este archivo. El secreto y los admins
+# van SOLO por entorno (BOXTWINZ_SECRETO, BOXTWINZ_ADMINS), nunca en un archivo versionado.
+
+[servidor]
+base_de_datos = "sqlite:////home/lucasb/boxtwinz-datos/boxtwinz.db"
+datos = "~/boxtwinz-datos"
+web = "~/Proyectos/TwinBoxing/boxtwinz/web/out"
+cookie_segura = true
+
+[motor]
+# Igual que BOXTWIN_CMD de A: el anotador de twinboxing_env, por ruta absoluta para que el
+# servicio de systemd no dependa del PATH.
+cmd = "/home/lucasb/miniforge3/envs/twinboxing_env/bin/boxtwin-annotator"
+modelo_guantes = "~/boxtwin/modelos/guantes-v2.pt"
+modelo_pose = "~/boxtwin/modelos/yolov8l-pose.pt"
+modelo_detector = "~/boxtwin/modelos/detector.pt"
+umbral = 0.80
+device = "0"
+corte_mixtos = false
+identidad_estricta = false
+identidad_apariencia = true
+lock_gpu = "/tmp/boxtwin-gpu.lock"
+
+# Todo lo de aca es [PROVISIONAL] (spec 0.7). Lucas lo valida.
+[provisional]
+tendencia_n = 10
+tendencia_banda = 0.05
+calidad_pose_min = 0.70
+duracion_ranking_s = 180
+umbral_balance = 0.70
+umbral_caida_ritmo = 0.80
+umbral_exposicion_lado = 0.65
+min_golpes_rival_exposicion = 20
+umbral_golpes_sueltos = 0.30
+min_golpes_reglas = 30
+umbral_volumen_vs_rival = 0.80
+gap_combinacion_s = 0.5
+factor_volumen_individual = 1.10
+capacidad_umbral_alto = 0.70
+capacidad_dias_alto = 15
+capacidad_umbral_critico = 0.90
+capacidad_dias_critico = 5
+
+[provisional.cupo_minutos]
+free = 60
+premium = 300
