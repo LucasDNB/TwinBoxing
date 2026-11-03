@@ -56,6 +56,7 @@ from boxtwin.mvp.revision import (
     correcciones_de_sesion,
     degradar_conflictos,
     extension_de,
+    ignorar_cortos,
     tramos_de_propuesta,
 )
 from boxtwin.core.types import TrackRole
@@ -334,7 +335,8 @@ def completar(
         )
     # -- tramos, correcciones y revision (B3; identidad estable 02-11) ---------
     fps = doc.video.fps
-    auto_tramos = tramos_de_propuesta(prop, ev, cfg_identidad)
+    # Lo que "salio de cuadro" se ignora solo (3-11): no llega a la cola como pregunta.
+    auto_tramos = ignorar_cortos(tramos_de_propuesta(prop, ev, cfg_identidad))
     auto = sum(1 for t in auto_tramos if t.rol in ("A", "B"))
     sin_asignar_auto = [t for t in auto_tramos if t.rol == ""]
     correcciones = []
@@ -416,6 +418,10 @@ def completar(
     cobertura["revision_pendiente"] = sum(1 for t in tramos if t["revision_pendiente"]
                                           and t["tipo"] == "sospechoso")
     cobertura["tramos_a_revisar"] = sum(1 for t in tramos if t["revision_pendiente"])
+    # Lo unico que muestra el resultado de la revision en la web (3-11): los clips sin rol
+    # que nadie decidio todavia.
+    cobertura["tramos_sin_asignar"] = sum(1 for t in tramos if t["revision_pendiente"]
+                                          and t["tipo"] == "sin_asignar")
     cobertura["corte_de_mixtos"] = bool(cortar_mixtos)
     cobertura["identidad_estricta"] = bool(estricta)
     cobertura["identidad_apariencia"] = (modelo_apariencia.a_dict()

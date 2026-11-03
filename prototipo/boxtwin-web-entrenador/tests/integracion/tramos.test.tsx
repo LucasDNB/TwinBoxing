@@ -16,11 +16,38 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers());
 
 describe("03 · Identificación, fase 2", () => {
-  it("dice el resultado de la propagacion como es (D6)", async () => {
+  it("el resultado dice solo cuantos clips quedan sin asignar (3-11)", async () => {
     montar(<PantallaIdentificar />);
-    expect(await screen.findByText("13 de 20 tramos asignados solos")).toBeInTheDocument();
-    expect(screen.getByText("separación de color 1,38 (mínimo 0,55)")).toBeInTheDocument();
-    expect(screen.getByText(/El 86% del video quedó sin saber quién es quién/)).toBeInTheDocument();
+    expect(await screen.findByText("2 clips sin asignar")).toBeInTheDocument();
+    expect(screen.queryByText(/tramos asignados solos/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/separación de color/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/quedó sin saber quién es quién/)).not.toBeInTheDocument();
+  });
+
+  it("con la Fight-Card nueva usa su cuenta de clips sin asignar", async () => {
+    const fc = structuredClone(FIGHTCARDS["0.2"]) as any;
+    fc.identidad.tramos_sin_asignar = 1;
+    mundo.fightcard = fc;
+    montar(<PantallaIdentificar />);
+    expect(await screen.findByText("1 clip sin asignar")).toBeInTheDocument();
+  });
+
+  it("lo que salio de cuadro no se pregunta ni se cuenta (3-11)", async () => {
+    const t = mundo.tramos as any;
+    t.tramos.push({ track: 512, t_desde: 150, t_hasta: 152, motivo: "corto", recorte_url: null, asignado: null });
+    montar(<PantallaIdentificar />);
+    expect(await screen.findByText("2 clips sin asignar")).toBeInTheDocument();
+    expect(screen.queryByText("salió de cuadro")).not.toBeInTheDocument();
+  });
+
+  it("los botones dicen el nombre de cada boxeador", async () => {
+    mundo.job = { ...structuredClone(JOBS.listo),
+      boxeadores: { A: { id: "b1", nombre: "Juan Pérez" }, B: { id: "b2", nombre: "Ana" } } } as any;
+    montar(<PantallaIdentificar />);
+    const lista = await screen.findByRole("heading", { name: "Revisar tramos dudosos" });
+    const items = within(lista.closest("section")!).getAllByRole("listitem");
+    expect(within(items[0]).getByRole("radio", { name: "J. Pérez" })).toBeInTheDocument();
+    expect(within(items[0]).getByRole("radio", { name: "Ana" })).toBeInTheDocument();
   });
 
   it("lista los tramos con motivo y los manda con Aplicar", async () => {
@@ -30,7 +57,7 @@ describe("03 · Identificación, fase 2", () => {
     expect(within(items[0]).getByText("guante tapado o poca luz")).toBeInTheDocument();
     expect(within(items[1]).getByText("cruce o cuerpo a cuerpo")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Aplicar" })).toBeDisabled();
-    await userEvent.click(within(items[0]).getByRole("radio", { name: "A" }));
+    await userEvent.click(within(items[0]).getByRole("radio", { name: "Rincón rojo" }));
     await userEvent.click(within(items[1]).getByRole("radio", { name: "Ignorar" }));
     await userEvent.click(screen.getByRole("button", { name: "Aplicar (2)" }));
     await waitFor(() => {
@@ -44,7 +71,7 @@ describe("03 · Identificación, fase 2", () => {
     montar(<PantallaIdentificar />);
     const lista = await screen.findByRole("heading", { name: "Revisar tramos dudosos" });
     const items = within(lista.closest("section")!).getAllByRole("listitem");
-    await userEvent.click(within(items[0]).getByRole("radio", { name: "A" }));
+    await userEvent.click(within(items[0]).getByRole("radio", { name: "Rincón rojo" }));
     await userEvent.click(screen.getByRole("button", { name: "Aplicar (1)" }));
     expect(await screen.findByText("Esperando su turno en la estación.")).toBeInTheDocument();
 
@@ -59,8 +86,8 @@ describe("03 · Identificación, fase 2", () => {
     mundo.tramos = { ...(mundo.tramos as object), tramos: [{ ...(mundo.tramos as any).tramos[0], asignado: "A" }] };
     mundo.job = structuredClone(JOBS.listo);
     await act(async () => { await vi.advanceTimersByTimeAsync(3_500); });
-    expect(await screen.findByText("13 de 20 tramos asignados solos, 1 a mano")).toBeInTheDocument();
-    expect(screen.getByText("asignado a mano: A")).toBeInTheDocument();
+    expect(await screen.findByText("No quedan clips sin asignar.")).toBeInTheDocument();
+    expect(screen.getByText("asignado a mano: Rincón rojo")).toBeInTheDocument();
   });
 
   it("una sesion 0.1 dice que se proceso antes de la revision de tramos", async () => {
@@ -104,9 +131,9 @@ describe("03 · Identificación, revisión de lo asignado", () => {
   it("con un sospechoso pendiente no saltea la revision aunque no quede nada sin asignar", async () => {
     conSospechoso();
     montar(<PantallaIdentificar />);
-    expect(await screen.findByText("Hay 1 tramo asignado que puede estar mal. Revisalo antes de mirar los números.")).toBeInTheDocument();
+    expect(await screen.findByText("No quedan clips sin asignar.")).toBeInTheDocument();
     expect(await screen.findByText("puede cambiar de persona en el medio")).toBeInTheDocument();
-    expect(screen.getByText("Hoy dice: A")).toBeInTheDocument();
+    expect(screen.getByText("Hoy dice: Rincón rojo")).toBeInTheDocument();
     expect(window.location.pathname).toBe("/sesion/identificar/");
   });
 
@@ -120,8 +147,8 @@ describe("03 · Identificación, revisión de lo asignado", () => {
     // la hoja del video se cierra al partir: se espera a que la lista vuelva a estar accesible
     const antes = await screen.findByLabelText("Quién es antes de 01:41");
     const despues = screen.getByLabelText("Quién es desde 01:41");
-    await userEvent.click(await within(antes).findByRole("radio", { name: "A" }));
-    await userEvent.click(within(despues).getByRole("radio", { name: "B" }));
+    await userEvent.click(await within(antes).findByRole("radio", { name: "Rincón rojo" }));
+    await userEvent.click(within(despues).getByRole("radio", { name: "Rincón azul" }));
     await userEvent.click(screen.getByRole("button", { name: "Aplicar (1)" }));
     await waitFor(() => {
       const p = mundo.pedidos.find((x) => x.metodo === "PUT" && x.ruta.endsWith("/tramos"));
@@ -137,7 +164,7 @@ describe("03 · Identificación, revisión de lo asignado", () => {
     montar(<PantallaIdentificar />);
     const lista = await screen.findByRole("heading", { name: "Revisar tramos dudosos" });
     const items = within(lista.closest("section")!).getAllByRole("listitem");
-    await userEvent.click(within(items[0]).getByRole("radio", { name: "B" }));
+    await userEvent.click(within(items[0]).getByRole("radio", { name: "Rincón azul" }));
     await userEvent.click(screen.getByRole("button", { name: "Aplicar (1)" }));
     await waitFor(() => {
       const p = mundo.pedidos.find((x) => x.metodo === "PUT" && x.ruta.endsWith("/tramos"));

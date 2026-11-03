@@ -3,9 +3,10 @@
 /*
  * 03 · Identificacion, fase 2: revisar tramos (04 §03; B3; W9).
  *
- * Primero el resultado de la propagacion, dicho como es (D6): cuantos tramos asigno solo,
- * la separacion de color contra su minimo, y que los golpes de los tramos sin asignar no
- * se cuentan. Despues la lista de tramos dudosos con su motivo, su recorte y A / B / Ignorar.
+ * Primero el resultado, reducido a un numero (3-11): cuantos clips quedan sin asignar. Lo que
+ * salio de cuadro ya no llega como pregunta: el anotador lo ignora solo. Despues la lista de
+ * tramos dudosos con su motivo, su recorte y los botones con el nombre de cada boxeador (o
+ * Rincon rojo / Rincon azul si la sesion no los tiene) e Ignorar.
  * Tocar el rango abre el video en ese instante: en hoja en el celular, en linea en
  * escritorio. "Aplicar" manda todas las decisiones y la sesion vuelve a completar.
  *
@@ -30,7 +31,7 @@ import { ErrorApi } from "@/lib/api/cliente";
 import { type AsignacionTramo, useAsignarTramos, useTicket, useTramos } from "@/lib/api/consultas";
 import type { Sesion, Tramos } from "@/lib/api/esquemas";
 import type { FightCard } from "@/lib/fightcard";
-import { decimal, mmss } from "@/lib/formato";
+import { decimal, mmss, nombreCorto } from "@/lib/formato";
 import { useEsEscritorio } from "@/lib/medios";
 import { textos } from "@/lib/textos";
 
@@ -39,29 +40,17 @@ export function FaseRevisar({ s, fc }: { s: Sesion; fc: FightCard }) {
   const [todos, setTodos] = useState(false);
   const tramos = useTramos(s.id, !fc.sinRevisionDeTramos, todos);
   const ident = fc.identidad;
+  // Una Fight-Card de antes del 3-11 no trae el campo: se cuenta de la lista.
+  const clipsSinAsignar = ident.tramos_sin_asignar
+    ?? tramos.data?.tramos.filter((t) => sinAsignar(t) && !saleDeCuadro(t) && !t.asignado
+      && t.revision_pendiente !== false).length
+    ?? ident.tracks_sin_asignar ?? 0;
 
   return (
     <div className="flex flex-col gap-4">
       <section aria-labelledby="propagacion" className="rounded-md border border-borde bg-superficie p-4">
         <h2 id="propagacion" className="font-display text-xl font-semibold lg:text-2xl">Resultado</h2>
-        <ul className="mt-2 space-y-1 text-[15px]">
-          {ident.tramos_total != null && ident.tramos_asignados_auto != null && (
-            <li>{ident.tramos_asignados_auto} de {ident.tramos_total} tramos asignados solos
-              {ident.tramos_asignados_manual ? `, ${ident.tramos_asignados_manual} a mano` : ""}</li>
-          )}
-          {ident.separacion_color != null && ident.piso_de_separacion != null && (
-            <li className={ident.separacion_color < ident.piso_de_separacion ? "text-estimado" : undefined}>
-              {textos.separacion(ident.separacion_color, ident.piso_de_separacion)}
-            </li>
-          )}
-          {(ident.sin_asignar ?? 0) > 0 && <li>{textos.sinAsignar(ident.sin_asignar!)}</li>}
-          {(ident.revision_pendiente ?? 0) > 0 && (
-            <li className="text-estimado">{textos.revisionPendiente(ident.revision_pendiente!)}</li>
-          )}
-        </ul>
-        {(ident.sin_asignar ?? 0) > 0 && (
-          <p className="mt-2 text-sm text-texto-2">Los golpes que caen en tramos sin asignar no se cuentan. Revisalos para no perder conteo.</p>
-        )}
+        <p className="mt-2 text-[15px]">{textos.clipsSinAsignar(clipsSinAsignar)}</p>
       </section>
 
       {fc.sinRevisionDeTramos ? (
@@ -91,6 +80,11 @@ type Tramo = Tramos["tramos"][number];
 type Decision = { rol: Rol | "" } | { corte: number; antes: Rol | ""; despues: Rol | "" };
 
 const claveDe = (t: Tramo) => t.clave ?? String(t.track);
+// Las sesiones de antes del 2-11 no traen tipo: todo lo que listaban era sin asignar.
+const sinAsignar = (t: Tramo) => (t.tipo ?? "sin_asignar") === "sin_asignar";
+/* 3-11: lo que salio de cuadro se ignora solo. Las sesiones nuevas ya lo traen ignorado; en las
+ * de antes sigue sin asignar y aca no se pregunta. */
+const saleDeCuadro = (t: Tramo) => t.motivo === "corto" && sinAsignar(t);
 const esTrackEntero = (t: Tramo) => claveDe(t) === String(t.track);
 
 function inicialDe(t: Tramo): Decision {
@@ -122,9 +116,10 @@ export function asignacionesDe(t: Tramo, d: Decision): AsignacionTramo[] {
   ];
 }
 
-function Revision({ s, datos, todos, setTodos }: {
+function Revision({ s, datos: crudos, todos, setTodos }: {
   s: Sesion; datos: Tramos; todos: boolean; setTodos: (v: boolean) => void;
 }) {
+  const datos = { ...crudos, tramos: crudos.tramos.filter((t) => !saleDeCuadro(t)) };
   const aplicar = useAsignarTramos(s.id);
   const ticket = useTicket(s.id);
   const escritorio = useEsEscritorio();
@@ -139,8 +134,14 @@ function Revision({ s, datos, todos, setTodos }: {
   const individual = s.contexto === "bolsa" || s.contexto === "sombra";
   // Versiones 26-10 (03 §I-03): en la version Individual la revision le habla al boxeador.
   const vos = esCuentaIndividual(useCuenta().data);
+  // 3-11: el nombre del boxeador asignado; si la sesion no lo tiene, el rincon.
+  const nombreDe = (r: "A" | "B") => {
+    const n = s.boxeadores?.[r]?.nombre;
+    return n ? nombreCorto(n) : textos.rincon[r];
+  };
   const nombreRol = (r: string) =>
-    r === "ninguno" ? "ignorado" : vos ? (r === "A" ? "soy yo" : "mi compañero") : individual ? "es él" : r;
+    r === "ninguno" ? "ignorado" : vos ? (r === "A" ? "soy yo" : "mi compañero") : individual ? "es él"
+      : r === "A" || r === "B" ? nombreDe(r) : r;
 
   function decidir(t: Tramo, d: Decision) {
     setDecisiones((x) => ({ ...x, [claveDe(t)]: d }));
@@ -196,8 +197,8 @@ function Revision({ s, datos, todos, setTodos }: {
         </>
       ) : (
         <>
-          <ToggleGroupItem value="A" className="min-h-11 border border-borde">A</ToggleGroupItem>
-          <ToggleGroupItem value="B" className="min-h-11 border border-borde">B</ToggleGroupItem>
+          <ToggleGroupItem value="A" className="min-h-11 min-w-0 border border-borde px-2"><span className="truncate">{nombreDe("A")}</span></ToggleGroupItem>
+          <ToggleGroupItem value="B" className="min-h-11 min-w-0 border border-borde px-2"><span className="truncate">{nombreDe("B")}</span></ToggleGroupItem>
         </>
       )}
       <ToggleGroupItem value="ninguno" className="min-h-11 border border-borde">Ignorar</ToggleGroupItem>

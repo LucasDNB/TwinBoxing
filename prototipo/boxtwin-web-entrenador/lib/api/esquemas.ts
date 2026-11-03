@@ -351,6 +351,8 @@ export const FightCard = z.object({
     // Identidad estable (02-11): sospechosos que nadie miro y banderas con que se proceso.
     revision_pendiente: numN.optional(),
     tramos_a_revisar: numN.optional(),
+    // 3-11: los clips sin rol que nadie decidio; lo que salio de cuadro ya no cuenta.
+    tramos_sin_asignar: numN.optional(),
     corte_de_mixtos: z.boolean().optional(),
     identidad_estricta: z.boolean().optional(),
     // IE7: pesos de guante, remera y pantalon en este video, o null si la bandera esta apagada.
