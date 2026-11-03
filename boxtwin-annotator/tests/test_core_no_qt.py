@@ -32,6 +32,7 @@ MODULOS_CORE = [
     "boxtwin.core.gloves",
     "boxtwin.core.deteccion_guantes",
     "boxtwin.core.identidad_auto",
+    "boxtwin.core.apariencia",
     "boxtwin.core.undo",
     "boxtwin.core.metrics",
     "boxtwin.core.interpolation",

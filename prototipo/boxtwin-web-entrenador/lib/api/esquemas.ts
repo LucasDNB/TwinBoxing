@@ -353,6 +353,11 @@ export const FightCard = z.object({
     tramos_a_revisar: numN.optional(),
     corte_de_mixtos: z.boolean().optional(),
     identidad_estricta: z.boolean().optional(),
+    // IE7: pesos de guante, remera y pantalon en este video, o null si la bandera esta apagada.
+    identidad_apariencia: z
+      .object({ confiabilidad: z.record(z.string(), num), pesos: z.record(z.string(), num) })
+      .nullable()
+      .optional(),
   }),
   detector: z.object({
     checkpoint: z.string(),
@@ -561,6 +566,8 @@ export const MOTIVOS_TRAMO = [
   "color_insuficiente", "sin_coexistencia", "corto", "abstencion",
   // Identidad estable (02-11): asignados que la maquina sospecha que estan mal.
   "conflicto", "color_contradice", "posible_mezcla",
+  // IE7 (03-11): guante, remera y pantalon juntos, detras de BOXTWIN_IDENTIDAD_APARIENCIA.
+  "apariencia_contradice", "apariencia_mezcla",
 ] as const;
 
 const RolTramo = z.enum(["A", "B", "ninguno"]);

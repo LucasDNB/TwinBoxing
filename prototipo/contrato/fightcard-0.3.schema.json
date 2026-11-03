@@ -41,7 +41,15 @@
         "revision_pendiente": { "type": "integer", "minimum": 0, "description": "tramos sospechosos (asignados con una pregunta abierta) que nadie reviso; identidad estable 02-11" },
         "tramos_a_revisar": { "type": "integer", "minimum": 0 },
         "corte_de_mixtos": { "type": "boolean" },
-        "identidad_estricta": { "type": "boolean" }
+        "identidad_estricta": { "type": "boolean" },
+        "identidad_apariencia": {
+          "type": ["object", "null"],
+          "description": "IE7: confiabilidad y peso de guante, remera y pantalon en este video; null con la bandera apagada",
+          "properties": {
+            "confiabilidad": { "type": "object", "additionalProperties": { "type": "number" } },
+            "pesos": { "type": "object", "additionalProperties": { "type": "number" } }
+          }
+        }
       }
     },
     "detector": {

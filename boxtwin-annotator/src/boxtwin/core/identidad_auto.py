@@ -52,6 +52,7 @@ from pathlib import Path
 import numpy as np
 
 from boxtwin.core.annotations import new_id
+from boxtwin.core.apariencia import medir_ropa
 from boxtwin.core.deteccion_guantes import (
     ACROMATICO,
     Color,
@@ -150,6 +151,9 @@ class EvidenciaTrack:
     colores: list[tuple[int, Color]] = field(default_factory=list)
     frames_con_guante: list[int] = field(default_factory=list)
     xs: list[tuple[int, float]] = field(default_factory=list)
+    # IE7: (cuadro, color de remera, color de pantalon, aislado). Remera o pantalon en None
+    # donde la pose no alcanza. Evidencia vieja: vacio, y el verificador de apariencia no actua.
+    ropa: list[tuple[int, Color | None, Color | None, bool]] = field(default_factory=list)
 
     @property
     def fraccion_guante(self) -> float:
@@ -251,6 +255,9 @@ def analizar(
                 if aislado:
                     for _, color in con_color:
                         e.colores.append((f, color))
+                remera, pantalon = medir_ropa(frame, dets.keypoints[i], dets.kp_score[i])
+                if remera is not None or pantalon is not None:
+                    e.ropa.append((f, remera, pantalon, aislado))
                 if con_color:
                     e.frames_con_guante.append(f)
                 e.xs.append((f, (x0 + x1) / 2.0))
@@ -675,6 +682,8 @@ def guardar_evidencia(evidencia: dict[int, EvidenciaTrack], destino: Path) -> No
             "colores": [[f, list(c)] for f, c in e.colores],
             "frames_con_guante": e.frames_con_guante,
             "xs": [[f, x] for f, x in e.xs],
+            "ropa": [[f, list(r) if r else None, list(p) if p else None, bool(a)]
+                     for f, r, p, a in e.ropa],
         }
         for e in evidencia.values()
     ]
@@ -697,6 +706,8 @@ def cargar_evidencia(origen: Path) -> dict[int, EvidenciaTrack]:
             colores=[(f, tuple(c)) for f, c in t["colores"]],
             frames_con_guante=list(t["frames_con_guante"]),
             xs=[(f, x) for f, x in t["xs"]],
+            ropa=[(f, tuple(r) if r else None, tuple(p) if p else None, bool(a))
+                  for f, r, p, a in t.get("ropa", [])],
         )
     return salida
 
@@ -971,6 +982,7 @@ def _sub_evidencia(e: EvidenciaTrack, seg_id: int, inicio: int, fin: int) -> Evi
         recortes=len(xs), con_guante=len(con_guante),
         colores=[(f, c) for f, c in e.colores if adentro(f)],
         frames_con_guante=con_guante, xs=xs,
+        ropa=[r for r in e.ropa if adentro(r[0])],
     )
 
 
