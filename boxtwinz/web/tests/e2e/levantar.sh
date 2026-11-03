@@ -25,5 +25,8 @@ export BOXTWINZ_CMD="$PY -I $AQUI/boxtwinz_falso.py"
 export BOXTWINZ_ESPERA="0.3"
 export BOXTWINZ_LOCK_GPU="$TMP/gpu.lock"
 
+# Z18: las cuentas de demo, para el recorrido de presentacion.
+"$PY" -m boxtwinz_api.demo sembrar --clave clave-de-demo >/dev/null
+
 "$PY" -m boxtwinz_api.worker &
 exec "$PY" -m uvicorn boxtwinz_api.main:app --host 127.0.0.1 --port "${PUERTO:-8766}" --log-level warning

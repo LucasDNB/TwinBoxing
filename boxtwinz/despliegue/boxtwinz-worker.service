@@ -1,0 +1,28 @@
+# BoxTwinZ - El worker. Uno solo: comparte la GPU con el worker de A (riesgo R1 en TAREAS.md).
+# Toma /tmp/boxtwin-gpu.lock mientras corre el motor; A no conoce ese lock.
+#
+# TimeoutStopSec largo por lo mismo que en A: ante SIGTERM termina el trabajo en curso.
+
+[Unit]
+Description=BoxTwinZ worker (motor de BoxTwin por subproceso)
+Documentation=https://github.com/LucasDNB/TwinBoxing
+After=network-online.target boxtwinz-api.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lucasb
+Group=lucasb
+WorkingDirectory=/home/lucasb/Proyectos/TwinBoxing/boxtwinz/api
+EnvironmentFile=/etc/boxtwinz.env
+ExecStart=/home/lucasb/miniforge3/envs/twinboxing_env/bin/python -m boxtwinz_api.worker
+Restart=always
+RestartSec=5
+TimeoutStopSec=3600
+KillSignal=SIGTERM
+NoNewPrivileges=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
