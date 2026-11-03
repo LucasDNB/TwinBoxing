@@ -22,10 +22,12 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
 | Z10 Amigos | Hecha | día 3 | `test_z10_amigos.py` (5): el amigo ve el perfil 1 y sus sesiones, y ni el id ni el nombre de un cajón aparecen en la respuesta (CZ4); pendiente no alcanza; la solicitud no revela emails. Web `/amigos`; e2e |
 | Z11 Rival fantasma y reglas | Hecha | día 3 | `test_z11_reglas.py` (13): cada disparador en su borde, zurdo, máximo 3 por prioridad, rotación crc32, umbral desde la config; rival contra arquetipo (simulado no dispara exposición), variante premium con exposición real contra cajones del estilo, cajón y permisos. Web `/rival`; e2e |
 | Z12 Denuncias | Hecha | día 3 | `test_z12_denuncias.py` (3): denuncia a perfil visible con notificación al admin, no se denuncia lo que no se ve, `otro` pide detalle. Diálogo en `/publico`; e2e |
-| Z13 Panel admin y capacidad | Parcial | día 1 | `services/capacity.py` (uso diario partido por medianoche, rachas, una notificación por episodio). Faltan rutas, panel y tests de 15 y 5 días |
-| Z14 Planes | Parcial | día 1 | Premium simulado, cupos (402) y `POST /publicidad/impresion` con test. Falta el componente en resultados |
-| Z15 PWA | Parcial | día 1 | `manifest.webmanifest`, íconos 192/512, `sw.js` que no cachea `/api/` ni rangos. Falta Lighthouse y la prueba en Android |
-| Z16 a Z18 | Pendiente | | |
+| Z13 Panel admin y disparadores | Hecha | día 4 | `test_z13_admin.py` (12): series sintéticas de 14/15 días al 71%, 0,70 justo corta la racha, una vez por episodio, 90% 5 días, día sin dato corta, cerrar el mismo día dos veces no duplica, partición en medianoche; panel solo admin, bloques, proyección y CSV; moderación con tanda, sacar del ranking y suspender. Web `/admin` con gráfico de utilización y líneas en 70% y 90%; e2e |
+| Z14 Planes | Hecha | día 4 | `test_z14_planes.py` (6): 403 `plan_requerido` en las tres rutas premium, variantes ocultas en free, cupo por plan, cajón ignorado en free; 402 en `test_z5_circuito.py`. `/ajustes` con premium simulado y publicidad en inicio y resultado |
+| Z15 PWA | Hecha (falta Android) | día 4 | `pwa.spec.ts`: manifest con `standalone`, íconos 192 y 512 servidos, service worker que toma la página y no cachea `/api/`. **Falta:** instalarla en un Android real por el túnel (desvío D14) |
+| Z16 Accesibilidad y e2e | Hecha | día 4 | `accesibilidad.spec.ts`: axe WCAG 2.1 AA sin violaciones en las 12 pantallas, sin scroll horizontal a 375 px, y los cinco textos obligatorios (CZ7), "golpes lanzados" ausente. 25 e2e en verde en Pixel 7 (Chromium) e iPhone 13 (WebKit): `CI_E2E=1 bash boxtwinz/ci.sh` |
+| Z17 Despliegue | Preparada, sin ejecutar | día 4 | `boxtwinz/despliegue/`: dos servicios systemd, `/etc/boxtwinz.env` de ejemplo, Funnel en el puerto 10000, `verificar_a.sh` (CZ2) con la línea de base de A tomada el 3-11 y README con vuelta atrás. **Falta:** correrlo (pide sudo) y abrirlo desde un celular |
+| Z18 Datos de demo | Hecha | día 4 | `python -m boxtwinz_api.demo sembrar|reiniciar`: cuenta free y premium, amigos, 8 sesiones cada una (golpes sintéticos, rotulados en el nombre del video), cajón premium. `test_z18_demo.py` (2) y `demo.spec.ts`: el recorrido completo tarda 1,5 a 2,1 s automatizado, muy por debajo de los 5 minutos |
 
 ## Desvíos (manda el repo)
 
@@ -76,6 +78,14 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
   `exposicion_lado`. Contra un público o un amigo no hay mapa: no hay sparrings enlazados.
 - **D13 Mínimo de golpes en el rival fantasma.** Las reglas con "al menos 30 golpes" usan el
   promedio de golpes por sesión de la ventana, no la suma.
+- **D14 Lighthouse sin categoría PWA.** Lighthouse 12 sacó la auditoría PWA. La instalabilidad
+  se verifica con `pwa.spec.ts` (lo que Chrome pide: manifest, íconos, service worker) y queda
+  la prueba en un Android real.
+- **D15 Túnel en el puerto 10000.** Funnel solo admite 443, 8443 y 10000; 443 es de A y 8443 de
+  B. Una ruta dentro del dominio de A obligaría a reconstruir la web con `basePath` y pasaría
+  por el proxy de A.
+- **D16 Un PR por día, apilados.** `boxtwinz` (día 1) → `boxtwinz-dia2` → `boxtwinz-dia3` →
+  `boxtwinz-dia4`, cada PR contra la rama del día anterior.
 - **D11 Correcciones no cambian los números.** Se registran para reentrenar; las métricas
   siguen saliendo del detector, para no mezclar dos fuentes en un mismo número.
 
@@ -113,7 +123,25 @@ encendida). GPU libre al empezar y A sin trabajos. Dos clips de 90 s recortados 
 
 - Ninguna por ahora.
 
+## Criterios de aceptación (sección 14)
+
+| Id | Estado | Evidencia |
+|---|---|---|
+| CZ1 | Parcial | Sombra y sparring reales en la estación (Z4). Bolsa real sin correr: usa la misma ruta que sombra |
+| CZ2 | Línea de base tomada | `despliegue/README.md`; el diff antes/después se hace al desplegar |
+| CZ3 | Cumple | `test_z14_planes.py`, `test_z5_circuito.py::test_cupo_agotado_402` |
+| CZ4 | Cumple | `test_z10_amigos.py`, `test_z9_ranking.py::test_publicos_lista_y_detalle_sin_cajones` |
+| CZ5 | Cumple | `test_z6_metricas.py` |
+| CZ6 | Cumple | `test_z13_admin.py` |
+| CZ7 | Cumple | `accesibilidad.spec.ts`, `tests/unit/textos.test.ts` |
+| CZ8 | Parcial | 375 px sin desborde en el e2e y `capturas/`; falta Android real (D14) |
+
+Orden de recorte: no se recortó nada.
+
 ## Pendiente de Lucas
 
 - Aprobar o no las dependencias de D1.
+- Correr Z17 con sudo (`boxtwinz/despliegue/README.md`) y abrirlo desde un Android (Z15, CZ8).
+- Una sesión real de bolsa en la estación para cerrar CZ1.
+- Videos propios para la demo: `demo sembrar --videos <carpeta>`.
 - Lo de la sección 15 de la spec.
