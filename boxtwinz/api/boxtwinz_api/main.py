@@ -28,7 +28,7 @@ from boxtwinz_api import __version__
 from boxtwinz_api.config import cfg
 from boxtwinz_api.db import crear_tablas, obtener_sesion
 from boxtwinz_api.models import Trabajo, ahora
-from boxtwinz_api.routers import cuentas, perfiles, planes, sesiones
+from boxtwinz_api.routers import cuentas, perfiles, planes, rival, sesiones, social
 
 ARRANQUE = ahora()
 
@@ -76,7 +76,7 @@ async def _vida(_app: FastAPI):
 
 app = FastAPI(title="BoxTwinZ", version=__version__, lifespan=_vida, docs_url=None, redoc_url=None,
               openapi_url=None)
-for r in (cuentas.router, perfiles.router, sesiones.router, planes.router):
+for r in (cuentas.router, perfiles.router, sesiones.router, planes.router, social.router, rival.router):
     app.include_router(r, prefix="/api")
 
 

@@ -62,3 +62,30 @@ def nuevo_cliente(app):
     yield fabrica
     for c in abiertos:
         c.__exit__(None, None, None)
+
+
+def sesion_lista(db, email, modalidad="sombra", golpes=(), duracion=240.0, calidad=0.9, rival_perfil_id=None, ranura=1):
+    """Una sesion lista con golpes, sin pasar por el worker: para ranking, rival y admin."""
+    from sqlalchemy import select
+
+    from boxtwinz_api.models import Golpe, Perfil, Sesion, Usuario
+    from boxtwinz_api.services.ingest import es_apta_ranking, recalcular_metricas
+
+    u = db.scalar(select(Usuario).where(Usuario.email == email))
+    p = db.scalar(select(Perfil).where(Perfil.usuario_id == u.id, Perfil.ranura == ranura))
+    s = Sesion(usuario_id=u.id, perfil_id=p.id, modalidad=modalidad, video_ruta="/no/existe.mp4", estado="lista",
+               video_duracion_s=duracion, calidad_pose=calidad, rival_perfil_id=rival_perfil_id)
+    db.add(s)
+    db.flush()
+    for quien, t, mano in golpes:
+        db.add(Golpe(sesion_id=s.id, quien=quien, mano=mano, t_inicio=t, t_fin=t + 0.2, confianza=0.9))
+    db.flush()
+    recalcular_metricas(db, s)
+    s.apta_ranking = es_apta_ranking(s, p, u)
+    db.commit()
+    return s
+
+
+def golpes_cada(paso, duracion, quien="usuario", mano="izquierda"):
+    n = int(duracion / paso)
+    return [(quien, round(i * paso, 3), mano if i % 2 else ("derecha" if mano == "izquierda" else "izquierda")) for i in range(n)]

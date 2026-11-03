@@ -18,7 +18,10 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
 | Z6 Métricas | Hecha | día 1 | `test_z6_metricas.py` (14): combinaciones encadenadas, segmento corto, resto < 60 s, zurdo, sostén a mano, exposición cruzada, tendencia |
 | Z7 Resultado, valoración y correcciones | Hecha | día 2 | `/sesion`: video con línea de tiempo por mano, métricas, rounds rotulados sin validar, curva, exposición, altura como estimación, consejos. Salir sin valorar abre el diálogo y no navega. e2e `circuito.spec.ts` (2) |
 | Z8 Historial, stat general y comparación | Hecha | día 2 | `/perfil` con pestañas, stat, tendencia, historial y cajón premium; `/comparar` con curvas superpuestas. e2e `comparar.spec.ts` (2) |
-| Z9 a Z12 | Pendiente | | `rules.py` (consejos) ya escrito y usado en el resultado; faltan sus tests propios (Z11) |
+| Z9 Ranking y perfiles públicos | Hecha | día 3 | `test_z9_ranking.py` (7): aptitud en los bordes exactos (180 s, 0,70), umbral desde la config, orden y posición propia, volverse privado saca al momento, un cajón nunca es público. Web `/ranking` y `/publico`; e2e `social.spec.ts` |
+| Z10 Amigos | Hecha | día 3 | `test_z10_amigos.py` (5): el amigo ve el perfil 1 y sus sesiones, y ni el id ni el nombre de un cajón aparecen en la respuesta (CZ4); pendiente no alcanza; la solicitud no revela emails. Web `/amigos`; e2e |
+| Z11 Rival fantasma y reglas | Hecha | día 3 | `test_z11_reglas.py` (13): cada disparador en su borde, zurdo, máximo 3 por prioridad, rotación crc32, umbral desde la config; rival contra arquetipo (simulado no dispara exposición), variante premium con exposición real contra cajones del estilo, cajón y permisos. Web `/rival`; e2e |
+| Z12 Denuncias | Hecha | día 3 | `test_z12_denuncias.py` (3): denuncia a perfil visible con notificación al admin, no se denuncia lo que no se ve, `otro` pide detalle. Diálogo en `/publico`; e2e |
 | Z13 Panel admin y capacidad | Parcial | día 1 | `services/capacity.py` (uso diario partido por medianoche, rachas, una notificación por episodio). Faltan rutas, panel y tests de 15 y 5 días |
 | Z14 Planes | Parcial | día 1 | Premium simulado, cupos (402) y `POST /publicidad/impresion` con test. Falta el componente en resultados |
 | Z15 PWA | Parcial | día 1 | `manifest.webmanifest`, íconos 192/512, `sw.js` que no cachea `/api/` ni rangos. Falta Lighthouse y la prueba en Android |
@@ -67,6 +70,12 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
   al peleador A, que es el boxeador del perfil. Es eso lo que se usa como `calidad_pose`.
 - **D10 Worktree.** Se trabaja en el worktree de esta sesión de Claude Code, con la rama
   renombrada a `boxtwinz`, no en `~/Proyectos/TwinBoxing-boxtwinz`.
+- **D12 Exposición contra un estilo.** El mapa del rival fantasma sale de los sparrings del
+  perfil contra cajones de ese estilo (o contra ese cajón). Contra un arquetipo sin sparrings de
+  su estilo se muestra el mapa simulado del arquetipo con rótulo, y ese mapa no dispara
+  `exposicion_lado`. Contra un público o un amigo no hay mapa: no hay sparrings enlazados.
+- **D13 Mínimo de golpes en el rival fantasma.** Las reglas con "al menos 30 golpes" usan el
+  promedio de golpes por sesión de la ventana, no la suma.
 - **D11 Correcciones no cambian los números.** Se registran para reentrenar; las métricas
   siguen saliendo del detector, para no mezclar dos fuentes en un mismo número.
 
