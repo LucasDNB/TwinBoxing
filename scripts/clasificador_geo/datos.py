@@ -167,7 +167,7 @@ def main(argv=None) -> int:
             gs = golpes_de_eventos(doc.events, fuente, kp.shape[1], v.fps)
             golpes.extend(gs)
             ruta = comun.ruta_annot(fuente)
-            shas[str(ruta.relative_to(comun.REPO))] = _sha(ruta)
+            shas[str(ruta.relative_to(comun.RAIZ_FUENTES))] = _sha(ruta)
             print(f"{fuente}: {len(gs)} golpes completos, T={kp.shape[1]}, fps={v.fps:.3f}, "
                   f"cobertura A={valid[0].mean():.3f} B={valid[1].mean():.3f}")
         escribir_csv(golpes, csv_path)

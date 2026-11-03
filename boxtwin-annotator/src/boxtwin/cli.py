@@ -346,7 +346,17 @@ def build_parser() -> argparse.ArgumentParser:
     cp.add_argument("--device", default=None)
     cp.add_argument("--manual", action="store_true",
                     help="aplica las asignaciones de tramos hechas a mano en la web "
-                         "(identidad.asignaciones_manuales de sesion.json)")
+                         "(identidad.asignaciones_manuales y identidad.correcciones de "
+                         "sesion.json)")
+    cp.add_argument("--cortar-mixtos", action="store_true", dest="cortar_mixtos",
+                    help="parte los tracks mixtos donde cambia el color del guante (E11) "
+                         "antes de repartir A y B. Sin confirmar sobre material nuevo")
+    cp.add_argument("--estricta", action="store_true",
+                    help="le saca el rol a los tramos automaticos en conflicto (dos del mismo "
+                         "rol en el mismo cuadro): quedan sin asignar y se revisan")
+    cp.add_argument("--apariencia", action="store_true",
+                    help="suma a la revision los tramos que guante, remera y pantalon "
+                         "contradicen (IE7). No cambia la asignacion")
 
     en = sub.add_parser(
         "enriquecer",
@@ -695,6 +705,8 @@ def _cmd_completar(args: argparse.Namespace) -> int:
         umbral=args.umbral, device=args.device,
         cfg_guardia=ConfigGuardia(retorno_lento_ms=args.retorno_lento_ms),
         manual=args.manual,
+        cortar_mixtos=args.cortar_mixtos, estricta=args.estricta,
+        apariencia=args.apariencia,
     )
     ses = Sesion.cargar(args.sesion)
 

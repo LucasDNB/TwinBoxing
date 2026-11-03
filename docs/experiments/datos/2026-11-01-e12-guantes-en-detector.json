@@ -1,0 +1,246 @@
+{
+  "exp": "E12",
+  "fecha": "2026-11-01",
+  "commit": "547d58b",
+  "preregistro": "8741a8d",
+  "veredictos": {
+    "exp": "e12",
+    "P16a": {
+      "veredicto": "no demostrada",
+      "diferencia": -0.19373333333333326,
+      "folds_ganados": 0,
+      "folds": 6,
+      "folds_min": 5,
+      "ganados": [],
+      "desvio_familia_max": null,
+      "base": {
+        "folds": [
+          "sin-01-sparring",
+          "sin-02-sparring",
+          "sin-03-sparring",
+          "sin-04-sparring",
+          "sin-pacquiao_margarito",
+          "sin-sparring-3-rounds"
+        ],
+        "f1_080": 0.6226666666666666,
+        "f1_080_por_fold": {
+          "sin-01-sparring": 0.6667,
+          "sin-02-sparring": 0.6,
+          "sin-03-sparring": 0.6275,
+          "sin-04-sparring": 0.5889,
+          "sin-pacquiao_margarito": 0.6204,
+          "sin-sparring-3-rounds": 0.6325
+        },
+        "recall_080": 0.48711666666666664,
+        "precision_080": 0.8689166666666667,
+        "curva": {
+          "0.7": 0.5782,
+          "0.75": 0.6186833333333334,
+          "0.8": 0.6226666666666666,
+          "0.85": 0.5795,
+          "0.9": 0.4683833333333333
+        },
+        "f1_mejor_umbral": 0.6374833333333333,
+        "recall_medidos_mejor_umbral": [
+          0.5521,
+          0.4839,
+          0.5659,
+          0.475,
+          0.5538,
+          0.6043
+        ],
+        "recall_rellenados_mejor_umbral": [
+          null,
+          null,
+          null,
+          null,
+          0.1333,
+          0.0909
+        ],
+        "una_semilla": {
+          "media": 0.5450933333333333,
+          "desvio": 0.11559546863011583
+        },
+        "no_comparables": [
+          "sin-Sparring"
+        ]
+      },
+      "nuevo": {
+        "folds": [
+          "sin-01-sparring",
+          "sin-02-sparring",
+          "sin-03-sparring",
+          "sin-04-sparring",
+          "sin-pacquiao_margarito",
+          "sin-sparring-3-rounds"
+        ],
+        "f1_080": 0.42893333333333333,
+        "f1_080_por_fold": {
+          "sin-01-sparring": 0.4219,
+          "sin-02-sparring": 0.5,
+          "sin-03-sparring": 0.4144,
+          "sin-04-sparring": 0.3799,
+          "sin-pacquiao_margarito": 0.4477,
+          "sin-sparring-3-rounds": 0.4097
+        },
+        "recall_080": 0.5153166666666666,
+        "precision_080": 0.36993333333333334,
+        "curva": {
+          "0.7": 0.43661666666666665,
+          "0.75": 0.42391666666666666,
+          "0.8": 0.42893333333333333,
+          "0.85": 0.4293,
+          "0.9": 0.43888333333333335
+        },
+        "f1_mejor_umbral": 0.48083333333333333,
+        "recall_medidos_mejor_umbral": [
+          0.75,
+          0.4677,
+          0.7442,
+          0.7083,
+          0.4462,
+          0.5935
+        ],
+        "recall_rellenados_mejor_umbral": [
+          null,
+          null,
+          null,
+          null,
+          0.1333,
+          0.1818
+        ],
+        "una_semilla": {
+          "media": 0.49200666666666665,
+          "desvio": 0.09299717805630868
+        },
+        "no_comparables": [
+          "sin-Sparring"
+        ]
+      }
+    },
+    "P16e": {
+      "veredicto": "no realizado"
+    }
+  },
+  "guantes": {
+    "P16c": {
+      "Sparring": {
+        "cobertura_por_mano": {
+          "A-izq": 0.1554192229038855,
+          "A-der": 0.15848670756646216,
+          "B-izq": 0.23802551767412675,
+          "B-der": 0.23572474377745242
+        },
+        "cuadros_con_peleador": {
+          "A": 4890,
+          "B": 4781
+        }
+      },
+      "01-sparring": {
+        "cobertura_por_mano": {
+          "A-izq": 0.29070239545269994,
+          "A-der": 0.35464880227365003,
+          "B-izq": 0.36537301427709634,
+          "B-der": 0.30303639654132314
+        },
+        "cuadros_con_peleador": {
+          "A": 4926,
+          "B": 4973
+        }
+      },
+      "02-sparring": {
+        "cobertura_por_mano": {
+          "A-izq": 0.6746411483253588,
+          "A-der": 0.7085326953748007,
+          "B-izq": 0.7248182762201454,
+          "B-der": 0.5632398753894081
+        },
+        "cuadros_con_peleador": {
+          "A": 5016,
+          "B": 4815
+        }
+      },
+      "03-sparring": {
+        "cobertura_por_mano": {
+          "A-izq": 0.6753273322422259,
+          "A-der": 0.6579378068739771,
+          "B-izq": 0.638698984876735,
+          "B-der": 0.6784752434224156
+        },
+        "cuadros_con_peleador": {
+          "A": 4888,
+          "B": 4827
+        }
+      },
+      "04-sparring": {
+        "cobertura_por_mano": {
+          "A-izq": 0.4680316785783272,
+          "A-der": 0.47826926791578134,
+          "B-izq": 0.5761689291101055,
+          "B-der": 0.47322775263951733
+        },
+        "cuadros_con_peleador": {
+          "A": 5177,
+          "B": 5304
+        }
+      },
+      "sparring-3-rounds": {
+        "cobertura_por_mano": {
+          "A-izq": 0.5725218658892128,
+          "A-der": 0.54944120505345,
+          "B-izq": 0.5736434108527132,
+          "B-der": 0.46384447674418605
+        },
+        "cuadros_con_peleador": {
+          "A": 16464,
+          "B": 16512
+        }
+      },
+      "pacquiao_margarito": {
+        "cobertura_por_mano": {
+          "A-izq": 0.5527121825906531,
+          "A-der": 0.4718901294338504,
+          "B-izq": 0.47449029362988976,
+          "B-der": 0.5511657399278119
+        },
+        "cuadros_con_peleador": {
+          "A": 10121,
+          "B": 10251
+        }
+      }
+    },
+    "P16d": {
+      "mediana_ms": 12.632536888122559,
+      "p95_ms": 15.445656776428223,
+      "cuadros": 54589
+    }
+  },
+  "kmano": {
+    "bien": 137,
+    "mal": 6,
+    "no_se_puede_saber": 57,
+    "juzgables": 143,
+    "fraccion": 0.958041958041958,
+    "wilson95": [
+      0.912,
+      0.981
+    ],
+    "decision": 17
+  },
+  "diagnostico_no_preregistrado": {
+    "fold": "sin-03-sparring",
+    "prob_entrada_cero_media": {
+      "base": 0.639,
+      "v8g": 0.89
+    },
+    "predichos_sobre_cuadros_cero": {
+      "base": "0 de 75",
+      "v8g": "127 de 204"
+    },
+    "f1_080_sin_opinar_en_cuadros_cero": {
+      "base": 0.624,
+      "v8g": 0.637
+    },
+    "nota": "auditoria del 1-11, una sola vez, 5 semillas; no reemplaza a P16a"
+  }
+}

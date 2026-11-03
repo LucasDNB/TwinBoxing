@@ -219,10 +219,15 @@ def _cuadro_comun(frames: dict[int, set[int]], par: tuple[int, int]) -> int | No
 
 
 def recortar(
-    video: Path, cache, candidatos: list[Candidato], destino: Path
+    video: Path, cache, candidatos: list[Candidato], destino: Path,
+    nombres: dict[int, str] | None = None,
 ) -> list[Candidato]:
     """
     Escribe un jpg por candidato y le deja la ruta relativa adentro.
+
+    `nombres` (indice del candidato -> nombre sin extension) es para los tramos de la
+    revision: un track partido tiene mas de un tramo y cada uno necesita su recorte. Sin el,
+    `track_<n>.jpg` como siempre.
 
     Si un recorte no sale -el cuadro no se pudo leer, el track no esta en ese cuadro- se
     deja el candidato sin imagen con su aviso, en vez de sacarlo de la lista: el usuario
@@ -236,7 +241,7 @@ def recortar(
     if not cap.isOpened():
         raise RuntimeError(f"no se pudo abrir el video {video}")
     try:
-        for c in candidatos:
+        for k, c in enumerate(candidatos):
             cap.set(cv2.CAP_PROP_POS_FRAMES, c.cuadro)
             ok, img = cap.read()
             if not ok:
@@ -257,7 +262,7 @@ def recortar(
             if x1 - x0 < 4 or y1 - y0 < 4:
                 c.avisos.append("la caja quedo demasiado chica para recortar")
                 continue
-            nombre = f"track_{c.track}.jpg"
+            nombre = f"{(nombres or {}).get(k, f'track_{c.track}')}.jpg"
             cv2.imwrite(str(destino / nombre), img[y0:y1, x0:x1])
             c.recorte = f"{destino.name}/{nombre}"
     finally:

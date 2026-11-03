@@ -1,0 +1,414 @@
+{
+ "etiqueta": "diagnostico de IE6, no pre-registrado: no cambia la regla ni el veredicto",
+ "fuentes": [
+  {
+   "fuente": "Sparring",
+   "separacion_de_perfiles": 2.08,
+   "base": {
+    "antes": {
+     "cola/mixto": 622
+    },
+    "ronda1": {},
+    "ronda2": {
+     "items": 0,
+     "decisiones": 0,
+     "destapados": 0,
+     "decisiones_total": 18,
+     "bien": 5564,
+     "asignados": 5564,
+     "peleador": 9671,
+     "precision": 1.0,
+     "cobertura": 0.5753283011064005
+    }
+   },
+   "corte": {
+    "antes": {
+     "fuera/mixto": 9,
+     "cola/intercambiado": 225
+    },
+    "ronda1": {
+     "fuera/mixto": 9
+    },
+    "ronda2": {
+     "items": 0,
+     "decisiones": 0,
+     "destapados": 0,
+     "decisiones_total": 13,
+     "bien": 5907,
+     "asignados": 5916,
+     "peleador": 9671,
+     "precision": 0.9984787018255578,
+     "cobertura": 0.6107951607899907
+    }
+   },
+   "corte+estricta": {
+    "antes": {
+     "fuera/mixto": 9
+    },
+    "ronda1": {
+     "fuera/mixto": 9
+    },
+    "ronda2": {
+     "items": 0,
+     "decisiones": 0,
+     "destapados": 0,
+     "decisiones_total": 13,
+     "bien": 5907,
+     "asignados": 5916,
+     "peleador": 9671,
+     "precision": 0.9984787018255578,
+     "cobertura": 0.6107951607899907
+    }
+   }
+  },
+  {
+   "fuente": "01-sparring",
+   "separacion_de_perfiles": 0.384,
+   "base": {
+    "antes": {
+     "cola/tercero": 183,
+     "fuera/tercero": 2
+    },
+    "ronda1": {
+     "cola/tercero": 428,
+     "fuera/tercero": 2
+    },
+    "ronda2": {
+     "items": 0,
+     "decisiones": 0,
+     "destapados": 0,
+     "decisiones_total": 35,
+     "bien": 9844,
+     "asignados": 10274,
+     "peleador": 9908,
+     "precision": 0.958146778275258,
+     "cobertura": 0.9935405732741219
+    }
+   },
+   "corte": {
+    "antes": {
+     "cola/tercero": 183,
+     "fuera/tercero": 2
+    },
+    "ronda1": {
+     "cola/tercero": 428,
+     "fuera/tercero": 2
+    },
+    "ronda2": {
+     "items": 0,
+     "decisiones": 0,
+     "destapados": 0,
+     "decisiones_total": 35,
+     "bien": 9844,
+     "asignados": 10274,
+     "peleador": 9908,
+     "precision": 0.958146778275258,
+     "cobertura": 0.9935405732741219
+    }
+   },
+   "corte+estricta": {
+    "antes": {
+     "fuera/tercero": 2
+    },
+    "ronda1": {
+     "cola/tercero": 428,
+     "fuera/tercero": 2
+    },
+    "ronda2": {
+     "items": 0,
+     "decisiones": 0,
+     "destapados": 0,
+     "decisiones_total": 35,
+     "bien": 9844,
+     "asignados": 10274,
+     "peleador": 9908,
+     "precision": 0.958146778275258,
+     "cobertura": 0.9935405732741219
+    }
+   }
+  },
+  {
+   "fuente": "02-sparring",
+   "separacion_de_perfiles": 0.913,
+   "base": {
+    "antes": {
+     "cola/tercero": 750
+    },
+    "ronda1": {
+     "cola/tercero": 227
+    },
+    "ronda2": {
+     "items": 1,
+     "decisiones": 1,
+     "destapados": 0,
+     "decisiones_total": 146,
+     "bien": 9748,
+     "asignados": 9975,
+     "peleador": 9942,
+     "precision": 0.9772431077694236,
+     "cobertura": 0.9804868235767451
+    }
+   },
+   "corte": {
+    "antes": {
+     "cola/tercero": 750
+    },
+    "ronda1": {
+     "cola/tercero": 227
+    },
+    "ronda2": {
+     "items": 1,
+     "decisiones": 1,
+     "destapados": 0,
+     "decisiones_total": 146,
+     "bien": 9748,
+     "asignados": 9975,
+     "peleador": 9942,
+     "precision": 0.9772431077694236,
+     "cobertura": 0.9804868235767451
+    }
+   },
+   "corte+estricta": {
+    "antes": {},
+    "ronda1": {
+     "cola/tercero": 227
+    },
+    "ronda2": {
+     "items": 1,
+     "decisiones": 1,
+     "destapados": 0,
+     "decisiones_total": 146,
+     "bien": 9748,
+     "asignados": 9975,
+     "peleador": 9942,
+     "precision": 0.9772431077694236,
+     "cobertura": 0.9804868235767451
+    }
+   }
+  },
+  {
+   "fuente": "03-sparring",
+   "separacion_de_perfiles": 0.348,
+   "base": {
+    "antes": {
+     "fuera/mixto": 854,
+     "fuera/tercero": 30,
+     "cola/mixto": 550,
+     "cola/tercero": 575,
+     "fuera/intercambiado": 364,
+     "cola/intercambiado": 205
+    },
+    "ronda1": {
+     "fuera/mixto": 854,
+     "fuera/tercero": 30,
+     "fuera/intercambiado": 364,
+     "cola/tercero": 92
+    },
+    "ronda2": {
+     "items": 2,
+     "decisiones": 3,
+     "destapados": 1211,
+     "decisiones_total": 157,
+     "bien": 9524,
+     "asignados": 9653,
+     "peleador": 9717,
+     "precision": 0.9866362788770331,
+     "cobertura": 0.9801379026448492
+    }
+   },
+   "corte": {
+    "antes": {
+     "fuera/mixto": 854,
+     "fuera/tercero": 30,
+     "cola/mixto": 550,
+     "cola/tercero": 575,
+     "fuera/intercambiado": 364,
+     "cola/intercambiado": 205
+    },
+    "ronda1": {
+     "fuera/mixto": 854,
+     "fuera/tercero": 30,
+     "fuera/intercambiado": 364,
+     "cola/tercero": 92
+    },
+    "ronda2": {
+     "items": 2,
+     "decisiones": 3,
+     "destapados": 1211,
+     "decisiones_total": 157,
+     "bien": 9524,
+     "asignados": 9653,
+     "peleador": 9717,
+     "precision": 0.9866362788770331,
+     "cobertura": 0.9801379026448492
+    }
+   },
+   "corte+estricta": {
+    "antes": {
+     "fuera/mixto": 854,
+     "fuera/tercero": 30,
+     "fuera/intercambiado": 364
+    },
+    "ronda1": {
+     "fuera/mixto": 7,
+     "fuera/tercero": 30,
+     "cola/tercero": 92
+    },
+    "ronda2": {
+     "items": 2,
+     "decisiones": 3,
+     "destapados": 0,
+     "decisiones_total": 157,
+     "bien": 9524,
+     "asignados": 9653,
+     "peleador": 9717,
+     "precision": 0.9866362788770331,
+     "cobertura": 0.9801379026448492
+    }
+   }
+  },
+  {
+   "fuente": "04-sparring",
+   "separacion_de_perfiles": 1.715,
+   "base": {
+    "antes": {
+     "fuera/tercero": 4,
+     "cola/mixto": 590,
+     "cola/intercambiado": 645,
+     "cola/tercero": 169
+    },
+    "ronda1": {
+     "fuera/tercero": 4,
+     "cola/tercero": 171
+    },
+    "ronda2": {
+     "items": 0,
+     "decisiones": 0,
+     "destapados": 0,
+     "decisiones_total": 113,
+     "bien": 10428,
+     "asignados": 10603,
+     "peleador": 10549,
+     "precision": 0.9834952371970197,
+     "cobertura": 0.9885297184567258
+    }
+   },
+   "corte": {
+    "antes": {
+     "fuera/tercero": 3,
+     "cola/mixto": 59,
+     "cola/tercero": 170,
+     "cola/intercambiado": 95
+    },
+    "ronda1": {
+     "fuera/tercero": 3,
+     "cola/tercero": 172
+    },
+    "ronda2": {
+     "items": 0,
+     "decisiones": 0,
+     "destapados": 0,
+     "decisiones_total": 113,
+     "bien": 10428,
+     "asignados": 10603,
+     "peleador": 10549,
+     "precision": 0.9834952371970197,
+     "cobertura": 0.9885297184567258
+    }
+   },
+   "corte+estricta": {
+    "antes": {
+     "fuera/tercero": 3
+    },
+    "ronda1": {
+     "fuera/tercero": 3,
+     "cola/tercero": 172
+    },
+    "ronda2": {
+     "items": 0,
+     "decisiones": 0,
+     "destapados": 0,
+     "decisiones_total": 113,
+     "bien": 10428,
+     "asignados": 10603,
+     "peleador": 10549,
+     "precision": 0.9834952371970197,
+     "cobertura": 0.9885297184567258
+    }
+   }
+  },
+  {
+   "fuente": "sparring-3-rounds",
+   "separacion_de_perfiles": 1.694,
+   "base": {
+    "antes": {
+     "cola/mixto": 3390,
+     "cola/intercambiado": 2031,
+     "cola/tercero": 511,
+     "fuera/intercambiado": 21
+    },
+    "ronda1": {
+     "cola/mixto": 3,
+     "cola/tercero": 190,
+     "fuera/intercambiado": 21
+    },
+    "ronda2": {
+     "items": 2,
+     "decisiones": 2,
+     "destapados": 21,
+     "decisiones_total": 85,
+     "bien": 32681,
+     "asignados": 32874,
+     "peleador": 33022,
+     "precision": 0.9941290989839995,
+     "cobertura": 0.9896735509660226
+    }
+   },
+   "corte": {
+    "antes": {
+     "cola/mixto": 58,
+     "cola/tercero": 1652,
+     "cola/intercambiado": 236,
+     "fuera/mixto": 22
+    },
+    "ronda1": {
+     "cola/mixto": 4,
+     "cola/tercero": 190,
+     "fuera/mixto": 22
+    },
+    "ronda2": {
+     "items": 0,
+     "decisiones": 0,
+     "destapados": 0,
+     "decisiones_total": 80,
+     "bien": 32658,
+     "asignados": 32874,
+     "peleador": 33022,
+     "precision": 0.9934294579302793,
+     "cobertura": 0.9889770456059597
+    }
+   },
+   "corte+estricta": {
+    "antes": {
+     "fuera/mixto": 22
+    },
+    "ronda1": {
+     "cola/mixto": 4,
+     "cola/tercero": 190,
+     "fuera/mixto": 22
+    },
+    "ronda2": {
+     "items": 0,
+     "decisiones": 0,
+     "destapados": 0,
+     "decisiones_total": 80,
+     "bien": 32658,
+     "asignados": 32874,
+     "peleador": 33022,
+     "precision": 0.9934294579302793,
+     "cobertura": 0.9889770456059597
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,172 @@
+<title>K-mano · E12</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Una mesa de revision: el cuadro grande a la izquierda, la pregunta y tres botones a la derecha, la tira de 200 abajo. */
+:root {
+  --bg: #f3f4f2; --panel: #ffffff; --fg: #1d2421; --muted: #5f6b66; --line: #d6dbd8;
+  --accent: #e0a800; --accent-fg: #1d2421; --si: #2f7d4f; --no: #b23a2e; --ns: #6b6f8a;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141917; --panel: #1c2320; --fg: #e8ece9; --muted: #9aa7a1; --line: #2e3833;
+  --accent: #f0bd22; --accent-fg: #141917; --si: #4caf73; --no: #e0675b; --ns: #9a9fc2; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141917; --panel: #1c2320; --fg: #e8ece9; --muted: #9aa7a1; --line: #2e3833;
+  --accent: #f0bd22; --accent-fg: #141917; --si: #4caf73; --no: #e0675b; --ns: #9a9fc2; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 32px; }
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 18px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 2rem; letter-spacing: .02em; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 2px 0 0; max-width: 62ch; }
+.tablero { display: flex; gap: 20px; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: .9rem; }
+.tablero b { display: block; font-family: var(--display); font-size: 1.6rem; font-weight: 600; }
+.tablero .lbl { color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-size: .7rem; }
+.pasa { color: var(--si); } .falla { color: var(--no); }
+.mesa { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+.cuadro { min-width: 0; display: grid; place-items: center; background: #0d0f0e; border-radius: 6px; min-height: 380px; }
+.cuadro img { max-height: 380px; width: auto; display: block; }
+.lado { display: grid; gap: 14px; }
+.meta { font-family: var(--mono); font-size: .8rem; color: var(--muted); }
+.pregunta { font-family: var(--display); font-size: 1.9rem; line-height: 1.1; font-weight: 600; margin: 0; text-wrap: balance; }
+.pregunta em { font-style: normal; background: var(--accent); color: var(--accent-fg); padding: 0 .2em; border-radius: 3px; }
+.botones { display: grid; gap: 8px; }
+button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+  padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; font-weight: 500; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button kbd { font-family: var(--mono); font-size: .75rem; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+button[data-r="si"].on { background: var(--si); border-color: var(--si); color: #fff; }
+button[data-r="no"].on { background: var(--no); border-color: var(--no); color: #fff; }
+button[data-r="no_se_ve"].on { background: var(--ns); border-color: var(--ns); color: #fff; }
+button.on kbd { color: inherit; border-color: currentColor; }
+.nav { display: flex; gap: 8px; } .nav button { flex: 1; justify-content: center; }
+.ayuda { font-size: .85rem; color: var(--muted); margin: 0; }
+.aviso { font-size: .85rem; border-left: 3px solid var(--no); padding: 6px 10px; background: var(--panel); margin: 0; }
+.tira { display: grid; grid-template-columns: repeat(auto-fill, minmax(14px, 1fr)); gap: 3px; }
+.tira button { padding: 0; height: 14px; border-radius: 3px; border: none; background: var(--line); }
+.tira button.si { background: var(--si); } .tira button.no { background: var(--no); } .tira button.no_se_ve { background: var(--ns); }
+.tira button.act { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (max-width: 760px) { .mesa { grid-template-columns: 1fr; } .cuadro { min-height: 0; } .cuadro img { max-height: 60vh; } }
+@media (prefers-reduced-motion: no-preference) { button { transition: background .12s, border-color .12s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>K-mano · guante a la mano correcta</h1>
+      <p class="sub">200 cuadros de sparring-3-rounds con el guante detectado (círculo amarillo). Para cada uno: ¿es la mano que dice la pregunta, del propio peleador, no la del lado de la pantalla? E12 corre solo si al menos el 90% está bien.</p>
+    </div>
+    <div class="tablero" aria-live="polite">
+      <div><span class="lbl">Marcados</span><b id="n-marcados">0/200</b></div>
+      <div><span class="lbl">Bien</span><b id="n-bien">–</b></div>
+    </div>
+  </header>
+
+  <p class="aviso" id="aviso" hidden></p>
+
+  <section class="mesa">
+    <div class="cuadro"><img id="img" alt="Recorte del peleador con el guante marcado"></div>
+    <div class="lado">
+      <div class="meta" id="meta"></div>
+      <p class="pregunta" id="pregunta"></p>
+      <div class="botones">
+        <button id="b-si" data-r="si">Sí, es esa mano <kbd>S</kbd></button>
+        <button id="b-no" data-r="no">No, es la otra <kbd>N</kbd></button>
+        <button id="b-ns" data-r="no_se_ve">No se puede saber <kbd>X</kbd></button>
+      </div>
+      <div class="nav">
+        <button id="b-ant" aria-label="Anterior">← Anterior</button>
+        <button id="b-sig" aria-label="Siguiente">Siguiente →</button>
+      </div>
+      <p class="ayuda">Al responder pasa al siguiente sin marcar. Con ← y → se recorre; un clic en la tira salta a ese cuadro.</p>
+    </div>
+  </section>
+
+  <nav class="tira" id="tira" aria-label="Los 200 cuadros"></nav>
+</div>
+
+<script>
+const ITEMS = /*DATOS*/[];
+const resp = {};          // id -> "si" | "no" | "no_se_ve"
+let i = 0, db = null, col = null;
+const $ = (id) => document.getElementById(id);
+
+function aviso(t) { $("aviso").textContent = t; $("aviso").hidden = !t; }
+
+function pintar() {
+  const it = ITEMS[i];
+  $("img").src = it.img;
+  $("meta").textContent = `#${i + 1} de ${ITEMS.length} · cuadro ${it.cuadro} · peleador ${it.peleador}`;
+  $("pregunta").innerHTML = `¿Este guante es la mano <em>${it.mano}</em> del peleador?`;
+  for (const b of document.querySelectorAll(".botones button")) b.classList.toggle("on", resp[it.id] === b.dataset.r);
+  const tira = $("tira").children;
+  for (let k = 0; k < tira.length; k++) {
+    tira[k].className = (resp[ITEMS[k].id] || "") + (k === i ? " act" : "");
+  }
+  const vals = Object.values(resp), n = vals.length;
+  $("n-marcados").textContent = `${n}/${ITEMS.length}`;
+  const jud = vals.filter((v) => v !== "no_se_ve").length, bien = vals.filter((v) => v === "si").length;
+  const el = $("n-bien");
+  if (!jud) { el.textContent = "–"; el.className = ""; }
+  else { const p = bien / jud; el.textContent = `${(p * 100).toFixed(1)}%`; el.className = p >= 0.9 ? "pasa" : "falla"; }
+}
+
+function ir(k) { i = Math.max(0, Math.min(ITEMS.length - 1, k)); pintar(); }
+
+async function responder(r) {
+  const it = ITEMS[i];
+  resp[it.id] = r;
+  const proximo = ITEMS.findIndex((x, k) => k > i && !resp[x.id]);
+  pintar();
+  if (proximo >= 0) ir(proximo);
+  if (!col) return;
+  try {
+    await col.doc(it.id).set({ respuesta: r, cuadro: it.cuadro, peleador: it.peleador, mano: it.mano, en: new Date().toISOString() });
+  } catch (e) {
+    aviso(`La respuesta del #${ITEMS.indexOf(it) + 1} no se guardó (${e && e.code || "error"}). Volvé a marcarla en un rato.`);
+  }
+}
+
+function armarTira() {
+  const t = $("tira");
+  ITEMS.forEach((it, k) => {
+    const b = document.createElement("button");
+    b.setAttribute("aria-label", `Cuadro ${k + 1}`);
+    b.addEventListener("click", () => ir(k));
+    t.appendChild(b);
+  });
+}
+
+document.querySelectorAll(".botones button").forEach((b) => b.addEventListener("click", () => responder(b.dataset.r)));
+$("b-ant").addEventListener("click", () => ir(i - 1));
+$("b-sig").addEventListener("click", () => ir(i + 1));
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === "s") responder("si");
+  else if (k === "n") responder("no");
+  else if (k === "x") responder("no_se_ve");
+  else if (e.key === "ArrowLeft") ir(i - 1);
+  else if (e.key === "ArrowRight") ir(i + 1);
+});
+
+armarTira();
+pintar();
+
+(async () => {
+  db = window.claude ? await window.claude.use("db") : null;
+  if (!db) { aviso("No hay dónde guardar las respuestas en esta vista: abrila desde claude.ai con tu cuenta. Lo que marques acá no se guarda."); return; }
+  col = db.collection("respuestas");
+  const timer = setTimeout(() => aviso("Todavía no se pudo leer lo ya marcado; podés seguir marcando."), 10000);
+  col.onSnapshot((snap) => {
+    if (!snap.metadata || !snap.metadata.fromCache) { clearTimeout(timer); aviso(""); }
+    snap.docs.forEach((d) => { const v = d.data(); if (v && v.respuesta) resp[d.id] = v.respuesta; });
+    pintar();
+  }, (e) => { clearTimeout(timer); aviso(`No se pueden leer las respuestas guardadas (${e.code}).`); });
+})();
+</script>

@@ -331,6 +331,21 @@ Qué sigue y en qué orden, al 20-10: `docs/tareas/2026-10-20-proxima-sesion.md`
 Están pre-registrados en la sección 7 de la spec, escritos antes de medir. No se
 tocan después de ver los resultados.
 
+## 5sexies. Identidad estable (desde el 2-11)
+
+Spec y pre-registro en `docs/specs/2026-11-02-identidad-estable/` (registro en `01-pasos.md`).
+La revisión de tramos ve también los ASIGNADOS sospechosos (conflicto, color que contradice,
+posible mezcla) y las correcciones van por rango, con "Acá cambia de persona" en la web
+(`boxtwin/mvp/revision.py`, `PUT /jobs/{id}/tramos` con `desde`/`hasta`). El corte de mixtos de
+E11 y el modo estricto van detrás de `BOXTWIN_CORTE_MIXTOS` y `BOXTWIN_IDENTIDAD_ESTRICTA`,
+apagadas. Qué se enciende lo decide la medición offline `scripts/identidad/medir_identidad_estable.py`
+(IE6, la corre Lucas). Nada de esto entra a A antes del 17-11.
+IE6 (3-11) dio no estable con una ronda. IE7 (3-11, `02-ie7-apariencia.md`) da estable en
+desarrollo con rondas y un usuario que separa a un tercero; el verificador de guante, remera y
+pantalon (`boxtwin/core/apariencia.py`, `BOXTWIN_IDENTIDAD_APARIENCIA`) la regla lo dejaba apagado
+por costo; desde el 3-11 viene encendido por defecto por decision de Lucas (red si la persona se
+equivoca en la primera ronda; se apaga con 0). Las otras dos banderas, apagadas.
+
 ## 5quinquies. Versiones Individual y Gimnasio (desde el 26-10)
 
 Specs SDD en `prototipo/specs/versiones-26-10/`, registro en `prototipo/TAREAS.md`. Una versión es

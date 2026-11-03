@@ -30,6 +30,11 @@ USO
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar_final.py --excluir 03-sparring 04-sparring
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar_final.py --exp E7 --dispositivo cuda
     (25-10, modo academico: lee el 3D de ~/boxtwin/e7-4dhumans, guarda en ~/boxtwin/modelos/clasificador_e7_v1)
+  ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar_final.py --exp E4-y26 --dispositivo cpu
+  ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/entrenar_final.py --exp E4a-y26 --dispositivo cpu
+    (gemelo C, docs/specs/2026-10-27-gemelo-yolo26: golpes.npz de E8 sobre YOLO26, metricas de
+    docs/experiments/datos/<fecha>-e8-yolo26-E4.json, salida en ~/boxtwin-gemelo/modelos.
+    Sin ese json se niega: C no muestra numeros que no midio)
 """
 
 from __future__ import annotations
@@ -51,6 +56,15 @@ SALIDA = Path("~/boxtwin/modelos/clasificador_geo_v1").expanduser()
 METRICAS_E4 = REPO / "docs" / "experiments" / "datos" / "2026-10-16-clasificador-geo-E4.json"
 REFERENCIA = "docs/experiments/2026-10-16-clasificador-geometrico.md"
 EXP = "E4"
+GEMELO = Path("~/boxtwin-gemelo").expanduser()
+
+
+def _json_e8(patron: str = "*-e8-yolo26-E4.json") -> Path:
+    """El json de E8 mas reciente; si todavia no existe, un nombre que no existe."""
+    hechos = sorted((REPO / "docs" / "experiments" / "datos").glob(patron))
+    return hechos[-1] if hechos else REPO / "docs" / "experiments" / "datos" / "pendiente-e8-yolo26-E4.json"
+
+
 # Por experimento: nombre del modelo, salida por defecto y de donde salen las metricas que
 # muestra la Fight-Card. E4a es el de bolsa y sombra (sin rival).
 VARIANTES = {
@@ -67,6 +81,18 @@ VARIANTES = {
            "licencia": ("modo academico: 3D de 4D-Humans con SMPL, licencia de SMPLify "
                         "(Max-Planck-Gesellschaft): uso no comercial y sin fines de lucro, solo "
                         "investigacion y educacion")},
+    # Gemelo C (27-10, docs/specs/2026-10-27-gemelo-yolo26, T4): la misma receta de E4 y E4a
+    # sobre las poses de YOLO26. `columnas` es el experimento de entrenar.py del que salen las
+    # columnas; `trabajo`, el directorio de E8 con golpes.npz; `seccion`, donde estan sus
+    # metricas dentro del json de E8, que trae las dos condiciones y las dos variantes.
+    "E4-y26": {"nombre": "clasificador_geo_y26_v1", "columnas": "E4",
+               "salida": GEMELO / "modelos" / "clasificador_geo_y26_v1",
+               "trabajo": GEMELO / "e8" / "y26" / "clasificador-geo",
+               "metricas": _json_e8(), "seccion": ("y26", "E4")},
+    "E4a-y26": {"nombre": "clasificador_geo_y26_v1_sin_rival", "columnas": "E4a",
+                "salida": GEMELO / "modelos" / "clasificador_geo_y26_v1_sin_rival",
+                "trabajo": GEMELO / "e8" / "y26" / "clasificador-geo",
+                "metricas": _json_e8(), "seccion": ("y26", "E4a")},
 }
 
 
@@ -78,17 +104,23 @@ def sha256(p: Path) -> str:
     return h.hexdigest()
 
 
-def metricas_e4(ruta: Path = METRICAS_E4, referencia: str = REFERENCIA) -> dict:
-    """Lo que la Fight-Card muestra del clasificador: familia del ensamble con una fuente afuera."""
+def metricas_e4(ruta: Path = METRICAS_E4, referencia: str = REFERENCIA, seccion: tuple = ()) -> dict:
+    """Lo que la Fight-Card muestra del clasificador: familia del ensamble con una fuente afuera.
+
+    `seccion` es el camino dentro del json cuando trae mas de un experimento (el de E8).
+    """
     if not ruta.is_file():
         return {}
-    fam = json.loads(ruta.read_text())["ensamble_total"]["familia"]
+    crudo = json.loads(ruta.read_text())
+    for clave in seccion:
+        crudo = crudo[clave]
+    fam = crudo["ensamble_total"]["familia"]
     return {
         "familia_fuente_no_vista": fam["exactitud"],
         "familia_wilson95": fam.get("wilson95"),
         "familia_balanceada": fam.get("balanceada"),
         "recall_por_familia": fam.get("recall"),
-        "golpes": json.loads(ruta.read_text())["ensamble_total"]["golpes"],
+        "golpes": crudo["ensamble_total"]["golpes"],
         "referencia": referencia,
         "de": str(ruta.relative_to(REPO)) if ruta.is_relative_to(REPO) else str(ruta),
     }
@@ -96,7 +128,8 @@ def metricas_e4(ruta: Path = METRICAS_E4, referencia: str = REFERENCIA) -> dict:
 
 def entrenar_final(d: dict, salida: Path, excluir: str | None = None, semillas=SEMILLAS,
                    dispositivo: str = "cpu", epocas: int = entrenar.HIPER["epocas"],
-                   golpes_npz: Path | None = None, metricas: dict | None = None, exp: str = EXP) -> Path:
+                   golpes_npz: Path | None = None, metricas: dict | None = None, exp: str = EXP,
+                   comando: str | None = None) -> Path:
     """
     Entrena las semillas pedidas sobre todo menos `excluir` y escribe .pt y meta.json en
     `salida` (o salida/sin_<fuente>). Devuelve el directorio.
@@ -135,14 +168,20 @@ def entrenar_final(d: dict, salida: Path, excluir: str | None = None, semillas=S
         "golpes_npz_sha256": sha256(golpes_npz) if golpes_npz and Path(golpes_npz).is_file() else None,
         # La clave sigue siendo metricas_e4 porque es la que lee el producto; con --exp E4a
         # trae las de E4a.
-        "metricas_e4": metricas if metricas is not None else metricas_e4(
-            VARIANTES[exp]["metricas"], VARIANTES[exp].get("referencia", REFERENCIA)),
+        "metricas_e4": metricas if metricas is not None else _metricas_de(exp),
         "semillas": dict(sorted(por_semilla.items())),
     }
+    if comando:
+        meta["comando"] = comando
     if VARIANTES[exp].get("licencia"):
         meta["licencia"] = VARIANTES[exp]["licencia"]
     meta_previo.write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n")
     return destino
+
+
+def _metricas_de(exp: str) -> dict:
+    v = VARIANTES[exp]
+    return metricas_e4(v["metricas"], v.get("referencia", REFERENCIA), v.get("seccion", ()))
 
 
 def main(argv=None) -> int:
@@ -161,11 +200,19 @@ def main(argv=None) -> int:
     dispositivo = args.dispositivo
     if dispositivo == "auto":
         dispositivo = "cuda" if entrenar.gpu_libre() else "cpu"
-    d = entrenar.cargar_entrada(args.exp)
-    salida = args.salida or VARIANTES[args.exp]["salida"]
-    npz = TRABAJO / "datos" / "golpes.npz"
+    v = VARIANTES[args.exp]
+    if "seccion" in v and not _metricas_de(args.exp):
+        print(f"{args.exp}: no estan las metricas de E8 en {v['metricas']}; no se arma un modelo "
+              "de C sin sus numeros (CG5)", file=sys.stderr)
+        return 2
+    trabajo = v.get("trabajo", TRABAJO)
+    d = entrenar.cargar_entrada(v.get("columnas", args.exp), trabajo)
+    salida = args.salida or v["salida"]
+    npz = trabajo / "datos" / "golpes.npz"
+    comando = " ".join(["entrenar_final.py", *(argv if argv is not None else sys.argv[1:])])
     for excluir in (args.excluir or [None]):
-        out = entrenar_final(d, salida, excluir, args.semillas, dispositivo, golpes_npz=npz, exp=args.exp)
+        out = entrenar_final(d, salida, excluir, args.semillas, dispositivo, golpes_npz=npz, exp=args.exp,
+                             comando=comando)
         print(f"{excluir or 'completo'} ({dispositivo}): {out}", flush=True)
     return 0
 

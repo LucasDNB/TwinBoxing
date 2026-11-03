@@ -862,3 +862,78 @@ PENDIENTE Y PROXIMO PASO
 2. Los cuatro botones por el Funnel, cada uno en su version y rol
 3. CV6 cumple: 0 fugas en 53 pedidos por perfil contra la cuenta real
 4. Mientras este encendida, la cuenta real no entra por la web. Apagar: BOXTWIN_DEMO vacia
+
+29-10 E8: YOLO26l-pose en lugar de YOLOv8l-pose, todo lo demas fijo (gemelo C)
+
+1. Una sola variable, el checkpoint de pose; rama D-H2: las dos sin ReID
+2. Detector, F1 en 0,80: 0,433 contra 0,623, 0 de 6 folds: no demostrada
+3. Familia de E4: 0,675 contra 0,732, 1 de 7 folds: no demostrada
+4. Trackeo: menos cambios de track (306 contra 326) y mas tracks mixtos (29 contra 23)
+5. Mecanismo probable: munecas con puntaje >= 0,3 en 0,750 contra 0,896 (K3)
+6. YOLO26 mas rapido (37,1 contra 40,6 ms por cuadro) y con menos memoria
+7. Auditoria independiente: 9 de 9 items pasan
+8. Documentado en docs/experiments/2026-10-29-e8-yolo26.md
+
+31-10 E8b: YOLO26 con el umbral de puntaje calibrado por articulacion
+
+1. Umbral que iguala la fraccion aceptada de v8 con 0,3: 0,10 a 0,18 segun la articulacion
+2. Detector, F1 en 0,80: 0,626 contra 0,623 de la base, 3 de 6 folds: iguala
+3. Familia de E4: 0,713 contra 0,732, 2 de 7 folds: iguala, del lado bajo
+4. Recupera +0,124 de F1 (mejor umbral de cada uno) y +0,037 de familia respecto de E8
+5. Cuadros-carril usables: 139534 contra 147788 (base) y 111472 (YOLO26 con 0,3)
+6. Auditoria independiente: 6 de 6 items pasan
+7. Documentado en docs/experiments/2026-10-31-e8b-umbral-calibrado.md
+
+31-10 E10: relleno de huecos cortos de keypoints en vez de enmascararlos
+
+1. Huecos cerrados de hasta 0,10 s, por articulacion, interpolados antes de las features
+2. Cuadros-carril usables 158976 contra 147788; pasos usables de E4 0,914 contra 0,842
+3. Detector, F1 en 0,80: 0,628 contra 0,623, 3 de 6 folds: no demostrada
+4. Familia de E4: 0,743 contra 0,732, 5 de 7 folds, debajo de +0,03: no demostrada
+5. Sobre YOLO26 calibrado: +0,018 de F1 y +0,010 de familia, positivas
+6. Solo 27% de los cuadros perdidos de muneca caen en huecos de hasta 0,10 s
+7. Auditoria independiente: 7 de 8 items pasan; el total de P14d se corrigio
+8. Documentado en docs/experiments/2026-10-31-e10-relleno-temporal.md
+
+01-11 E12: el guante detectado como features del detector de golpes
+
+1. Guante por cuadro en las siete fuentes; K-mano 137 de 143 juzgables (0,958)
+2. Detector, F1 en 0,80: 0,429 contra 0,623, 0 de 6 folds: no demostrada
+3. La caida no es del guante: el detector marca golpes en cuadros sin pose (entrada en cero)
+   y la evaluacion los cuenta; defecto heredado, tambien en E8
+4. Sin esos cuadros (diagnostico de un fold): 0,637 contra 0,624, sin efecto
+5. La regla de asignacion de mano dejo inerte el cambio de mascara: la hipotesis no se probo
+6. Costo 12,6 ms por cuadro: con C5 da 2,12 a 2,24 veces, no entra sin muestrear
+7. Documentado en docs/experiments/2026-11-01-e12-guantes-en-detector.md
+
+01-11 R1: el detector evaluado con la mascara de pose del producto
+
+1. La evaluacion dejaba marcar golpes en cuadros sin pose; el producto no
+2. Seis condiciones re-entrenadas, curva vieja igual a la publicada en las seis
+3. Base: F1 0,600 con la mascara del producto contra 0,623 con la vieja
+4. E12: la caida a 0,429 era del defecto; con la mascara el guante iguala (+0,001)
+5. E10: +0,019 y 5 de 6 folds, debajo de +0,03: sigue no demostrada
+6. E8b: sigue iguala, ahora por debajo (-0,025)
+7. Documentado en docs/experiments/2026-11-01-r1-evaluacion-producto.md
+
+03-11 IE6: identidad estable, errores silenciosos y cola de revision (desarrollo)
+
+1. Auditoria: base y corte iguales a E11 S10 v2 (0,850/0,788 y 0,923/0,872)
+2. Silenciosos 1,54% (base) y 1,55% (corte, estricta) contra 0,5%: ninguna pasa E1
+3. 03-sparring concentra 1248 de 1275 (12,8%): perfiles de color no separan (0,348)
+4. Tras usuario simulado, precision 0,970 a 0,984 contra 0,99: ninguna pasa E2
+5. Veredicto: no estable; se elige base, BOXTWIN_CORTE_MIXTOS y ESTRICTA apagadas
+6. Costo 22 decisiones por minuto de video; 80% de la cola son tracks cortos
+7. Diagnostico aparte: una segunda ronda de la cola destapa 1211 de los 1248
+8. Documentado en docs/experiments/2026-11-03-identidad-estable.md
+
+03-11 IE7: verificador de apariencia (guante, remera, pantalon) y usuario simulado v2
+
+1. Ropa por muestra: remera 0,973 en 01 y remera+pantalon 0,919 en 03, donde el guante no pasa el piso
+2. Ninguna senal sirve en las seis; la altura solo en 04 (0,894) y queda afuera
+3. Verificador: pesos por video con las semillas, dos motivos nuevos, bandera apagada
+4. Auditoria: base con el simulado de IE6 da 1275 silenciosos, igual que IE6
+5. Simulado v2 y rondas: silenciosos 0,052% y precision 0,9993 en las dos condiciones
+6. Regla: estable en desarrollo; se elige base (23,2 contra 24,1 decisiones por minuto)
+7. Con una sola ronda el verificador baja 1275 a 64; con rondas la cola ya los encuentra
+8. Documentado en docs/experiments/2026-11-03-ie7-apariencia.md

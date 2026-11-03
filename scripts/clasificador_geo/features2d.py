@@ -16,14 +16,24 @@ QUE HACE
   vecino mas cercano). Escribe <trabajo>/datos/golpes.npz con X (N, 32, 26), M (N, 32), las
   etiquetas como enteros y frame_dir, y golpes2d.meta.json con los nombres de las features.
 
+  Dos opciones de la campana posterior a E8 (docs/specs/2026-10-30-mejoras-post-e8/), por
+  entorno y apagadas por defecto; apagadas, golpes.npz es el de antes:
+  BOXTWIN_UMBRALES=<umbrales.json> (E8b) pone un umbral de score por articulacion en las 20
+  del brazo y en las 6 del rival; BOXTWIN_RELLENO=1 (E10) rellena los huecos cortos de cada
+  serie antes de las features y suma R (N, 32), los pasos con pose rellenada. El meta registra
+  el sha256 de los umbrales y si hubo relleno.
+
 USO
   ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/features2d.py
+  BOXTWIN_UMBRALES=~/boxtwin-mejoras/e8b/umbrales.json BOXTWIN_RELLENO=1 \
+    ~/miniforge3/envs/twinboxing_env/bin/python scripts/clasificador_geo/features2d.py
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -43,25 +53,44 @@ def nombres_brazo() -> list[str]:
     return list(NOMBRES)
 
 
-def features_brazo(kp_p: np.ndarray, sc_p: np.ndarray, side: str) -> tuple[np.ndarray, np.ndarray]:
+def leer_umbrales(ruta) -> tuple[dict, str]:
+    """Los umbrales por articulacion de un umbrales.json (E8b) y su sha256."""
+    from boxtwin_detector.dataset import leer_umbrales as leer
+    return leer(Path(ruta).expanduser())
+
+
+def opciones_de_entorno() -> tuple[dict | None, str | None, bool]:
+    """(umbrales, sha256 de umbrales.json, relleno) segun BOXTWIN_UMBRALES y BOXTWIN_RELLENO."""
+    ruta = os.environ.get("BOXTWIN_UMBRALES")
+    u, sha = leer_umbrales(ruta) if ruta else (None, None)
+    return u, sha, os.environ.get("BOXTWIN_RELLENO") == "1"
+
+
+def features_brazo(kp_p: np.ndarray, sc_p: np.ndarray, side: str,
+                   umbrales: dict | None = None) -> tuple[np.ndarray, np.ndarray]:
     """Las 20 del detector y su mascara, sobre el video entero del peleador."""
     from boxtwin_detector.features import features_de
-    f, usable = features_de(kp_p, sc_p, brazo=side)
+    f, usable = features_de(kp_p, sc_p, brazo=side, umbrales=umbrales)
     return f.astype(np.float32), usable.astype(bool)
 
 
-def features_rival(kp: np.ndarray, sc: np.ndarray, valid: np.ndarray, p: int, side: str) -> np.ndarray:
+def features_rival(kp: np.ndarray, sc: np.ndarray, valid: np.ndarray, p: int, side: str,
+                   umbrales: dict | None = None) -> np.ndarray:
     """
     (T, 6) en pixeles de imagen, sin espejar. kp (2, T, 17, 2), sc (2, T, 17), valid (2, T).
     Donde el rival no tiene hombros y caderas confiables, rival_ok = 0 y las otras cinco en 0.
+    Con `umbrales`, hombros y caderas usan cada uno el suyo.
     """
+    u_hom = MIN_SCORE if umbrales is None else umbrales["hombro"]
+    u_cad = MIN_SCORE if umbrales is None else umbrales["cadera"]
     r = 1 - p
     kr, sr = kp[r].astype(np.float64), sc[r]
     s = kr[:, list(HOMBROS)].mean(1)
     c = kr[:, list(CADERAS)].mean(1)
     v = s - c
     torso = np.linalg.norm(v, axis=-1)
-    ok = (sr[:, list(HOMBROS + CADERAS)].min(1) >= MIN_SCORE) & valid[r].astype(bool) & (torso > 1e-6)
+    ok = ((sr[:, list(HOMBROS)].min(1) >= u_hom) & (sr[:, list(CADERAS)].min(1) >= u_cad)
+          & valid[r].astype(bool) & (torso > 1e-6))
     t = np.where(ok, torso, 1.0)
     m = kp[p][:, MUNECA[side]].astype(np.float64)
     h = (m[:, 1] - s[:, 1]) / t
@@ -90,22 +119,40 @@ def remuestrear_mascara(m: np.ndarray, pasos: int = PASOS) -> np.ndarray:
     return np.asarray(m, bool)[pos]
 
 
-def construir(golpes: list[dict], series: dict[str, dict]) -> dict:
+def rellenar_serie(s: dict, umbrales: dict | None) -> dict:
+    """La serie de una fuente con los huecos cortos de cada peleador rellenados (E10)."""
+    from boxtwin_detector.relleno import rellenar
+    kp, sc = s["kp"].copy(), s["sc"].copy()
+    rell = np.zeros(sc.shape[:2], bool)
+    for p in range(kp.shape[0]):
+        kp[p], sc[p], r = rellenar(kp[p], sc[p], umbrales, float(s["fps"]),
+                                   presente=s["valid"][p].astype(bool))
+        rell[p] = r.any(axis=1)
+    return {**s, "kp": kp, "sc": sc, "rellenado": rell}
+
+
+def construir(golpes: list[dict], series: dict[str, dict], umbrales: dict | None = None,
+              relleno: bool = False) -> dict:
     """Junta X (N, 32, 26), M (N, 32) y las etiquetas de los golpes, en el orden de golpes."""
+    if relleno:
+        series = {k: rellenar_serie(s, umbrales) for k, s in series.items()}
     cache: dict = {}
-    X, M = [], []
+    X, M, R = [], [], []
     for g in golpes:
         s = series[g["fuente"]]
         clave = (g["fuente"], g["p"], g["side"])
         if clave not in cache:
-            fb, us = features_brazo(s["kp"][g["p"]], s["sc"][g["p"]], g["side"])
-            fr = features_rival(s["kp"], s["sc"], s["valid"], g["p"], g["side"])
+            fb, us = features_brazo(s["kp"][g["p"]], s["sc"][g["p"]], g["side"], umbrales)
+            fr = features_rival(s["kp"], s["sc"], s["valid"], g["p"], g["side"], umbrales)
             cache[clave] = (np.concatenate([fb, fr], -1), us)
         f, us = cache[clave]
         a, b = g["ini"], g["fin"] + 1
         X.append(remuestrear(f[a:b]))
         M.append(remuestrear_mascara(us[a:b]))
-    return {
+        if relleno:
+            R.append(remuestrear_mascara(s["rellenado"][g["p"]][a:b]))
+    opcional = {"R": np.stack(R)} if relleno else {}
+    return {**opcional,
         "X": np.stack(X).astype(np.float32), "M": np.stack(M),
         "y_tipo": np.array([TIPOS.index(g["tipo"]) for g in golpes]),
         "y_altura": np.array([ALTURAS.index(g["altura"]) for g in golpes]),
@@ -128,15 +175,20 @@ def main(argv=None) -> int:
     ap.parse_args(argv)
     d = TRABAJO / "datos"
     golpes = leer_csv(d / "golpes.csv")
+    umbrales, sha, relleno = opciones_de_entorno()
     series = {}
     for f in dict.fromkeys(g["fuente"] for g in golpes):
         with np.load(d / "series" / f"{f}.npz") as z:
-            series[f] = {k: z[k] for k in ("kp", "sc", "valid")}
-    datos = construir(golpes, series)
+            series[f] = {k: z[k] for k in ("kp", "sc", "valid", "fps")}
+    datos = construir(golpes, series, umbrales, relleno)
     np.savez_compressed(d / "golpes.npz", **datos)
     nombres = nombres_brazo() + NOMBRES_RIVAL
-    (d / "golpes2d.meta.json").write_text(json.dumps(
-        {"features": nombres, "F": len(nombres), "pasos": PASOS, "golpes": len(golpes)}, indent=2) + "\n")
+    meta = {"features": nombres, "F": len(nombres), "pasos": PASOS, "golpes": len(golpes)}
+    if umbrales is not None:     # apagado, el meta es el de antes
+        meta.update(umbrales=umbrales, umbrales_sha256=sha)
+    if relleno:
+        meta["relleno"] = True
+    (d / "golpes2d.meta.json").write_text(json.dumps(meta, indent=2) + "\n")
     M = datos["M"]
     print(f"X {datos['X'].shape}, pasos usables {M.mean():.3f}, golpes sin ningun paso usable "
           f"{int((M.sum(1) == 0).sum())}, rival_ok medio {datos['X'][..., 25].mean():.3f}")

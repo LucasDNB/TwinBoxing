@@ -99,3 +99,66 @@ def test_metricas_reales_de_e7():
     m = ef.metricas_e4(ef.VARIANTES["E7"]["metricas"], ef.VARIANTES["E7"]["referencia"])
     assert m["golpes"] == 1047 and round(m["familia_fuente_no_vista"], 4) == 0.7775
     assert m["referencia"].endswith("2026-10-24-e7-4dhumans.md")
+
+
+# -- T4 del gemelo YOLO26 (docs/specs/2026-10-27-gemelo-yolo26, 01-percepcion.md §6) ------
+
+
+def test_variantes_y26_rutas_propias(trabajo):
+    """E4-y26 y E4a-y26 leen el trabajo de E8 y escriben en ~/boxtwin-gemelo/modelos."""
+    from pathlib import Path
+    import entrenar_final as ef
+    gemelo = Path("~/boxtwin-gemelo").expanduser()
+    for exp, nombre, base in (("E4-y26", "clasificador_geo_y26_v1", "E4"),
+                              ("E4a-y26", "clasificador_geo_y26_v1_sin_rival", "E4a")):
+        v = ef.VARIANTES[exp]
+        assert v["nombre"] == nombre and v["columnas"] == base
+        assert v["salida"] == gemelo / "modelos" / nombre
+        assert v["trabajo"] == gemelo / "e8" / "y26" / "clasificador-geo"
+        assert v["metricas"].name.endswith("-e8-yolo26-E4.json")
+        assert v["seccion"] == ("y26", base)
+
+
+def test_e4_y_e4a_con_las_rutas_de_hoy(trabajo):
+    from pathlib import Path
+    import entrenar_final as ef
+    modelos = Path("~/boxtwin/modelos").expanduser()
+    assert ef.VARIANTES["E4"]["salida"] == modelos / "clasificador_geo_v1"
+    assert ef.VARIANTES["E4a"]["salida"] == modelos / "clasificador_geo_v1_sin_rival"
+    assert ef.VARIANTES["E4"]["metricas"].name == "2026-10-16-clasificador-geo-E4.json"
+    assert ef.VARIANTES["E4a"]["metricas"].name == "2026-10-16-clasificador-geo-E4a.json"
+    for exp in ("E4", "E4a", "E7"):
+        assert "trabajo" not in ef.VARIANTES[exp] and "seccion" not in ef.VARIANTES[exp]
+    m = ef.metricas_e4(ef.VARIANTES["E4"]["metricas"])
+    if m:                                    # el json real esta en el repo
+        assert round(m["familia_fuente_no_vista"], 3) == 0.727
+
+
+def test_metricas_de_una_seccion_del_json_de_e8(tmp_path):
+    import entrenar_final as ef
+    p = tmp_path / "2026-11-01-e8-yolo26-E4.json"
+    total = lambda fam: {"ensamble_total": {"golpes": 1047, "familia": {"exactitud": fam}}}
+    p.write_text(json.dumps({"base": {"E4": total(0.727)},
+                             "y26": {"E4": total(0.741), "E4a": total(0.719)}}))
+    assert ef.metricas_e4(p, seccion=("y26", "E4"))["familia_fuente_no_vista"] == 0.741
+    assert ef.metricas_e4(p, seccion=("y26", "E4a"))["familia_fuente_no_vista"] == 0.719
+
+
+def test_la_variante_y26_usa_las_columnas_de_su_base(trabajo):
+    import entrenar_final as ef
+    out = ef.entrenar_final(_datos(f=20), trabajo / "m", None, semillas=(0,), epocas=1,
+                            metricas={}, exp="E4a-y26", comando="entrenar_final.py --exp E4a-y26")
+    meta = json.loads((out / "meta.json").read_text())
+    assert meta["exp"] == "E4a-y26" and meta["nombre"] == "clasificador_geo_y26_v1_sin_rival"
+    assert meta["metodo"] == "geometrico-v1"           # el producto lo carga como el de A
+    assert meta["comando"] == "entrenar_final.py --exp E4a-y26"   # CG9
+
+
+def test_y26_sin_el_json_de_e8_se_niega(trabajo, monkeypatch, tmp_path):
+    """CG5: un modelo de C sin las metricas de E8 mostraria nada, o las de A. No se arma."""
+    import entrenar_final as ef
+    monkeypatch.setitem(ef.VARIANTES["E4-y26"], "metricas", tmp_path / "no-esta-e8-yolo26-E4.json")
+    llamado = []
+    monkeypatch.setattr(ef.entrenar, "cargar_entrada", lambda *a, **k: llamado.append(a))
+    assert ef.main(["--exp", "E4-y26", "--dispositivo", "cpu", "--salida", str(tmp_path / "m")]) == 2
+    assert not llamado and not (tmp_path / "m").exists()

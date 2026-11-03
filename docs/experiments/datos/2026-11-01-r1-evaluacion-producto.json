@@ -1,0 +1,507 @@
+{
+  "exp": "r1",
+  "P12a-R1": {
+    "veredicto": "no demostrada",
+    "diferencia": -0.12100000000000005,
+    "folds_ganados": 0,
+    "folds": 6,
+    "folds_min": 5,
+    "ganados": [],
+    "desvio_familia_max": null,
+    "base": {
+      "folds": [
+        "sin-01-sparring",
+        "sin-02-sparring",
+        "sin-03-sparring",
+        "sin-04-sparring",
+        "sin-pacquiao_margarito",
+        "sin-sparring-3-rounds"
+      ],
+      "f1_080": 0.5995666666666667,
+      "f1_080_por_fold": {
+        "sin-01-sparring": 0.6623,
+        "sin-02-sparring": 0.5918,
+        "sin-03-sparring": 0.6061,
+        "sin-04-sparring": 0.5517,
+        "sin-pacquiao_margarito": 0.5742,
+        "sin-sparring-3-rounds": 0.6113
+      },
+      "recall_080": 0.4555166666666667,
+      "precision_080": 0.8851666666666667,
+      "curva": {
+        "0.7": 0.6447166666666666,
+        "0.75": 0.6207666666666667,
+        "0.8": 0.5995666666666667,
+        "0.85": 0.5550833333333334,
+        "0.9": 0.44958333333333333
+      },
+      "f1_mejor_umbral": 0.69215,
+      "recall_medidos_mejor_umbral": [
+        0.6771,
+        0.6452,
+        0.6434,
+        0.6333,
+        0.6308,
+        0.6152
+      ],
+      "recall_rellenados_mejor_umbral": [
+        null,
+        null,
+        null,
+        null,
+        0.2,
+        0.1818
+      ],
+      "una_semilla": {
+        "media": 0.67519,
+        "desvio": 0.03033122153821042
+      },
+      "no_comparables": [
+        "sin-Sparring"
+      ]
+    },
+    "nuevo": {
+      "folds": [
+        "sin-01-sparring",
+        "sin-02-sparring",
+        "sin-03-sparring",
+        "sin-04-sparring",
+        "sin-pacquiao_margarito",
+        "sin-sparring-3-rounds"
+      ],
+      "f1_080": 0.47856666666666664,
+      "f1_080_por_fold": {
+        "sin-01-sparring": 0.5075,
+        "sin-02-sparring": 0.4096,
+        "sin-03-sparring": 0.5028,
+        "sin-04-sparring": 0.4348,
+        "sin-pacquiao_margarito": 0.5196,
+        "sin-sparring-3-rounds": 0.4971
+      },
+      "recall_080": 0.3294166666666667,
+      "precision_080": 0.87755,
+      "curva": {
+        "0.7": 0.5322833333333333,
+        "0.75": 0.5105666666666666,
+        "0.8": 0.47856666666666664,
+        "0.85": 0.41085,
+        "0.9": 0.3130833333333333
+      },
+      "f1_mejor_umbral": 0.60545,
+      "recall_medidos_mejor_umbral": [
+        0.6042,
+        0.5,
+        0.5271,
+        0.5833,
+        0.4638,
+        0.5147
+      ],
+      "recall_rellenados_mejor_umbral": [
+        null,
+        null,
+        null,
+        null,
+        0.5714,
+        0.0
+      ],
+      "una_semilla": {
+        "media": 0.5960566666666667,
+        "desvio": 0.03912205201702729
+      },
+      "no_comparables": [
+        "sin-Sparring"
+      ]
+    }
+  },
+  "P13a-R1": {
+    "veredicto": "iguala",
+    "diferencia": -0.024566666666666737,
+    "folds_ganados": 0,
+    "folds": 6,
+    "folds_min": 5,
+    "ganados": [],
+    "desvio_familia_max": null,
+    "base": {
+      "folds": [
+        "sin-01-sparring",
+        "sin-02-sparring",
+        "sin-03-sparring",
+        "sin-04-sparring",
+        "sin-pacquiao_margarito",
+        "sin-sparring-3-rounds"
+      ],
+      "f1_080": 0.5995666666666667,
+      "f1_080_por_fold": {
+        "sin-01-sparring": 0.6623,
+        "sin-02-sparring": 0.5918,
+        "sin-03-sparring": 0.6061,
+        "sin-04-sparring": 0.5517,
+        "sin-pacquiao_margarito": 0.5742,
+        "sin-sparring-3-rounds": 0.6113
+      },
+      "recall_080": 0.4555166666666667,
+      "precision_080": 0.8851666666666667,
+      "curva": {
+        "0.7": 0.6447166666666666,
+        "0.75": 0.6207666666666667,
+        "0.8": 0.5995666666666667,
+        "0.85": 0.5550833333333334,
+        "0.9": 0.44958333333333333
+      },
+      "f1_mejor_umbral": 0.69215,
+      "recall_medidos_mejor_umbral": [
+        0.6771,
+        0.6452,
+        0.6434,
+        0.6333,
+        0.6308,
+        0.6152
+      ],
+      "recall_rellenados_mejor_umbral": [
+        null,
+        null,
+        null,
+        null,
+        0.2,
+        0.1818
+      ],
+      "una_semilla": {
+        "media": 0.67519,
+        "desvio": 0.03033122153821042
+      },
+      "no_comparables": [
+        "sin-Sparring"
+      ]
+    },
+    "nuevo": {
+      "folds": [
+        "sin-01-sparring",
+        "sin-02-sparring",
+        "sin-03-sparring",
+        "sin-04-sparring",
+        "sin-pacquiao_margarito",
+        "sin-sparring-3-rounds"
+      ],
+      "f1_080": 0.575,
+      "f1_080_por_fold": {
+        "sin-01-sparring": 0.6364,
+        "sin-02-sparring": 0.5773,
+        "sin-03-sparring": 0.5876,
+        "sin-04-sparring": 0.5059,
+        "sin-pacquiao_margarito": 0.5498,
+        "sin-sparring-3-rounds": 0.593
+      },
+      "recall_080": 0.43448333333333333,
+      "precision_080": 0.8583333333333334,
+      "curva": {
+        "0.7": 0.6420833333333333,
+        "0.75": 0.6178833333333333,
+        "0.8": 0.575,
+        "0.85": 0.52345,
+        "0.9": 0.4411833333333333
+      },
+      "f1_mejor_umbral": 0.6915833333333333,
+      "recall_medidos_mejor_umbral": [
+        0.6771,
+        0.6774,
+        0.6202,
+        0.5833,
+        0.6449,
+        0.5898
+      ],
+      "recall_rellenados_mejor_umbral": [
+        null,
+        null,
+        null,
+        null,
+        0.5714,
+        0.2857
+      ],
+      "una_semilla": {
+        "media": 0.68144,
+        "desvio": 0.03432894224793518
+      },
+      "no_comparables": [
+        "sin-Sparring"
+      ]
+    }
+  },
+  "P14a-R1": {
+    "veredicto": "no demostrada",
+    "diferencia": 0.01915,
+    "folds_ganados": 5,
+    "folds": 6,
+    "folds_min": 5,
+    "ganados": [
+      "sin-01-sparring",
+      "sin-02-sparring",
+      "sin-03-sparring",
+      "sin-04-sparring",
+      "sin-pacquiao_margarito"
+    ],
+    "desvio_familia_max": null,
+    "base": {
+      "folds": [
+        "sin-01-sparring",
+        "sin-02-sparring",
+        "sin-03-sparring",
+        "sin-04-sparring",
+        "sin-pacquiao_margarito",
+        "sin-sparring-3-rounds"
+      ],
+      "f1_080": 0.5995666666666667,
+      "f1_080_por_fold": {
+        "sin-01-sparring": 0.6623,
+        "sin-02-sparring": 0.5918,
+        "sin-03-sparring": 0.6061,
+        "sin-04-sparring": 0.5517,
+        "sin-pacquiao_margarito": 0.5742,
+        "sin-sparring-3-rounds": 0.6113
+      },
+      "recall_080": 0.4555166666666667,
+      "precision_080": 0.8851666666666667,
+      "curva": {
+        "0.7": 0.6447166666666666,
+        "0.75": 0.6207666666666667,
+        "0.8": 0.5995666666666667,
+        "0.85": 0.5550833333333334,
+        "0.9": 0.44958333333333333
+      },
+      "f1_mejor_umbral": 0.69215,
+      "recall_medidos_mejor_umbral": [
+        0.6771,
+        0.6452,
+        0.6434,
+        0.6333,
+        0.6308,
+        0.6152
+      ],
+      "recall_rellenados_mejor_umbral": [
+        null,
+        null,
+        null,
+        null,
+        0.2,
+        0.1818
+      ],
+      "una_semilla": {
+        "media": 0.67519,
+        "desvio": 0.03033122153821042
+      },
+      "no_comparables": [
+        "sin-Sparring"
+      ]
+    },
+    "nuevo": {
+      "folds": [
+        "sin-01-sparring",
+        "sin-02-sparring",
+        "sin-03-sparring",
+        "sin-04-sparring",
+        "sin-pacquiao_margarito",
+        "sin-sparring-3-rounds"
+      ],
+      "f1_080": 0.6187166666666667,
+      "f1_080_por_fold": {
+        "sin-01-sparring": 0.6625,
+        "sin-02-sparring": 0.6,
+        "sin-03-sparring": 0.6825,
+        "sin-04-sparring": 0.5856,
+        "sin-pacquiao_margarito": 0.5782,
+        "sin-sparring-3-rounds": 0.6035
+      },
+      "recall_080": 0.48485,
+      "precision_080": 0.8656666666666667,
+      "curva": {
+        "0.7": 0.6812833333333334,
+        "0.75": 0.6621,
+        "0.8": 0.6187166666666667,
+        "0.85": 0.5645166666666667,
+        "0.9": 0.4738833333333333
+      },
+      "f1_mejor_umbral": 0.7191000000000001,
+      "recall_medidos_mejor_umbral": [
+        0.6354,
+        0.629,
+        0.7364,
+        0.6833,
+        0.7615,
+        0.6558
+      ],
+      "recall_rellenados_mejor_umbral": [
+        null,
+        null,
+        null,
+        null,
+        0.2667,
+        0.1818
+      ],
+      "una_semilla": {
+        "media": 0.70203,
+        "desvio": 0.03965040461592916
+      },
+      "no_comparables": [
+        "sin-Sparring"
+      ]
+    }
+  },
+  "P14c-R1": {
+    "direccion_declarada": "positiva",
+    "f1_080": 0.04081666666666672
+  },
+  "P16a-R1": {
+    "veredicto": "no demostrada",
+    "diferencia": 0.0010333333333333306,
+    "folds_ganados": 3,
+    "folds": 6,
+    "folds_min": 5,
+    "ganados": [
+      "sin-02-sparring",
+      "sin-03-sparring",
+      "sin-pacquiao_margarito"
+    ],
+    "desvio_familia_max": null,
+    "base": {
+      "folds": [
+        "sin-01-sparring",
+        "sin-02-sparring",
+        "sin-03-sparring",
+        "sin-04-sparring",
+        "sin-pacquiao_margarito",
+        "sin-sparring-3-rounds"
+      ],
+      "f1_080": 0.5995666666666667,
+      "f1_080_por_fold": {
+        "sin-01-sparring": 0.6623,
+        "sin-02-sparring": 0.5918,
+        "sin-03-sparring": 0.6061,
+        "sin-04-sparring": 0.5517,
+        "sin-pacquiao_margarito": 0.5742,
+        "sin-sparring-3-rounds": 0.6113
+      },
+      "recall_080": 0.4555166666666667,
+      "precision_080": 0.8851666666666667,
+      "curva": {
+        "0.7": 0.6447166666666666,
+        "0.75": 0.6207666666666667,
+        "0.8": 0.5995666666666667,
+        "0.85": 0.5550833333333334,
+        "0.9": 0.44958333333333333
+      },
+      "f1_mejor_umbral": 0.69215,
+      "recall_medidos_mejor_umbral": [
+        0.6771,
+        0.6452,
+        0.6434,
+        0.6333,
+        0.6308,
+        0.6152
+      ],
+      "recall_rellenados_mejor_umbral": [
+        null,
+        null,
+        null,
+        null,
+        0.2,
+        0.1818
+      ],
+      "una_semilla": {
+        "media": 0.67519,
+        "desvio": 0.03033122153821042
+      },
+      "no_comparables": [
+        "sin-Sparring"
+      ]
+    },
+    "nuevo": {
+      "folds": [
+        "sin-01-sparring",
+        "sin-02-sparring",
+        "sin-03-sparring",
+        "sin-04-sparring",
+        "sin-pacquiao_margarito",
+        "sin-sparring-3-rounds"
+      ],
+      "f1_080": 0.6006,
+      "f1_080_por_fold": {
+        "sin-01-sparring": 0.6234,
+        "sin-02-sparring": 0.62,
+        "sin-03-sparring": 0.6131,
+        "sin-04-sparring": 0.5402,
+        "sin-pacquiao_margarito": 0.6182,
+        "sin-sparring-3-rounds": 0.5887
+      },
+      "recall_080": 0.46173333333333333,
+      "precision_080": 0.8656833333333334,
+      "curva": {
+        "0.7": 0.6524666666666666,
+        "0.75": 0.6204333333333334,
+        "0.8": 0.6006,
+        "0.85": 0.5445333333333333,
+        "0.9": 0.4686666666666667
+      },
+      "f1_mejor_umbral": 0.6978,
+      "recall_medidos_mejor_umbral": [
+        0.6875,
+        0.6774,
+        0.7054,
+        0.65,
+        0.6385,
+        0.6152
+      ],
+      "recall_rellenados_mejor_umbral": [
+        null,
+        null,
+        null,
+        null,
+        0.3333,
+        0.1818
+      ],
+      "una_semilla": {
+        "media": 0.6815966666666666,
+        "desvio": 0.028845802698717424
+      },
+      "no_comparables": [
+        "sin-Sparring"
+      ]
+    }
+  },
+  "K-r1b": {
+    "base": {
+      "f1_080": 0.6226666666666666,
+      "publicado": 0.6227,
+      "diferencia": -3.3333333333440684e-05,
+      "pasa": true
+    },
+    "y26": {
+      "f1_080": 0.43333333333333335,
+      "publicado": 0.4333,
+      "diferencia": 3.333333333332966e-05,
+      "pasa": true
+    },
+    "y26cal": {
+      "f1_080": 0.6255,
+      "publicado": 0.6255,
+      "diferencia": 0.0,
+      "pasa": true
+    },
+    "v8r": {
+      "f1_080": 0.6275666666666666,
+      "publicado": 0.6276,
+      "diferencia": -3.3333333333440684e-05,
+      "pasa": true
+    },
+    "y26calr": {
+      "f1_080": 0.6438166666666667,
+      "publicado": 0.6438,
+      "diferencia": 1.666666666666483e-05,
+      "pasa": true
+    },
+    "v8g": {
+      "f1_080": 0.42893333333333333,
+      "publicado": 0.4289,
+      "diferencia": 3.333333333332966e-05,
+      "pasa": true
+    }
+  }
+}

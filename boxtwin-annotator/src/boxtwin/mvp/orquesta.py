@@ -29,6 +29,7 @@ USO
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 import time
 from pathlib import Path
 
@@ -48,7 +49,15 @@ from boxtwin.mvp.candidatos import elegir, recortar
 from boxtwin.mvp.fightcard import construir
 from boxtwin.mvp.guardia import ConfigGuardia, medir
 from boxtwin.mvp.sesion import Progreso, Sesion
-from boxtwin.mvp.tramos import aplicar_manuales, listar_tramos
+from boxtwin.mvp.revision import (
+    a_propuesta,
+    aplicar_correcciones,
+    cola_de_revision,
+    correcciones_de_sesion,
+    degradar_conflictos,
+    extension_de,
+    tramos_de_propuesta,
+)
 from boxtwin.core.types import TrackRole
 
 __all__ = [
@@ -249,6 +258,9 @@ def completar(
     device: str | None = None,
     progreso=None,
     manual: bool = False,
+    cortar_mixtos: bool = False,
+    estricta: bool = False,
+    apariencia: bool = False,
 ) -> dict:
     """
     Identidad por color desde las semillas, detector, guardia y Fight-Card.
@@ -259,6 +271,14 @@ def completar(
     Con `manual` aplica ademas las asignaciones de tramos que hizo una persona en la web
     (`identidad.asignaciones_manuales` de sesion.json), encima de la asignacion por color
     (B3 de la web entrenador). No repite la pose: esta etapa nunca la corre, lee la cache.
+
+    Identidad estable (docs/specs/2026-11-02-identidad-estable): las correcciones van por
+    rango (`identidad.correcciones`, ademas de las viejas por track), `cortar_mixtos` parte los
+    tracks mixtos con el corte de E11 antes de la particion, y `estricta` les saca el rol a los
+    tramos automaticos en conflicto (dos del mismo rol en el mismo cuadro). Los tramos para
+    revisar incluyen ahora los asignados sospechosos. Con las dos banderas apagadas y sin
+    correcciones por rango, la asignacion es la de antes. `apariencia` (IE7) no cambia la
+    asignacion: suma a la revision los tramos que guante, remera y pantalon contradicen.
     """
     import torch
 
@@ -294,9 +314,15 @@ def completar(
         prop = proponer_individual(ev, cfg_identidad, doc.video.total_frames, doc.video.fps,
                                    semilla=int(semilla_a))
     else:
+        if cortar_mixtos:
+            cfg_identidad = replace(cfg_identidad, cortar_mixtos=True)
+        # E11: si una semilla se parte, la semilla es el pedazo que vio la persona.
+        cuadros_semilla = {int(c["track"]): int(c["cuadro"]) for c in (ses.candidatos or [])
+                           if c.get("cuadro") is not None}
         prop = proponer(
             ev, cfg_identidad, doc.video.total_frames, doc.video.fps,
             semillas=(int(semilla_a), int(semilla_b)),
+            cache=cache, cuadros_semilla=cuadros_semilla,
         )
     if prop.diagnostico.get("semillas_en_conflicto"):
         ses.estado = "espera_siembra"
@@ -306,27 +332,38 @@ def completar(
             "las dos semillas caen del mismo lado de la coexistencia: "
             "o son la misma persona, o hay una coexistencia espuria. Elegi otro par"
         )
-    # -- tramos: lo que quedo sin asignar y lo que asigno una persona (B3) -----
-    auto = sum(1 for r in prop.roles.values() if r in (TrackRole.A, TrackRole.B))
-    sin_asignar_auto = list(prop.sin_asignar)
-    manuales: dict[int, str] = {}
+    # -- tramos, correcciones y revision (B3; identidad estable 02-11) ---------
+    fps = doc.video.fps
+    auto_tramos = tramos_de_propuesta(prop, ev, cfg_identidad)
+    auto = sum(1 for t in auto_tramos if t.rol in ("A", "B"))
+    sin_asignar_auto = [t for t in auto_tramos if t.rol == ""]
+    correcciones = []
     if manual:
-        manuales = {int(k): v for k, v in
-                    (ses.identidad.get("asignaciones_manuales") or {}).items()}
-        if individual and any(r == "B" for r in manuales.values()):
+        correcciones = correcciones_de_sesion(ses.identidad, extension_de(auto_tramos), fps)
+        if individual and any(c.rol == "B" for c in correcciones):
             # La API ya lo rechaza (B8b); esto cuida que un sesion.json editado a mano no
             # meta una segunda persona en una sesion de una.
             raise ValueError("en una sesion de una sola persona un tramo es A o ninguno, no B")
-    asignados_manual = aplicar_manuales(prop, manuales) if manuales else 0
+    asignados_manual = sum(1 for c in correcciones if c.rol in ("A", "B"))
+    corregidos = aplicar_correcciones(auto_tramos, correcciones)
+    final, degradados = (degradar_conflictos(corregidos, ev, cfg_identidad) if estricta
+                         else (corregidos, 0))
+    prop_final = a_propuesta(final, prop)
 
-    AsignarIdentidadAuto(prop, annotator="boxtwin-completar", forzar=True).do(doc)
+    AsignarIdentidadAuto(prop_final, annotator="boxtwin-completar", forzar=True).do(doc)
     save_doc(doc, paths.annot)
     ses.anotar_etapa("identidad", time.perf_counter() - t0,
-                     asignados=prop.diagnostico.get("asignados_A", 0)
-                     + prop.diagnostico.get("asignados_B", 0),
-                     manual=bool(manual), asignados_manual=asignados_manual)
-    tramos = listar_tramos(ev, prop, cfg_identidad, doc.video.fps,
-                           sin_asignar=sin_asignar_auto, manuales=manuales)
+                     asignados=sum(1 for t in final if t.rol in ("A", "B")),
+                     manual=bool(manual), asignados_manual=asignados_manual,
+                     cortar_mixtos=bool(cortar_mixtos), estricta=bool(estricta),
+                     tracks_partidos=prop.diagnostico.get("tracks_partidos", 0),
+                     degradados=degradados)
+    modelo_apariencia = None
+    if apariencia and not individual:
+        from boxtwin.core.apariencia import ajustar
+        modelo_apariencia = ajustar(ev, (int(semilla_a), int(semilla_b)))
+    tramos = cola_de_revision(auto_tramos, corregidos, ev, prop.perfiles, cfg_identidad, fps,
+                              todos=True, estricta=estricta, apariencia=modelo_apariencia)
     _recortar_tramos(paths.video, ses, directorio, cache, tramos)
     ses.identidad["tramos"] = tramos
 
@@ -354,6 +391,8 @@ def completar(
         "checkpoint": Path(detector).name,
         "semillas_del_ensamble": list(getattr(ens, "semillas", [])),
         "umbral": umbral,
+        **_metricas_medidas(Path(detector)),
+        "pose": _info_pose(paths, cache),
     }
     (directorio / SEGMENTOS).write_text(
         json.dumps(
@@ -371,7 +410,16 @@ def completar(
 
     cobertura["separacion_de_perfiles"] = prop.diagnostico.get("separacion_de_perfiles")
     cobertura["piso_de_separacion"] = cfg_identidad.separacion_minima
-    cobertura["tracks_sin_asignar"] = len(prop.sin_asignar)
+    cobertura["tracks_sin_asignar"] = len(sin_asignar_auto)
+    # Identidad estable: lo dudoso que nadie miro todavia. La pantalla no da por buena una
+    # identidad con preguntas abiertas.
+    cobertura["revision_pendiente"] = sum(1 for t in tramos if t["revision_pendiente"]
+                                          and t["tipo"] == "sospechoso")
+    cobertura["tramos_a_revisar"] = sum(1 for t in tramos if t["revision_pendiente"])
+    cobertura["corte_de_mixtos"] = bool(cortar_mixtos)
+    cobertura["identidad_estricta"] = bool(estricta)
+    cobertura["identidad_apariencia"] = (modelo_apariencia.a_dict()
+                                         if modelo_apariencia is not None else None)
     # 0.2: cuantos tramos eran de peleador, cuantos asigno el sistema y cuantos una persona.
     cobertura["tramos_total"] = auto + len(sin_asignar_auto)
     cobertura["tramos_asignados_auto"] = auto
@@ -464,20 +512,55 @@ def _recortar_tramos(video: Path, ses: Sesion, directorio: Path, cache, tramos: 
     Si el video no se puede abrir el tramo queda sin recorte y se puede asignar igual desde
     el reproductor: un recorte que falta no puede frenar la revision.
     """
+    # Los asignados sin sospecha (tipo "asignado") no se recortan: pueden ser cientos, cada
+    # recorte es un salto en el video (lo que costo la mitad del tiempo de C5) y la web los
+    # muestra con el reproductor.
+    tramos = [t for t in tramos if t.get("tipo", "sin_asignar") != "asignado"]
     if not tramos:
         return
     from boxtwin.mvp.candidatos import Candidato
 
     cands = [Candidato(track=t["track"], cuadro=t["cuadro"], alto=0.0, fraccion_guante=0.0,
                        cuadros_con_color=0) for t in tramos]
+    # Uno por clave: un track partido tiene un recorte por pedazo (identidad estable).
+    nombres = {k: f"track_{t.get('clave', t['track'])}" for k, t in enumerate(tramos)}
     try:
-        recortar(video, cache, cands, directorio / TRAMOS)
+        recortar(video, cache, cands, directorio / TRAMOS, nombres=nombres)
     except Exception as e:  # noqa: BLE001 - cv2 y un video roto fallan de muchas formas
         ses.avisos.append(f"no se pudieron recortar los tramos para revisar: {e}")
         return
-    por_track = {c.track: c.recorte for c in cands}
-    for t in tramos:
-        t["recorte"] = por_track.get(t["track"])
+    for t, c in zip(tramos, cands):
+        t["recorte"] = c.recorte
+
+
+# Lo que se copia del archivo de metricas del detector. Nada mas: el archivo lo escribe un
+# script de E8 y la Fight-Card no tiene por que llevar lo que se le haya agregado.
+CAMPOS_METRICAS = ("precision_medida", "recall_medido", "medido_sobre")
+
+
+def _metricas_medidas(detector: Path) -> dict:
+    """
+    Precision y recall medidos para ESTE checkpoint, de `<checkpoint>.metricas.json` al lado.
+
+    Sin el archivo devuelve {} y la Fight-Card queda con los numeros de A (0,885 y 0,484). Con
+    el, el gemelo C muestra los que midio E8 para su detector y no los de otro
+    (docs/specs/2026-10-27-gemelo-yolo26, T3 y CG5).
+    """
+    ruta = detector.with_suffix(".metricas.json")
+    if not ruta.is_file():
+        return {}
+    crudo = json.loads(ruta.read_text())
+    return {k: crudo[k] for k in CAMPOS_METRICAS if k in crudo}
+
+
+def _info_pose(paths: ProjectPaths, cache) -> dict:
+    """El checkpoint de pose que escribio el cache de la sesion, con su sha256, o nulos."""
+    meta = cache.meta
+    if paths.meta.is_file():
+        meta = json.loads(paths.meta.read_text())
+    inf = (meta or {}).get("inference") or {}
+    ruta = inf.get("model_path")
+    return {"modelo": Path(ruta).name if ruta else None, "sha256": inf.get("model_sha256")}
 
 
 def _paths_de(ses: Sesion, directorio: Path) -> ProjectPaths:

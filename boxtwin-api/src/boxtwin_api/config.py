@@ -37,6 +37,14 @@ def _lista(nombre: str, defecto: str) -> list[str]:
     return [x for x in os.environ.get(nombre, defecto).split() if x]
 
 
+def _bandera(nombre: str, defecto: bool = False) -> bool:
+    """Encendida con 1, si, true u on. Sin la variable vale `defecto`; cualquier otro valor apaga."""
+    valor = os.environ.get(nombre)
+    if valor is None or not valor.strip():
+        return defecto
+    return valor.strip().lower() in ("1", "si", "true", "on")
+
+
 ESTADOS_CRITERIO = ("pendiente", "aprobado", "rechazado")
 
 
@@ -160,6 +168,17 @@ class Config:
         default_factory=lambda: _ruta("BOXTWIN_MODELO_CLASIFICADOR_GEO_INDIVIDUAL",
                                       "~/boxtwin/modelos/clasificador_geo_v1_sin_rival")
     )
+    # Identidad estable (docs/specs/2026-11-02-identidad-estable): partir los tracks mixtos
+    # con el corte de E11 y sacarle el rol a los tramos automaticos en conflicto. Apagadas por
+    # defecto; las enciende Lucas despues de leer la medicion de la spec (§6).
+    corte_mixtos: bool = field(default_factory=lambda: _bandera("BOXTWIN_CORTE_MIXTOS"))
+    identidad_estricta: bool = field(
+        default_factory=lambda: _bandera("BOXTWIN_IDENTIDAD_ESTRICTA"))
+    # IE7 (02-ie7-apariencia.md): verificador de guante, remera y pantalon en la revision.
+    # Encendido por defecto desde el 3-11 por decision de Lucas, no de la medicion (la regla de
+    # IE7 eligio base): es la red si la persona se equivoca en la primera ronda. Se apaga con 0.
+    identidad_apariencia: bool = field(
+        default_factory=lambda: _bandera("BOXTWIN_IDENTIDAD_APARIENCIA", defecto=True))
     umbral_detector: float = field(
         default_factory=lambda: float(os.environ.get("BOXTWIN_UMBRAL", "0.80"))
     )

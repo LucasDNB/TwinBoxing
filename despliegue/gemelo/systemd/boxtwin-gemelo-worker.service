@@ -1,0 +1,33 @@
+# BoxTwin gemelo C con YOLO26l-pose (docs/specs/2026-10-27-gemelo-yolo26/03-instancia-c.md).
+#
+# Copia de la unidad de B con nombre, descripcion, directorio, entorno y puerto distintos. No se
+# habilita al arrancar: se enciende para usarla y se apaga despues. Restart=on-failure y no
+# always: si alguien la para a mano, queda parada. Solo 127.0.0.1: ni Funnel ni tailscale serve.
+#
+# Instalacion (L2, Lucas), desde ~/boxtwin-gemelo/systemd/:
+#   sudo cp boxtwin-gemelo-*.service /etc/systemd/system/ && sudo systemctl daemon-reload
+#   (sin enable)
+
+[Unit]
+Description=BoxTwin gemelo C (YOLO26l-pose, local) - worker
+Documentation=https://github.com/LucasDNB/TwinBoxing
+After=network-online.target boxtwin-gemelo-api.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lucasb
+Group=lucasb
+WorkingDirectory=/home/lucasb/Proyectos/TwinBoxing-gemelo
+EnvironmentFile=/etc/boxtwin-gemelo.env
+ExecStart=/home/lucasb/miniforge3/envs/twinboxing_env/bin/python -m boxtwin_api.worker
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=3600
+KillSignal=SIGTERM
+NoNewPrivileges=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

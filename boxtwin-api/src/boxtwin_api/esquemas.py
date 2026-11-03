@@ -120,6 +120,16 @@ class AsignarBoxeadores(BaseModel):
 class AsignacionTramo(BaseModel):
     track: int
     rol: Literal["A", "B", "ninguno"]
+    # Identidad estable (02-11): el rango en segundos. Sin los dos, el track entero. Partir un
+    # track donde cambia de persona son dos asignaciones con el mismo track y rangos contiguos.
+    desde: float | None = Field(default=None, ge=0)
+    hasta: float | None = Field(default=None, ge=0)
+
+    @model_validator(mode="after")
+    def _rango(self):
+        if self.desde is not None and self.hasta is not None and self.hasta <= self.desde:
+            raise ValueError("el rango esta vacio: 'hasta' tiene que ser mayor que 'desde'")
+        return self
 
 
 class EntradaTramos(BaseModel):

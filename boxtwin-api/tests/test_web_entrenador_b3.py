@@ -49,8 +49,11 @@ def test_lista_los_tramos_con_cobertura_y_motivo(cliente, lista_con_tramos):
     assert d["cobertura"] == {"A": 0.62, "B": 0.58, "sin_asignar": 0.18}
     assert d["separacion_color"] == 1.375
     t26, t29 = d["tramos"]
-    assert t26 == {"track": 26, "t_desde": 192.0, "t_hasta": 220.4, "motivo": "color_insuficiente",
-                   "recorte_url": f"/jobs/{lista_con_tramos}/tramos/26/recorte", "asignado": None}
+    # Una sesion procesada antes del 2-11 no trae clave, tipo ni rol actual: se leen igual.
+    assert t26 == {"clave": "26", "track": 26, "t_desde": 192.0, "t_hasta": 220.4,
+                   "tipo": "sin_asignar", "motivo": "color_insuficiente", "rol_actual": None,
+                   "recorte_url": f"/jobs/{lista_con_tramos}/tramos/26/recorte", "asignado": None,
+                   "partes": [], "revision_pendiente": True}
     assert t29["recorte_url"] is None
 
 

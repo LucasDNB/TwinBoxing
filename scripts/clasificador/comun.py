@@ -27,6 +27,10 @@ from pathlib import Path
 # Raiz del repo: scripts/clasificador/comun.py -> ../../
 REPO = Path(__file__).resolve().parents[2]
 
+# Raiz de los proyectos de anotacion. Por defecto el repo; el gemelo YOLO26 la cambia para
+# leer las anotaciones del puente de identidad (docs/specs/2026-10-27-gemelo-yolo26).
+RAIZ_FUENTES = Path(os.environ.get("BOXTWIN_RAIZ_FUENTES", str(REPO))).expanduser()
+
 # Directorio de trabajo fuera del repo, como las mediciones de C8. Nada pesado entra a git.
 TRABAJO = Path(os.environ.get("BOXTWIN_CLASIFICADOR", "~/boxtwin/clasificador-2026-10")).expanduser()
 
@@ -68,7 +72,7 @@ MIN_SCORE = 0.3
 
 
 def ruta_annot(fuente: str) -> Path:
-    return REPO / FUENTES[fuente] / "annotations" / f"{fuente}.annot.json"
+    return RAIZ_FUENTES / FUENTES[fuente] / "annotations" / f"{fuente}.annot.json"
 
 
 # ---------------------------------------------------------------------------

@@ -178,3 +178,64 @@ def test_el_barrido_propaga_la_mascara_de_interpolacion():
     assert fila["golpes_medidos"] == 1 and fila["golpes_rellenados"] == 1
     assert fila["recall_medidos"] == 1.0, "el golpe con pose medida se encuentra"
     assert fila["recall_rellenados"] == 0.0
+
+
+# -- R1-T2: la evaluacion con la mascara de pose del producto --------------------------------
+
+
+def test_barrer_con_pose_no_abre_segmentos_donde_no_hay_pose():
+    import numpy as np
+    from boxtwin_detector.evaluacion import barrer
+    T = 60
+    labels = np.zeros((2, T), np.int8)
+    labels[0, 10] = 1
+    labels[0, 11:16] = 2
+    usable = np.ones((2, T), bool)
+    p = np.zeros((2, T))
+    p[0, 10:16] = 0.9          # el golpe anotado
+    p[1, 30:40] = 0.9          # una marca donde el carril 1 no tiene pose
+    pose = np.ones((2, T), bool)
+    pose[1, 25:45] = False
+    sin = barrer(list(p), labels, usable, [0.5], cobertura=(0, T - 1), como_score=True)[0]
+    con = barrer(list(p), labels, usable, [0.5], cobertura=(0, T - 1), como_score=True, pose=pose)[0]
+    assert sin["predichos"] == 2 and con["predichos"] == 1
+    assert con["emparejados"] == sin["emparejados"] == 1
+    assert con["golpes"] == sin["golpes"]
+
+
+def test_barrer_con_pose_toda_verdadera_da_lo_mismo():
+    import numpy as np
+    from boxtwin_detector.evaluacion import barrer
+    rng = np.random.default_rng(0)
+    T = 200
+    labels = np.zeros((4, T), np.int8)
+    for c in range(4):
+        labels[c, 20 + 30 * c] = 1
+        labels[c, 21 + 30 * c: 27 + 30 * c] = 2
+    p = rng.uniform(0, 1, (4, T))
+    u = [0.3, 0.6, 0.9]
+    a = barrer(list(p), labels, np.ones((4, T), bool), u, cobertura=(5, 190), como_score=True)
+    b = barrer(list(p), labels, np.ones((4, T), bool), u, cobertura=(5, 190), como_score=True,
+               pose=np.ones((4, T), bool))
+    assert a == b
+
+
+def test_la_pose_solo_saca_cuadros_marcados():
+    # K-r1c: los cuadros dentro de segmentos con la mascara estan contenidos en los de sin ella.
+    # Los predichos pueden subir, porque la mascara puede partir un segmento largo en dos.
+    import numpy as np
+    from boxtwin_detector.decodificacion import decodificar_score
+    rng = np.random.default_rng(1)
+    T = 300
+    for k in range(200):
+        p = rng.uniform(0, 1, T)
+        pose = rng.uniform(0, 1, T) > 0.3
+        for u in (0.2, 0.5, 0.8):
+            def cuadros(segs):
+                m = np.zeros(T, bool)
+                for x in segs:
+                    m[x.inicio:x.fin + 1] = True
+                return m
+            sin = cuadros(decodificar_score(p, u))
+            con = cuadros(decodificar_score(p, u, valido=pose))
+            assert not (con & ~sin).any()

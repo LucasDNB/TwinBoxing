@@ -79,3 +79,77 @@ describe("03 · Identificación, fase 2", () => {
     expect(window.location.pathname).toBe("/sesion/");
   });
 });
+
+/*
+ * Identidad estable (docs/specs/2026-11-02-identidad-estable, IE4): los asignados que se
+ * sospecha que estan mal tambien se revisan, y un tramo se puede partir donde cambia de persona.
+ */
+describe("03 · Identificación, revisión de lo asignado", () => {
+  function conSospechoso() {
+    const fc = structuredClone(FIGHTCARDS["0.2"]) as any;
+    fc.identidad.sin_asignar = 0;
+    fc.identidad.revision_pendiente = 1;
+    mundo.fightcard = fc;
+    mundo.tramos = {
+      cobertura: { A: 0.9, B: 0.9, sin_asignar: 0 },
+      separacion_color: 1.375,
+      revision_pendiente: 1,
+      tramos: [
+        { clave: "57-2700", track: 57, t_desde: 90, t_hasta: 110, tipo: "sospechoso", motivo: "posible_mezcla",
+          rol_actual: "A", recorte_url: null, asignado: null, partes: [], revision_pendiente: true },
+      ],
+    };
+  }
+
+  it("con un sospechoso pendiente no saltea la revision aunque no quede nada sin asignar", async () => {
+    conSospechoso();
+    montar(<PantallaIdentificar />);
+    expect(await screen.findByText("Hay 1 tramo asignado que puede estar mal. Revisalo antes de mirar los números.")).toBeInTheDocument();
+    expect(await screen.findByText("puede cambiar de persona en el medio")).toBeInTheDocument();
+    expect(screen.getByText("Hoy dice: A")).toBeInTheDocument();
+    expect(window.location.pathname).toBe("/sesion/identificar/");
+  });
+
+  it("partir el tramo en el instante del video manda dos rangos", async () => {
+    conSospechoso();
+    montar(<PantallaIdentificar />);
+    await userEvent.click(await screen.findByRole("button", { name: "01:30 a 01:50" }));
+    const video = await screen.findByLabelText("Video desde 01:30");
+    Object.defineProperty(video, "currentTime", { value: 101.25, configurable: true });
+    await userEvent.click(screen.getByRole("button", { name: "Acá cambia de persona" }));
+    // la hoja del video se cierra al partir: se espera a que la lista vuelva a estar accesible
+    const antes = await screen.findByLabelText("Quién es antes de 01:41");
+    const despues = screen.getByLabelText("Quién es desde 01:41");
+    await userEvent.click(await within(antes).findByRole("radio", { name: "A" }));
+    await userEvent.click(within(despues).getByRole("radio", { name: "B" }));
+    await userEvent.click(screen.getByRole("button", { name: "Aplicar (1)" }));
+    await waitFor(() => {
+      const p = mundo.pedidos.find((x) => x.metodo === "PUT" && x.ruta.endsWith("/tramos"));
+      expect(p?.cuerpo).toEqual({ asignaciones: [
+        { track: 57, rol: "A", desde: 90, hasta: 101.25 },
+        { track: 57, rol: "B", desde: 101.25, hasta: 110 },
+      ] });
+    });
+  });
+
+  it("un pedazo de track decidido entero va con su rango", async () => {
+    conSospechoso();
+    montar(<PantallaIdentificar />);
+    const lista = await screen.findByRole("heading", { name: "Revisar tramos dudosos" });
+    const items = within(lista.closest("section")!).getAllByRole("listitem");
+    await userEvent.click(within(items[0]).getByRole("radio", { name: "B" }));
+    await userEvent.click(screen.getByRole("button", { name: "Aplicar (1)" }));
+    await waitFor(() => {
+      const p = mundo.pedidos.find((x) => x.metodo === "PUT" && x.ruta.endsWith("/tramos"));
+      expect(p?.cuerpo).toEqual({ asignaciones: [{ track: 57, rol: "B", desde: 90, hasta: 110 }] });
+    });
+  });
+
+  it("'Ver también lo asignado' pide la lista completa", async () => {
+    conSospechoso();
+    montar(<PantallaIdentificar />);
+    await userEvent.click(await screen.findByRole("checkbox", { name: "Ver también lo asignado" }));
+    await waitFor(() => expect(mundo.pedidos.some((x) => x.ruta.includes("/tramos?todos=1"))).toBe(true));
+  });
+});
+
