@@ -26,7 +26,7 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
 | Z14 Planes | Hecha | día 4 | `test_z14_planes.py` (6): 403 `plan_requerido` en las tres rutas premium, variantes ocultas en free, cupo por plan, cajón ignorado en free; 402 en `test_z5_circuito.py`. `/ajustes` con premium simulado y publicidad en inicio y resultado |
 | Z15 PWA | Hecha (falta Android) | día 4 | `pwa.spec.ts`: manifest con `standalone`, íconos 192 y 512 servidos, service worker que toma la página y no cachea `/api/`. **Falta:** instalarla en un Android real por el túnel (desvío D14) |
 | Z16 Accesibilidad y e2e | Hecha | día 4 | `accesibilidad.spec.ts`: axe WCAG 2.1 AA sin violaciones en las 12 pantallas, sin scroll horizontal a 375 px, y los cinco textos obligatorios (CZ7), "golpes lanzados" ausente. 25 e2e en verde en Pixel 7 (Chromium) e iPhone 13 (WebKit): `CI_E2E=1 bash boxtwinz/ci.sh` |
-| Z17 Despliegue | Preparada, sin ejecutar | día 4 | `boxtwinz/despliegue/`: dos servicios systemd, `/etc/boxtwinz.env` de ejemplo, Funnel en el puerto 10000, `verificar_a.sh` (CZ2) con la línea de base de A tomada el 3-11 y README con vuelta atrás. **Falta:** correrlo (pide sudo) y abrirlo desde un celular |
+| Z17 Despliegue | Hecha (falta celular) | d8d186f | Desplegado el 3-11 en https://desarrollo-lucas.tail52f6aa.ts.net:10000: `boxtwinz-api` y `boxtwinz-worker` activos, `/api/salud` con commit `d8d186f` y web y manifest 200 por el túnel. **Falta:** ingresar y subir desde un celular |
 | Z18 Datos de demo | Hecha | día 4 | `python -m boxtwinz_api.demo sembrar|reiniciar`: cuenta free y premium, amigos, 8 sesiones cada una (golpes sintéticos, rotulados en el nombre del video), cajón premium. `test_z18_demo.py` (2) y `demo.spec.ts`: el recorrido completo tarda 1,5 a 2,1 s automatizado, muy por debajo de los 5 minutos |
 
 ## Desvíos (manda el repo)
@@ -86,6 +86,13 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
   por el proxy de A.
 - **D16 Un PR por día, apilados.** `boxtwinz` (día 1) → `boxtwinz-dia2` → `boxtwinz-dia3` →
   `boxtwinz-dia4`, cada PR contra la rama del día anterior.
+- **D17 Se despliega desde un worktree propio.** `~/Proyectos/TwinBoxing-boxtwinz`, detached en
+  `d8d186f`, no desde `~/Proyectos/TwinBoxing`, que es el checkout de A y tiene cambios locales.
+  Los servicios instalados llevan esa ruta; los del repo y el README dicen la del checkout de A.
+  Base, configuración y clave de demo en `~/boxtwinz-datos/`.
+- **D18 Los días 2 a 4 no están en `main`.** Los PR #59 a #62 se mergearon en orden sobre ramas
+  apiladas: `main` quedó con el día 1, `boxtwinz` con el 2, `boxtwinz-dia2` con el 3 y
+  `boxtwinz-dia3` con el 4. Lo completo es `boxtwinz-dia4` (`d8d186f`).
 - **D11 Correcciones no cambian los números.** Se registran para reentrenar; las métricas
   siguen saliendo del detector, para no mezclar dos fuentes en un mismo número.
 
@@ -112,6 +119,10 @@ encendida). GPU libre al empezar y A sin trabajos. Dos clips de 90 s recortados 
 
 ## Riesgos
 
+- **R3 Registro abierto en un túnel público.** BoxTwinZ no tiene código de invitación, a
+  diferencia de A: cualquiera con la URL crea una cuenta y usa 60 minutos de GPU por mes. Con R1,
+  eso además puede competir con A por los 8 GB.
+
 - **R1 GPU compartida con A.** El worker de BoxTwinZ toma `/tmp/boxtwin-gpu.lock` mientras
   corre el motor, pero el worker de A no conoce ese lock. Si A y BoxTwinZ procesan a la vez, los
   dos procesos de pose comparten los 8 GB de la 2080 y pueden caerse por memoria o tardar el
@@ -128,7 +139,7 @@ encendida). GPU libre al empezar y A sin trabajos. Dos clips de 90 s recortados 
 | Id | Estado | Evidencia |
 |---|---|---|
 | CZ1 | Parcial | Sombra y sparring reales en la estación (Z4). Bolsa real sin correr: usa la misma ruta que sombra |
-| CZ2 | Línea de base tomada | `despliegue/README.md`; el diff antes/después se hace al desplegar |
+| CZ2 | Cumple | `verificar_a.sh` antes y después del despliegue del 3-11: diff vacío (hashes de `/etc/boxtwin.env` y de los servicios, commit `ed54f1a`, servicios activos) |
 | CZ3 | Cumple | `test_z14_planes.py`, `test_z5_circuito.py::test_cupo_agotado_402` |
 | CZ4 | Cumple | `test_z10_amigos.py`, `test_z9_ranking.py::test_publicos_lista_y_detalle_sin_cajones` |
 | CZ5 | Cumple | `test_z6_metricas.py` |
@@ -141,7 +152,7 @@ Orden de recorte: no se recortó nada.
 ## Pendiente de Lucas
 
 - Aprobar o no las dependencias de D1.
-- Correr Z17 con sudo (`boxtwinz/despliegue/README.md`) y abrirlo desde un Android (Z15, CZ8).
+- Abrirlo desde un Android por el túnel (Z15, CZ8).
 - Una sesión real de bolsa en la estación para cerrar CZ1.
 - Videos propios para la demo: `demo sembrar --videos <carpeta>`.
 - Lo de la sección 15 de la spec.
