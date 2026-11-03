@@ -42,7 +42,7 @@ No toca el código de A: corre con el paquete instalado en `twinboxing_env`, que
 |---|---|---|
 | Contexto | `combate` | Entra al perfil y al Rival (`solo_pelea` toma sparring y combate) |
 | Rounds | 12, de 180 s | El combate |
-| Descanso | 0 s si el video tiene los rounds netos; 60 si trae los descansos | Se decide en S1 mirando la duración |
+| Descanso | 0 s, sobre el video de rounds netos que arma `cortar_rounds.py` | El video de Lucas trae los descansos (decisión 4) |
 | Peleador A | `Tercero Z`, guardia zurda | El tipo v2 saca jab y cross del brazo y la guardia; sin guardia supone ortodoxa y el jab del zurdo saldría cross |
 | Peleador B | `Tercero O`, guardia ortodoxa | |
 | Nota en los dos | "Gemelo de un tercero (2-11-2026): material de transmisión, con seudónimo. No es un atleta de la cuenta" | Que se lea en la ficha sin abrir la base |
@@ -51,6 +51,21 @@ No toca el código de A: corre con el paquete instalado en `twinboxing_env`, que
 La siembra la hace Lucas en la web como en cualquier sesión, con A = el zurdo. Los peleadores ya
 quedan asignados en la carga; si la siembra sale al revés, se corrige con `PUT
 /sesiones/{id}/boxeadores` sin reprocesar.
+
+### 2.1 El video trae los descansos
+
+El video que pasó Lucas (`~/Proyectos/twinboxing-finales/pacman3x1.mp4`) trae los descansos. A
+arma los rounds contando desde el segundo 0 con round y descanso fijos, y una transmisión no
+cumple eso: hay presentación antes del primer round, descansos de largo variable y, sobre todo,
+repeticiones en cámara lenta y desde otro ángulo. El detector ve golpes en las repeticiones y A
+suma los golpes del descanso al round que acaba de terminar. Cargado tal cual, el volumen sale
+inflado con golpes repetidos y, con un minuto de desfase al principio, los doce rounds quedan
+corridos.
+
+Por eso Lucas marca dónde empieza cada round (doce tiempos, mm:ss) y
+`boxtwin-api/scripts/cortar_rounds.py` corta los rounds de 180 s, reencodeando para que el corte
+caiga en el cuadro exacto, y los une en `pacman-netos.mp4`, con un JSON al lado con los inicios y
+el sha256 del original. Se carga ese, con descanso 0. El original no se toca.
 
 ## 3. Qué produce
 
