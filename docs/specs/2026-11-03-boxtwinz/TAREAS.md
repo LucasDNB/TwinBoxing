@@ -13,7 +13,7 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
 | Z1 Esqueleto | Hecha | día 1 | `test_z1_salud.py` (4); `ci.sh` en verde; humo: `GET /api/salud` 200 y `/`, `/registro/`, `/sw.js` 200 servidos por la API en 8003 desde `web/out` |
 | Z2 Cuentas | Hecha | día 1 | `test_z2_cuentas.py` (12): checks, cookie httpOnly/Lax/30 días, admin por lista, premium simulado, baja con anonimización, suspendido |
 | Z3 Perfiles y arquetipos | Hecha | día 1 | `test_z3_perfiles.py` (10): 4 ranuras, 403 `plan_requerido` en free, premium edita, custom solo premium, seed con los valores de la spec |
-| Z4 Worker y adaptador | Hecha (código) | día 1 | `test_z4_worker.py` (12) con motor falso: comando igual al de A, sombra sin siembra, sparring espera siembra, tiempo de GPU, lock, fallo con reintento y devolución de cupo, adaptador contra una Fight-Card real de la estación. **Falta:** una sesión real de sombra y una de sparring en la estación (ver "Pendiente de Lucas") |
+| Z4 Worker y adaptador | Hecha | día 1 | `test_z4_worker.py` (13) con motor falso, y corrida real del 3-11 en la estación (ver "Corrida real de Z4") |
 | Z5 Subida, siembra y cupos | Hecha (API) | día 1 | `test_z5_circuito.py` (7) con un video real de 3 s (ffmpeg) y motor falso: subir sparring, candidatos, sembrar, resultado, valorar, corregir; 402 `cupo_agotado`; video por rangos. **Falta:** pantallas `/subir` y `/siembra` y el e2e de navegador |
 | Z6 Métricas | Hecha | día 1 | `test_z6_metricas.py` (14): combinaciones encadenadas, segmento corto, resto < 60 s, zurdo, sostén a mano, exposición cruzada, tendencia |
 | Z7 Resultado, valoración y correcciones | API hecha | día 1 | Rutas y tests en `test_z5_circuito.py`. Falta la pantalla |
@@ -53,9 +53,11 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
   `/siembra?id=`, `/perfiles/[id]` es `/perfil?id=` y `/publicos/[id]` es `/publico?id=`. Es lo
   mismo que hace la web entrenador.
 - **D6 Golpes sin identidad.** El detector corre sobre los keypoints ya asignados a A o B, así
-  que en la Fight-Card no existen golpes sin identidad que contar. El panel usa
-  `identidad.sin_asignar` (fracción de cuadros sin identidad) como proxy, guardado en
-  `sesiones.fraccion_sin_identidad`.
+  que en la Fight-Card no existen golpes sin identidad que contar. Se guarda en
+  `sesiones.fraccion_sin_identidad` la fracción de cuadros sin pose confiable del peleador:
+  `1 − cobertura`, la peor de las dos en sparring. Primero se usó `identidad.sin_asignar` y la
+  corrida real mostró que estaba mal: ese campo cuenta los cuadros con cualquier detección sin
+  rol, terceros al fondo incluidos, y dio 0,70 en un sparring con cobertura de 0,999 y 0,946.
 - **D7 Las sesiones se suben con el perfil 1.** En premium, un cajón recibe sparrings como
   rival, elegido al subir o en la siembra; no se sube una sesión "del cajón". En free, subir con
   un cajón responde 403 `plan_requerido`.
@@ -67,6 +69,27 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
   renombrada a `boxtwinz`, no en `~/Proyectos/TwinBoxing-boxtwinz`.
 - **D11 Correcciones no cambian los números.** Se registran para reentrenar; las métricas
   siguen saliendo del detector, para no mezclar dos fuentes en un mismo número.
+
+## Corrida real de Z4 (3-11)
+
+API en 8003 y worker sobre una base de prueba en el scratchpad, con los modelos de A
+(`yolov8l-pose.pt`, `guantes-v2.pt`, `detector_7fuentes.ens.pt`, umbral 0,80, apariencia
+encendida). GPU libre al empezar y A sin trabajos. Dos clips de 90 s recortados a 1080p H.264
+(la API acepta mp4/mov/m4v): sombra de `video/loma-sombra.webm` (59,9 fps) y sparring de
+`videos/sparr.mp4` (4K bajado a 1080p, 59,9 fps), los dos desde el segundo 30.
+
+1. Sombra, sin intervención: `procesar` 297,3 s, semilla automática track 49, `completar`
+   2,2 s. 30 golpes detectados (7 izquierda), 20,0 por minuto, calidad de pose 0,993, rótulo
+   "Reconocimiento en evaluación". Sin altura: el motor la deja en null sin rival (`sin_rival`).
+2. Sparring: `procesar` 297,1 s hasta `esperando_siembra`. Candidatos sugeridos 141 (guantes
+   rojos) y 143 (amarillos), comprobados mirando los recortes; sembrados como usuario y rival.
+   `completar` 7,4 s. Usuario 19 golpes, rival 22, iniciativa 0,463; exposición 20 por el lado
+   izquierdo del usuario y 2 por el derecho; altura estimada en 40 de 41 golpes.
+3. Ninguna regla se disparó en el sparring: la mano adelantada del usuario da 0,737 (> 0,70)
+   pero son 19 golpes, debajo del mínimo de 30.
+4. Costo de GPU: 299,5 s y 304,5 s para 90 s de video, 3,33x y 3,38x tiempo real a 60 fps.
+   Es un dato suelto, no la medición del Cap 5: A midió 1,1x a 2,6x sobre otro material.
+5. Encontró el error de D6, corregido con un test.
 
 ## Riesgos
 
@@ -84,6 +107,4 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
 ## Pendiente de Lucas
 
 - Aprobar o no las dependencias de D1.
-- Ok para correr Z4 sobre material real en la estación: una sombra y un sparring cortos (de 1
-  a 3 minutos cada uno, son minutos de GPU con el worker de A en la misma placa).
 - Lo de la sección 15 de la spec.

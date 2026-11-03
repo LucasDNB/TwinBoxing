@@ -14,7 +14,7 @@ def fightcard(golpes_a, golpes_b=(), duracion=240.0, cobertura=0.9, sin_asignar=
     return {
         "version": "0.3",
         "video": {"duracion_s": duracion, "fps": 30.0},
-        "identidad": {"cobertura_A": cobertura, "cobertura_B": 0.8, "sin_asignar": sin_asignar},
+        "identidad": {"cobertura_A": cobertura, "cobertura_B": 0.8 if golpes_b else 0.0, "sin_asignar": sin_asignar},
         "peleadores": {
             "A": {"golpes": [g("A", t, b, i) for i, (t, b) in enumerate(golpes_a)]},
             "B": {"golpes": [g("B", t, b, i) for i, (t, b) in enumerate(golpes_b)]},

@@ -76,8 +76,15 @@ def leer_salida(directorio: Path) -> SalidaMotor:
     ident = fc.get("identidad") or {}
     if isinstance(ident.get("cobertura_A"), (int, float)):
         out.calidad_pose = float(ident["cobertura_A"])
-    if isinstance(ident.get("sin_asignar"), (int, float)):
-        out.fraccion_sin_identidad = float(ident["sin_asignar"])
+    # Golpes sin identidad (desvio D6): el detector corre solo sobre poses asignadas, asi que
+    # lo que se pierde es lo que pasa en cuadros sin pose confiable del peleador. Se usa
+    # 1 - cobertura, la peor de los dos en sparring (en bolsa y sombra B no existe y su
+    # cobertura es 0). NO `sin_asignar`: ese cuenta cuadros con cualquier deteccion sin rol,
+    # terceros al fondo incluidos (0,70 en el sparring del Z4).
+    cobs = [float(ident[k]) for k in ("cobertura_A", "cobertura_B")
+            if isinstance(ident.get(k), (int, float)) and (k == "cobertura_A" or ident[k] > 0)]
+    if cobs:
+        out.fraccion_sin_identidad = round(1.0 - min(cobs), 4)
 
     for lado, pel in (fc.get("peleadores") or {}).items():
         quien = _QUIEN.get(lado)

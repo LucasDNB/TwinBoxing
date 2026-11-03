@@ -71,7 +71,7 @@ def test_sombra_de_punta_a_punta_sin_siembra(db, cliente):
     assert s.semilla_usuario == 3          # el sugerido con mas permanencia
     assert _vuelta(db, motor) == "lista"
     db.refresh(s)
-    assert s.estado == "lista" and s.calidad_pose == 0.9 and s.fraccion_sin_identidad == 0.05
+    assert s.estado == "lista" and s.calidad_pose == 0.9 and s.fraccion_sin_identidad == pytest.approx(0.1)
     gs = db.scalars(select(Golpe).where(Golpe.sesion_id == s.id).order_by(Golpe.t_inicio)).all()
     assert [g.mano for g in gs] == ["izquierda", "derecha", "izquierda"]
     assert all(g.quien == "usuario" and g.altura_estimada == "cabeza" for g in gs)
@@ -175,3 +175,11 @@ def test_candidato_individual_sin_sugeridos():
     assert candidato_individual({"candidatos": [
         {"track": 1, "t_desde": 0, "t_hasta": 10}, {"track": 2, "t_desde": 0, "t_hasta": 50}]}) == 2
     assert candidato_individual({}) is None
+
+
+def test_sin_identidad_es_uno_menos_la_peor_cobertura(tmp_path):
+    fc = fightcard([(1.0, "izq")], [(1.5, "der")], cobertura=0.95, sin_asignar=0.70)
+    fc["identidad"]["cobertura_B"] = 0.80
+    (tmp_path / "fightcard.json").write_text(json.dumps(fc))
+    # sin_asignar (terceros al fondo) no entra: 1 - min(0,95, 0,80).
+    assert leer_salida(tmp_path).fraccion_sin_identidad == pytest.approx(0.20)
