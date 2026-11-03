@@ -85,17 +85,23 @@ function Identificar({ s }: { s: Sesion }) {
   return <>{encabezado}<EsperaSesion s={s} /></>;
 }
 
-/* Fase 2 solo si quedo algo sin asignar; si no, a la Fight-Card (04 §03). */
+/*
+ * Fase 2 solo si quedo algo sin asignar o algo asignado que se sospecha (identidad estable,
+ * 02-11); si no, a la Fight-Card (04 §03). Saltear la revision con sospechosos pendientes
+ * dejaria pasar justo los errores que no se ven.
+ */
 function FaseRevisarSiHace({ s }: { s: Sesion }) {
   const router = useRouter();
   const fc = useFightCard(s.id);
   const sinAsignar = fc.data?.identidad.sin_asignar ?? null;
+  const pendiente = fc.data?.identidad.revision_pendiente ?? 0;
+  const nadaQueRevisar = (sinAsignar ?? 0) <= 0 && pendiente <= 0;
   useEffect(() => {
-    if (fc.data && (sinAsignar ?? 0) <= 0) router.replace(`/sesion/?id=${s.id}&vista=fightcard`);
-  }, [fc.data, sinAsignar, router, s.id]);
+    if (fc.data && nadaQueRevisar) router.replace(`/sesion/?id=${s.id}&vista=fightcard`);
+  }, [fc.data, nadaQueRevisar, router, s.id]);
   if (fc.isPending) return <Esqueleto />;
   if (fc.isError) return <ErrorConReintento error={fc.error} alReintentar={() => fc.refetch()} />;
-  if ((sinAsignar ?? 0) <= 0) return <Esqueleto />;
+  if (nadaQueRevisar) return <Esqueleto />;
   return <FaseRevisar s={s} fc={fc.data} />;
 }
 

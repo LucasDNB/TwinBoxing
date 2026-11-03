@@ -348,6 +348,11 @@ export const FightCard = z.object({
     tramos_asignados_auto: numN.optional(),
     tramos_asignados_manual: numN.optional(),
     separacion_color: numN.optional(),
+    // Identidad estable (02-11): sospechosos que nadie miro y banderas con que se proceso.
+    revision_pendiente: numN.optional(),
+    tramos_a_revisar: numN.optional(),
+    corte_de_mixtos: z.boolean().optional(),
+    identidad_estricta: z.boolean().optional(),
   }),
   detector: z.object({
     checkpoint: z.string(),
@@ -552,19 +557,32 @@ export type Panel = z.infer<typeof Panel>;
 
 // -- Tramos (B3) ------------------------------------------------------------------
 
-export const MOTIVOS_TRAMO = ["color_insuficiente", "sin_coexistencia", "corto", "abstencion"] as const;
+export const MOTIVOS_TRAMO = [
+  "color_insuficiente", "sin_coexistencia", "corto", "abstencion",
+  // Identidad estable (02-11): asignados que la maquina sospecha que estan mal.
+  "conflicto", "color_contradice", "posible_mezcla",
+] as const;
+
+const RolTramo = z.enum(["A", "B", "ninguno"]);
 
 export const Tramos = z.object({
   // B8b: en bolsa y sombra no hay B.
   cobertura: z.object({ A: num, B: num.optional(), sin_asignar: num }),
   separacion_color: numN,
+  revision_pendiente: numN.optional(),
   tramos: z.array(z.object({
+    // Las sesiones de antes del 2-11 no traen clave, tipo, rol actual ni partes.
+    clave: z.string().optional(),
     track: num,
     t_desde: num,
     t_hasta: num,
-    motivo: z.enum(MOTIVOS_TRAMO),
+    tipo: z.enum(["sospechoso", "sin_asignar", "asignado"]).optional(),
+    motivo: z.enum(MOTIVOS_TRAMO).nullable(),
+    rol_actual: RolTramo.nullable().optional(),
     recorte_url: strN,
-    asignado: z.enum(["A", "B", "ninguno"]).nullable(),
+    asignado: RolTramo.nullable(),
+    partes: z.array(z.object({ t_desde: num, t_hasta: num, rol: RolTramo })).optional(),
+    revision_pendiente: z.boolean().optional(),
   })),
 });
 export type Tramos = z.infer<typeof Tramos>;

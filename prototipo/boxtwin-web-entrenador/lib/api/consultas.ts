@@ -28,7 +28,7 @@ export const claves = {
   boxeadores: ["boxeadores"] as const,
   perfil: (id: string, contexto: string) => ["perfil", id, contexto] as const,
   rival: (a: string, b: string) => ["rival", a, b] as const,
-  tramos: (id: string) => ["tramos", id] as const,
+  tramos: (id: string, todos = false) => ["tramos", id, todos] as const,
   ticket: (id: string) => ["ticket", id] as const,
   procesado: (id: string) => ["procesado", id] as const,
   // Versiones 26-10
@@ -90,7 +90,7 @@ export function useSesion(id: string | null) {
   useEffect(() => {
     if (id && previo.current && previo.current !== "listo" && estado === "listo") {
       qc.invalidateQueries({ queryKey: claves.fightcard(id) });
-      qc.invalidateQueries({ queryKey: claves.tramos(id) });
+      qc.invalidateQueries({ queryKey: ["tramos", id] });  // con y sin ?todos=1
       qc.invalidateQueries({ queryKey: claves.procesado(id) });
       qc.invalidateQueries({ queryKey: claves.sesiones });
     }
@@ -138,10 +138,10 @@ export function useRival(a: string, b: string, habilitada: boolean) {
   });
 }
 
-export function useTramos(id: string | null, habilitada: boolean) {
+export function useTramos(id: string | null, habilitada: boolean, todos = false) {
   return useQuery({
-    queryKey: claves.tramos(id ?? ""),
-    queryFn: () => pedirValidado(Tramos, `/jobs/${id}/tramos`),
+    queryKey: claves.tramos(id ?? "", todos),
+    queryFn: () => pedirValidado(Tramos, `/jobs/${id}/tramos${todos ? "?todos=1" : ""}`),
     enabled: !!id && habilitada,
     retry: false,
   });
@@ -215,14 +215,22 @@ export function useSembrar(id: string) {
   });
 }
 
+export type AsignacionTramo = {
+  track: number;
+  rol: "A" | "B" | "ninguno";
+  desde?: number;
+  hasta?: number;
+};
+
 export function useAsignarTramos(id: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (asignaciones: { track: number; rol: "A" | "B" | "ninguno" }[]) =>
+    // Identidad estable (02-11): con desde y hasta (segundos) la decision es sobre ese rango.
+    mutationFn: (asignaciones: AsignacionTramo[]) =>
       pedir(`/jobs/${id}/tramos`, { method: "PUT", body: JSON.stringify({ asignaciones }) }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: claves.sesion(id) });
-      qc.invalidateQueries({ queryKey: claves.tramos(id) });
+      qc.invalidateQueries({ queryKey: ["tramos", id] });  // con y sin ?todos=1
     },
   });
 }
