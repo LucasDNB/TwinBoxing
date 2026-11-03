@@ -23,7 +23,7 @@ from boxtwinz_api.services.metrics import tendencia
 
 __all__ = ["METRICAS", "stat_general", "sesiones_del_perfil"]
 
-METRICAS = ("volumen", "pct_izquierda", "pct_mano_adelantada", "combinaciones_min",
+METRICAS = ("golpes", "volumen", "pct_izquierda", "pct_mano_adelantada", "combinaciones_min",
             "pct_golpes_en_combinacion", "sosten_ritmo", "iniciativa")
 
 
