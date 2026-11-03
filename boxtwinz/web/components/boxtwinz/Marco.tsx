@@ -21,10 +21,15 @@ const NAV = [
   { href: "/subir/", texto: "Subir" },
   { href: "/rival/", texto: "Rival" },
   { href: "/ranking/", texto: "Ranking" },
+  { href: "/amigos/", texto: "Amigos" },
   { href: "/ajustes/", texto: "Ajustes" },
 ];
 
-export function Marco({ titulo, children }: { titulo: string; children: ReactNode }) {
+export function Marco({ titulo, children, interceptar }: {
+  titulo: string; children: ReactNode;
+  /* Si devuelve true, la navegacion inferior no sale (la valoracion obligatoria la usa). */
+  interceptar?: (href: string) => boolean;
+}) {
   const [yo, setYo] = useState<Yo | null>(null);
   const [n, setN] = useState(0);
   const router = useRouter();
@@ -50,7 +55,7 @@ export function Marco({ titulo, children }: { titulo: string; children: ReactNod
           <ul className="mx-auto flex max-w-xl justify-around">
             {NAV.map((x) => (
               <li key={x.href}>
-                <Link href={x.href} className={cn("objetivo-tactil flex items-center px-2 text-sm", ruta?.startsWith(x.href.slice(0, -1)) ? "text-texto" : "text-tenue")}>
+                <Link href={x.href} onClick={(e) => { if (interceptar?.(x.href)) e.preventDefault(); }} className={cn("objetivo-tactil flex items-center px-2 text-sm", ruta?.startsWith(x.href.slice(0, -1)) ? "text-texto" : "text-tenue")}>
                   {x.texto}
                 </Link>
               </li>

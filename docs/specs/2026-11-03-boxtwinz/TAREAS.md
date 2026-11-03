@@ -14,10 +14,10 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
 | Z2 Cuentas | Hecha | día 1 | `test_z2_cuentas.py` (12): checks, cookie httpOnly/Lax/30 días, admin por lista, premium simulado, baja con anonimización, suspendido |
 | Z3 Perfiles y arquetipos | Hecha | día 1 | `test_z3_perfiles.py` (10): 4 ranuras, 403 `plan_requerido` en free, premium edita, custom solo premium, seed con los valores de la spec |
 | Z4 Worker y adaptador | Hecha | día 1 | `test_z4_worker.py` (13) con motor falso, y corrida real del 3-11 en la estación (ver "Corrida real de Z4") |
-| Z5 Subida, siembra y cupos | Hecha (API) | día 1 | `test_z5_circuito.py` (7) con un video real de 3 s (ffmpeg) y motor falso: subir sparring, candidatos, sembrar, resultado, valorar, corregir; 402 `cupo_agotado`; video por rangos. **Falta:** pantallas `/subir` y `/siembra` y el e2e de navegador |
+| Z5 Subida, siembra y cupos | Hecha | día 2 | API: `test_z5_circuito.py` (7). Web: `/subir` (5 pasos, progreso por XHR, cupo restante) y `/siembra`. e2e `circuito.spec.ts` › sparring: subir, sembrar, resultado |
 | Z6 Métricas | Hecha | día 1 | `test_z6_metricas.py` (14): combinaciones encadenadas, segmento corto, resto < 60 s, zurdo, sostén a mano, exposición cruzada, tendencia |
-| Z7 Resultado, valoración y correcciones | API hecha | día 1 | Rutas y tests en `test_z5_circuito.py`. Falta la pantalla |
-| Z8 Historial, stat general y comparación | API hecha | día 1 | `GET /perfiles/{id}/stats`, `GET /comparar` (422 entre modalidades), cajón premium mirado desde el rival. Falta la pantalla y el e2e |
+| Z7 Resultado, valoración y correcciones | Hecha | día 2 | `/sesion`: video con línea de tiempo por mano, métricas, rounds rotulados sin validar, curva, exposición, altura como estimación, consejos. Salir sin valorar abre el diálogo y no navega. e2e `circuito.spec.ts` (2) |
+| Z8 Historial, stat general y comparación | Hecha | día 2 | `/perfil` con pestañas, stat, tendencia, historial y cajón premium; `/comparar` con curvas superpuestas. e2e `comparar.spec.ts` (2) |
 | Z9 a Z12 | Pendiente | | `rules.py` (consejos) ya escrito y usado en el resultado; faltan sus tests propios (Z11) |
 | Z13 Panel admin y capacidad | Parcial | día 1 | `services/capacity.py` (uso diario partido por medianoche, rachas, una notificación por episodio). Faltan rutas, panel y tests de 15 y 5 días |
 | Z14 Planes | Parcial | día 1 | Premium simulado, cupos (402) y `POST /publicidad/impresion` con test. Falta el componente en resultados |
