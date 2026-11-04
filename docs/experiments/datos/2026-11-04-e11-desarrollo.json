@@ -1,0 +1,502 @@
+{
+  "modo": "desarrollo",
+  "videos": [
+    {
+      "fuente": "Sparring",
+      "siembra": {
+        "caso": "par_sugerido",
+        "semillas": [
+          1,
+          3
+        ]
+      },
+      "sin_corte": {
+        "bien": 4872,
+        "asignados": 5494,
+        "peleador": 9671,
+        "precision": 0.8867855842737532,
+        "cobertura": 0.5037741701995657,
+        "c1_por_track": {
+          "peleadores_en_la_verdad": 23,
+          "evaluables": 8,
+          "aciertos": 8,
+          "invertidos": 0,
+          "descartados": 7,
+          "sin_decidir": 8,
+          "cuadros_peleador": 9671,
+          "cuadros_bien": 4896,
+          "tracks_mixtos": 5
+        }
+      },
+      "con_corte": {
+        "bien": 5612,
+        "asignados": 5846,
+        "peleador": 9671,
+        "precision": 0.9599726308587068,
+        "cobertura": 0.5802915934236377,
+        "c1_por_segmento": {
+          "evaluables": 13,
+          "aciertos": 12
+        },
+        "cortes": [
+          {
+            "track": 1,
+            "cuadro": 612,
+            "medianas": [
+              1.67,
+              -1.627
+            ],
+            "diferencia": 3.297
+          },
+          {
+            "track": 3,
+            "cuadro": 612,
+            "medianas": [
+              -1.627,
+              1.67
+            ],
+            "diferencia": 3.297
+          },
+          {
+            "track": 12,
+            "cuadro": 963,
+            "medianas": [
+              1.67,
+              -1.627
+            ],
+            "diferencia": 3.297
+          },
+          {
+            "track": 12,
+            "cuadro": 1053,
+            "medianas": [
+              1.49,
+              -1.627
+            ],
+            "diferencia": 3.116
+          },
+          {
+            "track": 35,
+            "cuadro": 4383,
+            "medianas": [
+              -1.627,
+              1.454
+            ],
+            "diferencia": 3.081
+          },
+          {
+            "track": 50,
+            "cuadro": 4735,
+            "medianas": [
+              1.67,
+              -1.281
+            ],
+            "diferencia": 2.951
+          },
+          {
+            "track": 50,
+            "cuadro": 4960,
+            "medianas": [
+              -1.56,
+              1.67
+            ],
+            "diferencia": 3.23
+          }
+        ]
+      },
+      "p15d": {
+        "partidos": 5,
+        "mixtos": 5,
+        "partidos_mixtos": 4,
+        "precision_del_corte": 0.8,
+        "recall_del_corte": 0.8
+      }
+    },
+    {
+      "fuente": "01-sparring",
+      "siembra": {
+        "caso": "par_sugerido",
+        "semillas": [
+          62,
+          109
+        ]
+      },
+      "sin_corte": {
+        "bien": 8883,
+        "asignados": 9068,
+        "peleador": 9908,
+        "precision": 0.9795985884428761,
+        "cobertura": 0.8965482438433588,
+        "c1_por_track": {
+          "peleadores_en_la_verdad": 14,
+          "evaluables": 9,
+          "aciertos": 9,
+          "invertidos": 0,
+          "descartados": 1,
+          "sin_decidir": 4,
+          "cuadros_peleador": 9908,
+          "cuadros_bien": 8916,
+          "tracks_mixtos": 0
+        }
+      },
+      "con_corte": {
+        "bien": 8883,
+        "asignados": 9068,
+        "peleador": 9908,
+        "precision": 0.9795985884428761,
+        "cobertura": 0.8965482438433588,
+        "c1_por_segmento": {
+          "evaluables": 9,
+          "aciertos": 9
+        },
+        "cortes": []
+      },
+      "p15d": {
+        "partidos": 0,
+        "mixtos": 0,
+        "partidos_mixtos": 0,
+        "precision_del_corte": null,
+        "recall_del_corte": null
+      }
+    },
+    {
+      "fuente": "02-sparring",
+      "siembra": {
+        "caso": "par_sugerido",
+        "semillas": [
+          375,
+          384
+        ]
+      },
+      "sin_corte": {
+        "bien": 9497,
+        "asignados": 10247,
+        "peleador": 9942,
+        "precision": 0.9268078461988875,
+        "cobertura": 0.9552403942868638,
+        "c1_por_track": {
+          "peleadores_en_la_verdad": 18,
+          "evaluables": 13,
+          "aciertos": 13,
+          "invertidos": 0,
+          "descartados": 0,
+          "sin_decidir": 5,
+          "cuadros_peleador": 9942,
+          "cuadros_bien": 9543,
+          "tracks_mixtos": 0
+        }
+      },
+      "con_corte": {
+        "bien": 9497,
+        "asignados": 10247,
+        "peleador": 9942,
+        "precision": 0.9268078461988875,
+        "cobertura": 0.9552403942868638,
+        "c1_por_segmento": {
+          "evaluables": 13,
+          "aciertos": 13
+        },
+        "cortes": []
+      },
+      "p15d": {
+        "partidos": 0,
+        "mixtos": 0,
+        "partidos_mixtos": 0,
+        "precision_del_corte": null,
+        "recall_del_corte": null
+      }
+    },
+    {
+      "fuente": "03-sparring",
+      "siembra": {
+        "caso": "par_sugerido",
+        "semillas": [
+          41,
+          64
+        ]
+      },
+      "sin_corte": {
+        "bien": 6889,
+        "asignados": 9467,
+        "peleador": 9717,
+        "precision": 0.7276856448716594,
+        "cobertura": 0.7089636719152002,
+        "c1_por_track": {
+          "peleadores_en_la_verdad": 39,
+          "evaluables": 20,
+          "aciertos": 16,
+          "invertidos": 4,
+          "descartados": 0,
+          "sin_decidir": 19,
+          "cuadros_peleador": 9717,
+          "cuadros_bien": 6947,
+          "tracks_mixtos": 4
+        }
+      },
+      "con_corte": {
+        "bien": 6889,
+        "asignados": 9467,
+        "peleador": 9717,
+        "precision": 0.7276856448716594,
+        "cobertura": 0.7089636719152002,
+        "c1_por_segmento": {
+          "evaluables": 20,
+          "aciertos": 16
+        },
+        "cortes": []
+      },
+      "p15d": {
+        "partidos": 0,
+        "mixtos": 4,
+        "partidos_mixtos": 0,
+        "precision_del_corte": null,
+        "recall_del_corte": 0.0
+      }
+    },
+    {
+      "fuente": "04-sparring",
+      "siembra": {
+        "caso": "par_sugerido",
+        "semillas": [
+          60,
+          64
+        ]
+      },
+      "sin_corte": {
+        "bien": 8291,
+        "asignados": 9699,
+        "peleador": 10549,
+        "precision": 0.8548303948860707,
+        "cobertura": 0.7859512750023699,
+        "c1_por_track": {
+          "peleadores_en_la_verdad": 23,
+          "evaluables": 14,
+          "aciertos": 11,
+          "invertidos": 3,
+          "descartados": 0,
+          "sin_decidir": 9,
+          "cuadros_peleador": 10549,
+          "cuadros_bien": 8337,
+          "tracks_mixtos": 1
+        }
+      },
+      "con_corte": {
+        "bien": 9372,
+        "asignados": 9699,
+        "peleador": 10549,
+        "precision": 0.9662851840395917,
+        "cobertura": 0.8884254431699687,
+        "c1_por_segmento": {
+          "evaluables": 15,
+          "aciertos": 14
+        },
+        "cortes": [
+          {
+            "track": 152,
+            "cuadro": 2738,
+            "medianas": [
+              1.826,
+              -1.754
+            ],
+            "diferencia": 3.579
+          }
+        ]
+      },
+      "p15d": {
+        "partidos": 1,
+        "mixtos": 1,
+        "partidos_mixtos": 1,
+        "precision_del_corte": 1.0,
+        "recall_del_corte": 1.0
+      }
+    },
+    {
+      "fuente": "sparring-3-rounds",
+      "siembra": {
+        "caso": "par_sugerido",
+        "semillas": [
+          56,
+          60
+        ]
+      },
+      "sin_corte": {
+        "bien": 26857,
+        "asignados": 32810,
+        "peleador": 33022,
+        "precision": 0.8185614142029869,
+        "cobertura": 0.8133062806613772,
+        "c1_por_track": {
+          "peleadores_en_la_verdad": 68,
+          "evaluables": 41,
+          "aciertos": 28,
+          "invertidos": 13,
+          "descartados": 1,
+          "sin_decidir": 26,
+          "cuadros_peleador": 33022,
+          "cuadros_bien": 26989,
+          "tracks_mixtos": 8
+        }
+      },
+      "con_corte": {
+        "bien": 31983,
+        "asignados": 33951,
+        "peleador": 33022,
+        "precision": 0.9420341079791464,
+        "cobertura": 0.968536127430198,
+        "c1_por_segmento": {
+          "evaluables": 49,
+          "aciertos": 47
+        },
+        "cortes": [
+          {
+            "track": 6,
+            "cuadro": 315,
+            "medianas": [
+              1.865,
+              -1.806
+            ],
+            "diferencia": 3.672
+          },
+          {
+            "track": 25,
+            "cuadro": 1175,
+            "medianas": [
+              1.183,
+              -1.242
+            ],
+            "diferencia": 2.425
+          },
+          {
+            "track": 120,
+            "cuadro": 5451,
+            "medianas": [
+              1.732,
+              -1.445
+            ],
+            "diferencia": 3.177
+          },
+          {
+            "track": 122,
+            "cuadro": 5575,
+            "medianas": [
+              -1.519,
+              1.983
+            ],
+            "diferencia": 3.502
+          },
+          {
+            "track": 150,
+            "cuadro": 7585,
+            "medianas": [
+              2.114,
+              -1.781
+            ],
+            "diferencia": 3.895
+          },
+          {
+            "track": 224,
+            "cuadro": 10858,
+            "medianas": [
+              1.971,
+              -1.221
+            ],
+            "diferencia": 3.192
+          },
+          {
+            "track": 248,
+            "cuadro": 11909,
+            "medianas": [
+              -1.449,
+              0.85
+            ],
+            "diferencia": 2.3
+          },
+          {
+            "track": 290,
+            "cuadro": 14799,
+            "medianas": [
+              2.019,
+              -1.373
+            ],
+            "diferencia": 3.392
+          },
+          {
+            "track": 291,
+            "cuadro": 13853,
+            "medianas": [
+              0.319,
+              -1.158
+            ],
+            "diferencia": 1.477
+          },
+          {
+            "track": 302,
+            "cuadro": 14810,
+            "medianas": [
+              -1.317,
+              2.03
+            ],
+            "diferencia": 3.347
+          }
+        ]
+      },
+      "p15d": {
+        "partidos": 10,
+        "mixtos": 8,
+        "partidos_mixtos": 5,
+        "precision_del_corte": 0.5,
+        "recall_del_corte": 0.625
+      }
+    }
+  ],
+  "sin_corte": {
+    "total": {
+      "bien": 65289,
+      "asignados": 76785,
+      "peleador": 82809,
+      "precision": 0.8502832584489158,
+      "cobertura": 0.7884287939716698,
+      "wilson95_precision": [
+        0.8477,
+        0.8528
+      ],
+      "wilson95_cobertura": [
+        0.7856,
+        0.7912
+      ],
+      "advertencia": "los cuadros no son independientes: el intervalo es optimista"
+    },
+    "c1": {
+      "aciertos": 85,
+      "evaluables": 105
+    }
+  },
+  "con_corte": {
+    "total": {
+      "bien": 72236,
+      "asignados": 78278,
+      "peleador": 82809,
+      "precision": 0.9228135619203353,
+      "cobertura": 0.8723206414761681,
+      "wilson95_precision": [
+        0.9209,
+        0.9247
+      ],
+      "wilson95_cobertura": [
+        0.87,
+        0.8746
+      ],
+      "advertencia": "los cuadros no son independientes: el intervalo es optimista"
+    },
+    "c1_por_segmento": {
+      "aciertos": 111,
+      "evaluables": 119
+    }
+  },
+  "p15d": {
+    "partidos": 16,
+    "mixtos": 18,
+    "partidos_mixtos": 10
+  },
+  "etiqueta": "desarrollo: material donde se diseno el corte, no decide P15a ni P15b"
+}

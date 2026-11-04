@@ -1,0 +1,104 @@
+{
+ "c5": {
+  "todas": {
+   "n": 7,
+   "mediana": 1.892,
+   "maximo": 2.061,
+   "pasa": true
+  },
+  "otras_cuentas": {
+   "n": 4,
+   "mediana": 1.9205,
+   "maximo": 2.04,
+   "pasa": true
+  },
+  "sin_transmision": {
+   "n": 6,
+   "mediana": 1.7035,
+   "maximo": 2.04,
+   "pasa": true
+  },
+  "tres_minutos_o_mas": {
+   "n": 4,
+   "mediana": 1.966,
+   "maximo": 2.061,
+   "pasa": true
+  },
+  "tres_minutos_o_mas_sin_transmision": {
+   "n": 3,
+   "mediana": 1.892,
+   "maximo": 2.04,
+   "pasa": true
+  }
+ },
+ "c4": {
+  "sesiones": 7,
+  "llegaron": 7,
+  "trabajos_con_error": 0
+ },
+ "sesiones": [
+  {
+   "id": "423d13be",
+   "duracion_s": 9.133,
+   "segundos": 17.8,
+   "factor": 1.949,
+   "solapada": false,
+   "llego_a_fightcard": true,
+   "trabajos_con_error": 0
+  },
+  {
+   "id": "fbb0e53d",
+   "duracion_s": 23.867,
+   "segundos": 26.2,
+   "factor": 1.098,
+   "solapada": false,
+   "llego_a_fightcard": true,
+   "trabajos_con_error": 0
+  },
+  {
+   "id": "158f413a",
+   "duracion_s": 174.933,
+   "segundos": 330.9,
+   "factor": 1.892,
+   "solapada": false,
+   "llego_a_fightcard": true,
+   "trabajos_con_error": 0
+  },
+  {
+   "id": "c426094e",
+   "duracion_s": 1664.333,
+   "segundos": 3394.6,
+   "factor": 2.04,
+   "solapada": false,
+   "llego_a_fightcard": true,
+   "trabajos_con_error": 0
+  },
+  {
+   "id": "3b82b7f8",
+   "duracion_s": 2134.0,
+   "segundos": 4397.3,
+   "factor": 2.061,
+   "solapada": false,
+   "llego_a_fightcard": true,
+   "trabajos_con_error": 0
+  },
+  {
+   "id": "1af9aec5",
+   "duracion_s": 17.533,
+   "segundos": 24.2,
+   "factor": 1.38,
+   "solapada": false,
+   "llego_a_fightcard": true,
+   "trabajos_con_error": 0
+  },
+  {
+   "id": "17449af3",
+   "duracion_s": 637.504,
+   "segundos": 965.8,
+   "factor": 1.515,
+   "solapada": false,
+   "llego_a_fightcard": true,
+   "trabajos_con_error": 0
+  }
+ ]
+}
