@@ -163,3 +163,10 @@ def concordancia(cuadros) -> dict:
         "error_muneca_p95": float(np.percentile(errores, 95)) if errores else None,
         "n_error": len(errores),
     }
+
+
+def veredicto_720p(videos: dict[str, dict]) -> dict:
+    """Cierre del 4-11, §1: apto si en todos los videos empareja >= 98% y el error mediano es <= 2%."""
+    ok = {v: c["fraccion_emparejada"] >= 0.98 and c["error_muneca_mediana"] <= 0.02 for v, c in videos.items()}
+    return {"por_video": ok, "apto": bool(ok) and all(ok.values())}
+

@@ -131,6 +131,31 @@ def rellenar_serie(s: dict, umbrales: dict | None) -> dict:
     return {**s, "kp": kp, "sc": sc, "rellenado": rell}
 
 
+def diezmar_serie(s: dict, fps_objetivo: float) -> dict:
+    """
+    La serie como si la pose corriera a fps_objetivo (cierre del 4-11, §2): queda un cuadro de
+    cada round(fps / objetivo) y los del medio se interpolan, con el menor puntaje de los dos.
+    Sin vecino conservado valido a cada lado, el cuadro queda con puntaje 0.
+    """
+    paso = max(1, int(round(float(s["fps"]) / fps_objetivo)))
+    kp, sc = s["kp"].copy(), s["sc"].copy()
+    n = kp.shape[1]
+    for p in range(kp.shape[0]):
+        ok = s["valid"][p].astype(bool)
+        for f in range(n):
+            if f % paso == 0:
+                continue
+            a = f - f % paso
+            b = a + paso
+            if b >= n or not (ok[a] and ok[b]):
+                sc[p, f] = 0
+                continue
+            w = (f - a) / paso
+            kp[p, f] = (1 - w) * s["kp"][p, a] + w * s["kp"][p, b]
+            sc[p, f] = np.minimum(s["sc"][p, a], s["sc"][p, b])
+    return {**s, "kp": kp, "sc": sc}
+
+
 def construir(golpes: list[dict], series: dict[str, dict], umbrales: dict | None = None,
               relleno: bool = False) -> dict:
     """Junta X (N, 32, 26), M (N, 32) y las etiquetas de los golpes, en el orden de golpes."""
@@ -180,6 +205,9 @@ def main(argv=None) -> int:
     for f in dict.fromkeys(g["fuente"] for g in golpes):
         with np.load(d / "series" / f"{f}.npz") as z:
             series[f] = {k: z[k] for k in ("kp", "sc", "valid", "fps")}
+    muestreo = os.environ.get("BOXTWIN_MUESTREO_FPS")
+    if muestreo:
+        series = {k: diezmar_serie(v, float(muestreo)) for k, v in series.items()}
     datos = construir(golpes, series, umbrales, relleno)
     np.savez_compressed(d / "golpes.npz", **datos)
     nombres = nombres_brazo() + NOMBRES_RIVAL
@@ -188,6 +216,8 @@ def main(argv=None) -> int:
         meta.update(umbrales=umbrales, umbrales_sha256=sha)
     if relleno:
         meta["relleno"] = True
+    if muestreo:
+        meta["muestreo_fps"] = float(muestreo)
     (d / "golpes2d.meta.json").write_text(json.dumps(meta, indent=2) + "\n")
     M = datos["M"]
     print(f"X {datos['X'].shape}, pasos usables {M.mean():.3f}, golpes sin ningun paso usable "

@@ -114,3 +114,12 @@ def test_concordancia_sin_solape_no_empareja():
     z = np.zeros((1, 17, 2))
     s = np.ones((1, 17))
     assert regla.concordancia([(a, z, s, b, z, s)])["emparejadas"] == 0
+
+
+def test_720p_pide_los_dos_umbrales_en_los_dos_videos():
+    bien = {"fraccion_emparejada": 0.98, "error_muneca_mediana": 0.02}
+    assert regla.veredicto_720p({"a": bien, "b": bien})["apto"]
+    assert not regla.veredicto_720p({"a": bien, "b": {**bien, "fraccion_emparejada": 0.97}})["apto"]
+    assert not regla.veredicto_720p({"a": {**bien, "error_muneca_mediana": 0.021}, "b": bien})["apto"]
+    assert not regla.veredicto_720p({})["apto"]
+

@@ -154,3 +154,20 @@ def test_main_registra_el_sha256_en_el_meta(trabajo, tmp_path, monkeypatch):
     meta = json.loads((d / "golpes2d.meta.json").read_text())
     assert len(meta["umbrales_sha256"]) == 64 and meta["relleno"] is True
     assert "R" in np.load(d / "golpes.npz").files
+
+
+def test_diezmar_interpola_con_el_menor_puntaje_y_no_toca_lo_conservado():
+    kp = np.zeros((1, 5, 17, 2)); kp[0, :, :, 0] = np.arange(5.0)[:, None] ** 2
+    sc = np.full((1, 5, 17), 0.9); sc[0, 2] = 0.5
+    s = {"kp": kp, "sc": sc, "valid": np.ones((1, 5)), "fps": np.array(30.0)}
+    d = features2d.diezmar_serie(s, 15)
+    assert d["kp"][0, 1, 0, 0] == 2.0 and d["kp"][0, 2, 0, 0] == 4.0
+    assert d["sc"][0, 1, 0] == 0.5 and d["sc"][0, 2, 0] == 0.5
+
+
+def test_diezmar_a_60_fps_deja_uno_de_cada_cuatro_y_sin_vecino_queda_en_cero():
+    kp = np.ones((1, 6, 17, 2)); sc = np.full((1, 6, 17), 0.9)
+    s = {"kp": kp, "sc": sc, "valid": np.ones((1, 6)), "fps": np.array(59.94)}
+    d = features2d.diezmar_serie(s, 15)
+    assert (d["sc"][0, 1:4] == 0.9).all() and (d["sc"][0, 5] == 0).all()
+
