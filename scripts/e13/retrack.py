@@ -14,6 +14,8 @@ QUE HACE
     Usa los cuadros del video porque el GMC (sparseOptFlow) los necesita.
   - ocsort, bytetrack: implementaciones oficiales, importadas desde --terceros, con sus defaults
     salvo el buffer equivalente a 4 s (round(4 * fps) cuadros).
+  - boosttrack (T3): BoxMOT con ReID osnet_x0_25_msmt17, defaults de BoostTrackConfig salvo el
+    buffer. Devuelve det_ind, asi que no hace falta emparejar. Toma el candado de GPU.
   Las oficiales no devuelven el indice de la deteccion: los keypoints se recuperan emparejando la
   caja de salida con las detecciones del cuadro por IoU, la mayor primero (emparejar_salida).
 
@@ -24,11 +26,13 @@ USO
   python scripts/e13/retrack.py base --fuente 01-sparring
   python scripts/e13/retrack.py h13-2
   python scripts/e13/retrack.py ocsort --terceros ~/boxtwin-mejoras/e13/terceros
+  ~/boxtwin-mejoras/e13/venv-t3/bin/python scripts/e13/retrack.py boosttrack
 """
 
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import sys
 import time
@@ -177,7 +181,36 @@ class ByteTrack:
         return np.array([t.track_id for t in o], np.int64), cajas, np.array([t.score for t in o], np.float32), idx
 
 
-TRACKERS = {"base": Base, "ocsort": OCSort, "bytetrack": ByteTrack}
+class BoostTrack:
+    """T3: BoxMOT, con ReID. Corre con e13/venv-t3, que es el unico que tiene boxmot instalado."""
+
+    necesita_cuadros = True
+    usa_gpu = True
+    dispositivo = "cuda:0"
+
+    def __init__(self, fuente: str, _terceros):
+        from boxmot.reid.specs import ReIDConfig
+        from boxmot.trackers.boosttrack.config import BoostTrackConfig
+        from boxmot.trackers.boosttrack.tracker import BoostTrack as T
+
+        self.T = T
+        self.cfg = BoostTrackConfig(max_age=round(c.BUFFER_S * c.meta_de(fuente)["video"]["fps"]))
+        self.reid = ReIDConfig(model=c.E13 / "reid" / "osnet_x0_25_msmt17.pt", device=self.dispositivo)
+        self.reiniciar()
+
+    def reiniciar(self):
+        self.t = self.T(config=self.cfg, reid=self.reid)
+
+    def paso(self, xyxy, conf, cls, cuadro, _forma):
+        o = self.t.update(np.c_[xyxy, conf, cls].astype(np.float32), cuadro)
+        if len(o) == 0:
+            return np.zeros(0, np.int64), np.zeros((0, 4), np.float32), np.zeros(0, np.float32), []
+        # columnas: x1 y1 x2 y2 id conf cls det_ind
+        return o[:, 4].astype(np.int64), o[:, :4].astype(np.float32), o[:, 5].astype(np.float32), \
+            o[:, 7].astype(int).tolist()
+
+
+TRACKERS = {"base": Base, "ocsort": OCSort, "bytetrack": ByteTrack, "boosttrack": BoostTrack}
 
 
 def retrackear(nombre: str, fuente: str, terceros: Path | None) -> dict:
@@ -197,7 +230,13 @@ def retrackear(nombre: str, fuente: str, terceros: Path | None) -> dict:
     ids = c.Ids()
     o_off, o_id, o_box, o_conf, o_kp, o_sc = [0], [], [], [], [], []
     sin_det, t0 = 0, time.time()
+    candado = open(c.CANDADO, "a+") if getattr(tr, "usa_gpu", False) else None
     for f in range(n):
+        if candado and f % 500 == 0:
+            # T3 usa la GPU para el ReID: misma disciplina que detectar.py
+            fcntl.flock(candado, fcntl.LOCK_UN)
+            c.esperar_colas()
+            fcntl.flock(candado, fcntl.LOCK_EX)
         cuadro = None
         if cap is not None:
             ok, cuadro = cap.read()
@@ -222,6 +261,8 @@ def retrackear(nombre: str, fuente: str, terceros: Path | None) -> dict:
             o_sc.append(sc[a:b][idx])
     if cap is not None:
         cap.release()
+    if candado:
+        candado.close()
     base = np.load(c.cache_de(fuente))
     nuevo_meta = json.loads(json.dumps(meta))
     nuevo_meta["e13"] = {"tracker": nombre, "desde": "detecciones guardadas"}
