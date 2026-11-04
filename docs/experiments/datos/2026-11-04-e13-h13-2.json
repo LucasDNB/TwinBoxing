@@ -1,0 +1,54 @@
+{
+ "fuentes": {
+  "Sparring": {
+   "cuadros": 5531,
+   "distintos": 0,
+   "primer_distinto": null,
+   "fraccion": 1.0,
+   "mismo_largo": true
+  },
+  "01-sparring": {
+   "cuadros": 5053,
+   "distintos": 0,
+   "primer_distinto": null,
+   "fraccion": 1.0,
+   "mismo_largo": true
+  },
+  "02-sparring": {
+   "cuadros": 5119,
+   "distintos": 0,
+   "primer_distinto": null,
+   "fraccion": 1.0,
+   "mismo_largo": true
+  },
+  "03-sparring": {
+   "cuadros": 5248,
+   "distintos": 0,
+   "primer_distinto": null,
+   "fraccion": 1.0,
+   "mismo_largo": true
+  },
+  "04-sparring": {
+   "cuadros": 5479,
+   "distintos": 0,
+   "primer_distinto": null,
+   "fraccion": 1.0,
+   "mismo_largo": true
+  },
+  "sparring-3-rounds": {
+   "cuadros": 17399,
+   "distintos": 0,
+   "primer_distinto": null,
+   "fraccion": 1.0,
+   "mismo_largo": true
+  },
+  "pacquiao_margarito": {
+   "cuadros": 136364,
+   "distintos": 0,
+   "primer_distinto": null,
+   "fraccion": 1.0,
+   "mismo_largo": true
+  }
+ },
+ "pasa": true
+}

@@ -79,9 +79,11 @@ def test_boosttrack_devuelve_el_indice_de_la_deteccion(monkeypatch):
 def test_resumen_c1_suma_y_separa_sin_siembra():
     from medir_e13 import resumen_c1
 
-    f = lambda n, a, b: {"fuente": n, "sin_corte": {"c1_por_track": {"aciertos": a, "evaluables": b}},  # noqa: E731
-                         "con_corte": {"c1_por_segmento": {"aciertos": a + 1, "evaluables": b + 2}}}
+    q = {"bien": 6, "asignados": 8, "peleador": 12}
+    f = lambda n, a, b: {"fuente": n, "sin_corte": {**q, "c1_por_track": {"aciertos": a, "evaluables": b}},  # noqa: E731
+                         "con_corte": {**q, "c1_por_segmento": {"aciertos": a + 1, "evaluables": b + 2}}}
     r = resumen_c1([f("x", 3, 4), f("y", 5, 6), {"fuente": "z"}])
     assert r["fuentes_con_siembra"] == 2 and r["sin_siembra"] == ["z"]
     assert r["sin_corte"] == {"aciertos": 8, "evaluables": 10}
     assert r["con_corte"] == {"aciertos": 10, "evaluables": 14}
+    assert r["por_cuadro"]["sin_corte"]["precision"] == 0.75 and r["por_cuadro"]["con_corte"]["cobertura"] == 0.5

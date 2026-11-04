@@ -1,0 +1,3300 @@
+{
+ "k1": {
+  "Sparring": {
+   "cuadros": 9671,
+   "iguales": 9671,
+   "conflictos": 0,
+   "pasa": true
+  },
+  "01-sparring": {
+   "cuadros": 9899,
+   "iguales": 9899,
+   "conflictos": 0,
+   "pasa": true
+  },
+  "02-sparring": {
+   "cuadros": 9831,
+   "iguales": 9831,
+   "conflictos": 0,
+   "pasa": true
+  },
+  "03-sparring": {
+   "cuadros": 9715,
+   "iguales": 9715,
+   "conflictos": 0,
+   "pasa": true
+  },
+  "04-sparring": {
+   "cuadros": 10481,
+   "iguales": 10481,
+   "conflictos": 0,
+   "pasa": true
+  },
+  "sparring-3-rounds": {
+   "cuadros": 32976,
+   "iguales": 32976,
+   "conflictos": 0,
+   "pasa": true
+  },
+  "pacquiao_margarito": {
+   "cuadros": 20372,
+   "iguales": 20372,
+   "conflictos": 0,
+   "pasa": true
+  }
+ },
+ "p18": {
+  "ocsort": {
+   "regla": {
+    "baja_mixtos": -0.5217391304347826,
+    "sube_cambios": 0.3159609120521173,
+    "mejora": false
+   },
+   "base": {
+    "A": {
+     "cuadros": 48430,
+     "cambios": 161,
+     "cambios_por_minuto": 6.593671938082477,
+     "tracks_distintos": 137
+    },
+    "B": {
+     "cuadros": 49501,
+     "cambios": 146,
+     "cambios_por_minuto": 5.879642725531267,
+     "tracks_distintos": 127
+    },
+    "tracks_mixtos": 23,
+    "cuadros_en_tracks_mixtos": 21039,
+    "cambios_por_minuto": 6.233655507807339
+   },
+   "tracker": {
+    "A": {
+     "cuadros": 48430,
+     "cambios": 208,
+     "cambios_por_minuto": 8.51853269019351,
+     "tracks_distintos": 156
+    },
+    "B": {
+     "cuadros": 49501,
+     "cambios": 196,
+     "cambios_por_minuto": 7.893219001398139,
+     "tracks_distintos": 159
+    },
+    "tracks_mixtos": 35,
+    "cuadros_en_tracks_mixtos": 23586,
+    "cambios_por_minuto": 8.20324698747285
+   },
+   "denominador": {
+    "A": 48430,
+    "B": 49501
+   },
+   "fuentes": [
+    {
+     "denominador": {
+      "A": 4334,
+      "B": 4337
+     },
+     "fps": 29.643,
+     "base": {
+      "A": {
+       "cuadros": 4334,
+       "cambios": 12,
+       "cambios_por_minuto": 4.924540839870789,
+       "tracks_distintos": 13
+      },
+      "B": {
+       "cuadros": 4337,
+       "cambios": 10,
+       "cambios_por_minuto": 4.100945353931289,
+       "tracks_distintos": 10
+      },
+      "tracks_mixtos": 5,
+      "cuadros_en_tracks_mixtos": 4888
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4334,
+       "cambios": 12,
+       "cambios_por_minuto": 4.924540839870789,
+       "tracks_distintos": 12
+      },
+      "B": {
+       "cuadros": 4337,
+       "cambios": 14,
+       "cambios_por_minuto": 5.741323495503805,
+       "tracks_distintos": 13
+      },
+      "tracks_mixtos": 6,
+      "cuadros_en_tracks_mixtos": 2598
+     },
+     "diferencia": {
+      "A_cambios": 0,
+      "B_cambios": 4,
+      "A_tracks_distintos": -1,
+      "B_tracks_distintos": 3,
+      "tracks_mixtos": 1,
+      "cuadros_en_tracks_mixtos": -2290
+     },
+     "fuente": "Sparring"
+    },
+    {
+     "denominador": {
+      "A": 4822,
+      "B": 4937
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 4822,
+       "cambios": 11,
+       "cambios_por_minuto": 4.106180008295313,
+       "tracks_distintos": 12
+      },
+      "B": {
+       "cuadros": 4937,
+       "cambios": 11,
+       "cambios_por_minuto": 4.010532712173385,
+       "tracks_distintos": 11
+      },
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4822,
+       "cambios": 15,
+       "cambios_por_minuto": 5.599336374948154,
+       "tracks_distintos": 14
+      },
+      "B": {
+       "cuadros": 4937,
+       "cambios": 16,
+       "cambios_por_minuto": 5.833502126797651,
+       "tracks_distintos": 15
+      },
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "diferencia": {
+      "A_cambios": 4,
+      "B_cambios": 5,
+      "A_tracks_distintos": 2,
+      "B_tracks_distintos": 4,
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "fuente": "01-sparring"
+    },
+    {
+     "denominador": {
+      "A": 4990,
+      "B": 4727
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 4990,
+       "cambios": 5,
+       "cambios_por_minuto": 1.8036072144288575,
+       "tracks_distintos": 6
+      },
+      "B": {
+       "cuadros": 4727,
+       "cambios": 21,
+       "cambios_por_minuto": 7.996615189337847,
+       "tracks_distintos": 12
+      },
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4990,
+       "cambios": 6,
+       "cambios_por_minuto": 2.1643286573146288,
+       "tracks_distintos": 5
+      },
+      "B": {
+       "cuadros": 4727,
+       "cambios": 23,
+       "cambios_por_minuto": 8.758197588322403,
+       "tracks_distintos": 13
+      },
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "diferencia": {
+      "A_cambios": 1,
+      "B_cambios": 2,
+      "A_tracks_distintos": -1,
+      "B_tracks_distintos": 1,
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "fuente": "02-sparring"
+    },
+    {
+     "denominador": {
+      "A": 4694,
+      "B": 4585
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 4694,
+       "cambios": 17,
+       "cambios_por_minuto": 6.51896037494674,
+       "tracks_distintos": 18
+      },
+      "B": {
+       "cuadros": 4585,
+       "cambios": 16,
+       "cambios_por_minuto": 6.281352235550708,
+       "tracks_distintos": 16
+      },
+      "tracks_mixtos": 5,
+      "cuadros_en_tracks_mixtos": 3296
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4694,
+       "cambios": 22,
+       "cambios_por_minuto": 8.436301661695781,
+       "tracks_distintos": 22
+      },
+      "B": {
+       "cuadros": 4585,
+       "cambios": 23,
+       "cambios_por_minuto": 9.029443838604143,
+       "tracks_distintos": 22
+      },
+      "tracks_mixtos": 7,
+      "cuadros_en_tracks_mixtos": 4783
+     },
+     "diferencia": {
+      "A_cambios": 5,
+      "B_cambios": 7,
+      "A_tracks_distintos": 4,
+      "B_tracks_distintos": 6,
+      "tracks_mixtos": 2,
+      "cuadros_en_tracks_mixtos": 1487
+     },
+     "fuente": "03-sparring"
+    },
+    {
+     "denominador": {
+      "A": 4947,
+      "B": 5221
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 4947,
+       "cambios": 20,
+       "cambios_por_minuto": 7.277137659187386,
+       "tracks_distintos": 18
+      },
+      "B": {
+       "cuadros": 5221,
+       "cambios": 6,
+       "cambios_por_minuto": 2.0685692396092703,
+       "tracks_distintos": 7
+      },
+      "tracks_mixtos": 1,
+      "cuadros_en_tracks_mixtos": 299
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4947,
+       "cambios": 31,
+       "cambios_por_minuto": 11.279563371740448,
+       "tracks_distintos": 22
+      },
+      "B": {
+       "cuadros": 5221,
+       "cambios": 12,
+       "cambios_por_minuto": 4.137138479218541,
+       "tracks_distintos": 11
+      },
+      "tracks_mixtos": 5,
+      "cuadros_en_tracks_mixtos": 4190
+     },
+     "diferencia": {
+      "A_cambios": 11,
+      "B_cambios": 6,
+      "A_tracks_distintos": 4,
+      "B_tracks_distintos": 4,
+      "tracks_mixtos": 4,
+      "cuadros_en_tracks_mixtos": 3891
+     },
+     "fuente": "04-sparring"
+    },
+    {
+     "denominador": {
+      "A": 15572,
+      "B": 15971
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 15572,
+       "cambios": 37,
+       "cambios_por_minuto": 4.276907269458001,
+       "tracks_distintos": 32
+      },
+      "B": {
+       "cuadros": 15971,
+       "cambios": 39,
+       "cambios_por_minuto": 4.395466783545176,
+       "tracks_distintos": 36
+      },
+      "tracks_mixtos": 8,
+      "cuadros_en_tracks_mixtos": 9996
+     },
+     "y26": {
+      "A": {
+       "cuadros": 15572,
+       "cambios": 52,
+       "cambios_por_minuto": 6.010788594913948,
+       "tracks_distintos": 39
+      },
+      "B": {
+       "cuadros": 15971,
+       "cambios": 53,
+       "cambios_por_minuto": 5.973326654561393,
+       "tracks_distintos": 43
+      },
+      "tracks_mixtos": 11,
+      "cuadros_en_tracks_mixtos": 8387
+     },
+     "diferencia": {
+      "A_cambios": 15,
+      "B_cambios": 14,
+      "A_tracks_distintos": 7,
+      "B_tracks_distintos": 7,
+      "tracks_mixtos": 3,
+      "cuadros_en_tracks_mixtos": -1609
+     },
+     "fuente": "sparring-3-rounds"
+    },
+    {
+     "denominador": {
+      "A": 9071,
+      "B": 9723
+     },
+     "fps": 59.94005994005994,
+     "base": {
+      "A": {
+       "cuadros": 9071,
+       "cambios": 59,
+       "cambios_por_minuto": 23.391887574447377,
+       "tracks_distintos": 38
+      },
+      "B": {
+       "cuadros": 9723,
+       "cambios": 43,
+       "cambios_por_minuto": 15.905106926396652,
+       "tracks_distintos": 35
+      },
+      "tracks_mixtos": 4,
+      "cuadros_en_tracks_mixtos": 2560
+     },
+     "y26": {
+      "A": {
+       "cuadros": 9071,
+       "cambios": 70,
+       "cambios_por_minuto": 27.75308695273418,
+       "tracks_distintos": 42
+      },
+      "B": {
+       "cuadros": 9723,
+       "cambios": 55,
+       "cambios_por_minuto": 20.34374141748409,
+       "tracks_distintos": 42
+      },
+      "tracks_mixtos": 6,
+      "cuadros_en_tracks_mixtos": 3628
+     },
+     "diferencia": {
+      "A_cambios": 11,
+      "B_cambios": 12,
+      "A_tracks_distintos": 4,
+      "B_tracks_distintos": 7,
+      "tracks_mixtos": 2,
+      "cuadros_en_tracks_mixtos": 1068
+     },
+     "fuente": "pacquiao_margarito"
+    }
+   ]
+  },
+  "bytetrack": {
+   "regla": {
+    "baja_mixtos": -0.48,
+    "sube_cambios": 0.28780487804878047,
+    "mejora": false
+   },
+   "base": {
+    "A": {
+     "cuadros": 51224,
+     "cambios": 236,
+     "cambios_por_minuto": 9.184936204910057,
+     "tracks_distintos": 153
+    },
+    "B": {
+     "cuadros": 51346,
+     "cambios": 174,
+     "cambios_por_minuto": 6.765590872855621,
+     "tracks_distintos": 137
+    },
+    "tracks_mixtos": 25,
+    "cuadros_en_tracks_mixtos": 23606,
+    "cambios_por_minuto": 7.9746957991239045
+   },
+   "tracker": {
+    "A": {
+     "cuadros": 51224,
+     "cambios": 310,
+     "cambios_por_minuto": 12.064958574246262,
+     "tracks_distintos": 195
+    },
+    "B": {
+     "cuadros": 51346,
+     "cambios": 218,
+     "cambios_por_minuto": 8.476429944152445,
+     "tracks_distintos": 165
+    },
+    "tracks_mixtos": 37,
+    "cuadros_en_tracks_mixtos": 27097,
+    "cambios_por_minuto": 10.269852151066882
+   },
+   "denominador": {
+    "A": 51224,
+    "B": 51346
+   },
+   "fuentes": [
+    {
+     "denominador": {
+      "A": 4866,
+      "B": 4771
+     },
+     "fps": 29.643,
+     "base": {
+      "A": {
+       "cuadros": 4866,
+       "cambios": 15,
+       "cambios_por_minuto": 5.482675709001233,
+       "tracks_distintos": 15
+      },
+      "B": {
+       "cuadros": 4771,
+       "cambios": 12,
+       "cambios_por_minuto": 4.473477258436386,
+       "tracks_distintos": 11
+      },
+      "tracks_mixtos": 5,
+      "cuadros_en_tracks_mixtos": 5491
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4866,
+       "cambios": 23,
+       "cambios_por_minuto": 8.406769420468558,
+       "tracks_distintos": 21
+      },
+      "B": {
+       "cuadros": 4771,
+       "cambios": 26,
+       "cambios_por_minuto": 9.692534059945503,
+       "tracks_distintos": 17
+      },
+      "tracks_mixtos": 7,
+      "cuadros_en_tracks_mixtos": 4338
+     },
+     "diferencia": {
+      "A_cambios": 8,
+      "B_cambios": 14,
+      "A_tracks_distintos": 6,
+      "B_tracks_distintos": 6,
+      "tracks_mixtos": 2,
+      "cuadros_en_tracks_mixtos": -1153
+     },
+     "fuente": "Sparring"
+    },
+    {
+     "denominador": {
+      "A": 4914,
+      "B": 4972
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 4914,
+       "cambios": 11,
+       "cambios_por_minuto": 4.029304029304029,
+       "tracks_distintos": 12
+      },
+      "B": {
+       "cuadros": 4972,
+       "cambios": 11,
+       "cambios_por_minuto": 3.9823008849557526,
+       "tracks_distintos": 11
+      },
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4914,
+       "cambios": 19,
+       "cambios_por_minuto": 6.95970695970696,
+       "tracks_distintos": 17
+      },
+      "B": {
+       "cuadros": 4972,
+       "cambios": 15,
+       "cambios_por_minuto": 5.430410297666936,
+       "tracks_distintos": 15
+      },
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "diferencia": {
+      "A_cambios": 8,
+      "B_cambios": 4,
+      "A_tracks_distintos": 5,
+      "B_tracks_distintos": 4,
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "fuente": "01-sparring"
+    },
+    {
+     "denominador": {
+      "A": 5004,
+      "B": 4805
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 5004,
+       "cambios": 5,
+       "cambios_por_minuto": 1.7985611510791366,
+       "tracks_distintos": 6
+      },
+      "B": {
+       "cuadros": 4805,
+       "cambios": 24,
+       "cambios_por_minuto": 8.99063475546306,
+       "tracks_distintos": 14
+      },
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "y26": {
+      "A": {
+       "cuadros": 5004,
+       "cambios": 8,
+       "cambios_por_minuto": 2.8776978417266186,
+       "tracks_distintos": 8
+      },
+      "B": {
+       "cuadros": 4805,
+       "cambios": 25,
+       "cambios_por_minuto": 9.365244536940688,
+       "tracks_distintos": 14
+      },
+      "tracks_mixtos": 1,
+      "cuadros_en_tracks_mixtos": 440
+     },
+     "diferencia": {
+      "A_cambios": 3,
+      "B_cambios": 1,
+      "A_tracks_distintos": 2,
+      "B_tracks_distintos": 0,
+      "tracks_mixtos": 1,
+      "cuadros_en_tracks_mixtos": 440
+     },
+     "fuente": "02-sparring"
+    },
+    {
+     "denominador": {
+      "A": 4844,
+      "B": 4803
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 4844,
+       "cambios": 24,
+       "cambios_por_minuto": 8.918249380677127,
+       "tracks_distintos": 22
+      },
+      "B": {
+       "cuadros": 4803,
+       "cambios": 22,
+       "cambios_por_minuto": 8.244846970643348,
+       "tracks_distintos": 21
+      },
+      "tracks_mixtos": 5,
+      "cuadros_en_tracks_mixtos": 3410
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4844,
+       "cambios": 30,
+       "cambios_por_minuto": 11.147811725846408,
+       "tracks_distintos": 24
+      },
+      "B": {
+       "cuadros": 4803,
+       "cambios": 31,
+       "cambios_por_minuto": 11.617738913179263,
+       "tracks_distintos": 29
+      },
+      "tracks_mixtos": 5,
+      "cuadros_en_tracks_mixtos": 3767
+     },
+     "diferencia": {
+      "A_cambios": 6,
+      "B_cambios": 9,
+      "A_tracks_distintos": 2,
+      "B_tracks_distintos": 8,
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 357
+     },
+     "fuente": "03-sparring"
+    },
+    {
+     "denominador": {
+      "A": 5149,
+      "B": 5300
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 5149,
+       "cambios": 21,
+       "cambios_por_minuto": 7.341231307049913,
+       "tracks_distintos": 18
+      },
+      "B": {
+       "cuadros": 5300,
+       "cambios": 6,
+       "cambios_por_minuto": 2.0377358490566038,
+       "tracks_distintos": 7
+      },
+      "tracks_mixtos": 1,
+      "cuadros_en_tracks_mixtos": 301
+     },
+     "y26": {
+      "A": {
+       "cuadros": 5149,
+       "cambios": 37,
+       "cambios_por_minuto": 12.93455039813556,
+       "tracks_distintos": 27
+      },
+      "B": {
+       "cuadros": 5300,
+       "cambios": 8,
+       "cambios_por_minuto": 2.716981132075472,
+       "tracks_distintos": 8
+      },
+      "tracks_mixtos": 1,
+      "cuadros_en_tracks_mixtos": 301
+     },
+     "diferencia": {
+      "A_cambios": 16,
+      "B_cambios": 2,
+      "A_tracks_distintos": 9,
+      "B_tracks_distintos": 1,
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "fuente": "04-sparring"
+    },
+    {
+     "denominador": {
+      "A": 16371,
+      "B": 16464
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 16371,
+       "cambios": 79,
+       "cambios_por_minuto": 8.686091258933478,
+       "tracks_distintos": 39
+      },
+      "B": {
+       "cuadros": 16464,
+       "cambios": 42,
+       "cambios_por_minuto": 4.591836734693878,
+       "tracks_distintos": 38
+      },
+      "tracks_mixtos": 10,
+      "cuadros_en_tracks_mixtos": 11524
+     },
+     "y26": {
+      "A": {
+       "cuadros": 16371,
+       "cambios": 90,
+       "cambios_por_minuto": 9.895547003848268,
+       "tracks_distintos": 49
+      },
+      "B": {
+       "cuadros": 16464,
+       "cambios": 47,
+       "cambios_por_minuto": 5.1384839650145775,
+       "tracks_distintos": 45
+      },
+      "tracks_mixtos": 16,
+      "cuadros_en_tracks_mixtos": 15072
+     },
+     "diferencia": {
+      "A_cambios": 11,
+      "B_cambios": 5,
+      "A_tracks_distintos": 10,
+      "B_tracks_distintos": 7,
+      "tracks_mixtos": 6,
+      "cuadros_en_tracks_mixtos": 3548
+     },
+     "fuente": "sparring-3-rounds"
+    },
+    {
+     "denominador": {
+      "A": 10076,
+      "B": 10231
+     },
+     "fps": 59.94005994005994,
+     "base": {
+      "A": {
+       "cuadros": 10076,
+       "cambios": 81,
+       "cambios_por_minuto": 28.911144433176982,
+       "tracks_distintos": 41
+      },
+      "B": {
+       "cuadros": 10231,
+       "cambios": 57,
+       "cambios_por_minuto": 20.036653796794543,
+       "tracks_distintos": 35
+      },
+      "tracks_mixtos": 4,
+      "cuadros_en_tracks_mixtos": 2880
+     },
+     "y26": {
+      "A": {
+       "cuadros": 10076,
+       "cambios": 103,
+       "cambios_por_minuto": 36.763554032311475,
+       "tracks_distintos": 49
+      },
+      "B": {
+       "cuadros": 10231,
+       "cambios": 66,
+       "cambios_por_minuto": 23.200335975235788,
+       "tracks_distintos": 37
+      },
+      "tracks_mixtos": 7,
+      "cuadros_en_tracks_mixtos": 3179
+     },
+     "diferencia": {
+      "A_cambios": 22,
+      "B_cambios": 9,
+      "A_tracks_distintos": 8,
+      "B_tracks_distintos": 2,
+      "tracks_mixtos": 3,
+      "cuadros_en_tracks_mixtos": 299
+     },
+     "fuente": "pacquiao_margarito"
+    }
+   ]
+  },
+  "boosttrack": {
+   "regla": {
+    "baja_mixtos": 0.21739130434782608,
+    "sube_cambios": 0.4984326018808775,
+    "mejora": false
+   },
+   "base": {
+    "A": {
+     "cuadros": 48727,
+     "cambios": 170,
+     "cambios_por_minuto": 6.919182714262994,
+     "tracks_distintos": 137
+    },
+    "B": {
+     "cuadros": 49680,
+     "cambios": 149,
+     "cambios_por_minuto": 5.976032885611382,
+     "tracks_distintos": 129
+    },
+    "tracks_mixtos": 23,
+    "cuadros_en_tracks_mixtos": 21271,
+    "cambios_por_minuto": 6.444144480242123
+   },
+   "tracker": {
+    "A": {
+     "cuadros": 48727,
+     "cambios": 264,
+     "cambios_por_minuto": 10.745083744502532,
+     "tracks_distintos": 194
+    },
+    "B": {
+     "cuadros": 49680,
+     "cambios": 214,
+     "cambios_por_minuto": 8.583027097455272,
+     "tracks_distintos": 176
+    },
+    "tracks_mixtos": 18,
+    "cuadros_en_tracks_mixtos": 10291,
+    "cambios_por_minuto": 9.6561161804255
+   },
+   "denominador": {
+    "A": 48727,
+    "B": 49680
+   },
+   "fuentes": [
+    {
+     "denominador": {
+      "A": 4510,
+      "B": 4435
+     },
+     "fps": 29.643,
+     "base": {
+      "A": {
+       "cuadros": 4510,
+       "cambios": 12,
+       "cambios_por_minuto": 4.732363636363637,
+       "tracks_distintos": 13
+      },
+      "B": {
+       "cuadros": 4435,
+       "cambios": 10,
+       "cambios_por_minuto": 4.01032694475761,
+       "tracks_distintos": 10
+      },
+      "tracks_mixtos": 5,
+      "cuadros_en_tracks_mixtos": 5060
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4510,
+       "cambios": 21,
+       "cambios_por_minuto": 8.281636363636364,
+       "tracks_distintos": 19
+      },
+      "B": {
+       "cuadros": 4435,
+       "cambios": 23,
+       "cambios_por_minuto": 9.223751972942503,
+       "tracks_distintos": 17
+      },
+      "tracks_mixtos": 4,
+      "cuadros_en_tracks_mixtos": 2125
+     },
+     "diferencia": {
+      "A_cambios": 9,
+      "B_cambios": 13,
+      "A_tracks_distintos": 6,
+      "B_tracks_distintos": 7,
+      "tracks_mixtos": -1,
+      "cuadros_en_tracks_mixtos": -2935
+     },
+     "fuente": "Sparring"
+    },
+    {
+     "denominador": {
+      "A": 4814,
+      "B": 4925
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 4814,
+       "cambios": 11,
+       "cambios_por_minuto": 4.113003739094308,
+       "tracks_distintos": 12
+      },
+      "B": {
+       "cuadros": 4925,
+       "cambios": 11,
+       "cambios_por_minuto": 4.020304568527918,
+       "tracks_distintos": 11
+      },
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4814,
+       "cambios": 16,
+       "cambios_por_minuto": 5.982550893228084,
+       "tracks_distintos": 14
+      },
+      "B": {
+       "cuadros": 4925,
+       "cambios": 18,
+       "cambios_por_minuto": 6.5786802030456855,
+       "tracks_distintos": 16
+      },
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "diferencia": {
+      "A_cambios": 5,
+      "B_cambios": 7,
+      "A_tracks_distintos": 2,
+      "B_tracks_distintos": 5,
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "fuente": "01-sparring"
+    },
+    {
+     "denominador": {
+      "A": 4982,
+      "B": 4720
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 4982,
+       "cambios": 5,
+       "cambios_por_minuto": 1.8065034122842232,
+       "tracks_distintos": 6
+      },
+      "B": {
+       "cuadros": 4720,
+       "cambios": 21,
+       "cambios_por_minuto": 8.008474576271187,
+       "tracks_distintos": 12
+      },
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4982,
+       "cambios": 8,
+       "cambios_por_minuto": 2.890405459654757,
+       "tracks_distintos": 7
+      },
+      "B": {
+       "cuadros": 4720,
+       "cambios": 23,
+       "cambios_por_minuto": 8.771186440677965,
+       "tracks_distintos": 14
+      },
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "diferencia": {
+      "A_cambios": 3,
+      "B_cambios": 2,
+      "A_tracks_distintos": 1,
+      "B_tracks_distintos": 2,
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": 0
+     },
+     "fuente": "02-sparring"
+    },
+    {
+     "denominador": {
+      "A": 4670,
+      "B": 4587
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 4670,
+       "cambios": 17,
+       "cambios_por_minuto": 6.552462526766596,
+       "tracks_distintos": 18
+      },
+      "B": {
+       "cuadros": 4587,
+       "cambios": 16,
+       "cambios_por_minuto": 6.278613472858077,
+       "tracks_distintos": 16
+      },
+      "tracks_mixtos": 5,
+      "cuadros_en_tracks_mixtos": 3293
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4670,
+       "cambios": 32,
+       "cambios_por_minuto": 12.33404710920771,
+       "tracks_distintos": 31
+      },
+      "B": {
+       "cuadros": 4587,
+       "cambios": 26,
+       "cambios_por_minuto": 10.202746893394375,
+       "tracks_distintos": 24
+      },
+      "tracks_mixtos": 3,
+      "cuadros_en_tracks_mixtos": 2052
+     },
+     "diferencia": {
+      "A_cambios": 15,
+      "B_cambios": 10,
+      "A_tracks_distintos": 13,
+      "B_tracks_distintos": 8,
+      "tracks_mixtos": -2,
+      "cuadros_en_tracks_mixtos": -1241
+     },
+     "fuente": "03-sparring"
+    },
+    {
+     "denominador": {
+      "A": 4933,
+      "B": 5231
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 4933,
+       "cambios": 20,
+       "cambios_por_minuto": 7.297790391242652,
+       "tracks_distintos": 18
+      },
+      "B": {
+       "cuadros": 5231,
+       "cambios": 6,
+       "cambios_por_minuto": 2.064614796406041,
+       "tracks_distintos": 7
+      },
+      "tracks_mixtos": 1,
+      "cuadros_en_tracks_mixtos": 301
+     },
+     "y26": {
+      "A": {
+       "cuadros": 4933,
+       "cambios": 33,
+       "cambios_por_minuto": 12.041354145550375,
+       "tracks_distintos": 27
+      },
+      "B": {
+       "cuadros": 5231,
+       "cambios": 10,
+       "cambios_por_minuto": 3.4410246606767347,
+       "tracks_distintos": 11
+      },
+      "tracks_mixtos": 3,
+      "cuadros_en_tracks_mixtos": 1724
+     },
+     "diferencia": {
+      "A_cambios": 13,
+      "B_cambios": 4,
+      "A_tracks_distintos": 9,
+      "B_tracks_distintos": 4,
+      "tracks_mixtos": 2,
+      "cuadros_en_tracks_mixtos": 1423
+     },
+     "fuente": "04-sparring"
+    },
+    {
+     "denominador": {
+      "A": 15696,
+      "B": 16064
+     },
+     "fps": 30.0,
+     "base": {
+      "A": {
+       "cuadros": 15696,
+       "cambios": 43,
+       "cambios_por_minuto": 4.931192660550458,
+       "tracks_distintos": 32
+      },
+      "B": {
+       "cuadros": 16064,
+       "cambios": 42,
+       "cambios_por_minuto": 4.706175298804781,
+       "tracks_distintos": 38
+      },
+      "tracks_mixtos": 8,
+      "cuadros_en_tracks_mixtos": 10046
+     },
+     "y26": {
+      "A": {
+       "cuadros": 15696,
+       "cambios": 83,
+       "cambios_por_minuto": 9.51834862385321,
+       "tracks_distintos": 55
+      },
+      "B": {
+       "cuadros": 16064,
+       "cambios": 62,
+       "cambios_por_minuto": 6.947211155378485,
+       "tracks_distintos": 52
+      },
+      "tracks_mixtos": 4,
+      "cuadros_en_tracks_mixtos": 2348
+     },
+     "diferencia": {
+      "A_cambios": 40,
+      "B_cambios": 20,
+      "A_tracks_distintos": 23,
+      "B_tracks_distintos": 14,
+      "tracks_mixtos": -4,
+      "cuadros_en_tracks_mixtos": -7698
+     },
+     "fuente": "sparring-3-rounds"
+    },
+    {
+     "denominador": {
+      "A": 9122,
+      "B": 9718
+     },
+     "fps": 59.94005994005994,
+     "base": {
+      "A": {
+       "cuadros": 9122,
+       "cambios": 62,
+       "cambios_por_minuto": 24.443874476761998,
+       "tracks_distintos": 38
+      },
+      "B": {
+       "cuadros": 9718,
+       "cambios": 43,
+       "cambios_por_minuto": 15.913290249573434,
+       "tracks_distintos": 35
+      },
+      "tracks_mixtos": 4,
+      "cuadros_en_tracks_mixtos": 2571
+     },
+     "y26": {
+      "A": {
+       "cuadros": 9122,
+       "cambios": 71,
+       "cambios_por_minuto": 27.992178836291966,
+       "tracks_distintos": 41
+      },
+      "B": {
+       "cuadros": 9718,
+       "cambios": 52,
+       "cambios_por_minuto": 19.243978906460896,
+       "tracks_distintos": 42
+      },
+      "tracks_mixtos": 4,
+      "cuadros_en_tracks_mixtos": 2042
+     },
+     "diferencia": {
+      "A_cambios": 9,
+      "B_cambios": 9,
+      "A_tracks_distintos": 3,
+      "B_tracks_distintos": 7,
+      "tracks_mixtos": 0,
+      "cuadros_en_tracks_mixtos": -529
+     },
+     "fuente": "pacquiao_margarito"
+    }
+   ]
+  }
+ },
+ "p18c": {
+  "base": {
+   "total": {
+    "fuentes_con_siembra": 6,
+    "sin_siembra": [],
+    "sin_corte": {
+     "aciertos": 98,
+     "evaluables": 107
+    },
+    "con_corte": {
+     "aciertos": 115,
+     "evaluables": 123
+    },
+    "por_cuadro": {
+     "sin_corte": {
+      "bien": 66167,
+      "asignados": 75026,
+      "peleador": 82573,
+      "precision": 0.8819209340761869,
+      "cobertura": 0.8013151998837392
+     },
+     "con_corte": {
+      "bien": 70461,
+      "asignados": 75574,
+      "peleador": 82573,
+      "precision": 0.9323444570884166,
+      "cobertura": 0.8533176704249573
+     }
+    }
+   },
+   "fuentes": [
+    {
+     "fuente": "Sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       1,
+       3
+      ]
+     },
+     "sin_corte": {
+      "bien": 4358,
+      "asignados": 6011,
+      "peleador": 9671,
+      "precision": 0.7250041590417567,
+      "cobertura": 0.45062558163581845,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 21,
+       "evaluables": 7,
+       "aciertos": 6,
+       "invertidos": 1,
+       "descartados": 7,
+       "sin_decidir": 7,
+       "cuadros_peleador": 9671,
+       "cuadros_bien": 4376,
+       "tracks_mixtos": 5
+      }
+     },
+     "con_corte": {
+      "bien": 4379,
+      "asignados": 5474,
+      "peleador": 9671,
+      "precision": 0.7999634636463281,
+      "cobertura": 0.45279702202460964,
+      "c1_por_segmento": {
+       "evaluables": 11,
+       "aciertos": 8
+      },
+      "cortes": [
+       {
+        "track": 1,
+        "cuadro": 612,
+        "medianas": [
+         1.922,
+         -1.78
+        ],
+        "diferencia": 3.702
+       },
+       {
+        "track": 34,
+        "cuadro": 3810,
+        "medianas": [
+         -1.8,
+         1.874
+        ],
+        "diferencia": 3.674
+       },
+       {
+        "track": 34,
+        "cuadro": 4012,
+        "medianas": [
+         -1.714,
+         1.904
+        ],
+        "diferencia": 3.617
+       },
+       {
+        "track": 45,
+        "cuadro": 4383,
+        "medianas": [
+         -1.79,
+         1.425
+        ],
+        "diferencia": 3.215
+       },
+       {
+        "track": 48,
+        "cuadro": 4827,
+        "medianas": [
+         1.762,
+         -1.828
+        ],
+        "diferencia": 3.59
+       },
+       {
+        "track": 52,
+        "cuadro": 4997,
+        "medianas": [
+         0.478,
+         -1.13
+        ],
+        "diferencia": 1.608
+       }
+      ]
+     },
+     "p15d": {
+      "partidos": 5,
+      "mixtos": 5,
+      "partidos_mixtos": 4,
+      "precision_del_corte": 0.8,
+      "recall_del_corte": 0.8
+     },
+     "puente": null
+    },
+    {
+     "fuente": "01-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       38,
+       30
+      ]
+     },
+     "sin_corte": {
+      "bien": 8448,
+      "asignados": 8591,
+      "peleador": 9899,
+      "precision": 0.9833546734955185,
+      "cobertura": 0.8534195373270027,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 23,
+       "evaluables": 14,
+       "aciertos": 14,
+       "invertidos": 0,
+       "descartados": 1,
+       "sin_decidir": 8,
+       "cuadros_peleador": 9899,
+       "cuadros_bien": 8502,
+       "tracks_mixtos": 0
+      }
+     },
+     "con_corte": {
+      "bien": 8448,
+      "asignados": 8591,
+      "peleador": 9899,
+      "precision": 0.9833546734955185,
+      "cobertura": 0.8534195373270027,
+      "c1_por_segmento": {
+       "evaluables": 14,
+       "aciertos": 14
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 0,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": null
+     },
+     "puente": null
+    },
+    {
+     "fuente": "02-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       377,
+       386
+      ]
+     },
+     "sin_corte": {
+      "bien": 9485,
+      "asignados": 10357,
+      "peleador": 9831,
+      "precision": 0.9158057352515208,
+      "cobertura": 0.9648052080154613,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 20,
+       "evaluables": 13,
+       "aciertos": 13,
+       "invertidos": 0,
+       "descartados": 0,
+       "sin_decidir": 7,
+       "cuadros_peleador": 9831,
+       "cuadros_bien": 9531,
+       "tracks_mixtos": 0
+      }
+     },
+     "con_corte": {
+      "bien": 9485,
+      "asignados": 10357,
+      "peleador": 9831,
+      "precision": 0.9158057352515208,
+      "cobertura": 0.9648052080154613,
+      "c1_por_segmento": {
+       "evaluables": 13,
+       "aciertos": 13
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 0,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": null
+     },
+     "puente": null
+    },
+    {
+     "fuente": "03-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       42,
+       65
+      ]
+     },
+     "sin_corte": {
+      "bien": 7063,
+      "asignados": 7591,
+      "peleador": 9715,
+      "precision": 0.9304439467790805,
+      "cobertura": 0.7270200720535255,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 38,
+       "evaluables": 18,
+       "aciertos": 18,
+       "invertidos": 0,
+       "descartados": 0,
+       "sin_decidir": 20,
+       "cuadros_peleador": 9715,
+       "cuadros_bien": 7120,
+       "tracks_mixtos": 5
+      }
+     },
+     "con_corte": {
+      "bien": 7063,
+      "asignados": 7591,
+      "peleador": 9715,
+      "precision": 0.9304439467790805,
+      "cobertura": 0.7270200720535255,
+      "c1_por_segmento": {
+       "evaluables": 18,
+       "aciertos": 18
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 5,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": 0.0
+     },
+     "puente": null
+    },
+    {
+     "fuente": "04-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       60,
+       64
+      ]
+     },
+     "sin_corte": {
+      "bien": 9434,
+      "asignados": 9587,
+      "peleador": 10481,
+      "precision": 0.9840408887034526,
+      "cobertura": 0.9001049518175747,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 24,
+       "evaluables": 12,
+       "aciertos": 11,
+       "invertidos": 1,
+       "descartados": 1,
+       "sin_decidir": 11,
+       "cuadros_peleador": 10481,
+       "cuadros_bien": 9477,
+       "tracks_mixtos": 1
+      }
+     },
+     "con_corte": {
+      "bien": 9434,
+      "asignados": 9587,
+      "peleador": 10481,
+      "precision": 0.9840408887034526,
+      "cobertura": 0.9001049518175747,
+      "c1_por_segmento": {
+       "evaluables": 12,
+       "aciertos": 11
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 1,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": 0.0
+     },
+     "puente": null
+    },
+    {
+     "fuente": "sparring-3-rounds",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       57,
+       62
+      ]
+     },
+     "sin_corte": {
+      "bien": 27379,
+      "asignados": 32889,
+      "peleador": 32976,
+      "precision": 0.8324667822068169,
+      "cobertura": 0.8302704997573993,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 67,
+       "evaluables": 43,
+       "aciertos": 36,
+       "invertidos": 7,
+       "descartados": 1,
+       "sin_decidir": 23,
+       "cuadros_peleador": 32976,
+       "cuadros_bien": 27504,
+       "tracks_mixtos": 10
+      }
+     },
+     "con_corte": {
+      "bien": 31652,
+      "asignados": 33974,
+      "peleador": 32976,
+      "precision": 0.9316536174721846,
+      "cobertura": 0.9598495875788452,
+      "c1_por_segmento": {
+       "evaluables": 55,
+       "aciertos": 51
+      },
+      "cortes": [
+       {
+        "track": 6,
+        "cuadro": 315,
+        "medianas": [
+         1.905,
+         -1.842
+        ],
+        "diferencia": 3.746
+       },
+       {
+        "track": 25,
+        "cuadro": 1198,
+        "medianas": [
+         1.2,
+         -0.816
+        ],
+        "diferencia": 2.017
+       },
+       {
+        "track": 120,
+        "cuadro": 5451,
+        "medianas": [
+         1.752,
+         -1.455
+        ],
+        "diferencia": 3.207
+       },
+       {
+        "track": 122,
+        "cuadro": 5575,
+        "medianas": [
+         -1.504,
+         2.003
+        ],
+        "diferencia": 3.506
+       },
+       {
+        "track": 148,
+        "cuadro": 8383,
+        "medianas": [
+         2.119,
+         -1.647
+        ],
+        "diferencia": 3.766
+       },
+       {
+        "track": 171,
+        "cuadro": 8280,
+        "medianas": [
+         -1.661,
+         2.135
+        ],
+        "diferencia": 3.795
+       },
+       {
+        "track": 198,
+        "cuadro": 9613,
+        "medianas": [
+         2.001,
+         -1.321
+        ],
+        "diferencia": 3.322
+       },
+       {
+        "track": 202,
+        "cuadro": 10047,
+        "medianas": [
+         2.026,
+         -1.203
+        ],
+        "diferencia": 3.229
+       },
+       {
+        "track": 220,
+        "cuadro": 10568,
+        "medianas": [
+         -1.292,
+         0.281
+        ],
+        "diferencia": 1.573
+       },
+       {
+        "track": 220,
+        "cuadro": 10598,
+        "medianas": [
+         0.384,
+         -0.841
+        ],
+        "diferencia": 1.224
+       },
+       {
+        "track": 245,
+        "cuadro": 11965,
+        "medianas": [
+         -0.979,
+         1.066
+        ],
+        "diferencia": 2.045
+       },
+       {
+        "track": 287,
+        "cuadro": 13853,
+        "medianas": [
+         0.322,
+         -1.143
+        ],
+        "diferencia": 1.465
+       },
+       {
+        "track": 299,
+        "cuadro": 14598,
+        "medianas": [
+         1.0,
+         -1.319
+        ],
+        "diferencia": 2.319
+       },
+       {
+        "track": 327,
+        "cuadro": 16945,
+        "medianas": [
+         -1.988,
+         1.977
+        ],
+        "diferencia": 3.965
+       }
+      ]
+     },
+     "p15d": {
+      "partidos": 13,
+      "mixtos": 10,
+      "partidos_mixtos": 4,
+      "precision_del_corte": 0.3076923076923077,
+      "recall_del_corte": 0.4
+     },
+     "puente": null
+    }
+   ]
+  },
+  "ocsort": {
+   "total": {
+    "fuentes_con_siembra": 6,
+    "sin_siembra": [],
+    "sin_corte": {
+     "aciertos": 104,
+     "evaluables": 116
+    },
+    "con_corte": {
+     "aciertos": 116,
+     "evaluables": 133
+    },
+    "por_cuadro": {
+     "sin_corte": {
+      "bien": 63649,
+      "asignados": 75138,
+      "peleador": 79137,
+      "precision": 0.8470946791237456,
+      "cobertura": 0.8042887650530094
+     },
+     "con_corte": {
+      "bien": 65631,
+      "asignados": 74306,
+      "peleador": 79137,
+      "precision": 0.8832530347482034,
+      "cobertura": 0.8293339398764168
+     }
+    }
+   },
+   "fuentes": [
+    {
+     "fuente": "Sparring",
+     "siembra": {
+      "caso": "lista",
+      "semillas": [
+       4,
+       15
+      ]
+     },
+     "sin_corte": {
+      "bien": 3420,
+      "asignados": 4690,
+      "peleador": 8671,
+      "precision": 0.7292110874200426,
+      "cobertura": 0.3944181755276208,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 19,
+       "evaluables": 11,
+       "aciertos": 8,
+       "invertidos": 3,
+       "descartados": 7,
+       "sin_decidir": 1,
+       "cuadros_peleador": 8671,
+       "cuadros_bien": 3450,
+       "tracks_mixtos": 6
+      }
+     },
+     "con_corte": {
+      "bien": 2842,
+      "asignados": 4130,
+      "peleador": 8671,
+      "precision": 0.688135593220339,
+      "cobertura": 0.3277591973244147,
+      "c1_por_segmento": {
+       "evaluables": 13,
+       "aciertos": 7
+      },
+      "cortes": [
+       {
+        "track": 4,
+        "cuadro": 586,
+        "medianas": [
+         1.787,
+         -1.622
+        ],
+        "diferencia": 3.409
+       },
+       {
+        "track": 4,
+        "cuadro": 855,
+        "medianas": [
+         -1.626,
+         1.64
+        ],
+        "diferencia": 3.266
+       },
+       {
+        "track": 39,
+        "cuadro": 4135,
+        "medianas": [
+         -1.587,
+         1.564
+        ],
+        "diferencia": 3.151
+       },
+       {
+        "track": 40,
+        "cuadro": 4179,
+        "medianas": [
+         1.807,
+         -1.564
+        ],
+        "diferencia": 3.37
+       },
+       {
+        "track": 43,
+        "cuadro": 4733,
+        "medianas": [
+         1.743,
+         -1.671
+        ],
+        "diferencia": 3.414
+       },
+       {
+        "track": 46,
+        "cuadro": 5013,
+        "medianas": [
+         -1.469,
+         1.701
+        ],
+        "diferencia": 3.17
+       }
+      ]
+     },
+     "p15d": {
+      "partidos": 5,
+      "mixtos": 6,
+      "partidos_mixtos": 4,
+      "precision_del_corte": 0.8,
+      "recall_del_corte": 0.6666666666666666
+     },
+     "puente": {
+      "conflictos": 13,
+      "iou_mediana": 0.9747863453557578,
+      "tracks_nuevos_usados": 19
+     }
+    },
+    {
+     "fuente": "01-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       36,
+       24
+      ]
+     },
+     "sin_corte": {
+      "bien": 7709,
+      "asignados": 8289,
+      "peleador": 9759,
+      "precision": 0.9300277476173242,
+      "cobertura": 0.7899374935956552,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 29,
+       "evaluables": 13,
+       "aciertos": 13,
+       "invertidos": 0,
+       "descartados": 4,
+       "sin_decidir": 12,
+       "cuadros_peleador": 9759,
+       "cuadros_bien": 7746,
+       "tracks_mixtos": 0
+      }
+     },
+     "con_corte": {
+      "bien": 7709,
+      "asignados": 8289,
+      "peleador": 9759,
+      "precision": 0.9300277476173242,
+      "cobertura": 0.7899374935956552,
+      "c1_por_segmento": {
+       "evaluables": 13,
+       "aciertos": 13
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 0,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": null
+     },
+     "puente": {
+      "conflictos": 3,
+      "iou_mediana": 0.9749552591430686,
+      "tracks_nuevos_usados": 29
+     }
+    },
+    {
+     "fuente": "02-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       257,
+       233
+      ]
+     },
+     "sin_corte": {
+      "bien": 9350,
+      "asignados": 11326,
+      "peleador": 9717,
+      "precision": 0.8255341691682854,
+      "cobertura": 0.9622311412987548,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 18,
+       "evaluables": 13,
+       "aciertos": 12,
+       "invertidos": 1,
+       "descartados": 0,
+       "sin_decidir": 5,
+       "cuadros_peleador": 9717,
+       "cuadros_bien": 9372,
+       "tracks_mixtos": 0
+      }
+     },
+     "con_corte": {
+      "bien": 9350,
+      "asignados": 11326,
+      "peleador": 9717,
+      "precision": 0.8255341691682854,
+      "cobertura": 0.9622311412987548,
+      "c1_por_segmento": {
+       "evaluables": 13,
+       "aciertos": 12
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 0,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": null
+     },
+     "puente": {
+      "conflictos": 0,
+      "iou_mediana": 0.9818492634027629,
+      "tracks_nuevos_usados": 18
+     }
+    },
+    {
+     "fuente": "03-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       4,
+       55
+      ]
+     },
+     "sin_corte": {
+      "bien": 7424,
+      "asignados": 9520,
+      "peleador": 9279,
+      "precision": 0.7798319327731092,
+      "cobertura": 0.8000862161870891,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 37,
+       "evaluables": 21,
+       "aciertos": 19,
+       "invertidos": 2,
+       "descartados": 1,
+       "sin_decidir": 15,
+       "cuadros_peleador": 9279,
+       "cuadros_bien": 7489,
+       "tracks_mixtos": 7
+      }
+     },
+     "con_corte": {
+      "bien": 7424,
+      "asignados": 9520,
+      "peleador": 9279,
+      "precision": 0.7798319327731092,
+      "cobertura": 0.8000862161870891,
+      "c1_por_segmento": {
+       "evaluables": 21,
+       "aciertos": 19
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 7,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": 0.0
+     },
+     "puente": {
+      "conflictos": 51,
+      "iou_mediana": 0.9755239124433749,
+      "tracks_nuevos_usados": 37
+     }
+    },
+    {
+     "fuente": "04-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       48,
+       65
+      ]
+     },
+     "sin_corte": {
+      "bien": 6943,
+      "asignados": 9547,
+      "peleador": 10168,
+      "precision": 0.7272441604692573,
+      "cobertura": 0.6828284815106216,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 28,
+       "evaluables": 12,
+       "aciertos": 10,
+       "invertidos": 2,
+       "descartados": 0,
+       "sin_decidir": 16,
+       "cuadros_peleador": 10168,
+       "cuadros_bien": 6980,
+       "tracks_mixtos": 5
+      }
+     },
+     "con_corte": {
+      "bien": 8793,
+      "asignados": 9547,
+      "peleador": 10168,
+      "precision": 0.92102231067351,
+      "cobertura": 0.864771833202203,
+      "c1_por_segmento": {
+       "evaluables": 15,
+       "aciertos": 15
+      },
+      "cortes": [
+       {
+        "track": 147,
+        "cuadro": 2730,
+        "medianas": [
+         1.854,
+         -0.675
+        ],
+        "diferencia": 2.529
+       },
+       {
+        "track": 147,
+        "cuadro": 2883,
+        "medianas": [
+         1.826,
+         -1.811
+        ],
+        "diferencia": 3.637
+       },
+       {
+        "track": 155,
+        "cuadro": 2738,
+        "medianas": [
+         -0.78,
+         1.787
+        ],
+        "diferencia": 2.567
+       }
+      ]
+     },
+     "p15d": {
+      "partidos": 2,
+      "mixtos": 5,
+      "partidos_mixtos": 2,
+      "precision_del_corte": 1.0,
+      "recall_del_corte": 0.4
+     },
+     "puente": {
+      "conflictos": 32,
+      "iou_mediana": 0.978381704095634,
+      "tracks_nuevos_usados": 28
+     }
+    },
+    {
+     "fuente": "sparring-3-rounds",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       47,
+       53
+      ]
+     },
+     "sin_corte": {
+      "bien": 28803,
+      "asignados": 31766,
+      "peleador": 31543,
+      "precision": 0.9067241704967576,
+      "cobertura": 0.9131344513838252,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 71,
+       "evaluables": 46,
+       "aciertos": 42,
+       "invertidos": 4,
+       "descartados": 0,
+       "sin_decidir": 25,
+       "cuadros_peleador": 31543,
+       "cuadros_bien": 28948,
+       "tracks_mixtos": 11
+      }
+     },
+     "con_corte": {
+      "bien": 29513,
+      "asignados": 31494,
+      "peleador": 31543,
+      "precision": 0.9370991299930146,
+      "cobertura": 0.9356434074121042,
+      "c1_por_segmento": {
+       "evaluables": 58,
+       "aciertos": 50
+      },
+      "cortes": [
+       {
+        "track": 11,
+        "cuadro": 970,
+        "medianas": [
+         -1.841,
+         1.184
+        ],
+        "diferencia": 3.025
+       },
+       {
+        "track": 47,
+        "cuadro": 4688,
+        "medianas": [
+         2.031,
+         -1.739
+        ],
+        "diferencia": 3.77
+       },
+       {
+        "track": 81,
+        "cuadro": 5368,
+        "medianas": [
+         1.929,
+         -0.391
+        ],
+        "diferencia": 2.32
+       },
+       {
+        "track": 92,
+        "cuadro": 5450,
+        "medianas": [
+         1.631,
+         -1.351
+        ],
+        "diferencia": 2.982
+       },
+       {
+        "track": 133,
+        "cuadro": 9613,
+        "medianas": [
+         2.039,
+         -1.234
+        ],
+        "diferencia": 3.273
+       },
+       {
+        "track": 147,
+        "cuadro": 9840,
+        "medianas": [
+         1.902,
+         -1.292
+        ],
+        "diferencia": 3.194
+       },
+       {
+        "track": 151,
+        "cuadro": 9918,
+        "medianas": [
+         2.051,
+         -1.205
+        ],
+        "diferencia": 3.255
+       },
+       {
+        "track": 163,
+        "cuadro": 10537,
+        "medianas": [
+         2.086,
+         -1.084
+        ],
+        "diferencia": 3.17
+       },
+       {
+        "track": 163,
+        "cuadro": 10650,
+        "medianas": [
+         1.639,
+         -1.115
+        ],
+        "diferencia": 2.753
+       },
+       {
+        "track": 170,
+        "cuadro": 11340,
+        "medianas": [
+         1.992,
+         -1.434
+        ],
+        "diferencia": 3.426
+       },
+       {
+        "track": 202,
+        "cuadro": 13421,
+        "medianas": [
+         0.375,
+         -1.723
+        ],
+        "diferencia": 2.098
+       },
+       {
+        "track": 209,
+        "cuadro": 13853,
+        "medianas": [
+         0.349,
+         -1.078
+        ],
+        "diferencia": 1.426
+       },
+       {
+        "track": 209,
+        "cuadro": 14123,
+        "medianas": [
+         -1.058,
+         1.4
+        ],
+        "diferencia": 2.458
+       },
+       {
+        "track": 221,
+        "cuadro": 15482,
+        "medianas": [
+         -1.252,
+         0.411
+        ],
+        "diferencia": 1.663
+       }
+      ]
+     },
+     "p15d": {
+      "partidos": 12,
+      "mixtos": 11,
+      "partidos_mixtos": 4,
+      "precision_del_corte": 0.3333333333333333,
+      "recall_del_corte": 0.36363636363636365
+     },
+     "puente": {
+      "conflictos": 37,
+      "iou_mediana": 0.9757461061911349,
+      "tracks_nuevos_usados": 71
+     }
+    }
+   ]
+  },
+  "bytetrack": {
+   "total": {
+    "fuentes_con_siembra": 6,
+    "sin_siembra": [],
+    "sin_corte": {
+     "aciertos": 102,
+     "evaluables": 114
+    },
+    "con_corte": {
+     "aciertos": 120,
+     "evaluables": 141
+    },
+    "por_cuadro": {
+     "sin_corte": {
+      "bien": 60847,
+      "asignados": 69811,
+      "peleador": 82263,
+      "precision": 0.8715961667931987,
+      "cobertura": 0.7396642475961246
+     },
+     "con_corte": {
+      "bien": 63545,
+      "asignados": 71772,
+      "peleador": 82263,
+      "precision": 0.8853731260101433,
+      "cobertura": 0.7724614954475281
+     }
+    }
+   },
+   "fuentes": [
+    {
+     "fuente": "Sparring",
+     "siembra": {
+      "caso": "lista",
+      "semillas": [
+       36,
+       3
+      ]
+     },
+     "sin_corte": {
+      "bien": 1778,
+      "asignados": 3001,
+      "peleador": 9637,
+      "precision": 0.5924691769410196,
+      "cobertura": 0.18449725018159177,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 31,
+       "evaluables": 4,
+       "aciertos": 3,
+       "invertidos": 1,
+       "descartados": 13,
+       "sin_decidir": 14,
+       "cuadros_peleador": 9637,
+       "cuadros_bien": 1782,
+       "tracks_mixtos": 7
+      }
+     },
+     "con_corte": {
+      "bien": 1009,
+      "asignados": 5065,
+      "peleador": 9637,
+      "precision": 0.19921026653504442,
+      "cobertura": 0.10470063297706755,
+      "c1_por_segmento": {
+       "evaluables": 15,
+       "aciertos": 4
+      },
+      "cortes": [
+       {
+        "track": 3,
+        "cuadro": 596,
+        "medianas": [
+         -1.945,
+         1.976
+        ],
+        "diferencia": 3.921
+       },
+       {
+        "track": 3,
+        "cuadro": 765,
+        "medianas": [
+         2.011,
+         -1.945
+        ],
+        "diferencia": 3.956
+       },
+       {
+        "track": 17,
+        "cuadro": 1389,
+        "medianas": [
+         2.0,
+         -1.915
+        ],
+        "diferencia": 3.914
+       },
+       {
+        "track": 36,
+        "cuadro": 2896,
+        "medianas": [
+         -1.709,
+         1.949
+        ],
+        "diferencia": 3.658
+       },
+       {
+        "track": 51,
+        "cuadro": 3914,
+        "medianas": [
+         1.866,
+         -1.827
+        ],
+        "diferencia": 3.693
+       },
+       {
+        "track": 51,
+        "cuadro": 4003,
+        "medianas": [
+         1.835,
+         -1.843
+        ],
+        "diferencia": 3.677
+       },
+       {
+        "track": 60,
+        "cuadro": 4773,
+        "medianas": [
+         1.943,
+         -1.921
+        ],
+        "diferencia": 3.864
+       }
+      ]
+     },
+     "p15d": {
+      "partidos": 5,
+      "mixtos": 7,
+      "partidos_mixtos": 5,
+      "precision_del_corte": 1.0,
+      "recall_del_corte": 0.7142857142857143
+     },
+     "puente": {
+      "conflictos": 4,
+      "iou_mediana": 0.9143524985096206,
+      "tracks_nuevos_usados": 31
+     }
+    },
+    {
+     "fuente": "01-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       51,
+       35
+      ]
+     },
+     "sin_corte": {
+      "bien": 8937,
+      "asignados": 9052,
+      "peleador": 9886,
+      "precision": 0.9872956252761821,
+      "cobertura": 0.9040056645761683,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 32,
+       "evaluables": 22,
+       "aciertos": 22,
+       "invertidos": 0,
+       "descartados": 2,
+       "sin_decidir": 8,
+       "cuadros_peleador": 9886,
+       "cuadros_bien": 9020,
+       "tracks_mixtos": 0
+      }
+     },
+     "con_corte": {
+      "bien": 8937,
+      "asignados": 9052,
+      "peleador": 9886,
+      "precision": 0.9872956252761821,
+      "cobertura": 0.9040056645761683,
+      "c1_por_segmento": {
+       "evaluables": 22,
+       "aciertos": 22
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 0,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": null
+     },
+     "puente": {
+      "conflictos": 2,
+      "iou_mediana": 0.9151533477416977,
+      "tracks_nuevos_usados": 32
+     }
+    },
+    {
+     "fuente": "02-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       494,
+       492
+      ]
+     },
+     "sin_corte": {
+      "bien": 9572,
+      "asignados": 10221,
+      "peleador": 9809,
+      "precision": 0.9365032775657959,
+      "cobertura": 0.9758385156488939,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 21,
+       "evaluables": 14,
+       "aciertos": 14,
+       "invertidos": 0,
+       "descartados": 0,
+       "sin_decidir": 7,
+       "cuadros_peleador": 9809,
+       "cuadros_bien": 9601,
+       "tracks_mixtos": 1
+      }
+     },
+     "con_corte": {
+      "bien": 9613,
+      "asignados": 10221,
+      "peleador": 9809,
+      "precision": 0.9405146267488504,
+      "cobertura": 0.9800183504944439,
+      "c1_por_segmento": {
+       "evaluables": 15,
+       "aciertos": 15
+      },
+      "cortes": [
+       {
+        "track": 492,
+        "cuadro": 3758,
+        "medianas": [
+         0.75,
+         -0.852
+        ],
+        "diferencia": 1.602
+       }
+      ]
+     },
+     "p15d": {
+      "partidos": 1,
+      "mixtos": 1,
+      "partidos_mixtos": 1,
+      "precision_del_corte": 1.0,
+      "recall_del_corte": 1.0
+     },
+     "puente": {
+      "conflictos": 0,
+      "iou_mediana": 0.9295361624711612,
+      "tracks_nuevos_usados": 21
+     }
+    },
+    {
+     "fuente": "03-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       49,
+       86
+      ]
+     },
+     "sin_corte": {
+      "bien": 4821,
+      "asignados": 5143,
+      "peleador": 9647,
+      "precision": 0.93739062803811,
+      "cobertura": 0.4997408520783663,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 48,
+       "evaluables": 14,
+       "aciertos": 14,
+       "invertidos": 0,
+       "descartados": 0,
+       "sin_decidir": 34,
+       "cuadros_peleador": 9647,
+       "cuadros_bien": 4861,
+       "tracks_mixtos": 5
+      }
+     },
+     "con_corte": {
+      "bien": 4821,
+      "asignados": 5143,
+      "peleador": 9647,
+      "precision": 0.93739062803811,
+      "cobertura": 0.4997408520783663,
+      "c1_por_segmento": {
+       "evaluables": 14,
+       "aciertos": 14
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 5,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": 0.0
+     },
+     "puente": {
+      "conflictos": 3,
+      "iou_mediana": 0.9166537231787141,
+      "tracks_nuevos_usados": 48
+     }
+    },
+    {
+     "fuente": "04-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       78,
+       35
+      ]
+     },
+     "sin_corte": {
+      "bien": 9026,
+      "asignados": 9610,
+      "peleador": 10449,
+      "precision": 0.9392299687825182,
+      "cobertura": 0.8638147191118767,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 34,
+       "evaluables": 14,
+       "aciertos": 14,
+       "invertidos": 0,
+       "descartados": 1,
+       "sin_decidir": 19,
+       "cuadros_peleador": 10449,
+       "cuadros_bien": 9067,
+       "tracks_mixtos": 1
+      }
+     },
+     "con_corte": {
+      "bien": 9026,
+      "asignados": 9610,
+      "peleador": 10449,
+      "precision": 0.9392299687825182,
+      "cobertura": 0.8638147191118767,
+      "c1_por_segmento": {
+       "evaluables": 14,
+       "aciertos": 14
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 1,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": 0.0
+     },
+     "puente": {
+      "conflictos": 0,
+      "iou_mediana": 0.9193920705471086,
+      "tracks_nuevos_usados": 34
+     }
+    },
+    {
+     "fuente": "sparring-3-rounds",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       397,
+       405
+      ]
+     },
+     "sin_corte": {
+      "bien": 26713,
+      "asignados": 32784,
+      "peleador": 32835,
+      "precision": 0.8148182040019522,
+      "cobertura": 0.8135526115425613,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 78,
+       "evaluables": 46,
+       "aciertos": 35,
+       "invertidos": 11,
+       "descartados": 0,
+       "sin_decidir": 32,
+       "cuadros_peleador": 32835,
+       "cuadros_bien": 26819,
+       "tracks_mixtos": 16
+      }
+     },
+     "con_corte": {
+      "bien": 30139,
+      "asignados": 32681,
+      "peleador": 32835,
+      "precision": 0.9222178023928277,
+      "cobertura": 0.9178924927668646,
+      "c1_por_segmento": {
+       "evaluables": 61,
+       "aciertos": 51
+      },
+      "cortes": [
+       {
+        "track": 33,
+        "cuadro": 1043,
+        "medianas": [
+         -1.839,
+         1.189
+        ],
+        "diferencia": 3.028
+       },
+       {
+        "track": 33,
+        "cuadro": 1203,
+        "medianas": [
+         1.189,
+         -0.478
+        ],
+        "diferencia": 1.667
+       },
+       {
+        "track": 165,
+        "cuadro": 5372,
+        "medianas": [
+         2.146,
+         -1.171
+        ],
+        "diferencia": 3.317
+       },
+       {
+        "track": 165,
+        "cuadro": 5881,
+        "medianas": [
+         1.903,
+         -1.415
+        ],
+        "diferencia": 3.318
+       },
+       {
+        "track": 167,
+        "cuadro": 5478,
+        "medianas": [
+         0.355,
+         -1.498
+        ],
+        "diferencia": 1.853
+       },
+       {
+        "track": 200,
+        "cuadro": 7311,
+        "medianas": [
+         2.059,
+         -1.767
+        ],
+        "diferencia": 3.826
+       },
+       {
+        "track": 214,
+        "cuadro": 7218,
+        "medianas": [
+         -1.891,
+         2.052
+        ],
+        "diferencia": 3.943
+       },
+       {
+        "track": 231,
+        "cuadro": 10111,
+        "medianas": [
+         -1.53,
+         0.46
+        ],
+        "diferencia": 1.99
+       },
+       {
+        "track": 262,
+        "cuadro": 9918,
+        "medianas": [
+         1.914,
+         -1.444
+        ],
+        "diferencia": 3.358
+       },
+       {
+        "track": 278,
+        "cuadro": 10588,
+        "medianas": [
+         -1.211,
+         0.553
+        ],
+        "diferencia": 1.764
+       },
+       {
+        "track": 285,
+        "cuadro": 10858,
+        "medianas": [
+         1.985,
+         -1.146
+        ],
+        "diferencia": 3.131
+       },
+       {
+        "track": 297,
+        "cuadro": 10780,
+        "medianas": [
+         -0.861,
+         1.926
+        ],
+        "diferencia": 2.787
+       },
+       {
+        "track": 353,
+        "cuadro": 13438,
+        "medianas": [
+         0.944,
+         -1.674
+        ],
+        "diferencia": 2.618
+       },
+       {
+        "track": 362,
+        "cuadro": 14819,
+        "medianas": [
+         2.012,
+         -1.36
+        ],
+        "diferencia": 3.372
+       },
+       {
+        "track": 362,
+        "cuadro": 15481,
+        "medianas": [
+         -1.364,
+         1.155
+        ],
+        "diferencia": 2.52
+       },
+       {
+        "track": 381,
+        "cuadro": 14819,
+        "medianas": [
+         -1.317,
+         1.965
+        ],
+        "diferencia": 3.282
+       },
+       {
+        "track": 390,
+        "cuadro": 15083,
+        "medianas": [
+         1.769,
+         -1.336
+        ],
+        "diferencia": 3.106
+       },
+       {
+        "track": 427,
+        "cuadro": 16948,
+        "medianas": [
+         -1.184,
+         1.918
+        ],
+        "diferencia": 3.102
+       }
+      ]
+     },
+     "p15d": {
+      "partidos": 15,
+      "mixtos": 16,
+      "partidos_mixtos": 10,
+      "precision_del_corte": 0.6666666666666666,
+      "recall_del_corte": 0.625
+     },
+     "puente": {
+      "conflictos": 2,
+      "iou_mediana": 0.9215198004097763,
+      "tracks_nuevos_usados": 78
+     }
+    }
+   ]
+  },
+  "boosttrack": {
+   "total": {
+    "fuentes_con_siembra": 6,
+    "sin_siembra": [],
+    "sin_corte": {
+     "aciertos": 143,
+     "evaluables": 145
+    },
+    "con_corte": {
+     "aciertos": 148,
+     "evaluables": 154
+    },
+    "por_cuadro": {
+     "sin_corte": {
+      "bien": 72661,
+      "asignados": 74401,
+      "peleador": 79567,
+      "precision": 0.9766132175642801,
+      "cobertura": 0.913205223270954
+     },
+     "con_corte": {
+      "bien": 72477,
+      "asignados": 75463,
+      "peleador": 79567,
+      "precision": 0.9604309396657965,
+      "cobertura": 0.910892706775422
+     }
+    }
+   },
+   "fuentes": [
+    {
+     "fuente": "Sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       4,
+       2
+      ]
+     },
+     "sin_corte": {
+      "bien": 5879,
+      "asignados": 6164,
+      "peleador": 8945,
+      "precision": 0.9537637897469176,
+      "cobertura": 0.6572386808272778,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 32,
+       "evaluables": 14,
+       "aciertos": 14,
+       "invertidos": 0,
+       "descartados": 6,
+       "sin_decidir": 12,
+       "cuadros_peleador": 8945,
+       "cuadros_bien": 5940,
+       "tracks_mixtos": 4
+      }
+     },
+     "con_corte": {
+      "bien": 5914,
+      "asignados": 6164,
+      "peleador": 8945,
+      "precision": 0.9594419208306295,
+      "cobertura": 0.661151481274455,
+      "c1_por_segmento": {
+       "evaluables": 17,
+       "aciertos": 16
+      },
+      "cortes": [
+       {
+        "track": 46,
+        "cuadro": 2836,
+        "medianas": [
+         -1.799,
+         1.814
+        ],
+        "diferencia": 3.612
+       },
+       {
+        "track": 63,
+        "cuadro": 4003,
+        "medianas": [
+         2.006,
+         -2.028
+        ],
+        "diferencia": 4.034
+       },
+       {
+        "track": 73,
+        "cuadro": 4811,
+        "medianas": [
+         2.051,
+         -2.126
+        ],
+        "diferencia": 4.177
+       },
+       {
+        "track": 80,
+        "cuadro": 5013,
+        "medianas": [
+         -2.009,
+         2.277
+        ],
+        "diferencia": 4.286
+       }
+      ]
+     },
+     "p15d": {
+      "partidos": 4,
+      "mixtos": 4,
+      "partidos_mixtos": 2,
+      "precision_del_corte": 0.5,
+      "recall_del_corte": 0.5
+     },
+     "puente": {
+      "conflictos": 11,
+      "iou_mediana": 0.9719701529479504,
+      "tracks_nuevos_usados": 32
+     }
+    },
+    {
+     "fuente": "01-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       47,
+       35
+      ]
+     },
+     "sin_corte": {
+      "bien": 8866,
+      "asignados": 8933,
+      "peleador": 9739,
+      "precision": 0.9924997201388112,
+      "cobertura": 0.9103604066125885,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 30,
+       "evaluables": 20,
+       "aciertos": 20,
+       "invertidos": 0,
+       "descartados": 1,
+       "sin_decidir": 9,
+       "cuadros_peleador": 9739,
+       "cuadros_bien": 8928,
+       "tracks_mixtos": 0
+      }
+     },
+     "con_corte": {
+      "bien": 8866,
+      "asignados": 8933,
+      "peleador": 9739,
+      "precision": 0.9924997201388112,
+      "cobertura": 0.9103604066125885,
+      "c1_por_segmento": {
+       "evaluables": 20,
+       "aciertos": 20
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 0,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": null
+     },
+     "puente": {
+      "conflictos": 3,
+      "iou_mediana": 0.9708492501226286,
+      "tracks_nuevos_usados": 30
+     }
+    },
+    {
+     "fuente": "02-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       519,
+       528
+      ]
+     },
+     "sin_corte": {
+      "bien": 9476,
+      "asignados": 9967,
+      "peleador": 9702,
+      "precision": 0.9507374335306511,
+      "cobertura": 0.976705833848691,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 21,
+       "evaluables": 14,
+       "aciertos": 14,
+       "invertidos": 0,
+       "descartados": 0,
+       "sin_decidir": 7,
+       "cuadros_peleador": 9702,
+       "cuadros_bien": 9521,
+       "tracks_mixtos": 0
+      }
+     },
+     "con_corte": {
+      "bien": 9476,
+      "asignados": 9967,
+      "peleador": 9702,
+      "precision": 0.9507374335306511,
+      "cobertura": 0.976705833848691,
+      "c1_por_segmento": {
+       "evaluables": 14,
+       "aciertos": 14
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 0,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": null
+     },
+     "puente": {
+      "conflictos": 0,
+      "iou_mediana": 0.9783580566769161,
+      "tracks_nuevos_usados": 21
+     }
+    },
+    {
+     "fuente": "03-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       52,
+       95
+      ]
+     },
+     "sin_corte": {
+      "bien": 8616,
+      "asignados": 9040,
+      "peleador": 9257,
+      "precision": 0.9530973451327434,
+      "cobertura": 0.9307551042454358,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 52,
+       "evaluables": 27,
+       "aciertos": 26,
+       "invertidos": 1,
+       "descartados": 0,
+       "sin_decidir": 25,
+       "cuadros_peleador": 9257,
+       "cuadros_bien": 8726,
+       "tracks_mixtos": 3
+      }
+     },
+     "con_corte": {
+      "bien": 8616,
+      "asignados": 9040,
+      "peleador": 9257,
+      "precision": 0.9530973451327434,
+      "cobertura": 0.9307551042454358,
+      "c1_por_segmento": {
+       "evaluables": 27,
+       "aciertos": 26
+      },
+      "cortes": []
+     },
+     "p15d": {
+      "partidos": 0,
+      "mixtos": 3,
+      "partidos_mixtos": 0,
+      "precision_del_corte": null,
+      "recall_del_corte": 0.0
+     },
+     "puente": {
+      "conflictos": 49,
+      "iou_mediana": 0.9711323513486237,
+      "tracks_nuevos_usados": 52
+     }
+    },
+    {
+     "fuente": "04-sparring",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       77,
+       81
+      ]
+     },
+     "sin_corte": {
+      "bien": 8889,
+      "asignados": 8962,
+      "peleador": 10164,
+      "precision": 0.9918544967641152,
+      "cobertura": 0.8745572609208973,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 35,
+       "evaluables": 13,
+       "aciertos": 13,
+       "invertidos": 0,
+       "descartados": 0,
+       "sin_decidir": 22,
+       "cuadros_peleador": 10164,
+       "cuadros_bien": 8940,
+       "tracks_mixtos": 3
+      }
+     },
+     "con_corte": {
+      "bien": 8871,
+      "asignados": 8962,
+      "peleador": 10164,
+      "precision": 0.9898460165141709,
+      "cobertura": 0.8727863046044865,
+      "c1_por_segmento": {
+       "evaluables": 14,
+       "aciertos": 13
+      },
+      "cortes": [
+       {
+        "track": 444,
+        "cuadro": 5408,
+        "medianas": [
+         1.921,
+         -0.429
+        ],
+        "diferencia": 2.349
+       }
+      ]
+     },
+     "p15d": {
+      "partidos": 1,
+      "mixtos": 3,
+      "partidos_mixtos": 0,
+      "precision_del_corte": 0.0,
+      "recall_del_corte": 0.0
+     },
+     "puente": {
+      "conflictos": 27,
+      "iou_mediana": 0.976942267861092,
+      "tracks_nuevos_usados": 35
+     }
+    },
+    {
+     "fuente": "sparring-3-rounds",
+     "siembra": {
+      "caso": "par_sugerido",
+      "semillas": [
+       112,
+       85
+      ]
+     },
+     "sin_corte": {
+      "bien": 30935,
+      "asignados": 31335,
+      "peleador": 31760,
+      "precision": 0.9872347215573639,
+      "cobertura": 0.9740239294710328,
+      "c1_por_track": {
+       "peleadores_en_la_verdad": 103,
+       "evaluables": 57,
+       "aciertos": 56,
+       "invertidos": 1,
+       "descartados": 0,
+       "sin_decidir": 46,
+       "cuadros_peleador": 31760,
+       "cuadros_bien": 31156,
+       "tracks_mixtos": 4
+      }
+     },
+     "con_corte": {
+      "bien": 30734,
+      "asignados": 32397,
+      "peleador": 31760,
+      "precision": 0.9486680865512239,
+      "cobertura": 0.9676952141057934,
+      "c1_por_segmento": {
+       "evaluables": 62,
+       "aciertos": 59
+      },
+      "cortes": [
+       {
+        "track": 35,
+        "cuadro": 1263,
+        "medianas": [
+         1.186,
+         -1.247
+        ],
+        "diferencia": 2.434
+       },
+       {
+        "track": 165,
+        "cuadro": 5370,
+        "medianas": [
+         2.214,
+         -1.438
+        ],
+        "diferencia": 3.652
+       },
+       {
+        "track": 165,
+        "cuadro": 5473,
+        "medianas": [
+         1.654,
+         -1.507
+        ],
+        "diferencia": 3.161
+       },
+       {
+        "track": 274,
+        "cuadro": 9840,
+        "medianas": [
+         2.039,
+         -1.464
+        ],
+        "diferencia": 3.504
+       },
+       {
+        "track": 290,
+        "cuadro": 10047,
+        "medianas": [
+         2.073,
+         -1.271
+        ],
+        "diferencia": 3.344
+       },
+       {
+        "track": 341,
+        "cuadro": 11910,
+        "medianas": [
+         -1.288,
+         0.784
+        ],
+        "diferencia": 2.072
+       },
+       {
+        "track": 436,
+        "cuadro": 15076,
+        "medianas": [
+         2.051,
+         -1.433
+        ],
+        "diferencia": 3.484
+       },
+       {
+        "track": 447,
+        "cuadro": 15479,
+        "medianas": [
+         -1.432,
+         0.529
+        ],
+        "diferencia": 1.961
+       }
+      ]
+     },
+     "p15d": {
+      "partidos": 7,
+      "mixtos": 4,
+      "partidos_mixtos": 1,
+      "precision_del_corte": 0.14285714285714285,
+      "recall_del_corte": 0.25
+     },
+     "puente": {
+      "conflictos": 36,
+      "iou_mediana": 0.971299060813846,
+      "tracks_nuevos_usados": 103
+     }
+    }
+   ]
+  }
+ }
+}

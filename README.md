@@ -955,3 +955,13 @@ PENDIENTE Y PROXIMO PASO
 5. Sub-hipotesis 3 sigue abierta: se mide pose, no la cadena en vivo
 6. Notebook sin medir; n, s y m a 416 y 480 sin medir por la regla
 7. Documentado en docs/experiments/2026-11-04-r11-perfiles.md
+
+04-11 E13: tracker alternativo sobre las detecciones de raiz-v8
+
+1. H13-1 hecho; H13-2 pasa: 180193 cuadros, 0 distintos; K1 al 100%
+2. Ningun tracker cumple P18a (baja 30% de mixtos, cambios hasta +20%)
+3. OC-SORT: mixtos 23 a 35, cambios +31,6%. ByteTrack: 25 a 37, +28,8%
+4. BoostTrack con ReID: mixtos 23 a 18, cambios +49,8%, cuadros en mixtos 21271 a 10291
+5. P18c por cuadro sin corte, precision: base 0,882, BoostTrack 0,977; no es C1
+6. P18d sin medir; base con buffer de 2 s en pacquiao, entorno de T3 fuera de lo que fija BoxMOT
+7. E9 no se arranco; documentado en docs/experiments/2026-11-04-e13-tracker.md

@@ -106,20 +106,29 @@ def resumen_c1(fuentes: list[dict]) -> dict:
         a, b = ruta
         return {k: sum(v[a][b][k] for v in medidas) for k in ("aciertos", "evaluables")}
 
+    def por_cuadro(clave):
+        # los evaluables cambian con el tracker; los cuadros de peleador casi no: es la lectura comparable
+        t = {k: sum(v[clave][k] for v in medidas) for k in ("bien", "asignados", "peleador")}
+        return {**t, "precision": t["bien"] / t["asignados"] if t["asignados"] else None,
+                "cobertura": t["bien"] / t["peleador"] if t["peleador"] else None}
+
     return {"fuentes_con_siembra": len(medidas), "sin_siembra": [v["fuente"] for v in fuentes if "sin_corte" not in v],
-            "sin_corte": suma(("sin_corte", "c1_por_track")), "con_corte": suma(("con_corte", "c1_por_segmento"))}
+            "sin_corte": suma(("sin_corte", "c1_por_track")), "con_corte": suma(("con_corte", "c1_por_segmento")),
+            "por_cuadro": {"sin_corte": por_cuadro("sin_corte"), "con_corte": por_cuadro("con_corte")}}
 
 
 def cmd_medir(a) -> int:
     exigir_h13_2()
-    from puente_identidad import _original, emparejar, verdad
+    from puente_identidad import _original, emparejar, k1, verdad
     from medir_trackeo import comparar, total
 
     pares: dict[str, list[dict]] = {t: [] for t in a.condiciones}
     c1: dict[str, list[dict]] = {t: [] for t in ["base", *a.condiciones]}
+    controles: dict[str, dict] = {}
     for f in c.ORDEN:
         doc, orig = _original(c.RAIZ_V8, f)
         gt = verdad(doc, orig)
+        controles[f] = k1(doc, orig)
         ab = emparejar(gt, orig)[0]
         for t in a.condiciones:
             r = comparar(ab, emparejar(gt, abrir(t, f))[0], doc.video.fps)
@@ -130,7 +139,7 @@ def cmd_medir(a) -> int:
                 c1[t].append(p18c(t, f, doc, orig))
         c.log(f"medido {f}")
 
-    salida: dict = {"p18": {}, "p18c": {t: {"total": resumen_c1(v), "fuentes": v} for t, v in c1.items()}}
+    salida: dict = {"k1": controles, "p18": {}, "p18c": {t: {"total": resumen_c1(v), "fuentes": v} for t, v in c1.items()}}
     for t, fuentes in pares.items():
         tot = total(fuentes)
         cpm_b, cpm_t = c.cambios_por_minuto(tot["base"]), c.cambios_por_minuto(tot["y26"])
