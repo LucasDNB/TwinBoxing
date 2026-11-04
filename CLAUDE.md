@@ -322,7 +322,9 @@ instante exacto del video.
 5. ~~Construir la imagen del worker.~~ **Construida el 20-10**, sin mmaction (el
    clasificador geométrico corre en `twinboxing_env`) y con las versiones de la
    estación. Falta probarla con GPU: el host no tiene el NVIDIA Container Toolkit.
-6. Sesiones de prueba con usuarios (C4, C6).
+6. Sesiones de prueba con usuarios (C4, C6). Al 4-11, C4 y C5 están leídos de la base de A,
+   provisionales hasta que Lucas confirme qué sesiones cuentan
+   (`docs/experiments/2026-11-04-c4-c5-sesiones.md`). C5: mediana 1,892. C6 sin hacer.
 
 Qué sigue y en qué orden, al 20-10: `docs/tareas/2026-10-20-proxima-sesion.md`.
 
@@ -381,24 +383,29 @@ subagentes: `etiquetador-golpes` (a ciegas, con un hook que le bloquea todo meno
 
 ## 6. Experimentos pendientes que bloquean la escritura
 
-Ninguno depende del dataset y ninguno está hecho todavía. **El Capítulo 4 no se
-escribe sin el primero.** El tercero ahora tiene la imagen escrita, aunque sin
-construir.
+Estado al 4-11. El 1 y el 4 están medidos en la estación, el 2 está medido solo para E4 y
+el 3 sigue sin medir.
 
 1. **Benchmark de perfiles de despliegue.** YOLOv8-pose n/s/m/l a 416/480/640 px,
    exportados a TensorRT y ONNX, en desktop y notebook. Medir FPS sostenidos con
    2 peleadores y mAP de keypoints. Los perfiles A/B/C **no se declaran, se
    miden**. Cuidado con el warm-up: los benchmarks de inferencia mienten si se
    promedia desde el primer frame.
+   **Hecho el 4-11 en la estación** (`docs/experiments/2026-11-04-r11-perfiles.md`): A
+   `engine-l-640`, B colapsa en A, C `onnx-l-640`. Falta la notebook.
 2. **Degradación del clasificador** con muestreo de pose cada dos cuadros. Un jab
    dura 200–300 ms: son ~8–9 muestras a 30 fps y ~4 a 15 fps. Decide si el
    perfil B es viable.
+   **Hecho el 4-11 para E4, simulado** (`docs/experiments/2026-11-04-clasificador-15fps.md`):
+   familia 0,732 a 0,718, viable por la regla; uppercut 0,541 a 0,412. Falta el detector.
 3. **PoC de despliegue en nube.** Containerizar el worker, procesar ~20 videos en
    instancia GPU alquilada (presupuesto < 20 USD), medir throughput y costo real
    por hora de video. `despliegue/Dockerfile.worker` ya lleva los dos entornos
    conda; falta construirlo, que es donde se van los días por mmcv.
 4. **Pérdida de precisión de pose entre 1080p y 720p.** Decide la estrategia de
    transcodificado en dispositivo antes de subir.
+   **Hecho el 4-11** (`docs/experiments/2026-11-04-pose-720p.md`): 720p es apto, para libx264
+   `crf 23` y contra 1080p, sin verdad anotada.
 
 ---
 

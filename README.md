@@ -965,3 +965,31 @@ PENDIENTE Y PROXIMO PASO
 5. P18c por cuadro sin corte, precision: base 0,882, BoostTrack 0,977; no es C1
 6. P18d sin medir; base con buffer de 2 s en pacquiao, entorno de T3 fuera de lo que fija BoxMOT
 7. E9 no se arranco; documentado en docs/experiments/2026-11-04-e13-tracker.md
+
+04-11 E11: corte de tracks mixtos, solo desarrollo
+
+1. Sin material de confirmacion: P15a y P15b quedan sin decidir
+2. Exploratorio: precision 0,850 a 0,923 y cobertura 0,788 a 0,872, seis fuentes
+3. El corte sigue apagado; la confirmacion pasa al Cap 8
+4. Documentado en docs/experiments/2026-11-04-e11-tracks-mixtos.md
+
+04-11 C4 y C5 sobre las sesiones de A: provisional
+
+1. Siete sesiones desde el 27-10, todas llegan a Fight-Card, sin trabajos con error
+2. C5: mediana 1,892, pasa en los cinco recortes; maximo 2,061 en videos largos
+3. Falta que Lucas confirme cuales son las sesiones de prueba; C6 sin hacer
+4. Documentado en docs/experiments/2026-11-04-c4-c5-sesiones.md
+
+04-11 Pose a 720p contra 1080p
+
+1. Pre-registro antes de medir; libx264 crf 23, mismos cuadros de R-11
+2. Cajas emparejadas 99,2% y 99,5%; error de muneca 0,79% y 1,14%: apto
+3. Es acuerdo con 1080p, no verdad anotada
+4. Documentado en docs/experiments/2026-11-04-pose-720p.md
+
+04-11 Clasificador con pose a 15 fps
+
+1. Pre-registro antes de medir; E4 completo con muestreo simulado
+2. Familia 0,732 a 0,718: cae 0,013, viable por la regla (0,03)
+3. Uppercut 0,541 a 0,412, n 85; el detector no se midio
+4. Documentado en docs/experiments/2026-11-04-clasificador-15fps.md

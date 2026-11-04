@@ -1,0 +1,31 @@
+{
+ "videos": {
+  "sparring-3": {
+   "cajas_base": 5584,
+   "emparejadas": 5540,
+   "fraccion_emparejada": 0.9921203438395415,
+   "fraccion_munecas_visibles": 0.8592057761732852,
+   "error_muneca_mediana": 0.007878405247368084,
+   "error_muneca_p95": 0.05857635518544581,
+   "n_error": 9281,
+   "mib": 28.943397521972656
+  },
+  "pacquiao": {
+   "cajas_base": 15550,
+   "emparejadas": 15467,
+   "fraccion_emparejada": 0.9946623794212218,
+   "fraccion_munecas_visibles": 0.5608392060515938,
+   "error_muneca_mediana": 0.011448419915089457,
+   "error_muneca_p95": 0.06499717393576608,
+   "n_error": 16773,
+   "mib": 30.13262176513672
+  }
+ },
+ "veredicto": {
+  "por_video": {
+   "sparring-3": true,
+   "pacquiao": true
+  },
+  "apto": true
+ }
+}
