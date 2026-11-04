@@ -945,3 +945,13 @@ PENDIENTE Y PROXIMO PASO
 3. Sin migraciones; /etc/boxtwin.env sin tocar
 4. Respaldos de base y entorno, huella antes y despues; 21 sesiones antes y despues
 5. verificar a ok y Funnel ok; registro en despliegue/PRODUCCION.md
+
+04-11 R-11: benchmark de perfiles de despliegue en la estacion
+
+1. Pre-registro antes de medir; YOLOv8-pose en TensorRT FP16 y ONNX, dos etapas, 12 celdas
+2. Perfil A: l a 640 en TensorRT, mediana 10,3 ms, p95 11,3 ms, 93 fps, mAP 0,672
+3. Perfil B colapsa en A; perfil C: l a 640 en ONNX, 26,0 ms, 38 fps
+4. Ninguna celda paso 40 ms: decide la calidad, no el presupuesto
+5. Sub-hipotesis 3 sigue abierta: se mide pose, no la cadena en vivo
+6. Notebook sin medir; n, s y m a 416 y 480 sin medir por la regla
+7. Documentado en docs/experiments/2026-11-04-r11-perfiles.md
