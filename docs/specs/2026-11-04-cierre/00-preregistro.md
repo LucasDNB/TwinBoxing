@@ -43,7 +43,7 @@ archivo. La lista de sesiones de prueba no estaba fijada en ningún documento. P
 
 - Notebook (§6.1): no hay acceso desde esta máquina.
 - PoC en nube (§6.3): necesita alquilar una instancia, con gasto y credenciales de Lucas.
-- C6: cualitativo, necesita a Suárez o un entrenador y un guion.
+- C6: no se realiza. Decisión de Lucas del 5-11: BoxTwin quedó fuera del alcance y para BoxTwinZ no es necesario.
 - C2 y C7: quedan sin medir y se declaran.
 - E11 confirmación: L3 no llegó (`sparr` tiene dos tracks asignados y `sparr01` nada). Se aplica la
   regla de `03-e11-tracks-mixtos.md` §4: E11 se informa solo con desarrollo, rotulado como exploratorio.

@@ -325,7 +325,8 @@ instante exacto del video.
 6. Sesiones de prueba con usuarios (C4, C6). Al 5-11, nueve sesiones de A
    (`docs/experiments/2026-11-04-c4-c5-sesiones.md`): C4 9 de 9; C5 mediana 1,949, pero las dos
    únicas nuevas de gimnasio, en 4K, dan 8,88 y 4,24. Transcodificar en el servidor no lo resuelve
-   (`docs/experiments/2026-11-05-transcodificar-4k.md`). C6 sin hacer.
+   (`docs/experiments/2026-11-05-transcodificar-4k.md`). C6 no se realiza: decisión de Lucas del
+   5-11, BoxTwin quedó fuera del alcance y para BoxTwinZ no es necesario.
 
 Qué sigue y en qué orden, al 20-10: `docs/tareas/2026-10-20-proxima-sesion.md`.
 

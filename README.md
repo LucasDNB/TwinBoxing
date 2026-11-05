@@ -979,7 +979,7 @@ PENDIENTE Y PROXIMO PASO
 2. C5: mediana 1,949, pasa por la letra
 3. Las dos unicas nuevas de gimnasio, en 4K, dan 8,88 y 4,24: no pasa para 4K de celular
 4. A 4K cada cuadro cuesta 2,5 veces mas; a 60 fps hay el doble de cuadros
-5. C6 sin hacer
+5. C6 no se realiza: BoxTwin quedo fuera del alcance, para BoxTwinZ no es necesario
 6. Documentado en docs/experiments/2026-11-04-c4-c5-sesiones.md
 
 04-11 Pose a 720p contra 1080p

@@ -97,7 +97,7 @@ no estaba en el modelo. Aun así, ninguna condición cumplió la regla: con el t
 servidor, sparr01 queda en 2,21 a 1080p y sparr en 3,02 a 1080p y 30 cuadros por segundo. Si el video
 llegara ya a 1080p, el de 30 cuadros por segundo daría 1,75. El de 60 no entra si se queda a 60."
 
-C6: [Lucas: lo que hayan dicho Suárez o el entrenador. Si no hubo sesión, escribir que C6 no se hizo.]
+DESPUÉS, C6: "La prueba con usuarios (C6) no se realizó. BoxTwin quedó fuera del alcance y para BoxTwinZ no hace falta. Ningún entrenador revisó la Fight-Card, así que no tengo evidencia de que le sirva a uno."
 
 QUÉ CAMBIÓ: C4 y C5 estaban sin medir. Fuentes: `2026-11-04-c4-c5-sesiones.md` y `2026-11-05-transcodificar-4k.md`.
 
