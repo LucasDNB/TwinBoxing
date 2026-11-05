@@ -945,3 +945,63 @@ PENDIENTE Y PROXIMO PASO
 3. Sin migraciones; /etc/boxtwin.env sin tocar
 4. Respaldos de base y entorno, huella antes y despues; 21 sesiones antes y despues
 5. verificar a ok y Funnel ok; registro en despliegue/PRODUCCION.md
+
+04-11 R-11: benchmark de perfiles de despliegue en la estacion
+
+1. Pre-registro antes de medir; YOLOv8-pose en TensorRT FP16 y ONNX, dos etapas, 12 celdas
+2. Perfil A: l a 640 en TensorRT, mediana 10,3 ms, p95 11,3 ms, 93 fps, mAP 0,672
+3. Perfil B colapsa en A; perfil C: l a 640 en ONNX, 26,0 ms, 38 fps
+4. Ninguna celda paso 40 ms: decide la calidad, no el presupuesto
+5. Sub-hipotesis 3 sigue abierta: se mide pose, no la cadena en vivo
+6. Notebook sin medir; n, s y m a 416 y 480 sin medir por la regla
+7. Documentado en docs/experiments/2026-11-04-r11-perfiles.md
+
+04-11 E13: tracker alternativo sobre las detecciones de raiz-v8
+
+1. H13-1 hecho; H13-2 pasa: 180193 cuadros, 0 distintos; K1 al 100%
+2. Ningun tracker cumple P18a (baja 30% de mixtos, cambios hasta +20%)
+3. OC-SORT: mixtos 23 a 35, cambios +31,6%. ByteTrack: 25 a 37, +28,8%
+4. BoostTrack con ReID: mixtos 23 a 18, cambios +49,8%, cuadros en mixtos 21271 a 10291
+5. P18c por cuadro sin corte, precision: base 0,882, BoostTrack 0,977; no es C1
+6. P18d sin medir; base con buffer de 2 s en pacquiao, entorno de T3 fuera de lo que fija BoxMOT
+7. E9 no se arranco; documentado en docs/experiments/2026-11-04-e13-tracker.md
+
+04-11 E11: corte de tracks mixtos, solo desarrollo
+
+1. Sin material de confirmacion: P15a y P15b quedan sin decidir
+2. Exploratorio: precision 0,850 a 0,923 y cobertura 0,788 a 0,872, seis fuentes
+3. El corte sigue apagado; la confirmacion pasa al Cap 8
+4. Documentado en docs/experiments/2026-11-04-e11-tracks-mixtos.md
+
+05-11 C4 y C5 sobre las sesiones de A
+
+1. Nueve sesiones desde el 27-10, todas llegan a Fight-Card, sin trabajos con error
+2. C5: mediana 1,949, pasa por la letra
+3. Las dos unicas nuevas de gimnasio, en 4K, dan 8,88 y 4,24: no pasa para 4K de celular
+4. A 4K cada cuadro cuesta 2,5 veces mas; a 60 fps hay el doble de cuadros
+5. C6 no se realiza: BoxTwin quedo fuera del alcance, para BoxTwinZ no es necesario
+6. Documentado en docs/experiments/2026-11-04-c4-c5-sesiones.md
+
+04-11 Pose a 720p contra 1080p
+
+1. Pre-registro antes de medir; libx264 crf 23, mismos cuadros de R-11
+2. Cajas emparejadas 99,2% y 99,5%; error de muneca 0,79% y 1,14%: apto
+3. Es acuerdo con 1080p, no verdad anotada
+4. Documentado en docs/experiments/2026-11-04-pose-720p.md
+
+04-11 Clasificador con pose a 15 fps
+
+1. Pre-registro antes de medir; E4 completo con muestreo simulado
+2. Familia 0,732 a 0,718: cae 0,013, viable por la regla (0,03)
+3. Uppercut 0,541 a 0,412, n 85; el detector no se midio
+4. Documentado en docs/experiments/2026-11-04-clasificador-15fps.md
+
+05-11 Bajar la resolucion antes de procesar video 4K
+
+1. Pre-registro antes de medir; offline, sin tocar A; control offline a 0,3% de A
+2. Ninguna condicion cumple la regla con el transcodificado en el servidor
+3. sparr01: 4,23 a 2,21 con 1080p; sparr: 8,88 a 3,02 con 1080p a 30 fps
+4. Si llega a 1080p, sparr01 da 1,75; dejando 60 fps no entra
+5. A 1080p el preproceso vuelve a unos 46 ms por cuadro: el costo no estaba en el modelo
+6. Sin identidad ni golpes sobre el video bajado; nada desplegado
+7. Documentado en docs/experiments/2026-11-05-transcodificar-4k.md

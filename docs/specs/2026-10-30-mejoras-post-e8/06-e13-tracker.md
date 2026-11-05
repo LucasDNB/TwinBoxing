@@ -2,6 +2,10 @@
 
 30-10-2026. Fase 2: no corre antes del 17-11. Correcciones hasta antes de H13-1.
 
+**Enmienda 3-11-2026, solo de calendario.** Por pedido de Lucas, E13 corre la noche del 3 al 4-11 en
+vez de después del 17-11, antes de ver ningún resultado de este experimento. Las condiciones, los
+controles y las reglas de §2 a §5 no cambian.
+
 ## 1. La pregunta
 
 Los tracks mixtos los produce el tracker: 23 con v8 y 29 con YOLO26 sobre el denominador común
