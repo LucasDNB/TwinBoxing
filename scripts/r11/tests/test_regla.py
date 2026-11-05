@@ -123,3 +123,16 @@ def test_720p_pide_los_dos_umbrales_en_los_dos_videos():
     assert not regla.veredicto_720p({"a": {**bien, "error_muneca_mediana": 0.021}, "b": bien})["apto"]
     assert not regla.veredicto_720p({})["apto"]
 
+
+def test_factor_4k_suma_el_transcodificado_solo_en_uno():
+    f = regla.factor_4k(10.0, 80.0, 10.0, 50.0)
+    assert f == {"con_transcodificado": 2.0, "sin_transcodificado": 1.8}
+
+
+def test_veredicto_4k_pide_tiempo_y_pose():
+    bien = {"fraccion_emparejada": 0.98, "error_muneca_mediana": 0.02}
+    assert regla.veredicto_4k(2.0, bien)["sirve"]
+    assert not regla.veredicto_4k(2.01, bien)["sirve"]
+    v = regla.veredicto_4k(1.0, {**bien, "error_muneca_mediana": 0.03})
+    assert v["entra_en_tiempo"] and not v["conserva_pose"] and not v["sirve"]
+

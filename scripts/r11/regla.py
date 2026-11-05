@@ -170,3 +170,16 @@ def veredicto_720p(videos: dict[str, dict]) -> dict:
     ok = {v: c["fraccion_emparejada"] >= 0.98 and c["error_muneca_mediana"] <= 0.02 for v, c in videos.items()}
     return {"por_video": ok, "apto": bool(ok) and all(ok.values())}
 
+
+def factor_4k(transcodificar: float, procesar: float, resto: float, duracion: float) -> dict:
+    """Cierre, 01 §2: el factor con el transcodificado en el servidor y sin el."""
+    return {"con_transcodificado": (transcodificar + procesar + resto) / duracion,
+            "sin_transcodificado": (procesar + resto) / duracion}
+
+
+def veredicto_4k(factor: float, conc: dict) -> dict:
+    """Cierre, 01 §2: entra si el factor es <= 2,0; conserva con >= 98% de cajas y error <= 2%."""
+    entra = factor <= 2.0
+    conserva = conc["fraccion_emparejada"] >= 0.98 and conc["error_muneca_mediana"] <= 0.02
+    return {"entra_en_tiempo": entra, "conserva_pose": conserva, "sirve": entra and conserva}
+
