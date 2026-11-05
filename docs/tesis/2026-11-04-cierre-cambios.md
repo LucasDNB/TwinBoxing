@@ -4,8 +4,6 @@ Fuentes: los documentos de `docs/experiments/` del 1 al 4-11. Las fuentes LaTeX 
 repositorio: estos textos se pegan a mano. Como en los cambios anteriores, va el DESPUÉS con dónde
 entra; el ANTES lo pone Lucas. Sigue vigente lo que ya está en los otros `*-cambios.md`.
 
-Lo marcado con corchetes lo tiene que completar o confirmar Lucas. No está medido por mí.
-
 ## 1. Cap 4, perfiles de despliegue
 
 DESPUÉS: "Los perfiles no los declaré, los medí. En la estación, con una RTX 2080 SUPER y dos
