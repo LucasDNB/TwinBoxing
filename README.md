@@ -1001,7 +1001,7 @@ PENDIENTE Y PROXIMO PASO
 1. Pre-registro antes de medir; offline, sin tocar A; control offline a 0,3% de A
 2. Ninguna condicion cumple la regla con el transcodificado en el servidor
 3. sparr01: 4,23 a 2,21 con 1080p; sparr: 8,88 a 3,02 con 1080p a 30 fps
-4. Si llega a 1080p, sparr01 da 1,75; a 60 fps no entra de ninguna forma
+4. Si llega a 1080p, sparr01 da 1,75; dejando 60 fps no entra
 5. A 1080p el preproceso vuelve a unos 46 ms por cuadro: el costo no estaba en el modelo
 6. Sin identidad ni golpes sobre el video bajado; nada desplegado
 7. Documentado en docs/experiments/2026-11-05-transcodificar-4k.md

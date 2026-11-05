@@ -10,7 +10,7 @@ dentro de 2,0 conservando la pose.
 
 Ayuda mucho, pero no alcanza. `sparr01` baja de 4,23 a 2,21 con 1080p, y `sparr` de 8,88 a 3,02 con
 1080p a 30 fps. El caso que se acerca es transcodificar **en el celular**: `sparr01` a 1080p da 1,75 y
-conserva la pose. A 60 fps no hay condición que entre.
+conserva la pose. Si el video queda a 60 fps no hay condición que entre.
 
 ## Resultados
 
@@ -33,8 +33,8 @@ tiempos se comparan con los de A. K-A: ningún trabajo entró en A ni en BoxTwin
    inferencia. Bajar a YOLOv8m, el plan B de C5, no ataca esto. No lo medí.
 2. **60 fps sigue siendo caro.** A la misma resolución son el doble de cuadros, y bajar a 30 fps da
    2,23 sin contar el transcodificado.
-3. **El transcodificado en el servidor pesa.** Cuesta de 61 a 169 s con libx264 en CPU, casi medio
-   punto de factor. No probé `h264_nvenc`, ni decodificar directo a menor resolución.
+3. **El transcodificado en el servidor pesa.** Cuesta de 61 a 169 s con libx264 en CPU, entre 0,3 y
+   0,9 puntos de factor. No probé `h264_nvenc`, ni decodificar directo a menor resolución.
 4. **El error de muñeca no es el problema.** Queda debajo de 1% en todo. Lo que falla es el
    emparejamiento de cajas, que baja con la resolución: a 720p se pierde lo más chico o lejano.
 
@@ -46,7 +46,9 @@ tiempos se comparan con los de A. K-A: ningún trabajo entró en A ni en BoxTwin
    La regla no las separa, y no lo miré. El umbral de 98% venía de `720p`, que comparaba otra cosa:
    allí detecciones sobre tramos con dos personas, acá la salida del tracker en todo el video.
 3. **`completar` y `clasificar` se tomaron de la sesión 4K.** Son 35 y 88 s. Si bajan con el video, el
-   factor real es algo menor; en `sparr01` 1080p con transcodificado no alcanzaría a saberse sin correrlo.
+   factor real es menor. `sparr01` a 1080p con transcodificado no entraría igual: aun con esas etapas en
+   cero da 2,02. `sparr` a 1080p y 30 fps sin transcodificado sí podría entrar: da 2,23 con los 88 s,
+   y 1,74 sin ellos.
 4. **Sin identidad, detector ni Fight-Card** sobre el video bajado. No sé si cambian los golpes.
 5. **Transcodificar en el celular no se probó.** El factor sin transcodificado supone que llega hecho y
    gratis, con un codificador que no es el del teléfono.
