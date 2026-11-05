@@ -92,9 +92,14 @@ letra y no se cumple para video 4K de celular."
 "A 4K cada cuadro cuesta unas 2,5 veces más que a 1080p, y a 60 cuadros por segundo hay el doble de
 cuadros. Las nueve sesiones llegaron a la Fight-Card sin errores de procesamiento."
 
+"Probé bajar la resolución antes de procesar. El costo por cuadro vuelve al de 1080p, lo que muestra que
+no estaba en el modelo. Aun así, ninguna condición cumplió la regla: con el transcodificado en el
+servidor, sparr01 queda en 2,21 a 1080p y sparr en 3,02 a 1080p y 30 cuadros por segundo. Si el video
+llegara ya a 1080p, el de 30 cuadros por segundo daría 1,75. El de 60 no entra de ninguna forma."
+
 C6: [Lucas: lo que hayan dicho Suárez o el entrenador. Si no hubo sesión, escribir que C6 no se hizo.]
 
-QUÉ CAMBIÓ: C4 y C5 estaban sin medir. Fuente: `2026-11-04-c4-c5-sesiones.md`.
+QUÉ CAMBIÓ: C4 y C5 estaban sin medir. Fuentes: `2026-11-04-c4-c5-sesiones.md` y `2026-11-05-transcodificar-4k.md`.
 
 ## 9. Cap 8, líneas futuras
 

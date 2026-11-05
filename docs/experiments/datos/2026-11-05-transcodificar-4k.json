@@ -1,0 +1,175 @@
+{
+ "sparr01-4k": {
+  "transcodificar_s": 0.0,
+  "procesar_s": 759.4873068332672,
+  "etapas": {
+   "preproceso": 665.58,
+   "evidencia": 74.94
+  },
+  "duracion_s": 187.98,
+  "resto_s": 35.511285,
+  "factor": {
+   "con_transcodificado": 4.229165825264748,
+   "sin_transcodificado": 4.229165825264748
+  },
+  "concordancia": {
+   "cajas_base": 21987,
+   "emparejadas": 21987,
+   "fraccion_emparejada": 1.0,
+   "fraccion_munecas_visibles": 0.7459407831900668,
+   "error_muneca_mediana": 0.0,
+   "error_muneca_p95": 0.0,
+   "n_error": 32802
+  },
+  "veredicto": {
+   "entra_en_tiempo": false,
+   "conserva_pose": true,
+   "sirve": false
+  }
+ },
+ "sparr01-1080": {
+  "transcodificar_s": 87.58855390548706,
+  "procesar_s": 292.4476251602173,
+  "etapas": {
+   "preproceso": 255.05,
+   "evidencia": 34.0
+  },
+  "duracion_s": 187.98,
+  "resto_s": 35.511285,
+  "factor": {
+   "con_transcodificado": 2.210594020990022,
+   "sin_transcodificado": 1.7446478889255095
+  },
+  "concordancia": {
+   "cajas_base": 21987,
+   "emparejadas": 21571,
+   "fraccion_emparejada": 0.9810797289307318,
+   "fraccion_munecas_visibles": 0.7491075981642019,
+   "error_muneca_mediana": 0.00506193031875871,
+   "error_muneca_p95": 0.03329012572294001,
+   "n_error": 31825
+  },
+  "veredicto": {
+   "entra_en_tiempo": false,
+   "conserva_pose": true,
+   "sirve": false
+  }
+ },
+ "sparr01-720": {
+  "transcodificar_s": 60.60533881187439,
+  "procesar_s": 235.03338742256165,
+  "etapas": {
+   "preproceso": 203.31,
+   "evidencia": 29.73
+  },
+  "duracion_s": 187.98,
+  "resto_s": 35.511285,
+  "factor": {
+   "con_transcodificado": 1.7616236367402704,
+   "sin_transcodificado": 1.4392205150684203
+  },
+  "concordancia": {
+   "cajas_base": 21987,
+   "emparejadas": 21012,
+   "fraccion_emparejada": 0.9556556146814027,
+   "fraccion_munecas_visibles": 0.7493337140681515,
+   "error_muneca_mediana": 0.009004405896798098,
+   "error_muneca_p95": 0.0577206022969493,
+   "n_error": 30833
+  },
+  "veredicto": {
+   "entra_en_tiempo": true,
+   "conserva_pose": false,
+   "sirve": false
+  }
+ },
+ "sparr-1080": {
+  "transcodificar_s": 168.9010488986969,
+  "procesar_s": 590.449257850647,
+  "etapas": {
+   "preproceso": 485.83,
+   "evidencia": 102.42
+  },
+  "duracion_s": 180.009,
+  "resto_s": 88.262332,
+  "factor": {
+   "con_transcodificado": 4.708723667979623,
+   "sin_transcodificado": 3.7704314220436035
+  },
+  "concordancia": {
+   "cajas_base": 71641,
+   "emparejadas": 69837,
+   "fraccion_emparejada": 0.9748188886252286,
+   "fraccion_munecas_visibles": 0.8350158225582428,
+   "error_muneca_mediana": 0.005446087793369831,
+   "error_muneca_p95": 0.04299464142749911,
+   "n_error": 115438
+  },
+  "veredicto": {
+   "entra_en_tiempo": false,
+   "conserva_pose": false,
+   "sirve": false
+  }
+ },
+ "sparr-720": {
+  "transcodificar_s": 123.65769958496094,
+  "procesar_s": 480.7289388179779,
+  "etapas": {
+   "preproceso": 389.14,
+   "evidencia": 90.08
+  },
+  "duracion_s": 180.009,
+  "resto_s": 88.262332,
+  "factor": {
+   "con_transcodificado": 3.847857442699748,
+   "sin_transcodificado": 3.160904570426912
+  },
+  "concordancia": {
+   "cajas_base": 71641,
+   "emparejadas": 67062,
+   "fraccion_emparejada": 0.9360840859284488,
+   "fraccion_munecas_visibles": 0.8387760579762011,
+   "error_muneca_mediana": 0.009157662477924369,
+   "error_muneca_p95": 0.06862887606031458,
+   "n_error": 110879
+  },
+  "veredicto": {
+   "entra_en_tiempo": false,
+   "conserva_pose": false,
+   "sirve": false
+  }
+ },
+ "sparr-1080-30": {
+  "transcodificar_s": 141.50527381896973,
+  "procesar_s": 313.1016516685486,
+  "etapas": {
+   "preproceso": 257.58,
+   "evidencia": 52.15
+  },
+  "duracion_s": 180.009,
+  "resto_s": 88.262332,
+  "factor": {
+   "con_transcodificado": 3.015789529898607,
+   "sin_transcodificado": 2.2296884248484723
+  },
+  "concordancia": {
+   "cajas_base": 35865,
+   "emparejadas": 34716,
+   "fraccion_emparejada": 0.9679631953157675,
+   "fraccion_munecas_visibles": 0.8376685101970273,
+   "error_muneca_mediana": 0.007843111326189738,
+   "error_muneca_p95": 0.058663442565772286,
+   "n_error": 57370
+  },
+  "veredicto": {
+   "entra_en_tiempo": false,
+   "conserva_pose": false,
+   "sirve": false
+  }
+ },
+ "k_4k": {
+  "offline": 740.52,
+  "a": 742.4,
+  "pasa": true
+ }
+}
