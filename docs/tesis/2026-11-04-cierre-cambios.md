@@ -83,14 +83,18 @@ QUÉ CAMBIÓ: identidad estable no tenía texto. Fuentes: `2026-11-03-identidad-
 
 ## 8. Cap 7, criterios C4, C5 y C6
 
-DESPUÉS, si Lucas confirma las sesiones: "Sobre [las N sesiones de prueba], el tiempo hasta la
-Fight-Card dio una mediana de [1,892] veces la duración del video, contra un máximo de 2,0. Las dos
-sesiones largas, de 28 y 36 minutos, quedaron en 2,04 y 2,06: un video largo tarda más de dos veces su
-duración. [Las siete] llegaron a la Fight-Card sin errores de procesamiento."
+DESPUÉS: "Medí el tiempo hasta la Fight-Card sobre nueve sesiones de la estación. La mediana dio 1,949
+veces la duración del video, debajo del máximo de 2,0, pero ese número esconde lo importante. La
+muestra tiene ensayos, bolsa y material de transmisión, y solo dos sesiones nuevas de gimnasio. Esas
+dos, filmadas en 4K, tardaron 8,88 y 4,24 veces la duración del video. El criterio se cumple por la
+letra y no se cumple para video 4K de celular."
+
+"A 4K cada cuadro cuesta unas 2,5 veces más que a 1080p, y a 60 cuadros por segundo hay el doble de
+cuadros. Las nueve sesiones llegaron a la Fight-Card sin errores de procesamiento."
 
 C6: [Lucas: lo que hayan dicho Suárez o el entrenador. Si no hubo sesión, escribir que C6 no se hizo.]
 
-QUÉ CAMBIÓ: C4 y C5 estaban sin medir. Fuente: `2026-11-04-c4-c5-sesiones.md`. Son provisionales.
+QUÉ CAMBIÓ: C4 y C5 estaban sin medir. Fuente: `2026-11-04-c4-c5-sesiones.md`.
 
 ## 9. Cap 8, líneas futuras
 

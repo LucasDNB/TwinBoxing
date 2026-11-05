@@ -24,3 +24,10 @@ def test_recortes_separan_cuenta_transmision_y_largo():
     assert x["sin_transmision"]["n"] == 2
     assert x["tres_minutos_o_mas"]["n"] == 2
     assert x["tres_minutos_o_mas_sin_transmision"]["n"] == 1
+
+
+def test_recorte_de_las_nuevas_de_gimnasio():
+    x = r.recortes([s(r.NUEVAS_GIMNASIO[0], 9.0), s(r.NUEVAS_GIMNASIO[1], 4.0), s("c", 1.0)])
+    assert x["nuevas_de_gimnasio"] == {"n": 2, "mediana": 6.5, "maximo": 9.0, "pasa": False}
+    assert x["sin_las_nuevas_de_gimnasio"]["n"] == 1
+

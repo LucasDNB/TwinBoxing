@@ -973,12 +973,14 @@ PENDIENTE Y PROXIMO PASO
 3. El corte sigue apagado; la confirmacion pasa al Cap 8
 4. Documentado en docs/experiments/2026-11-04-e11-tracks-mixtos.md
 
-04-11 C4 y C5 sobre las sesiones de A: provisional
+05-11 C4 y C5 sobre las sesiones de A
 
-1. Siete sesiones desde el 27-10, todas llegan a Fight-Card, sin trabajos con error
-2. C5: mediana 1,892, pasa en los cinco recortes; maximo 2,061 en videos largos
-3. Falta que Lucas confirme cuales son las sesiones de prueba; C6 sin hacer
-4. Documentado en docs/experiments/2026-11-04-c4-c5-sesiones.md
+1. Nueve sesiones desde el 27-10, todas llegan a Fight-Card, sin trabajos con error
+2. C5: mediana 1,949, pasa por la letra
+3. Las dos unicas nuevas de gimnasio, en 4K, dan 8,88 y 4,24: no pasa para 4K de celular
+4. A 4K cada cuadro cuesta 2,5 veces mas; a 60 fps hay el doble de cuadros
+5. C6 sin hacer
+6. Documentado en docs/experiments/2026-11-04-c4-c5-sesiones.md
 
 04-11 Pose a 720p contra 1080p
 

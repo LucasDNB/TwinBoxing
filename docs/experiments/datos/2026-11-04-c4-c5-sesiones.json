@@ -1,9 +1,9 @@
 {
  "c5": {
   "todas": {
-   "n": 7,
-   "mediana": 1.892,
-   "maximo": 2.061,
+   "n": 9,
+   "mediana": 1.949,
+   "maximo": 8.88,
    "pasa": true
   },
   "otras_cuentas": {
@@ -13,27 +13,39 @@
    "pasa": true
   },
   "sin_transmision": {
-   "n": 6,
-   "mediana": 1.7035,
-   "maximo": 2.04,
+   "n": 8,
+   "mediana": 1.9205,
+   "maximo": 8.88,
    "pasa": true
   },
   "tres_minutos_o_mas": {
-   "n": 4,
-   "mediana": 1.966,
-   "maximo": 2.061,
-   "pasa": true
+   "n": 6,
+   "mediana": 2.0505,
+   "maximo": 8.88,
+   "pasa": false
   },
   "tres_minutos_o_mas_sin_transmision": {
-   "n": 3,
+   "n": 5,
+   "mediana": 2.04,
+   "maximo": 8.88,
+   "pasa": false
+  },
+  "nuevas_de_gimnasio": {
+   "n": 2,
+   "mediana": 6.5595,
+   "maximo": 8.88,
+   "pasa": false
+  },
+  "sin_las_nuevas_de_gimnasio": {
+   "n": 7,
    "mediana": 1.892,
-   "maximo": 2.04,
+   "maximo": 2.061,
    "pasa": true
   }
  },
  "c4": {
-  "sesiones": 7,
-  "llegaron": 7,
+  "sesiones": 9,
+  "llegaron": 9,
   "trabajos_con_error": 0
  },
  "sesiones": [
@@ -96,6 +108,24 @@
    "duracion_s": 637.504,
    "segundos": 965.8,
    "factor": 1.515,
+   "solapada": false,
+   "llego_a_fightcard": true,
+   "trabajos_con_error": 0
+  },
+  {
+   "id": "dbe27831",
+   "duracion_s": 180.009,
+   "segundos": 1598.4,
+   "factor": 8.88,
+   "solapada": false,
+   "llego_a_fightcard": true,
+   "trabajos_con_error": 0
+  },
+  {
+   "id": "fad18e9f",
+   "duracion_s": 187.98,
+   "segundos": 796.8,
+   "factor": 4.239,
    "solapada": false,
    "llego_a_fightcard": true,
    "trabajos_con_error": 0

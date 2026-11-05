@@ -26,6 +26,7 @@ from pathlib import Path
 UMBRAL = 2.0
 CUENTA_FUENTES = "487f4ecfcea240cd972db04fc76d0334"     # la que cargo las fuentes de desarrollo
 TRANSMISION = "3b82b7f8"
+NUEVAS_GIMNASIO = ("dbe27831", "fad18e9f")               # sparr y sparr01, subidos por Lucas el 5-11
 
 
 def recorte(sesiones: list[dict]) -> dict:
@@ -41,7 +42,9 @@ def recortes(sesiones: list[dict]) -> dict:
             "otras_cuentas": recorte([s for s in llegan if s["cuenta"] != CUENTA_FUENTES]),
             "sin_transmision": recorte([s for s in llegan if s["id"] != TRANSMISION]),
             "tres_minutos_o_mas": recorte(largas),
-            "tres_minutos_o_mas_sin_transmision": recorte([s for s in largas if s["id"] != TRANSMISION])}
+            "tres_minutos_o_mas_sin_transmision": recorte([s for s in largas if s["id"] != TRANSMISION]),
+            "nuevas_de_gimnasio": recorte([s for s in llegan if s["id"] in NUEVAS_GIMNASIO]),
+            "sin_las_nuevas_de_gimnasio": recorte([s for s in llegan if s["id"] not in NUEVAS_GIMNASIO])}
 
 
 def main(argv=None) -> int:

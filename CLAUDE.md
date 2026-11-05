@@ -322,9 +322,9 @@ instante exacto del video.
 5. ~~Construir la imagen del worker.~~ **Construida el 20-10**, sin mmaction (el
    clasificador geométrico corre en `twinboxing_env`) y con las versiones de la
    estación. Falta probarla con GPU: el host no tiene el NVIDIA Container Toolkit.
-6. Sesiones de prueba con usuarios (C4, C6). Al 4-11, C4 y C5 están leídos de la base de A,
-   provisionales hasta que Lucas confirme qué sesiones cuentan
-   (`docs/experiments/2026-11-04-c4-c5-sesiones.md`). C5: mediana 1,892. C6 sin hacer.
+6. Sesiones de prueba con usuarios (C4, C6). Al 5-11, nueve sesiones de A
+   (`docs/experiments/2026-11-04-c4-c5-sesiones.md`): C4 9 de 9; C5 mediana 1,949, pero las dos
+   únicas nuevas de gimnasio, en 4K, dan 8,88 y 4,24. C6 sin hacer.
 
 Qué sigue y en qué orden, al 20-10: `docs/tareas/2026-10-20-proxima-sesion.md`.
 
