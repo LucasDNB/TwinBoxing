@@ -91,10 +91,6 @@ export default function Bienvenida() {
           )}
         </section>
       )}
-      <p className="mt-10 text-xs text-tenue">
-        El conteo es de {TEXTOS.golpes}: el detector encuentra menos golpes que los reales (recall medido 0,456) y no
-        sabe si un golpe conectó.
-      </p>
     </main>
   );
 }

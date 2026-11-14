@@ -21,7 +21,7 @@ type Expo = { lado_izquierdo_usuario?: number; lado_derecho_usuario?: number; iz
 type R = {
   yo: { nombre: string; metricas: Partial<Metrica>; curva: number[]; sesiones: number };
   rival: { nombre: string; metricas: Partial<Metrica>; curva: number[]; rotulo: string | null };
-  exposicion: Expo | null; altura: { cabeza: number; cuerpo: number } | null; consejos: C; aclaracion: string;
+  exposicion: Expo | null; altura: { cabeza: number; cuerpo: number } | null; consejos: C;
 };
 
 function Contenido() {
@@ -105,7 +105,6 @@ function Contenido() {
           )}
           {r.altura && <p className="text-sm">Cabeza {r.altura.cabeza} · Cuerpo {r.altura.cuerpo} <Rotulo>{TEXTOS.estimacion}</Rotulo></p>}
           <Consejos c={r.consejos} />
-          <p className="text-xs text-tenue">{r.aclaracion}</p>
         </>
       )}
     </div>
