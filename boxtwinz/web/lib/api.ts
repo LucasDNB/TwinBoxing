@@ -37,6 +37,12 @@ export async function api<T>(ruta: string, init: RequestInit & { json?: unknown 
 export type Yo = {
   id: string; email: string; nombre: string; plan: "free" | "premium"; rol: "usuario" | "admin";
   guardia: "ortodoxa" | "zurda" | null; consentimiento_reentrenamiento: boolean; pago_simulado: string | null;
+  demo: boolean;
+};
+
+export type UsuarioDemo = {
+  id: string; nombre: string; estandar: boolean; estilo: "fajador" | "estilista" | "hibrido" | null;
+  guardia: "ortodoxa" | "zurda" | null; peso_kg: number | null;
 };
 
 export type Perfil = {

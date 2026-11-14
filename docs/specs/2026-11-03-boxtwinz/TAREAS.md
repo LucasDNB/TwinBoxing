@@ -28,6 +28,7 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
 | Z16 Accesibilidad y e2e | Hecha | día 4 | `accesibilidad.spec.ts`: axe WCAG 2.1 AA sin violaciones en las 12 pantallas, sin scroll horizontal a 375 px, y los cinco textos obligatorios (CZ7), "golpes lanzados" ausente. 25 e2e en verde en Pixel 7 (Chromium) e iPhone 13 (WebKit): `CI_E2E=1 bash boxtwinz/ci.sh` |
 | Z17 Despliegue | Hecha (falta celular) | d8d186f | Desplegado el 3-11 en https://desarrollo-lucas.tail52f6aa.ts.net:10000: `boxtwinz-api` y `boxtwinz-worker` activos, `/api/salud` con commit `d8d186f` y web y manifest 200 por el túnel. **Falta:** ingresar y subir desde un celular |
 | Z18 Datos de demo | Hecha | día 4 | `python -m boxtwinz_api.demo sembrar|reiniciar`: cuenta free y premium, amigos, 8 sesiones cada una (golpes sintéticos, rotulados en el nombre del video), cajón premium. `test_z18_demo.py` (2) y `demo.spec.ts`: el recorrido completo tarda 1,5 a 2,1 s automatizado, muy por debajo de los 5 minutos |
+| Z19 Login de demo | Hecha (código) | 14-11 | `test_demo_acceso.py` (6): clave errada 401, sin cookie de demo 401 y un JWT de usuario no la abre, demo apagada 404; estándar Fajador, Estilista y Zurdo idempotentes; crear usuario rápido (estilo con no definido, guardia, peso 30 a 200); todos amigos entre sí y los estándar en el ranking de las tres modalidades; no se entra como usuario común; columnas nuevas agregadas a una base vieja. e2e `demo.spec.ts` y el selector en `accesibilidad.spec.ts`. **Falta:** desplegar y probarlo en la estación |
 
 ## Desvíos (manda el repo)
 
@@ -93,6 +94,13 @@ están, pero falta la evidencia que pide la columna "Hecho cuando" de la spec.
 - **D18 Los días 2 a 4 no están en `main`.** Los PR #59 a #62 se mergearon en orden sobre ramas
   apiladas: `main` quedó con el día 1, `boxtwinz` con el 2, `boxtwinz-dia2` con el 3 y
   `boxtwinz-dia3` con el 4. Lo completo es `boxtwinz-dia4` (`d8d186f`).
+- **D19 Login de demo.** Botón "Probar demo" en `/` con la clave `BOXTWINZ_DEMO_CLAVE` (por
+  defecto `USAL@2026`, a pedido de Lucas; se apaga con `BOXTWINZ_DEMO=0`). La clave deja una cookie
+  `boxtwinz_demo` de 12 h que abre `/demo/`: los estándar (sesiones sintéticas, como Z18) y los
+  creados ahí, sin sesiones, todos con el perfil 1 público y amigos entre sí. Estilo y peso van en
+  `perfiles.estilo_declarado` y `perfiles.peso_kg` (ranura 1), y `usuarios.demo`: las agrega
+  `_columnas_faltantes` al arrancar, copiado de A. Los usuarios de demo salen en el ranking general,
+  junto a las cuentas reales.
 - **D11 Correcciones no cambian los números.** Se registran para reentrenar; las métricas
   siguen saliendo del detector, para no mezclar dos fuentes en un mismo número.
 

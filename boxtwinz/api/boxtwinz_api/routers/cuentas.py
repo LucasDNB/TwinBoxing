@@ -66,6 +66,7 @@ def yo_dict(u: Usuario, db: Session) -> dict:
         "consentimiento_uso_version": u.consentimiento_uso_version,
         "consentimiento_reentrenamiento": u.consentimiento_reent_at is not None,
         "suspendido": u.suspendido,
+        "demo": bool(u.demo),
         "pago_simulado": textos.PAGO_SIMULADO if u.plan == "premium" else None,
     }
 

@@ -45,7 +45,10 @@ export function Marco({ titulo, children, interceptar }: {
       <div className="min-h-dvh pb-20">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-borde-suave bg-nav/95 px-4 py-3 backdrop-blur">
           <Link href="/inicio/" className="font-display text-xl font-semibold tracking-wide">BoxTwin<span className="text-a-trazo">Z</span></Link>
-          <span className="rotulo">{yo.plan === "premium" ? "Premium" : "Free"}{yo.rol === "admin" ? " · admin" : ""}</span>
+          <span className="flex items-center gap-3">
+            {yo.demo && <Link href="/demo/" className="text-sm underline underline-offset-4">Cambiar usuario</Link>}
+            <span className="rotulo">{yo.demo ? "Demo" : yo.plan === "premium" ? "Premium" : "Free"}{yo.rol === "admin" ? " · admin" : ""}</span>
+          </span>
         </header>
         <main className="mx-auto max-w-xl px-4 py-4">
           <h1 className="mb-4 font-display text-3xl font-semibold">{titulo}</h1>

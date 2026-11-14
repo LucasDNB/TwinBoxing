@@ -20,6 +20,10 @@ test("pantallas publicas", async ({ page }) => {
   await sinViolaciones(page, "bienvenida");
   await page.goto("/registro/");
   await sinViolaciones(page, "registro");
+  await page.request.post("/api/demo/acceso", { data: { clave: "USAL@2026" } });
+  await page.goto("/demo/");
+  await page.getByRole("list", { name: "Usuarios estándar" }).waitFor();
+  await sinViolaciones(page, "selector de demo");
 });
 
 test("pantallas con sesion y textos obligatorios", async ({ page }) => {

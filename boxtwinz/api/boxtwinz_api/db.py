@@ -58,12 +58,39 @@ def es_postgres() -> bool:
     return engine.dialect.name == "postgresql"
 
 
+def _columnas_faltantes() -> list[str]:
+    """
+    ADD COLUMN de lo que el modelo tiene y la tabla no (copiado de boxtwin-api/db.py, desvio
+    D1: sin Alembic). `create_all` no altera tablas existentes, y la base desplegada ya tiene
+    filas. No borra, no renombra ni cambia tipos; una columna obligatoria sin default frena.
+    """
+    from sqlalchemy import inspect, text
+
+    agregadas = []
+    insp = inspect(engine)
+    existentes = set(insp.get_table_names())
+    with engine.begin() as con:
+        for tabla in Base.metadata.sorted_tables:
+            if tabla.name not in existentes:
+                continue
+            hay = {c["name"] for c in insp.get_columns(tabla.name)}
+            for col in tabla.columns:
+                if col.name in hay:
+                    continue
+                if not col.nullable and col.server_default is None:
+                    raise RuntimeError(f"{tabla.name}.{col.name} es obligatoria: hay que migrarla a mano")
+                con.execute(text(f"ALTER TABLE {tabla.name} ADD COLUMN {col.name} {col.type.compile(engine.dialect)}"))
+                agregadas.append(f"{tabla.name}.{col.name}")
+    return agregadas
+
+
 def crear_tablas() -> None:
     url = str(engine.url)
     if url.startswith("sqlite:///"):
         ruta = url.replace("sqlite:///", "", 1)
         if ruta and ruta != ":memory:":
             Path(ruta).parent.mkdir(parents=True, exist_ok=True)
+    _columnas_faltantes()
     Base.metadata.create_all(engine)
     from boxtwinz_api.services.archetypes import cargar_seed
 
