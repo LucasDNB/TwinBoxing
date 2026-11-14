@@ -14,6 +14,8 @@ QUE HACE
   publicos), 3 sombras, 3 bolsas y 2 sparrings por cuenta, valoradas; en premium un cajon
   "Sparring de demo" que recibe los sparrings. Idempotente: si las cuentas existen, no hace nada.
   reiniciar: borra las dos cuentas y vuelve a sembrar.
+  sembrar tambien crea los usuarios estandar del login de demo (Fajador, Estilista, Zurdo),
+  que /api/demo/acceso crea igual si faltan. Los creados desde el selector no tienen sesiones.
 
 USO
   python -m boxtwinz_api.demo sembrar --clave una-clave-de-demo [--videos ~/videos-demo]
@@ -24,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import random
+import secrets
 import shutil
 import subprocess
 import sys
@@ -73,6 +76,103 @@ def _video(destino: Path, modalidad: str, videos: Path | None) -> Path:
     return destino
 
 
+def sesiones_sinteticas(db, rng: random.Random, u: Usuario, p1: Perfil, fuerza: float, pct_izq: float,
+                        base, videos: Path | None = None, rival_perfil_id: str | None = None,
+                        sosten: tuple[float, float] = (0.72, 0.95)) -> None:
+    """3 sombras, 3 bolsas y 2 sparrings valorados, un dia cada una desde `base`. No commitea."""
+    dia = 0
+    for modalidad, n in (("sombra", 3), ("bolsa", 3), ("sparring", 2)):
+        for i in range(n):
+            dia += 1
+            dur = DURACION[modalidad]
+            s = Sesion(usuario_id=u.id, perfil_id=p1.id, modalidad=modalidad, estado="lista",
+                       video_ruta="", video_duracion_s=dur, video_fps=15.0, video_ancho=320, video_alto=180,
+                       calidad_pose=round(rng.uniform(0.82, 0.97), 3), segundos_gpu=dur * rng.uniform(1.2, 2.6),
+                       rival_perfil_id=rival_perfil_id if modalidad == "sparring" else None,
+                       vista_resultado=True, creado=base + timedelta(days=dia))
+            db.add(s)
+            db.flush()
+            s.video_ruta = str(_video(cfg.dir_videos() / f"demo-sintetico-{s.id}.mp4", modalidad, videos))
+            vol = {"sombra": 30, "bolsa": 36, "sparring": 22}[modalidad] * fuerza * (1 + 0.04 * i)
+            gs = golpes_sinteticos(rng, dur, vol, rng.uniform(*sosten), pct_izq)
+            if modalidad == "sparring":
+                gs += golpes_sinteticos(rng, dur, 18, 0.85, 0.3, quien="rival")
+            for quien, t, mano in gs:
+                db.add(Golpe(sesion_id=s.id, quien=quien, mano=mano, t_inicio=t, t_fin=t + 0.25,
+                             confianza=round(rng.uniform(0.8, 0.99), 3),
+                             altura_estimada="cabeza" if rng.random() < 0.6 else "cuerpo"))
+            db.flush()
+            recalcular_metricas(db, s)
+            s.apta_ranking = es_apta_ranking(s, p1, u)
+            db.add(Valoracion(sesion_id=s.id, estrellas=rng.choice((3, 4, 4, 5)), modalidad=modalidad))
+
+
+# -- Usuarios de la demo del login ("Probar demo") -----------------------------------------
+# Tres estandar con historial sintetico y los que se crean desde el selector, sin sesiones.
+# Todos son amigos entre si y tienen el perfil 1 publico, para compararse y salir en el ranking.
+DOMINIO_DEMO = "demo.boxtwinz.ar"
+ESTILOS_DECLARADOS = ("fajador", "estilista", "hibrido")
+# clave: (nombre, estilo declarado, guardia, peso, fuerza, pct_izquierda, sosten)
+ESTANDAR = {
+    "fajador": ("Fajador", "fajador", "ortodoxa", 78.0, 1.30, 0.55, (0.70, 0.82)),
+    "estilista": ("Estilista", "estilista", "ortodoxa", 66.0, 0.85, 0.70, (0.88, 0.97)),
+    "zurdo": ("Zurdo", None, "zurda", 71.0, 1.0, 0.38, (0.78, 0.92)),
+}
+
+
+def email_estandar(clave: str) -> str:
+    return f"demo-{clave}@{DOMINIO_DEMO}"
+
+
+def crear_usuario_demo(db, nombre: str, estilo: str | None, guardia: str, peso_kg: float | None,
+                       email: str | None = None) -> Usuario:
+    """Usuario demo sin clave usable (solo entra por el selector), amigo de todos. No commitea."""
+    u = Usuario(email=email or f"demo-{secrets.token_hex(6)}@{DOMINIO_DEMO}", hash=hashear(secrets.token_urlsafe(24)),
+                nombre=nombre.strip(), plan="free", rol="usuario", demo=True,
+                consentimiento_uso_at=ahora(), consentimiento_uso_version=cfg.version_consentimiento_uso)
+    db.add(u)
+    db.flush()
+    p1 = crear_ranuras(db, u, guardia)[0]
+    p1.publico = True
+    p1.estilo_declarado = estilo
+    p1.peso_kg = peso_kg
+    amistar_demo(db, u)
+    return u
+
+
+def amistar_demo(db, u: Usuario) -> int:
+    """Amistad aceptada entre `u` y cada usuario demo que todavia no lo sea. No commitea."""
+    otros = db.scalars(select(Usuario).where(Usuario.demo.is_(True), Usuario.id != u.id)).all()
+    hechas = 0
+    for o in otros:
+        previa = db.scalar(select(Amistad).where(
+            ((Amistad.solicitante_id == u.id) & (Amistad.destinatario_id == o.id))
+            | ((Amistad.solicitante_id == o.id) & (Amistad.destinatario_id == u.id))))
+        if previa is None:
+            db.add(Amistad(solicitante_id=u.id, destinatario_id=o.id, estado="aceptada"))
+            hechas += 1
+        elif previa.estado != "aceptada":
+            previa.estado = "aceptada"
+            hechas += 1
+    db.flush()
+    return hechas
+
+
+def asegurar_estandar(db, videos: Path | None = None) -> int:
+    """Crea los estandar que falten, con 8 sesiones sinteticas cada uno. Commitea. Idempotente."""
+    creados = 0
+    for clave, (nombre, estilo, guardia, peso, fuerza, pct_izq, sosten) in ESTANDAR.items():
+        if db.scalar(select(Usuario).where(Usuario.email == email_estandar(clave))):
+            continue
+        u = crear_usuario_demo(db, nombre, estilo, guardia, peso, email=email_estandar(clave))
+        p1 = db.scalar(select(Perfil).where(Perfil.usuario_id == u.id, Perfil.ranura == 1))
+        rng = random.Random(f"boxtwinz-demo-{clave}")
+        sesiones_sinteticas(db, rng, u, p1, fuerza, pct_izq, ahora() - timedelta(days=12), videos, sosten=sosten)
+        creados += 1
+    db.commit()
+    return creados
+
+
 def sembrar(clave: str, videos: Path | None = None) -> bool:
     crear_tablas()
     with hacer_sesion() as db:
@@ -97,31 +197,8 @@ def sembrar(clave: str, videos: Path | None = None) -> bool:
         base = ahora() - timedelta(days=12)
         for email, (u, ps) in usuarios.items():
             fuerza = 1.0 if u.plan == "free" else 1.15
-            dia = 0
-            for modalidad, n in (("sombra", 3), ("bolsa", 3), ("sparring", 2)):
-                for i in range(n):
-                    dia += 1
-                    dur = DURACION[modalidad]
-                    s = Sesion(usuario_id=u.id, perfil_id=ps[0].id, modalidad=modalidad, estado="lista",
-                               video_ruta="", video_duracion_s=dur, video_fps=15.0, video_ancho=320, video_alto=180,
-                               calidad_pose=round(rng.uniform(0.82, 0.97), 3), segundos_gpu=dur * rng.uniform(1.2, 2.6),
-                               rival_perfil_id=ps[1].id if (modalidad == "sparring" and u.plan == "premium") else None,
-                               vista_resultado=True, creado=base + timedelta(days=dia))
-                    db.add(s)
-                    db.flush()
-                    s.video_ruta = str(_video(cfg.dir_videos() / f"demo-sintetico-{s.id}.mp4", modalidad, videos))
-                    vol = {"sombra": 30, "bolsa": 36, "sparring": 22}[modalidad] * fuerza * (1 + 0.04 * i)
-                    gs = golpes_sinteticos(rng, dur, vol, rng.uniform(0.72, 0.95), 0.62 if u.plan == "free" else 0.4)
-                    if modalidad == "sparring":
-                        gs += golpes_sinteticos(rng, dur, 18, 0.85, 0.3, quien="rival")
-                    for quien, t, mano in gs:
-                        db.add(Golpe(sesion_id=s.id, quien=quien, mano=mano, t_inicio=t, t_fin=t + 0.25,
-                                     confianza=round(rng.uniform(0.8, 0.99), 3),
-                                     altura_estimada="cabeza" if rng.random() < 0.6 else "cuerpo"))
-                    db.flush()
-                    recalcular_metricas(db, s)
-                    s.apta_ranking = es_apta_ranking(s, ps[0], u)
-                    db.add(Valoracion(sesion_id=s.id, estrellas=rng.choice((3, 4, 4, 5)), modalidad=modalidad))
+            sesiones_sinteticas(db, rng, u, ps[0], fuerza, 0.62 if u.plan == "free" else 0.4, base, videos,
+                                rival_perfil_id=ps[1].id if u.plan == "premium" else None)
         db.commit()
     return True
 
@@ -154,6 +231,9 @@ def main(argv: list[str] | None = None) -> int:
         with hacer_sesion() as db:
             borrar(db)
     hecho = sembrar(a.clave, a.videos)
+    with hacer_sesion() as db:
+        demo_estandar = asegurar_estandar(db, a.videos)
+    print(f"usuarios estandar de la demo creados: {demo_estandar}")
     print("cuentas de demo sembradas" if hecho else "las cuentas de demo ya existian: nada que hacer")
     for email, (_, plan, _) in CUENTAS.items():
         print(f"  {email} ({plan})")

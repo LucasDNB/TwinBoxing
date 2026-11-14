@@ -90,6 +90,11 @@ class Config:
     capacidad_umbral_critico: float = 0.90
     capacidad_dias_critico: int = 5
 
+    # Demo (login): boton "Probar demo" con una clave compartida y selector de usuarios.
+    demo: bool = True
+    demo_clave: str = "USAL@2026"
+    demo_horas: int = 12
+
     version_consentimiento_uso: str = "uso-2026-11-03"
     version_consentimiento_reent: str = "reent-2026-11-03"
 
@@ -149,6 +154,9 @@ def cargar(ruta: Path | None = None, entorno: dict | None = None) -> Config:
         c.secreto = secrets.token_hex(32)
     c.admins = tuple(e.strip().lower() for e in env.get("BOXTWINZ_ADMINS", "").replace(",", " ").split() if e.strip())
     c.cookie_segura = _bandera(env.get("BOXTWINZ_COOKIE_SEGURA"), bool(serv.get("cookie_segura", False)))
+
+    c.demo = _bandera(env.get("BOXTWINZ_DEMO"), bool(serv.get("demo", True)))
+    c.demo_clave = env.get("BOXTWINZ_DEMO_CLAVE") or str(serv.get("demo_clave", c.demo_clave))
 
     cmd = valor("BOXTWINZ_CMD", motor, "cmd", "boxtwin-annotator")
     c.cmd_boxtwin = _lista(cmd) if isinstance(cmd, str) else list(cmd)

@@ -67,6 +67,9 @@ class Usuario(_Comun, Base):
     consentimiento_reent_version: Mapped[str | None] = mapped_column(String(40), nullable=True)
     suspendido: Mapped[bool] = mapped_column(Boolean, default=False)
     premium_intencion_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Usuario de la demo (ingreso con la clave de demo, sin email propio). Nullable porque
+    # se agrega con ALTER TABLE a bases que ya tienen filas: null cuenta como falso.
+    demo: Mapped[bool | None] = mapped_column(Boolean, default=False, nullable=True)
 
 
 class Perfil(_Comun, Base):
@@ -82,6 +85,10 @@ class Perfil(_Comun, Base):
     customizado: Mapped[bool] = mapped_column(Boolean, default=False)
     # Moderacion (spec 6.4): "el perfil no fue sacado del ranking".
     fuera_de_ranking: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Solo ranura 1, declarados por el usuario: estilo (fajador, estilista, hibrido; null es
+    # "no definido") y peso. `estilo` de la ranura 1 sigue siendo "propio".
+    estilo_declarado: Mapped[str | None] = mapped_column(String(12), nullable=True)
+    peso_kg: Mapped[float | None] = mapped_column(Float, nullable=True)
 
 
 class Arquetipo(_Comun, Base):

@@ -1,8 +1,8 @@
 "use client";
-/* Bienvenida: ingresar o ir al registro (spec 12, "/"). */
+/* Bienvenida: ingresar, ir al registro o probar la demo con su contraseña (spec 12, "/"). */
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,28 @@ export default function Bienvenida() {
   const [clave, setClave] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [demoHabilitada, setDemoHabilitada] = useState(false);
+  const [demoAbierta, setDemoAbierta] = useState(false);
+  const [claveDemo, setClaveDemo] = useState("");
+  const [errorDemo, setErrorDemo] = useState<string | null>(null);
+
+  useEffect(() => {
+    api<{ habilitada: boolean }>("/demo").then((d) => setDemoHabilitada(d.habilitada)).catch(() => undefined);
+  }, []);
+
+  async function entrarDemo(e: React.FormEvent) {
+    e.preventDefault();
+    setEnviando(true);
+    setErrorDemo(null);
+    try {
+      await api("/demo/acceso", { method: "POST", json: { clave: claveDemo } });
+      router.push("/demo/");
+    } catch (err) {
+      setErrorDemo(err instanceof ErrorApi ? err.message : "No se pudo entrar a la demo");
+    } finally {
+      setEnviando(false);
+    }
+  }
 
   async function ingresar(e: React.FormEvent) {
     e.preventDefault();
@@ -51,6 +73,24 @@ export default function Bienvenida() {
       <p className="mt-6 text-sm text-texto-2">
         ¿No tenés cuenta? <Link href="/registro/" className="underline underline-offset-4">Registrate</Link>
       </p>
+      {demoHabilitada && (
+        <section className="mt-8 border-t border-borde-suave pt-6" aria-label="Demo">
+          {!demoAbierta ? (
+            <Button type="button" variant="outline" className="objetivo-tactil w-full" onClick={() => setDemoAbierta(true)}>
+              Probar demo
+            </Button>
+          ) : (
+            <form onSubmit={entrarDemo} className="space-y-3" aria-label="Probar demo">
+              <div className="space-y-1.5">
+                <Label htmlFor="clave-demo">Contraseña de la demo</Label>
+                <Input id="clave-demo" type="password" autoComplete="off" required autoFocus value={claveDemo} onChange={(e) => setClaveDemo(e.target.value)} />
+              </div>
+              {errorDemo && <p role="alert" className="text-sm text-error">{errorDemo}</p>}
+              <Button type="submit" variant="outline" className="objetivo-tactil w-full" disabled={enviando}>Entrar a la demo</Button>
+            </form>
+          )}
+        </section>
+      )}
       <p className="mt-10 text-xs text-tenue">
         El conteo es de {TEXTOS.golpes}: el detector encuentra menos golpes que los reales (recall medido 0,456) y no
         sabe si un golpe conectó.
