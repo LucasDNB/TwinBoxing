@@ -138,5 +138,4 @@ def rival(perfil_id: str = Query(...), modalidad: str = Query(...), rival_tipo: 
         "exposicion": expo or expo_simulada,
         "altura": altura(db, propio, modalidad),
         "consejos": consejos(entrada),
-        "aclaracion": "Comparación de golpes detectados en la misma modalidad; no predice un resultado.",
     }
